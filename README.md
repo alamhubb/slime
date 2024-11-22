@@ -2,9 +2,9 @@
 
 Slime is a highly fault-tolerant js/ts parser and generator, just like the children's toy slime
 
-### Why use slime instead of babel, recast, espree, typescript
+### Why use slime instead of babel, recast, espree, esprima, typescript
 
-* babel, recast, and espree do not support fault tolerance
+* babel, recast, espree and esprima do not support fault tolerance
 
 parser `let a =` will cause an error
 
