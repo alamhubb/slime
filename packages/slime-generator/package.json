@@ -4,6 +4,7 @@
   "type": "module",
   "main": "dist/index.mjs",
   "types": "dist/index.d.mts",
+
   "scripts": {
     "build": "tsdown",
     "prepublishOnly": "npm run build"
