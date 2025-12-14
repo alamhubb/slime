@@ -6,10 +6,10 @@
     "test": "tsx test-runner.ts"
   },
   "dependencies": {
-    "slime-ast": "^0.1.5",
-    "slime-generator": "^0.1.5",
-    "slime-parser": "^0.1.5",
-    "subhuti": "^0.1.5"
+    "slime-ast": "^0.2.2",
+    "slime-generator": "^0.2.2",
+    "slime-parser": "^0.2.2",
+    "subhuti": "^0.2.2"
   },
   "gitHead": "2f8c9e3c52445d48435b6a432fffb4eed5187217"
 }

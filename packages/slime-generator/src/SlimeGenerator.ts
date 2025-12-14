@@ -204,7 +204,7 @@ export default class SlimeGenerator {
         this.generatorNode(node.source)
 
         // ES2025 Import Attributes: with { type: "json" }
-        this.generatorAttributes((node as any).attributes)
+        this.generatorAttributes(node)
 
         // 添加分号
         this.addCode(es6TokensObj.Semicolon)
@@ -213,15 +213,16 @@ export default class SlimeGenerator {
     }
 
     /** 生成 ES2025 Import Attributes: with { type: "json" } 或 with {} */
-    private static generatorAttributes(attrs: any[] | undefined) {
+    private static generatorAttributes(node: any) {
+        const attrs = node?.attributes
         // 如果 attrs 是 undefined，不输出任何内容
         // 如果 attrs 是空数组，输出 with {}
         if (attrs === undefined) return
 
         this.addSpacing()
-        this.addCodeAndMappings({type: 'With', name: 'With', value: 'with'}, (node as any).withToken?.loc) // 使用精确 token 位置
+        this.addCodeAndMappings({type: 'With', name: 'With', value: 'with'}, node.withToken?.loc) // 使用精确 token 位置
         this.addSpacing()
-        this.addLBrace((node as any).attributesLBraceToken?.loc) // 使用精确 token 位置
+        this.addLBrace(node.attributesLBraceToken?.loc) // 使用精确 token 位置
         attrs.forEach((attr: any, index: number) => {
             if (index > 0) {
                 this.addComma()
@@ -237,7 +238,7 @@ export default class SlimeGenerator {
             this.addSpacing()
             this.generatorNode(attr.value)
         })
-        this.addRBrace((node as any).attributesRBraceToken?.loc) // 使用精确 token 位置
+        this.addRBrace(node.attributesRBraceToken?.loc) // 使用精确 token 位置
     }
 
     private static generatorImportSpecifier(node: SlimeImportSpecifier) {
@@ -303,7 +304,7 @@ export default class SlimeGenerator {
             }
 
             // ES2025 Import Attributes: with { type: "json" }
-            this.generatorAttributes((node as any).attributes)
+            this.generatorAttributes(node)
 
             // 添加分号和换行
             this.addCode(es6TokensObj.Semicolon)
@@ -353,7 +354,7 @@ export default class SlimeGenerator {
         this.generatorNode(node.source)
 
         // ES2025 Import Attributes: with { type: "json" }
-        this.generatorAttributes(node.attributes)
+        this.generatorAttributes(node)
 
         // 添加分号和换行
         this.addCode(es6TokensObj.Semicolon)
