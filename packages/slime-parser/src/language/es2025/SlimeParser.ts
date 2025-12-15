@@ -639,8 +639,9 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
 
     /**
      * 消费正则表达式字面量（使用 InputElementRegExp 模式）
+     * 使用 protected 以便子类重写 PrimaryExpression 时可以调用
      */
-    private consumeRegularExpressionLiteral(): SubhutiCst | undefined {
+    protected consumeRegularExpressionLiteral(): SubhutiCst | undefined {
         return this.consume(SlimeTokenType.RegularExpressionLiteral, LexicalGoal.InputElementRegExp)
     }
 
