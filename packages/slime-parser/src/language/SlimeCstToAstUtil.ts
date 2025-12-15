@@ -505,9 +505,13 @@ export class SlimeCstToAst {
     }
 
     /**
-     * [入口方法] 将顶�?CST 转换�?Program AST
+     * 重置状态钩子方法
+     * 
+     * [入口方法] 将顶层 CST 转换为 Program AST
      *
-     * 存在必要性：这是外部调用的主入口，支�?Module、Script、Program 多种顶层 CST�?
+     * 存在必要性：这是外部调用的主入口，支持 Module、Script、Program 多种顶层 CST
+     * 
+     * 注意：子类如需重置状态，应重写此方法，先调用自己的 resetState()，再调用 super.toProgram()
      */
     toProgram(cst: SubhutiCst): SlimeProgram {
         // Support both Module and Script entry points
