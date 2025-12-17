@@ -2,6 +2,10 @@
   "name": "slimejs",
   "version": "0.1.5",
   "description": "Slime库测试和调试工具",
+  "workspaces": [
+    "slime",
+    "slime/packages/*"
+  ],
   "scripts": {
     "test": "tsx test-runner.ts"
   },
