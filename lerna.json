@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/lerna-lite/lerna-lite/main/packages/cli/schemas/lerna-schema.json",
+  "version": "0.2.3",
+  "packages": [
+    "packages/slime-token",
+    "packages/slime-ast",
+    "packages/slime-parser",
+    "packages/slime-generator"
+  ]
+}
