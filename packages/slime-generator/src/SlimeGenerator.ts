@@ -40,15 +40,15 @@ import {
     type SlimeStringLiteral,
     type SlimeVariableDeclaration,
     type SlimeVariableDeclarator,
-    type SlimeFunctionParam
-} from "slime-ast/src/SlimeESTree.ts";
-import {SlimeNodeType} from "slime-ast/src/SlimeNodeType.ts";
+    type SlimeFunctionParam,
+    SlimeNodeType
+} from "slime-ast";
 import SlimeCodeMapping, {SlimeCodeLocation, type SlimeGeneratorResult} from "./SlimeCodeMapping.ts";
 import type {SubhutiSourceLocation} from "subhuti";
 import {SubhutiCreateToken} from "subhuti";
 import {SubhutiMatchToken} from "subhuti";
-import {SlimeTokensObj} from "slime-parser/src/language/es2025/SlimeTokens.ts";
-import {SlimeTokenType} from "slime-token/src/SlimeTokenType.ts";
+import { SlimeTokensObj } from "slime-parser";
+import { SlimeTokenType } from "slime-token";
 
 // 兼容别名
 const Es6TokenName = SlimeTokenType;

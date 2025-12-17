@@ -19,9 +19,8 @@ import {
     SlimeContextualKeywordTokenTypes,
     SlimeReservedWordTokenTypes, SlimeUnaryOperatorTokenTypes,
     SlimeTokenType
-} from "slime-token/src/SlimeTokenType.ts"
-import SubhutiTokenConsumer from "subhuti/src/SubhutiTokenConsumer.ts"
-import {LexicalGoal} from "subhuti/src/SubhutiLexer.ts"
+} from "slime-token"
+import { SubhutiTokenConsumer, LexicalGoal } from "subhuti"
 
 export default class SlimeTokenConsumer extends SubhutiTokenConsumer {
 

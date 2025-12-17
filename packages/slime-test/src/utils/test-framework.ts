@@ -7,8 +7,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import {performance} from 'perf_hooks'
-import SlimeParser from "slime-parser/src/language/es2025/SlimeParser.ts"
-import {SlimeCstToAst} from "slime-parser/src/language/SlimeCstToAstUtil.ts"
+import { SlimeParser, SlimeCstToAst } from "slime-parser"
 import {fileURLToPath} from "url";
 
 // ============================================
@@ -198,8 +197,8 @@ export function testStage2(ctx: TestContext): TestResult {
 // ============================================
 // Stage3 测试逻辑（代码生成测试）
 // ============================================
-import SlimeGenerator from 'slime-generator/src/SlimeGenerator'
-import {SubhutiMatchToken} from 'subhuti'
+import { SlimeGenerator } from 'slime-generator'
+import { SubhutiMatchToken } from 'subhuti'
 
 /** 提取 token 值（过滤分号） */
 export function extractTokenValues(tokens: SubhutiMatchToken[]): string[] {

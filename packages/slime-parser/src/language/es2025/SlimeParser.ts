@@ -14,6 +14,7 @@ import {
     SubhutiParser,
     SubhutiCst,
     SubhutiMatchToken,
+    Subhuti,
     SubhutiRule,
     matchRegExpLiteral, LexicalGoal
 } from "subhuti"
@@ -25,7 +26,7 @@ import {
     SlimeContextualKeywordTokenTypes,
     SlimeReservedWordTokenTypes,
     SlimeTokenType
-} from "slime-token/src/SlimeTokenType.ts";
+} from "slime-token";
 import {slimeTokens} from "./SlimeTokens.ts";
 
 // ============================================

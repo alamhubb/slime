@@ -63,13 +63,11 @@ import {
     type SlimeMaybeNamedClassDeclaration,
     type SlimeExportAllDeclaration,
     type SlimeExportSpecifier,
-} from "slime-ast/src/SlimeESTree.ts";
-import SubhutiCst, {type SubhutiSourceLocation} from "subhuti/src/struct/SubhutiCst.ts";
+} from "slime-ast";
+import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
 import SlimeParser from "./es2025/SlimeParser.ts";
 import SlimeTokenConsumer from "./es2025/SlimeTokenConsumer.ts";
-import SlimeAstUtil from "slime-ast/src/SlimeNodeCreate.ts";
-import SlimeTokenCreate from "slime-ast/src/SlimeTokenCreate.ts";
-import {SlimeNodeType} from "slime-ast/src/SlimeNodeType.ts";
+import { SlimeAstUtil, SlimeTokenCreate, SlimeNodeType } from "slime-ast";
 
 // ============================================
 // Unicode 转义序列解码

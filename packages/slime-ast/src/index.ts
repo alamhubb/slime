@@ -1,5 +1,5 @@
 export * from './SlimeESTree.ts'
-export * from './SlimeNodeCreate.ts'
+export { default as SlimeAstUtil } from './SlimeNodeCreate.ts'
 export * from './SlimeNodeType.ts'
-export * from './SlimeTokenCreate.ts'
+export { default as SlimeTokenCreate } from './SlimeTokenCreate.ts'
 

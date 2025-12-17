@@ -10,8 +10,8 @@ import {
     SlimeBinaryOperatorTokenTypes,
     SlimeLogicalOperatorTokenTypes,
     SlimeAssignmentOperatorTokenTypes,
-} from "slime-token/src/SlimeTokenType.ts";
-import type {SubhutiSourceLocation} from "subhuti/src/struct/SubhutiCst.ts";
+} from "slime-token";
+import type { SubhutiSourceLocation } from "subhuti";
 
 /**
  * 辅助类型：排除 ESTree 类型中与 Slime 冲突的属性

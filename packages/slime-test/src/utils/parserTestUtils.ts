@@ -1,5 +1,5 @@
-import {SlimeNodeType} from "slime-ast/src/SlimeNodeType";
-import SubhutiCst from "subhuti/src/struct/SubhutiCst.ts";
+import { SlimeNodeType } from "slime-ast";
+import { SubhutiCst } from "subhuti";
 
 /**
  * 递归清除 CST 节点的 tokens 属性（用于调试）

@@ -6,7 +6,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   outDir: 'dist',
-  // 编译装饰器
   target: 'es2020',
+  external: [/node_modules/],
 })
 

@@ -1,7 +1,5 @@
-import SubhutiLexer from "subhuti/src/SubhutiLexer.ts";
-import SlimeParser, {slimeTokens} from "slime-parser/src/language/es2025/SlimeParser.ts";
-import {SubhutiDebugUtils} from "subhuti/src/SubhutiDebug.ts";
-import slimeCstToAstUtil from "slime-parser/src/language/SlimeCstToAstUtil.ts";
+import { SubhutiLexer, SubhutiDebugUtils } from "subhuti";
+import { SlimeParser, slimeTokens, slimeCstToAstUtil } from "slime-parser";
 import SlimeAstPrintUtil from "./SlimeAstPrintUtil.ts";
 
 // 测试：第一个语句不完整

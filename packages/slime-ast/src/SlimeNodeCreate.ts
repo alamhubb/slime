@@ -190,7 +190,7 @@ import {
 } from "./SlimeESTree.ts";
 
 import {SlimeNodeType} from "./SlimeNodeType.ts";
-import type {SubhutiSourceLocation} from "subhuti/src/struct/SubhutiCst.ts";
+import type { SubhutiSourceLocation } from "subhuti";
 
 class SlimeNodeCreate {
   // ============================================

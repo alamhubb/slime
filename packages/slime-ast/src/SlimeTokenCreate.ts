@@ -5,7 +5,7 @@
  * 与 SlimeESTree.ts 中的 Token 类型一一对应
  */
 
-import type { SubhutiSourceLocation } from "subhuti/src/struct/SubhutiCst.ts";
+import type { SubhutiSourceLocation } from "subhuti";
 import type {
     // 变量声明关键字 Token
     SlimeVarToken,
@@ -90,7 +90,7 @@ import {
     SlimeLogicalOperatorTokenTypes,
     SlimeAssignmentOperatorTokenTypes,
     SlimeUpdateOperatorTokenTypes,
-} from "slime-token/src/SlimeTokenType.ts";
+} from "slime-token";
 
 class SlimeTokenFactory {
     // ============================================

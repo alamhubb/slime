@@ -2,21 +2,33 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "module": "ES2022",
-    "useDefineForClassFields": false,
-    "moduleResolution": "Node",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2020",
+    "lib": [
+      "ES2020",
+      "DOM"
+    ],
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "target": "ES2015",
-    "strict": false,
-    "esModuleInterop": true,
-    "verbatimModuleSyntax": true,
-    "lib": [
-      "ES2015",
-      "dom"
-    ],
     "types": [
       "node"
     ]
-  }
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

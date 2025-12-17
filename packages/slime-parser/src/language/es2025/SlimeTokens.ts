@@ -4,8 +4,8 @@
 import {
     createEmptyValueRegToken, createKeywordToken,
     createValueRegToken, type SubhutiCreateToken,
-} from "subhuti/src/struct/SubhutiCreateToken.ts";
-import {SlimeTokenType} from "slime-token/src/SlimeTokenType.ts";
+} from "subhuti";
+import { SlimeTokenType } from "slime-token";
 
 // ============================================
 // 词法歧义处理说明
