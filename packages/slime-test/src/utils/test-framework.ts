@@ -442,6 +442,7 @@ export function isExpectedToThrow(testDir: string): boolean {
 
 /** 获取解析模式（module 或 script） */
 export function getParseMode(testDir: string, filePath: string): 'module' | 'script' {
+    // 1. 优先从 options.json 读取
     const optionsPath = path.join(testDir, 'options.json')
     if (fs.existsSync(optionsPath)) {
         try {
@@ -451,8 +452,22 @@ export function getParseMode(testDir: string, filePath: string): 'module' | 'scr
         } catch {
         }
     }
+    // 2. 从 output.json 读取 sourceType（Babel 测试用例的期望输出）
+    const outputPath = path.join(testDir, 'output.json')
+    if (fs.existsSync(outputPath)) {
+        try {
+            const output = JSON.parse(fs.readFileSync(outputPath, 'utf-8'))
+            if (output.program?.sourceType === 'module') return 'module'
+            if (output.program?.sourceType === 'script') return 'script'
+        } catch {
+        }
+    }
+    // 3. 文件扩展名
     if (filePath.endsWith('.mjs')) return 'module'
-    if (testDir.includes('-module') || testDir.includes('_module') || testDir.endsWith('module')) return 'module'
+    // 4. 目录名检查（只检查目录名本身，不检查完整路径，避免 node_modules 误匹配）
+    const dirName = path.basename(testDir)
+    if (dirName.includes('-module') || dirName.includes('_module') || dirName.endsWith('module')) return 'module'
+    // 5. 代码内容检查
     try {
         const code = fs.readFileSync(filePath, 'utf-8')
         if (/^\s*(import|export)\s/m.test(code)) return 'module'
