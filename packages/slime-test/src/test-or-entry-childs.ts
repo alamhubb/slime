@@ -3,7 +3,7 @@
  * 目标：验证 Or 包裹节点的 childs 是否包含失败的分支
  */
 
-import SubhutiLexer from 'subhuti/src/SubhutiLexer.ts'
+import { SubhutiLexer } from 'subhuti'
 import { es2025Tokens } from "slime-parser/src/language/es2025/SlimeTokensName"
 import SlimeParser from "slime-parser/src/language/es2025/SlimeParser"
 

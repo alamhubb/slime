@@ -2,7 +2,7 @@
  * 阶段1: CST内容正确性测试
  * 不仅验证结构完整，还要验证内容正确
  */
-import SubhutiLexer from 'subhuti/src/SubhutiLexer.ts'
+import { SubhutiLexer } from 'subhuti'
 import * as fs from 'fs'
 import * as path from 'path'
 import {es2025Tokens} from "slime-parser/src/language/es2025/SlimeTokensName";

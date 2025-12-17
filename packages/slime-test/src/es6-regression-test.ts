@@ -2,7 +2,7 @@
  * Es2025Parser 回归测试 - 验证 Packrat Parsing 没有破坏 Es2025Parser
  */
 import SlimeParser from 'slime-parser/src/language/es2025/SlimeParser.ts'
-import SubhutiLexer from 'subhuti/src/SubhutiLexer.ts'
+import { SubhutiLexer } from 'subhuti'
 import { es2025Tokens } from 'slime-parser/src/language/es2025/SlimeTokenType.ts'
 
 function test(name: string, code: string): boolean {

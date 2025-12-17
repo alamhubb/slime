@@ -10,15 +10,16 @@
  *
  * @version 1.0.0
  */
-import SubhutiParser, {
-    Subhuti,
+import {
+    SubhutiParser,
+    SubhutiCst,
+    SubhutiMatchToken,
     SubhutiRule,
-    SubhutiParserOptions,
-    SubhutiTokenConsumerConstructor
-} from "subhuti/src/SubhutiParser.ts"
-import type SubhutiCst from "subhuti/src/struct/SubhutiCst.ts"
-import type SubhutiMatchToken from "subhuti/src/struct/SubhutiMatchToken.ts"
-import SubhutiLexer, {matchRegExpLiteral, LexicalGoal} from "subhuti/src/SubhutiLexer.ts"
+    matchRegExpLiteral, LexicalGoal
+} from "subhuti"
+import type {
+    SubhutiParserOptions, SubhutiTokenConsumerConstructor
+} from "subhuti"
 import SlimeTokenConsumer from "./SlimeTokenConsumer.ts"
 import {
     SlimeContextualKeywordTokenTypes,

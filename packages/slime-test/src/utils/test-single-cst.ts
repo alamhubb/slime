@@ -5,7 +5,7 @@
  *   npx tsx test-single-cst.ts "const [a, b] = arr"
  *   npx tsx test-single-cst.ts "class Test { *gen() { yield 1 } }"
  */
-import SubhutiLexer from 'subhuti/src/SubhutiLexer.ts'
+import { SubhutiLexer } from 'subhuti'
 import {es2025Tokens} from "slime-parser/src/language/es2025/SlimeTokensName";
 import SlimeParser from "slime-parser/src/language/es2025/SlimeParser";
 

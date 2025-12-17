@@ -3,7 +3,7 @@
  * 目标：找出为什么 Branch #2 的 displayDepth 是 58 而不是 41
  */
 
-import SubhutiLexer from 'subhuti/src/SubhutiLexer.ts'
+import { SubhutiLexer } from 'subhuti'
 import { es2025Tokens } from "slime-parser/src/language/es2025/SlimeTokensName"
 import SlimeParser from "slime-parser/src/language/es2025/SlimeParser"
 

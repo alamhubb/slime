@@ -3,7 +3,7 @@
  * 目标：找出为什么 Branch #2 和 Branch #5 没有被输出
  */
 
-import SubhutiLexer from 'subhuti/src/SubhutiLexer.ts'
+import { SubhutiLexer } from 'subhuti'
 import { es2025Tokens } from "slime-parser/src/language/es2025/SlimeTokensName"
 import SlimeParser from "slime-parser/src/language/es2025/SlimeParser"
 

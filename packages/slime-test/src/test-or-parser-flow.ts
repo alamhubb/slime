@@ -3,7 +3,7 @@
  * 目标：找出为什么 Parser 会尝试多个分支
  */
 
-import SubhutiLexer from 'subhuti/src/SubhutiLexer.ts'
+import { SubhutiLexer } from 'subhuti'
 import { es2025Tokens } from "slime-parser/src/language/es2025/SlimeTokensName"
 import SlimeParser from "slime-parser/src/language/es2025/SlimeParser"
 

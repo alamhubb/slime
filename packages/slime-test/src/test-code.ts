@@ -12,7 +12,7 @@
  *   - 完整调试输出：使用 SubhutiDebug 追踪器
  */
 
-import SubhutiLexer from 'subhuti/src/SubhutiLexer.ts'
+import { SubhutiLexer } from 'subhuti'
 import { SubhutiDebugUtils } from 'subhuti/src/SubhutiDebug.ts'
 import { es2025Tokens } from "slime-parser/src/language/es2025/SlimeTokensName"
 import SlimeParser from "slime-parser/src/language/es2025/SlimeParser"

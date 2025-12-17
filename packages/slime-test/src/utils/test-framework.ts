@@ -199,7 +199,7 @@ export function testStage2(ctx: TestContext): TestResult {
 // Stage3 测试逻辑（代码生成测试）
 // ============================================
 import SlimeGenerator from 'slime-generator/src/SlimeGenerator'
-import SubhutiMatchToken from 'subhuti/src/struct/SubhutiMatchToken'
+import {SubhutiMatchToken} from 'subhuti'
 
 /** 提取 token 值（过滤分号） */
 export function extractTokenValues(tokens: SubhutiMatchToken[]): string[] {
