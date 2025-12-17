@@ -1,6 +1,6 @@
 {
   "name": "slime-ast",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -14,7 +14,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "slime-token": "^0.2.3",
+    "slime-token": "^0.2.4",
     "subhuti": "^0.2.1"
   },
   "devDependencies": {
