@@ -2,9 +2,9 @@
   "name": "slime-generator",
   "version": "0.2.2",
   "type": "module",
-  "main": "dist/index.mjs",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
   "types": "dist/index.d.mts",
-
   "scripts": {
     "build": "tsdown",
     "prepublishOnly": "npm run build"
