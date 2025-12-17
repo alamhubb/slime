@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "test": "tsx test-runner.ts",
-    "publish": "npx lerna publish from-package --no-git-reset --no-push --no-git-tag-version"
+    "publish": "npx lerna publish --no-git-reset --no-push --no-git-tag-version"
   },
   "dependencies": {
     "slime-token": "^0.2.2",

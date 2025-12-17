@@ -9,6 +9,7 @@ import * as path from 'path'
 import {performance} from 'perf_hooks'
 import { SlimeParser, SlimeCstToAst } from "slime-parser"
 import {fileURLToPath} from "url";
+import {createRequire} from "module";
 
 // ============================================
 // Parser 类型定义（支持自定义 Parser）
@@ -481,6 +482,13 @@ export function shouldSkipTest(testName: string, testDir: string): SkipResult {
 // 测试运行器
 // ============================================
 
+/** 获取 slime-babel-test 包的路径 */
+function getBabelTestDir(): string {
+    const require = createRequire(import.meta.url)
+    const babelTestPkgPath = require.resolve('slime-babel-test/package.json')
+    return path.dirname(babelTestPkgPath)
+}
+
 export async function runTests(
     testFn: (ctx: TestContext) => TestResult | Promise<TestResult>,
     options: TestRunnerOptions
@@ -489,7 +497,7 @@ export async function runTests(
     const __dirname = path.dirname(__filename)
     const {
         stageName, description,
-        casesDir = path.join(__dirname, '../babel'),
+        casesDir = getBabelTestDir(),
         verboseOnFail = true,
         startFrom,
         stopOnFail: stopOnFailConfig,

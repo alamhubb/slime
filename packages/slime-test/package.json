@@ -25,6 +25,7 @@
   "license": "ISC",
   "dependencies": {
     "slime-ast": "^0.2.3",
+    "slime-babel-test": "^0.0.1",
     "slime-generator": "^0.2.3",
     "slime-parser": "^0.2.3",
     "slime-token": "^0.2.3",
