@@ -31,6 +31,7 @@
     "subhuti": "^0.2.6"
   },
   "devDependencies": {
-    "tsdown": "0.17.0-beta.6"
+    "tsdown": "0.17.0-beta.6",
+    "typescript": "^5.8.3"
   }
 }
