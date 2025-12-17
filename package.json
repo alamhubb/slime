@@ -11,9 +11,11 @@
     "publish": "npx lerna publish from-package --no-git-reset --no-push --no-git-tag-version"
   },
   "dependencies": {
+    "slime-token": "^0.2.2",
     "slime-ast": "^0.2.2",
     "slime-generator": "^0.2.2",
     "slime-parser": "^0.2.2",
+    "slime-test": "^0.2.2",
     "subhuti": "^0.2.2"
   },
   "gitHead": "2f8c9e3c52445d48435b6a432fffb4eed5187217"
