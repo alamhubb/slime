@@ -1,6 +1,6 @@
 {
   "name": "slime-generator",
-  "version": "0.2.4",
+  "version": "0.2.3",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -13,8 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "slime-ast": "^0.2.4",
-    "slime-token": "^0.2.4",
+    "slime-ast": "^0.2.3",
+    "slime-token": "^0.2.3",
     "subhuti": "^0.2.1"
   },
   "devDependencies": {
