@@ -6,30 +6,14 @@ import {
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeNodeType, SlimeTokenCreate } from "slime-ast";
-import SlimeParser from "../SlimeParser";
-import { checkCstName } from "../SlimeCstToAstUtil.ts";
+import SlimeParser from "../../SlimeParser";
+import { checkCstName, getUtil } from "../core/CstToAstContext";
 
 // 导入拆分出去的类
-import { OptionalChainCstToAst, setOptionalChainCstToAstUtil } from "./OptionalChainCstToAst";
+import { OptionalChainCstToAst } from "./OptionalChainCstToAst";
 
 // Re-export 拆分出去的类，保持向后兼容
 export { OptionalChainCstToAst } from "./OptionalChainCstToAst";
-
-// Util 引用，用于跨类调用
-let _slimeCstToAstUtil: any = null;
-
-export function setCallMemberExpressionCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-    // 同时设置拆分出去的类的 util
-    setOptionalChainCstToAstUtil(util);
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for CallMemberExpressionCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
 
 // 前向声明，用于调用 ExpressionCstToAst 的方法
 function createExpressionAst(cst: SubhutiCst): SlimeExpression {

@@ -66,38 +66,50 @@ import {
 } from "slime-ast";
 import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
 import SlimeParser from "./SlimeParser";
+import { checkCstName, getUtil } from "./cstToAst/core/CstToAstContext";
 import SlimeTokenConsumer from "./SlimeTokenConsumer";
 import { SlimeAstUtil, SlimeTokenCreate, SlimeNodeType } from "slime-ast";
+import { CstToAstContext } from "./cstToAst/core/CstToAstContext";
+
 
 // 导入 CstToAst 类用于静态方法调用
-import { IdentifierCstToAst } from "./cstToAst/IdentifierCstToAst";
-import { LiteralCstToAst } from "./cstToAst/LiteralCstToAst";
-import { ExpressionCstToAst } from "./cstToAst/ExpressionCstToAst";
-import { StatementCstToAst } from "./cstToAst/StatementCstToAst";
-import { DeclarationCstToAst } from "./cstToAst/DeclarationCstToAst";
-import { FunctionCstToAst } from "./cstToAst/FunctionCstToAst";
-import { ClassCstToAst } from "./cstToAst/ClassCstToAst";
-import { PropertyCstToAst } from "./cstToAst/PropertyCstToAst";
-import { PatternCstToAst } from "./cstToAst/PatternCstToAst";
-import { ModuleCstToAst } from "./cstToAst/ModuleCstToAst";
-import { TemplateCstToAst } from "./cstToAst/TemplateCstToAst";
-import { OperatorCstToAst } from "./cstToAst/OperatorCstToAst";
+import {
+    IdentifierCstToAst,
+    LiteralCstToAst,
+    ArrayLiteralCstToAst,
+    ObjectLiteralCstToAst,
+    ExpressionCstToAst,
+    StatementCstToAst,
+    DeclarationCstToAst,
+    FunctionCstToAst,
+    ClassCstToAst,
+    PropertyCstToAst,
+    PatternCstToAst,
+    ModuleCstToAst,
+    TemplateCstToAst,
+    OperatorCstToAst,
+    ClassElementNameCstToAst,
+    ClassBodyCstToAst,
+    ClassFieldCstToAst,
+    ClassStaticBlockCstToAst,
+    MethodDefinitionCstToAst
+} from "./cstToAst";
 
 // ============================================
 // Unicode 转义序列解码
-// ES2025 规范 12.9.4 - �?\uXXXX �?\u{XXXXX} 转换为实际字�?
+// ES2025 规范 12.9.4 - ?\uXXXX ?\u{XXXXX} 转换为实际字?
 // 参考实现：Babel、Acorn、TypeScript
 // ============================================
 
 /**
- * �?Unicode 转义序列解码为实际字�?
- * 支持 \uXXXX �?\u{XXXXX} 格式
+ * ?Unicode 转义序列解码为实际字?
+ * 支持 \uXXXX ?\u{XXXXX} 格式
  *
  * @param str 可能包含 Unicode 转义的字符串
- * @returns 解码后的字符�?
+ * @returns 解码后的字符?
  */
 function decodeUnicodeEscapes(str: string | undefined): string {
-    // 如果为空或不包含转义序列，直接返回（性能优化�?
+    // 如果为空或不包含转义序列，直接返回（性能优化?
     if (!str || !str.includes('\\u')) {
         return str || ''
     }
@@ -108,13 +120,6 @@ function decodeUnicodeEscapes(str: string | undefined): string {
             return String.fromCodePoint(codePoint)
         }
     )
-}
-
-export function checkCstName(cst: SubhutiCst, cstName: string) {
-    if (cst.name !== cstName) {
-        throwNewError(cst.name)
-    }
-    return cstName
 }
 
 export function throwNewError(errorMsg: string = 'syntax error') {
@@ -163,7 +168,12 @@ export function throwNewError(errorMsg: string = 'syntax error') {
  * - toProgram: Program 入口处理
  */
 export class SlimeCstToAst {
+    constructor() {
+        CstToAstContext.setUtil(this);
+    }
+
     private readonly expressionAstCache = new WeakMap<SubhutiCst, SlimeExpression>()
+
 
     /**
      * 中心转发方法：根�?CST 节点类型显式分发到对应的转换方法
@@ -188,13 +198,14 @@ export class SlimeCstToAst {
         // ==================== 字面量相关 ====================
         if (name === SlimeParser.prototype.Literal?.name) return LiteralCstToAst.createLiteralAst(cst)
         if (name === SlimeParser.prototype.BooleanLiteral?.name) return LiteralCstToAst.createBooleanLiteralAst(cst)
-        if (name === SlimeParser.prototype.ArrayLiteral?.name) return LiteralCstToAst.createArrayLiteralAst(cst)
-        if (name === SlimeParser.prototype.ObjectLiteral?.name) return LiteralCstToAst.createObjectLiteralAst(cst)
+        if (name === SlimeParser.prototype.ArrayLiteral?.name) return ArrayLiteralCstToAst.createArrayLiteralAst(cst)
+        if (name === SlimeParser.prototype.ObjectLiteral?.name) return ObjectLiteralCstToAst.createObjectLiteralAst(cst)
         if (name === SlimeParser.prototype.TemplateLiteral?.name) return TemplateCstToAst.createTemplateLiteralAst(cst)
         if (name === SlimeParser.prototype.LiteralPropertyName?.name) return PropertyCstToAst.createLiteralPropertyNameAst(cst)
         if (name === SlimeTokenConsumer.prototype.NumericLiteral?.name) return LiteralCstToAst.createNumericLiteralAst(cst)
         if (name === SlimeTokenConsumer.prototype.StringLiteral?.name) return LiteralCstToAst.createStringLiteralAst(cst)
         if (name === SlimeTokenConsumer.prototype.RegularExpressionLiteral?.name) return LiteralCstToAst.createRegExpLiteralAst(cst)
+
 
         // ==================== 表达式相�?====================
         // ==================== 表达式相关 ====================
@@ -233,7 +244,7 @@ export class SlimeCstToAst {
         if (name === SlimeParser.prototype.SuperProperty?.name) return ExpressionCstToAst.createSuperPropertyAst(cst)
         if (name === SlimeParser.prototype.SuperCall?.name) return ExpressionCstToAst.createSuperCallAst(cst)
         if (name === SlimeParser.prototype.ImportCall?.name) return ExpressionCstToAst.createImportCallAst(cst)
-        if (name === SlimeParser.prototype.SpreadElement?.name) return LiteralCstToAst.createSpreadElementAst(cst)
+        if (name === SlimeParser.prototype.SpreadElement?.name) return ArrayLiteralCstToAst.createSpreadElementAst(cst)
         if (name === SlimeParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name) return FunctionCstToAst.createCoverParenthesizedExpressionAndArrowParameterListAst(cst)
         if (name === SlimeParser.prototype.CoverCallExpressionAndAsyncArrowHead?.name) return FunctionCstToAst.createCoverCallExpressionAndAsyncArrowHeadAst(cst)
         if (name === SlimeParser.prototype.CoverInitializedName?.name) return FunctionCstToAst.createCoverInitializedNameAst(cst)
@@ -320,15 +331,15 @@ export class SlimeCstToAst {
         if (name === SlimeParser.prototype.ClassExpression?.name) return ClassCstToAst.createClassExpressionAst(cst)
         if (name === SlimeParser.prototype.ClassTail?.name) return ClassCstToAst.createClassTailAst(cst)
         if (name === SlimeParser.prototype.ClassHeritage?.name) return ClassCstToAst.createClassHeritageAst(cst)
-        if (name === SlimeParser.prototype.ClassBody?.name) return ClassCstToAst.createClassBodyAst(cst)
-        if (name === SlimeParser.prototype.ClassElementList?.name) return ClassCstToAst.createClassElementListAst(cst)
-        if (name === SlimeParser.prototype.ClassElement?.name) return ClassCstToAst.createClassElementAst(cst)
-        if (name === SlimeParser.prototype.ClassElementName?.name) return ClassCstToAst.createClassElementNameAst(cst)
-        if (name === SlimeParser.prototype.ClassStaticBlock?.name) return ClassCstToAst.createClassStaticBlockAst(cst)
-        if (name === SlimeParser.prototype.ClassStaticBlockBody?.name) return ClassCstToAst.createClassStaticBlockBodyAst(cst)
-        if (name === SlimeParser.prototype.ClassStaticBlockStatementList?.name) return ClassCstToAst.createClassStaticBlockStatementListAst(cst)
-        if (name === SlimeParser.prototype.MethodDefinition?.name) return ClassCstToAst.createMethodDefinitionAst(null, cst)
-        if (name === SlimeParser.prototype.FieldDefinition?.name) return ClassCstToAst.createFieldDefinitionAst(null, cst)
+        if (name === SlimeParser.prototype.ClassBody?.name) return ClassBodyCstToAst.createClassBodyAst(cst)
+        if (name === SlimeParser.prototype.ClassElementList?.name) return ClassBodyCstToAst.createClassElementListAst(cst)
+        if (name === SlimeParser.prototype.ClassElement?.name) return ClassBodyCstToAst.createClassElementAst(cst)
+        if (name === SlimeParser.prototype.ClassElementName?.name) return ClassElementNameCstToAst.createClassElementNameAst(cst)
+        if (name === SlimeParser.prototype.ClassStaticBlock?.name) return ClassStaticBlockCstToAst.createClassStaticBlockAst(cst)
+        if (name === SlimeParser.prototype.ClassStaticBlockBody?.name) return ClassStaticBlockCstToAst.createClassStaticBlockBodyAst(cst)
+        if (name === SlimeParser.prototype.ClassStaticBlockStatementList?.name) return ClassStaticBlockCstToAst.createClassStaticBlockStatementListAst(cst)
+        if (name === SlimeParser.prototype.MethodDefinition?.name) return MethodDefinitionCstToAst.createMethodDefinitionAst(null, cst)
+        if (name === SlimeParser.prototype.FieldDefinition?.name) return ClassFieldCstToAst.createFieldDefinitionAst(null, cst)
         if (name === SlimeParser.prototype.GeneratorMethod?.name) return FunctionCstToAst.createGeneratorMethodAst(cst)
         if (name === SlimeParser.prototype.AsyncMethod?.name) return FunctionCstToAst.createAsyncMethodAst(cst)
         if (name === SlimeParser.prototype.AsyncGeneratorMethod?.name) return FunctionCstToAst.createAsyncGeneratorMethodAst(cst)
@@ -363,7 +374,7 @@ export class SlimeCstToAst {
         if (name === SlimeParser.prototype.AssignmentRestElement?.name) return ExpressionCstToAst.createAssignmentRestElementAst(cst)
         if (name === SlimeParser.prototype.AssignmentRestProperty?.name) return ExpressionCstToAst.createAssignmentRestPropertyAst(cst)
         if (name === SlimeParser.prototype.Elision?.name) return LiteralCstToAst.createElisionAst(cst)
-        if (name === SlimeParser.prototype.ElementList?.name) return LiteralCstToAst.createElementListAst(cst)
+        if (name === SlimeParser.prototype.ElementList?.name) return ArrayLiteralCstToAst.createElementListAst(cst)
 
         // ==================== 模块相关 ====================
         if (name === SlimeParser.prototype.Module?.name) return ModuleCstToAst.createModuleAst(cst)
@@ -524,14 +535,14 @@ export class SlimeCstToAst {
      * 委托给 ClassCstToAst.createFieldDefinitionAst 静态方法
      */
     createFieldDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimePropertyDefinition {
-        return ClassCstToAst.createFieldDefinitionAst(staticCst, cst)
+        return ClassFieldCstToAst.createFieldDefinitionAst(staticCst, cst)
     }
 
     /**
      * 委托给 ClassCstToAst.isComputedPropertyName 静态方法
      */
     isComputedPropertyName(cst: SubhutiCst): boolean {
-        return ClassCstToAst.isComputedPropertyName(cst)
+        return ClassElementNameCstToAst.isComputedPropertyName(cst)
     }
 
     /**
@@ -594,14 +605,14 @@ export class SlimeCstToAst {
      * 委托给 FunctionCstToAst.createFormalParameterListAstWrapped 静态方法
      */
     createFormalParameterListAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
-        return FunctionCstToAst.createFormalParameterListAstWrapped(cst)
+        return FunctionCstToAst.createFormalParametersAstWrapped(cst)
     }
 
     /**
      * 委托给 ClassCstToAst.createMethodDefinitionAst 静态方法
      */
     createMethodDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
-        return ClassCstToAst.createMethodDefinitionAst(staticCst, cst)
+        return MethodDefinitionCstToAst.createMethodDefinitionAst(staticCst, cst)
     }
 
     /**
@@ -725,6 +736,7 @@ export class SlimeCstToAst {
     createForBindingAst(cst: SubhutiCst): any {
         return DeclarationCstToAst.createForBindingAst(cst)
     }
+
 
     /**
      * 委托给 StatementCstToAst.createLetOrConstAst 静态方法
@@ -870,14 +882,14 @@ export class SlimeCstToAst {
      * 委托给 LiteralCstToAst.createElementListAst 静态方法
      */
     createElementListAst(cst: SubhutiCst): Array<SlimeArrayElement> {
-        return LiteralCstToAst.createElementListAst(cst)
+        return ArrayLiteralCstToAst.createElementListAst(cst)
     }
 
     /**
      * 委托给 LiteralCstToAst.createSpreadElementAst 静态方法
      */
     createSpreadElementAst(cst: SubhutiCst): SlimeSpreadElement {
-        return LiteralCstToAst.createSpreadElementAst(cst)
+        return ArrayLiteralCstToAst.createSpreadElementAst(cst)
     }
 
     /**
@@ -897,34 +909,5 @@ export class SlimeCstToAst {
 
 const SlimeCstToAstUtil = new SlimeCstToAst()
 
-// 初始化各个 CstToAst 类的 util 引用
-import { setSlimeCstToAstUtil } from "./cstToAst/StatementCstToAst";
-import { setControlFlowCstToAstUtil } from "./cstToAst/ControlFlowCstToAst";
-import { setDeclarationCstToAstUtil } from "./cstToAst/DeclarationCstToAst";
-import { setFunctionCstToAstUtil } from "./cstToAst/FunctionCstToAst";
-import { setClassCstToAstUtil } from "./cstToAst/ClassCstToAst";
-import { setPatternCstToAstUtil } from "./cstToAst/PatternCstToAst";
-import { setModuleCstToAstUtil } from "./cstToAst/ModuleCstToAst";
-import { setImportCstToAstUtil } from "./cstToAst/ImportCstToAst";
-import { setExportCstToAstUtil } from "./cstToAst/ExportCstToAst";
-import { setTemplateCstToAstUtil } from "./cstToAst/TemplateCstToAst";
-import { setOperatorCstToAstUtil } from "./cstToAst/OperatorCstToAst";
-import { setLiteralCstToAstUtil } from "./cstToAst/LiteralCstToAst";
-import { setPropertyCstToAstUtil } from "./cstToAst/PropertyCstToAst";
-import { setExpressionCstToAstUtil } from "./cstToAst/ExpressionCstToAst";
-setSlimeCstToAstUtil(SlimeCstToAstUtil);
-setControlFlowCstToAstUtil(SlimeCstToAstUtil);
-setDeclarationCstToAstUtil(SlimeCstToAstUtil);
-setFunctionCstToAstUtil(SlimeCstToAstUtil);
-setClassCstToAstUtil(SlimeCstToAstUtil);
-setPatternCstToAstUtil(SlimeCstToAstUtil);
-setModuleCstToAstUtil(SlimeCstToAstUtil);
-setImportCstToAstUtil(SlimeCstToAstUtil);
-setExportCstToAstUtil(SlimeCstToAstUtil);
-setTemplateCstToAstUtil(SlimeCstToAstUtil);
-setOperatorCstToAstUtil(SlimeCstToAstUtil);
-setLiteralCstToAstUtil(SlimeCstToAstUtil);
-setPropertyCstToAstUtil(SlimeCstToAstUtil);
-setExpressionCstToAstUtil(SlimeCstToAstUtil);
-
 export default SlimeCstToAstUtil
+

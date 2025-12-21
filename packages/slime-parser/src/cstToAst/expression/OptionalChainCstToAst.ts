@@ -5,19 +5,7 @@ import {
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeNodeType } from "slime-ast";
 
-// 使用全局变量存储 util 实例
-let _slimeCstToAstUtil: any = null;
-
-export function setOptionalChainCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for OptionalChainCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
+import { getUtil } from "../core/CstToAstContext";
 
 // 前向声明，用于调用 ExpressionCstToAst 的方法
 function createExpressionAst(cst: SubhutiCst): SlimeExpression {

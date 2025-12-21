@@ -9,22 +9,9 @@ import {
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeTokenCreate, SlimeNodeType } from "slime-ast";
-import { checkCstName } from "./SlimeCstToAstTools.ts";
-import SlimeParser from "../SlimeParser.ts";
+import { checkCstName, getUtil } from "../core/CstToAstContext";
+import SlimeParser from "../../SlimeParser";
 
-// 使用全局变量存储 util 实例
-let _slimeCstToAstUtil: any = null;
-
-export function setParameterCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for ParameterCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
 
 /**
  * 参数相关的 CST to AST 转换

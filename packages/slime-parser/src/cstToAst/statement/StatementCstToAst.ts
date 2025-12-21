@@ -7,22 +7,11 @@ import {
     type SlimeStatement, type SlimeExpressionStatement, type SlimeFunctionExpression,
     type SlimeReturnStatement
 } from "slime-ast";
-import SlimeParser from "../SlimeParser.ts";
-import { checkCstName } from "./SlimeCstToAstTools.ts";
-import { ControlFlowCstToAst } from "./ControlFlowCstToAst.ts";
+import SlimeParser from "../../SlimeParser";
 
-let _slimeCstToAstUtil: any = null;
+import { checkCstName, getUtil } from "../core/CstToAstContext";
+import { ControlFlowCstToAst } from "./ControlFlowCstToAst";
 
-export function setSlimeCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized. Call setSlimeCstToAstUtil first.');
-    }
-    return _slimeCstToAstUtil;
-}
 
 export class StatementCstToAst {
     // 委托给 ControlFlowCstToAst

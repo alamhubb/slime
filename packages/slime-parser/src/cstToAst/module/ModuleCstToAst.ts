@@ -5,22 +5,11 @@ import {
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil } from "slime-ast";
-import SlimeParser from "../SlimeParser.ts";
-import { ImportCstToAst } from "./ImportCstToAst.ts";
-import { ExportCstToAst } from "./ExportCstToAst.ts";
+import SlimeParser from "../../SlimeParser";
+import { checkCstName, getUtil } from "../core/CstToAstContext";
+import { ImportCstToAst } from "./ImportCstToAst";
+import { ExportCstToAst } from "./ExportCstToAst";
 
-let _slimeCstToAstUtil: any = null;
-
-export function setModuleCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for ModuleCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
 
 /**
  * 模块相关的 CST to AST 转换（核心入口）

@@ -7,39 +7,12 @@ import {
     SlimeTokenCreate,
     type SlimeFunctionParam
 } from "slime-ast";
-import SlimeParser from "../SlimeParser.ts";
-import SlimeTokenConsumer from "../SlimeTokenConsumer.ts";
+import SlimeParser from "../../SlimeParser";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer";
+import { checkCstName, getUtil } from "../core/CstToAstContext";
+import { AccessorMethodCstToAst } from "./AccessorMethodCstToAst";
 
-// 导入拆分出去的类
-import { AccessorMethodCstToAst, setAccessorMethodCstToAstUtil } from "./AccessorMethodCstToAst";
-
-// Re-export 拆分出去的类，保持向后兼容
-export { AccessorMethodCstToAst } from "./AccessorMethodCstToAst";
-
-// 使用全局变量存储 util 实例
-let _slimeCstToAstUtil: any = null;
-
-export function setMethodDefinitionCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-    // 同时设置拆分出去的类的 util
-    setAccessorMethodCstToAstUtil(util);
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for MethodDefinitionCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
-
-// 延迟导入以避免循环依赖
-let _ClassCstToAst: any = null;
-function getClassCstToAst() {
-    if (!_ClassCstToAst) {
-        _ClassCstToAst = require('./ClassCstToAst.ts').ClassCstToAst;
-    }
-    return _ClassCstToAst;
-}
+// 直接使用 ObjectLiteralCstToAst.createClassElementNameAst
 
 /**
  * 方法定义相关的 CST to AST 转换
@@ -195,7 +168,7 @@ export class MethodDefinitionCstToAst {
         } else if (firstChild.name === 'PropertyName' || firstChild.name === 'LiteralPropertyName') {
             key = getUtil().createPropertyNameAst(firstChild)
         } else {
-            key = getClassCstToAst().createClassElementNameAst(firstChild)
+            key = getUtil().createClassElementNameAst(firstChild)
         }
 
         if (children[i]?.name === 'LParen' || children[i]?.value === '(') {
@@ -266,7 +239,7 @@ export class MethodDefinitionCstToAst {
         }
 
         const classElementNameCst = children[i++]
-        const key = getClassCstToAst().createClassElementNameAst(classElementNameCst)
+        const key = getUtil().createClassElementNameAst(classElementNameCst)
 
         if (children[i]?.name === 'LParen') {
             lParenToken = SlimeTokenCreate.createLParenToken(children[i].loc)
@@ -340,7 +313,7 @@ export class MethodDefinitionCstToAst {
         }
 
         const classElementNameCst = children[i++]
-        const key = getClassCstToAst().createClassElementNameAst(classElementNameCst)
+        const key = getUtil().createClassElementNameAst(classElementNameCst)
 
         if (children[i]?.name === 'LParen' || children[i]?.value === '(') {
             lParenToken = SlimeTokenCreate.createLParenToken(children[i].loc)
@@ -410,7 +383,7 @@ export class MethodDefinitionCstToAst {
         }
 
         const classElementNameCst = children[i++]
-        const key = getClassCstToAst().createClassElementNameAst(classElementNameCst)
+        const key = getUtil().createClassElementNameAst(classElementNameCst)
 
         if (children[i]?.name === 'LParen' || children[i]?.value === '(') {
             lParenToken = SlimeTokenCreate.createLParenToken(children[i].loc)
@@ -481,7 +454,7 @@ export class MethodDefinitionCstToAst {
         }
 
         const classElementNameCst = children[i++]
-        const key = getClassCstToAst().createClassElementNameAst(classElementNameCst)
+        const key = getUtil().createClassElementNameAst(classElementNameCst)
 
         if (children[i]?.name === 'LParen' || children[i]?.value === '(') {
             lParenToken = SlimeTokenCreate.createLParenToken(children[i].loc)

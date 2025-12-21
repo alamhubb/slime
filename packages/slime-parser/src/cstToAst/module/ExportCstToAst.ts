@@ -9,28 +9,19 @@ import {
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeTokenCreate } from "slime-ast";
-import SlimeParser from "../SlimeParser.ts";
-import SlimeTokenConsumer from "../SlimeTokenConsumer.ts";
-import { checkCstName } from "./SlimeCstToAstTools.ts";
+import SlimeParser from "../../SlimeParser";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer";
 
-let _slimeCstToAstUtil: any = null;
+import { checkCstName, getUtil } from "../core/CstToAstContext";
 
-export function setExportCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-}
 
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for ExportCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
+declare var require: any;
 
 // 延迟导入
 let _ImportCstToAst: any = null;
 function getImportCstToAst() {
     if (!_ImportCstToAst) {
-        _ImportCstToAst = require('./ImportCstToAst.ts').ImportCstToAst;
+        _ImportCstToAst = require('./ImportCstToAst').ImportCstToAst;
     }
     return _ImportCstToAst;
 }

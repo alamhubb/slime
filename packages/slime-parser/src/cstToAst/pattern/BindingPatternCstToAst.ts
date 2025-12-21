@@ -14,22 +14,9 @@ import {
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeTokenCreate, SlimeNodeType } from "slime-ast";
-import SlimeParser from "../SlimeParser";
-import { checkCstName } from "../SlimeCstToAstUtil.ts";
+import SlimeParser from "../../SlimeParser";
+import { checkCstName, getUtil } from "../core/CstToAstContext";
 
-// 使用全局变量存储 util 实例
-let _slimeCstToAstUtil: any = null;
-
-export function setBindingPatternCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for BindingPatternCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
 
 /**
  * Binding Pattern 相关的 CST to AST 转换

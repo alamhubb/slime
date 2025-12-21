@@ -9,29 +9,12 @@ import {
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeTokenCreate, SlimeNodeType } from "slime-ast";
-import SlimeParser from "../SlimeParser";
+import SlimeParser from "../../SlimeParser";
+import { checkCstName, getUtil } from "../core/CstToAstContext";
+import { BindingPatternCstToAst } from "./BindingPatternCstToAst";
 
-// 导入拆分出去的类
-import { BindingPatternCstToAst, setBindingPatternCstToAstUtil } from "./BindingPatternCstToAst";
-
-// Re-export 拆分出去的类，保持向后兼容
 export { BindingPatternCstToAst } from "./BindingPatternCstToAst";
 
-// 使用全局变量存储 util 实例
-let _slimeCstToAstUtil: any = null;
-
-export function setPatternCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-    // 同时设置拆分出去的类的 util
-    setBindingPatternCstToAstUtil(util);
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for PatternCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
 
 /**
  * 解构模式相关的 CST to AST 转换

@@ -1,42 +1,12 @@
 import { SubhutiCst } from "subhuti";
 import {
     SlimeAstUtil, type SlimeBlockStatement,
-    type SlimeMethodDefinition, SlimeNodeType,
+    type SlimeMethodDefinition,
     SlimeTokenCreate,
     type SlimeFunctionParam
 } from "slime-ast";
-import SlimeParser from "../SlimeParser.ts";
-
-// 使用全局变量存储 util 实例
-let _slimeCstToAstUtil: any = null;
-
-export function setAccessorMethodCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for AccessorMethodCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
-
-// 延迟导入以避免循环依赖
-let _ClassCstToAst: any = null;
-function getClassCstToAst() {
-    if (!_ClassCstToAst) {
-        _ClassCstToAst = require('./ClassCstToAst.ts').ClassCstToAst;
-    }
-    return _ClassCstToAst;
-}
-
-let _MethodDefinitionCstToAst: any = null;
-function getMethodDefinitionCstToAst() {
-    if (!_MethodDefinitionCstToAst) {
-        _MethodDefinitionCstToAst = require('./MethodDefinitionCstToAst.ts').MethodDefinitionCstToAst;
-    }
-    return _MethodDefinitionCstToAst;
-}
+import SlimeParser from "../../SlimeParser";
+import { checkCstName, getUtil, isComputedPropertyName, isStaticModifier } from "../core/CstToAstContext";
 
 /**
  * Accessor 方法（getter/setter）相关的 CST to AST 转换
@@ -47,7 +17,7 @@ export class AccessorMethodCstToAst {
      * Getter 方法
      */
     static createGetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
-        const children = cst.children
+        const children = cst.children || []
         let i = 1 // 跳过 'get'
 
         let staticToken: any = undefined
@@ -62,7 +32,7 @@ export class AccessorMethodCstToAst {
         }
 
         const classElementNameCst = children[i++]
-        const key = getClassCstToAst().createClassElementNameAst(classElementNameCst)
+        const key = getUtil().createClassElementNameAst(classElementNameCst)
 
         if (children[i]?.name === 'LParen' || children[i]?.value === '(') {
             lParenToken = SlimeTokenCreate.createLParenToken(children[i].loc)
@@ -97,8 +67,8 @@ export class AccessorMethodCstToAst {
             undefined, undefined, undefined, lParenToken, rParenToken, lBraceToken, rBraceToken
         )
 
-        const isComputed = getMethodDefinitionCstToAst().isComputedPropertyName(classElementNameCst)
-        const isStatic = getMethodDefinitionCstToAst().isStaticModifier(staticCst)
+        const isComputed = isComputedPropertyName(classElementNameCst)
+        const isStatic = isStaticModifier(staticCst)
 
         return SlimeAstUtil.createMethodDefinition(key, functionExpression, 'get', isComputed, isStatic, cst.loc, staticToken, getToken)
     }
@@ -114,7 +84,7 @@ export class AccessorMethodCstToAst {
      * Setter 方法
      */
     static createSetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
-        const children = cst.children
+        const children = cst.children || []
         let i = 1 // 跳过 'set'
 
         let staticToken: any = undefined
@@ -129,7 +99,7 @@ export class AccessorMethodCstToAst {
         }
 
         const classElementNameCst = children[i++]
-        const key = getClassCstToAst().createClassElementNameAst(classElementNameCst)
+        const key = getUtil().createClassElementNameAst(classElementNameCst)
 
         if (children[i]?.name === 'LParen' || children[i]?.value === '(') {
             lParenToken = SlimeTokenCreate.createLParenToken(children[i].loc)
@@ -171,8 +141,8 @@ export class AccessorMethodCstToAst {
             undefined, undefined, undefined, lParenToken, rParenToken, lBraceToken, rBraceToken
         )
 
-        const isComputed = getMethodDefinitionCstToAst().isComputedPropertyName(classElementNameCst)
-        const isStatic = getMethodDefinitionCstToAst().isStaticModifier(staticCst)
+        const isComputed = isComputedPropertyName(classElementNameCst)
+        const isStatic = isStaticModifier(staticCst)
 
         return SlimeAstUtil.createMethodDefinition(key, functionExpression, 'set', isComputed, isStatic, cst.loc, staticToken, undefined, setToken)
     }
@@ -198,8 +168,8 @@ export class AccessorMethodCstToAst {
             throw new Error('MethodDefinition missing ClassElementName/PropertyName')
         }
 
-        const key = getClassCstToAst().createClassElementNameAst(classElementName)
-        const isComputed = getMethodDefinitionCstToAst().isComputedPropertyName(classElementName)
+        const key = getUtil().createClassElementNameAst(classElementName)
+        const isComputed = isComputedPropertyName(classElementName)
 
         let params: SlimeFunctionParam[] = []
         const formalParams = cst.children?.find(ch =>

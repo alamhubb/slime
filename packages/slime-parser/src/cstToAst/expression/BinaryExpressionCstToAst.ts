@@ -1,22 +1,8 @@
 import { type SlimeExpression } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import { SlimeNodeType } from "slime-ast";
-import SlimeParser from "../SlimeParser";
-import { checkCstName } from "../SlimeCstToAstUtil.ts";
-
-// Util 引用，用于跨类调用
-let _slimeCstToAstUtil: any = null;
-
-export function setBinaryExpressionCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for BinaryExpressionCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
+import SlimeParser from "../../SlimeParser";
+import { checkCstName, getUtil } from "../core/CstToAstContext";
 
 // 前向声明，用于调用 ExpressionCstToAst 的方法
 function createExpressionAst(cst: SubhutiCst): SlimeExpression {
@@ -315,7 +301,7 @@ export class BinaryExpressionCstToAst {
         const operatorToken = cst.children[0]
         const argumentCst = cst.children[1]
 
-        const operatorMap: {[key: string]: string} = {
+        const operatorMap: { [key: string]: string } = {
             'Exclamation': '!',
             'Plus': '+',
             'Minus': '-',

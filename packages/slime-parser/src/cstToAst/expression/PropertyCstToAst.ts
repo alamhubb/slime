@@ -9,22 +9,13 @@ import {
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeNodeType } from "slime-ast";
-import SlimeParser from "../SlimeParser";
-import SlimeTokenConsumer from "../SlimeTokenConsumer";
-import { checkCstName } from "./SlimeCstToAstTools";
+import SlimeParser from "../../SlimeParser";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer";
+import { checkCstName, getUtil } from "../core/CstToAstContext";
 
-// 使用全局变量存储 util 实例
-let _slimeCstToAstUtil: any = null;
-
-export function setPropertyCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for PropertyCstToAst');
-    }
-    return _slimeCstToAstUtil;
+// 前向声明，用于调用 ExpressionCstToAst 的方法
+function createExpressionAst(cst: SubhutiCst): SlimeExpression {
+    return getUtil().createExpressionAst(cst);
 }
 
 /**

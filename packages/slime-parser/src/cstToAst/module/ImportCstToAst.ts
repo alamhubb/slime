@@ -10,21 +10,9 @@ import {
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeTokenCreate, SlimeNodeType } from "slime-ast";
-import SlimeParser from "../SlimeParser.ts";
-import { checkCstName } from "./SlimeCstToAstTools.ts";
+import SlimeParser from "../../SlimeParser";
+import { checkCstName, getUtil } from "../core/CstToAstContext";
 
-let _slimeCstToAstUtil: any = null;
-
-export function setImportCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for ImportCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
 
 /**
  * Import 相关的 CST to AST 转换

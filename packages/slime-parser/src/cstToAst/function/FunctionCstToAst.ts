@@ -13,24 +13,12 @@ import {
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeTokenCreate, SlimeNodeType } from "slime-ast";
-import { checkCstName } from "./SlimeCstToAstTools.ts";
-import SlimeParser from "../SlimeParser.ts";
-import { ArrowFunctionCstToAst } from "./ArrowFunctionCstToAst.ts";
-import { ParameterCstToAst } from "./ParameterCstToAst.ts";
+import { checkCstName, getUtil } from "../core/CstToAstContext";
+import SlimeParser from "../../SlimeParser";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer";
+import { ArrowFunctionCstToAst } from "./ArrowFunctionCstToAst";
+import { ParameterCstToAst } from "./ParameterCstToAst";
 
-// 使用全局变量存储 util 实例
-let _slimeCstToAstUtil: any = null;
-
-export function setFunctionCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for FunctionCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
 
 /**
  * 函数相关的 CST to AST 转换
@@ -138,6 +126,27 @@ export class FunctionCstToAst {
     }
 
     /**
+     * AsyncFunctionExpression CST 到 AST
+     */
+    static createAsyncFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
+        return FunctionCstToAst.createFunctionExpressionAst(cst)
+    }
+
+    /**
+     * GeneratorExpression CST 到 AST
+     */
+    static createGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
+        return FunctionCstToAst.createFunctionExpressionAst(cst)
+    }
+
+    /**
+     * AsyncGeneratorExpression CST 到 AST
+     */
+    static createAsyncGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
+        return FunctionCstToAst.createFunctionExpressionAst(cst)
+    }
+
+    /**
      * 创建 FunctionExpression AST
      */
     static createFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
@@ -203,7 +212,11 @@ export class FunctionCstToAst {
                 continue
             }
 
-            if (name === SlimeParser.prototype.FunctionBody?.name || name === 'FunctionBody') {
+            if (name === SlimeParser.prototype.FunctionBody?.name || name === 'FunctionBody' ||
+                name === 'GeneratorBody' || name === 'AsyncFunctionBody' || name === 'AsyncGeneratorBody' ||
+                name === SlimeParser.prototype.GeneratorBody?.name ||
+                name === SlimeParser.prototype.AsyncFunctionBody?.name ||
+                name === SlimeParser.prototype.AsyncGeneratorBody?.name) {
                 const bodyStatements = FunctionCstToAst.createFunctionBodyAst(child)
                 body = SlimeAstUtil.createBlockStatement(bodyStatements, child.loc)
                 continue

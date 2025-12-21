@@ -8,34 +8,17 @@ import {
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeNodeType, SlimeTokenCreate } from "slime-ast";
-import SlimeParser from "../SlimeParser";
-import SlimeTokenConsumer from "../SlimeTokenConsumer";
-import { checkCstName } from "../SlimeCstToAstUtil.ts";
+import SlimeParser from "../../SlimeParser";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer";
+import { checkCstName, getUtil } from "../core/CstToAstContext";
 
 // 导入拆分出去的类
-import { BinaryExpressionCstToAst, setBinaryExpressionCstToAstUtil } from "./BinaryExpressionCstToAst";
-import { CallMemberExpressionCstToAst, setCallMemberExpressionCstToAstUtil } from "./CallMemberExpressionCstToAst";
+import { BinaryExpressionCstToAst } from "./BinaryExpressionCstToAst";
+import { CallMemberExpressionCstToAst } from "./CallMemberExpressionCstToAst";
 
 // Re-export 拆分出去的类，保持向后兼容
 export { BinaryExpressionCstToAst } from "./BinaryExpressionCstToAst";
 export { CallMemberExpressionCstToAst } from "./CallMemberExpressionCstToAst";
-
-// Util 引用，用于跨类调用
-let _slimeCstToAstUtil: any = null;
-
-export function setExpressionCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-    // 同时设置拆分出去的类的 util
-    setBinaryExpressionCstToAstUtil(util);
-    setCallMemberExpressionCstToAstUtil(util);
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for ExpressionCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
 
 // 表达式 AST 缓存
 const expressionAstCache = new WeakMap<SubhutiCst, SlimeExpression>();

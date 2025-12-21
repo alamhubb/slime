@@ -1,31 +1,11 @@
 import { SubhutiCst } from "subhuti";
 import {
-    SlimeAstUtil, SlimeBlockStatement, type SlimeStatement, SlimeNodeType, SlimeTokenCreate
+    SlimeAstUtil, SlimeBlockStatement, type SlimeStatement, SlimeNodeType, SlimeTokenCreate, SlimeVariableDeclaration
 } from "slime-ast";
-import SlimeParser from "../SlimeParser.ts";
-import { checkCstName } from "./SlimeCstToAstTools.ts";
+import SlimeParser from "../../SlimeParser";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer";
+import { checkCstName, getUtil } from "../core/CstToAstContext";
 
-let _slimeCstToAstUtil: any = null;
-
-export function setControlFlowCstToAstUtil(util: any) {
-    _slimeCstToAstUtil = util;
-}
-
-function getUtil(): any {
-    if (!_slimeCstToAstUtil) {
-        throw new Error('SlimeCstToAstUtil not initialized for ControlFlowCstToAst');
-    }
-    return _slimeCstToAstUtil;
-}
-
-// 延迟导入
-let _StatementCstToAst: any = null;
-function getStatementCstToAst() {
-    if (!_StatementCstToAst) {
-        _StatementCstToAst = require('./StatementCstToAst.ts').StatementCstToAst;
-    }
-    return _StatementCstToAst;
-}
 
 /**
  * 控制流语句相关的 CST to AST 转换
@@ -43,7 +23,7 @@ export class ControlFlowCstToAst {
         const blockCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Block?.name)
         const catchCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Catch?.name)
         const finallyCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Finally?.name)
-        const block = blockCst ? getStatementCstToAst().createBlockAst(blockCst) : null
+        const block = blockCst ? getUtil().createBlockAst(blockCst) : null
         const handler = catchCst ? ControlFlowCstToAst.createCatchAst(catchCst) : null
         const finalizer = finallyCst ? ControlFlowCstToAst.createFinallyAst(finallyCst) : null
         return SlimeAstUtil.createTryStatement(block, handler, finalizer, cst.loc, tryToken, finallyToken)
@@ -59,13 +39,13 @@ export class ControlFlowCstToAst {
         const paramCst = cst.children?.find(ch => ch.name === SlimeParser.prototype.CatchParameter?.name)
         const blockCst = cst.children?.find(ch => ch.name === SlimeParser.prototype.Block?.name)
         const param = paramCst ? getUtil().createCatchParameterAst(paramCst) : null
-        const body = blockCst ? getStatementCstToAst().createBlockAst(blockCst) : SlimeAstUtil.createBlockStatement([])
-        return SlimeAstUtil.createCatchClause(param, body, cst.loc, catchToken, lParenToken, rParenToken)
+        const body = blockCst ? getUtil().createBlockAst(blockCst) : SlimeAstUtil.createBlockStatement([])
+        return SlimeAstUtil.createCatchClause(body, param, cst.loc, catchToken, lParenToken, rParenToken)
     }
 
     static createFinallyAst(cst: SubhutiCst): SlimeBlockStatement {
         const blockCst = cst.children?.find(ch => ch.name === SlimeParser.prototype.Block?.name)
-        if (blockCst) return getStatementCstToAst().createBlockAst(blockCst)
+        if (blockCst) return getUtil().createBlockAst(blockCst)
         return SlimeAstUtil.createBlockStatement([], cst.loc)
     }
 
@@ -117,13 +97,13 @@ export class ControlFlowCstToAst {
                 colonToken = SlimeTokenCreate.createColonToken(child.loc)
             } else if (child.name === SlimeParser.prototype.LabelledItem?.name || child.name === 'LabelledItem') {
                 const itemChild = child.children?.[0]
-                if (itemChild) body = getStatementCstToAst().createStatementDeclarationAst(itemChild)
+                if (itemChild) body = getUtil().createStatementDeclarationAst(itemChild)
             } else if (child.name === SlimeParser.prototype.Statement?.name || child.name === 'Statement' ||
                 child.name === SlimeParser.prototype.FunctionDeclaration?.name || child.name === 'FunctionDeclaration') {
-                body = getStatementCstToAst().createStatementDeclarationAst(child)
+                body = getUtil().createStatementDeclarationAst(child)
             }
         }
-        return SlimeAstUtil.createLabeledStatement(label, body, cst.loc, colonToken)
+        return SlimeAstUtil.createLabeledStatement(label, body, cst.loc)
     }
 
     static createWithStatementAst(cst: SubhutiCst): any {
@@ -136,7 +116,7 @@ export class ControlFlowCstToAst {
             else if (child.name === SlimeParser.prototype.Expression?.name || child.name === 'Expression')
                 object = getUtil().createExpressionAst(child)
             else if (child.name === SlimeParser.prototype.Statement?.name || child.name === 'Statement')
-                body = getStatementCstToAst().createStatementDeclarationAst(child)
+                body = getUtil().createStatementDeclarationAst(child)
         }
         return SlimeAstUtil.createWithStatement(object, body, cst.loc, withToken, lParenToken, rParenToken)
     }
@@ -162,7 +142,7 @@ export class ControlFlowCstToAst {
             else if (child.name === 'RParen' || child.value === ')') rParenToken = SlimeTokenCreate.createRParenToken(child.loc)
             else if (child.name === SlimeParser.prototype.Expression?.name || child.name === 'Expression') test = getUtil().createExpressionAst(child)
             else if (child.name === SlimeParser.prototype.Statement?.name || child.name === 'Statement') {
-                const stmt = getStatementCstToAst().createStatementDeclarationAst(child)
+                const stmt = getUtil().createStatementDeclarationAst(child)
                 if (!foundElse) consequent = stmt
                 else alternate = stmt
             } else if (child.name === SlimeParser.prototype.IfStatementBody?.name || child.name === 'IfStatementBody') {
@@ -178,9 +158,9 @@ export class ControlFlowCstToAst {
         const children = cst.children || []
         for (const child of children) {
             if (child.name === SlimeParser.prototype.Statement?.name || child.name === 'Statement')
-                return getStatementCstToAst().createStatementDeclarationAst(child)
+                return getUtil().createStatementDeclarationAst(child)
             if (child.name === SlimeParser.prototype.Block?.name || child.name === 'Block')
-                return getStatementCstToAst().createBlockAst(child)
+                return getUtil().createBlockAst(child)
         }
         return null
     }
@@ -209,10 +189,10 @@ export class ControlFlowCstToAst {
             } else if (child.name === SlimeParser.prototype.ForDeclaration?.name || child.name === 'ForDeclaration') {
                 init = ControlFlowCstToAst.createForDeclarationAst(child)
             } else if (child.name === SlimeParser.prototype.Statement?.name || child.name === 'Statement') {
-                body = getStatementCstToAst().createStatementDeclarationAst(child)
+                body = getUtil().createStatementDeclarationAst(child)
             }
         }
-        return SlimeAstUtil.createForStatement(init, test, update, body, cst.loc, forToken, lParenToken, rParenToken, initSemi, testSemi)
+        return SlimeAstUtil.createForStatement(body, init, test, update, cst.loc, forToken, lParenToken, rParenToken, initSemi, testSemi)
     }
 
     static createForVarDeclaration(cst: SubhutiCst, kind: string): any {
@@ -270,7 +250,7 @@ export class ControlFlowCstToAst {
             else if (child.name === SlimeParser.prototype.Expression?.name || child.name === 'Expression')
                 right = getUtil().createExpressionAst(child)
             else if (child.name === SlimeParser.prototype.Statement?.name || child.name === 'Statement')
-                body = getStatementCstToAst().createStatementDeclarationAst(child)
+                body = getUtil().createStatementDeclarationAst(child)
         }
         if (isForOf) return SlimeAstUtil.createForOfStatement(left, right, body, isAwait, cst.loc, forToken, lParenToken, rParenToken, ofToken)
         return SlimeAstUtil.createForInStatement(left, right, body, cst.loc, forToken, lParenToken, rParenToken, inToken)
@@ -285,7 +265,7 @@ export class ControlFlowCstToAst {
             else if (child.name === 'RParen' || child.value === ')') rParenToken = SlimeTokenCreate.createRParenToken(child.loc)
             else if (child.name === SlimeParser.prototype.Expression?.name || child.name === 'Expression') test = getUtil().createExpressionAst(child)
             else if (child.name === SlimeParser.prototype.Statement?.name || child.name === 'Statement')
-                body = getStatementCstToAst().createStatementDeclarationAst(child)
+                body = getUtil().createStatementDeclarationAst(child)
         }
         return SlimeAstUtil.createWhileStatement(test, body, cst.loc, whileToken, lParenToken, rParenToken)
     }
@@ -300,7 +280,7 @@ export class ControlFlowCstToAst {
             else if (child.name === 'RParen' || child.value === ')') rParenToken = SlimeTokenCreate.createRParenToken(child.loc)
             else if (child.name === SlimeParser.prototype.Expression?.name || child.name === 'Expression') test = getUtil().createExpressionAst(child)
             else if (child.name === SlimeParser.prototype.Statement?.name || child.name === 'Statement')
-                body = getStatementCstToAst().createStatementDeclarationAst(child)
+                body = getUtil().createStatementDeclarationAst(child)
         }
         return SlimeAstUtil.createDoWhileStatement(body, test, cst.loc, doToken, whileToken, lParenToken, rParenToken)
     }
@@ -355,22 +335,22 @@ export class ControlFlowCstToAst {
             else if (child.name === 'Colon' || child.value === ':') colonToken = SlimeTokenCreate.createColonToken(child.loc)
             else if (child.name === SlimeParser.prototype.Expression?.name || child.name === 'Expression') test = getUtil().createExpressionAst(child)
             else if (child.name === SlimeParser.prototype.StatementList?.name || child.name === 'StatementList') {
-                const stmts = getStatementCstToAst().createStatementListAst(child)
+                const stmts = getUtil().createStatementListAst(child)
                 consequent.push(...stmts)
             }
         }
-        return SlimeAstUtil.createSwitchCase(isDefault ? null : test, consequent, cst.loc, caseToken, colonToken)
+        return SlimeAstUtil.createSwitchCase(consequent, isDefault ? null : test, cst.loc, isDefault ? undefined : caseToken, isDefault ? caseToken : undefined, colonToken)
     }
 
     static createBreakableStatementAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
-        if (firstChild) return getStatementCstToAst().createStatementDeclarationAst(firstChild)
+        if (firstChild) return getUtil().createStatementDeclarationAst(firstChild)
         return null
     }
 
     static createIterationStatementAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
-        if (firstChild) return getStatementCstToAst().createStatementDeclarationAst(firstChild)
+        if (firstChild) return getUtil().createStatementDeclarationAst(firstChild)
         return null
     }
 }
