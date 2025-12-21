@@ -17,85 +17,21 @@ import { SlimeCstToAstTools } from "./SlimeCstToAstTools";
 import SlimeParser from "../SlimeParser";
 import SlimeTokenConsumer from "../SlimeTokenConsumer";
 import { IdentifierCstToAst } from "./IdentifierCstToAst";
+import {checkCstName} from "../SlimeCstToAstUtil.ts";
 
-// 前向声明类型，避免循环依赖
-type SlimeCstToAstType = {
-    createAssignmentExpressionAst(cst: SubhutiCst): SlimeExpression;
-    createExpressionAst(cst: SubhutiCst): SlimeExpression;
-    createSpreadElementAst(cst: SubhutiCst): SlimeSpreadElement;
-    createPropertyDefinitionAst(cst: SubhutiCst): SlimeProperty;
-    createPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral | SlimeExpression;
-};
 
 /**
  * 字面量相关的 CST to AST 转换
  */
 export class LiteralCstToAst {
-    /**
-     * 创建 Literal 的 AST
-     */
-    static createLiteralAst(cst: SubhutiCst, converter: SlimeCstToAstType): SlimeLiteral {
-        SlimeCstToAstTools.checkCstName(cst, SlimeParser.prototype.Literal?.name);
-        const firstChild = cst.children[0]
-        let value: SlimeLiteral
 
-        const childName = firstChild.name
-
-        // 直接是 token 的情况
-        if (childName === SlimeTokenConsumer.prototype.NumericLiteral?.name || childName === 'NumericLiteral') {
-            const rawValue = firstChild.value as string
-            value = SlimeAstUtil.createNumericLiteral(Number(rawValue), rawValue)
-        } else if (childName === SlimeTokenConsumer.prototype.True?.name || childName === 'True') {
-            value = SlimeAstUtil.createBooleanLiteral(true)
-        } else if (childName === SlimeTokenConsumer.prototype.False?.name || childName === 'False') {
-            value = SlimeAstUtil.createBooleanLiteral(false)
-        } else if (childName === SlimeTokenConsumer.prototype.NullLiteral?.name || childName === 'NullLiteral' || childName === 'Null') {
-            value = SlimeAstUtil.createNullLiteralToken()
-        } else if (childName === SlimeTokenConsumer.prototype.StringLiteral?.name || childName === 'StringLiteral') {
-            const rawValue = firstChild.value as string
-            value = SlimeAstUtil.createStringLiteral(rawValue, firstChild.loc, rawValue)
-        }
-        // 包装节点的情况
-        else if (childName === 'BooleanLiteral' || childName === SlimeParser.prototype.BooleanLiteral?.name) {
-            const innerChild = firstChild.children?.[0]
-            if (innerChild?.name === 'True' || innerChild?.value === 'true') {
-                value = SlimeAstUtil.createBooleanLiteral(true)
-            } else {
-                value = SlimeAstUtil.createBooleanLiteral(false)
-            }
-            value.loc = innerChild?.loc || firstChild.loc
-            return value
-        }
-        else if (childName === 'NullLiteral') {
-            value = SlimeAstUtil.createNullLiteralToken()
-        }
-        else if (childName === 'BigIntLiteral') {
-            const rawValue = firstChild.value as string || firstChild.children?.[0]?.value as string
-            const numStr = rawValue.endsWith('n') ? rawValue.slice(0, -1) : rawValue
-            value = SlimeAstUtil.createBigIntLiteral(numStr, rawValue) as any
-        }
-        else {
-            const rawValue = firstChild.value as string
-            if (rawValue !== undefined) {
-                value = SlimeAstUtil.createStringLiteral(rawValue, firstChild.loc, rawValue)
-            } else {
-                const innerChild = firstChild.children?.[0]
-                if (innerChild?.value) {
-                    value = SlimeAstUtil.createStringLiteral(innerChild.value, innerChild.loc, innerChild.value)
-                } else {
-                    throw new Error(`Cannot extract value from Literal: ${childName}`)
-                }
-            }
-        }
-
-        value.loc = firstChild.loc
-        return value
-    }
+    // ==================== 字面量相关转换方�?====================
 
     /**
-     * 创建 BooleanLiteral 的 AST
+     * 布尔字面�?CST �?AST
+     * BooleanLiteral -> true | false
      */
-    static createBooleanLiteralAst(cst: SubhutiCst): SlimeLiteral {
+    createBooleanLiteralAst(cst: SubhutiCst): SlimeLiteral {
         const firstChild = cst.children?.[0]
         if (firstChild?.name === 'True' || firstChild?.value === 'true') {
             const lit = SlimeAstUtil.createBooleanLiteral(true)
@@ -109,72 +45,14 @@ export class LiteralCstToAst {
     }
 
     /**
-     * 创建 NumericLiteral 的 AST
+     * ArrayLiteral CST �?ArrayExpression AST
+     * ArrayLiteral -> [ Elision? ] | [ ElementList ] | [ ElementList , Elision? ]
      */
-    static createNumericLiteralAst(cst: SubhutiCst): SlimeNumericLiteral {
-        const validNames = [
-            SlimeTokenConsumer.prototype.NumericLiteral?.name,
-            'NumericLiteral',
-            'Number'
-        ]
-        if (!validNames.includes(cst.name)) {
-            throw new Error(`Expected NumericLiteral, got ${cst.name}`)
-        }
-        const rawValue = cst.value as string
-        return SlimeAstUtil.createNumericLiteral(Number(rawValue), rawValue)
-    }
+    createArrayLiteralAst(cst: SubhutiCst): SlimeArrayExpression {
+        const astName = checkCstName(cst, SlimeParser.prototype.ArrayLiteral?.name);
+        // ArrayLiteral: [LBracket, ElementList?, Comma?, Elision?, RBracket]
 
-    /**
-     * 创建 StringLiteral 的 AST
-     */
-    static createStringLiteralAst(cst: SubhutiCst): SlimeStringLiteral {
-        const validNames = [
-            SlimeTokenConsumer.prototype.StringLiteral?.name,
-            'StringLiteral',
-            'String'
-        ]
-        if (!validNames.includes(cst.name)) {
-            throw new Error(`Expected StringLiteral, got ${cst.name}`)
-        }
-        const rawValue = cst.value as string
-        return SlimeAstUtil.createStringLiteral(rawValue, cst.loc, rawValue)
-    }
-
-    /**
-     * 创建 RegExpLiteral 的 AST
-     */
-    static createRegExpLiteralAst(cst: SubhutiCst): any {
-        const rawValue = cst.value as string
-        const match = rawValue.match(/^\/(.*)\/([gimsuy]*)$/)
-        if (match) {
-            const pattern = match[1]
-            const flags = match[2]
-            return {
-                type: SlimeNodeType.Literal,
-                value: new RegExp(pattern, flags),
-                raw: rawValue,
-                regex: {
-                    pattern: pattern,
-                    flags: flags
-                },
-                loc: cst.loc
-            }
-        }
-        return {
-            type: SlimeNodeType.Literal,
-            value: rawValue,
-            raw: rawValue,
-            loc: cst.loc
-        }
-    }
-
-
-    /**
-     * 创建 ArrayLiteral 的 AST
-     */
-    static createArrayLiteralAst(cst: SubhutiCst, converter: SlimeCstToAstType): SlimeArrayExpression {
-        SlimeCstToAstTools.checkCstName(cst, SlimeParser.prototype.ArrayLiteral?.name);
-
+        // 提取 LBracket �?RBracket tokens
         let lBracketToken: any = undefined
         let rBracketToken: any = undefined
 
@@ -191,11 +69,17 @@ export class LiteralCstToAst {
         }
 
         const elementList = cst.children.find(ch => ch.name === SlimeParser.prototype.ElementList?.name)
-        const elements = elementList ? LiteralCstToAst.createElementListAst(elementList, converter) : []
+        const elements = elementList ? this.createElementListAst(elementList) : []
 
-        // 处理尾随逗号和省略
+        // 处理 ArrayLiteral 顶层�?Comma �?Elision（尾随逗号和省略）
+        // 例如 [x,,] -> ElementList 后面�?Comma �?Elision
+        let hasTrailingComma = false
         for (const child of cst.children) {
-            if (child.name === SlimeParser.prototype.Elision?.name || child.name === 'Elision') {
+            if (child.name === 'Comma' || child.value === ',') {
+                // 顶层逗号，表示尾随逗号
+                hasTrailingComma = true
+            } else if (child.name === SlimeParser.prototype.Elision?.name || child.name === 'Elision') {
+                // 顶层 Elision，添加空元素
                 const elisionCommas = child.children?.filter((c: any) => c.name === 'Comma' || c.value === ',') || []
                 for (let j = 0; j < elisionCommas.length; j++) {
                     const commaToken = SlimeTokenCreate.createCommaToken(elisionCommas[j].loc)
@@ -208,68 +92,19 @@ export class LiteralCstToAst {
     }
 
     /**
-     * 创建 ElementList 的 AST
+     * 对象字面�?CST �?AST（透传�?ObjectExpression�?
+     * ObjectLiteral -> { } | { PropertyDefinitionList } | { PropertyDefinitionList , }
      */
-    static createElementListAst(cst: SubhutiCst, converter: SlimeCstToAstType): Array<SlimeArrayElement> {
-        SlimeCstToAstTools.checkCstName(cst, SlimeParser.prototype.ElementList?.name);
-        const elements: Array<SlimeArrayElement> = []
-
-        let currentElement: SlimeExpression | SlimeSpreadElement | null = null
-        let hasElement = false
-
-        for (let i = 0; i < cst.children.length; i++) {
-            const child = cst.children[i]
-
-            if (child.name === SlimeParser.prototype.AssignmentExpression?.name) {
-                if (hasElement) {
-                    elements.push(SlimeAstUtil.createArrayElement(currentElement, undefined))
-                }
-                currentElement = converter.createAssignmentExpressionAst(child)
-                hasElement = true
-            } else if (child.name === SlimeParser.prototype.SpreadElement?.name) {
-                if (hasElement) {
-                    elements.push(SlimeAstUtil.createArrayElement(currentElement, undefined))
-                }
-                currentElement = converter.createSpreadElementAst(child)
-                hasElement = true
-            } else if (child.name === SlimeParser.prototype.Elision?.name) {
-                const elisionCommas = child.children?.filter((c: any) => c.name === 'Comma' || c.value === ',') || []
-                for (let j = 0; j < elisionCommas.length; j++) {
-                    if (hasElement) {
-                        const commaToken = SlimeTokenCreate.createCommaToken(elisionCommas[j].loc)
-                        elements.push(SlimeAstUtil.createArrayElement(currentElement, commaToken))
-                        hasElement = false
-                        currentElement = null
-                    } else {
-                        const commaToken = SlimeTokenCreate.createCommaToken(elisionCommas[j].loc)
-                        elements.push(SlimeAstUtil.createArrayElement(null, commaToken))
-                    }
-                }
-            } else if (child.name === 'Comma' || child.value === ',') {
-                const commaToken = SlimeTokenCreate.createCommaToken(child.loc)
-                elements.push(SlimeAstUtil.createArrayElement(currentElement, commaToken))
-                hasElement = false
-                currentElement = null
-            }
-        }
-
-        if (hasElement) {
-            elements.push(SlimeAstUtil.createArrayElement(currentElement, undefined))
-        }
-
-        return elements
-    }
-
-    /**
-     * 创建 ObjectLiteral 的 AST
-     */
-    static createObjectLiteralAst(cst: SubhutiCst, converter: SlimeCstToAstType): SlimeObjectExpression {
-        SlimeCstToAstTools.checkCstName(cst, SlimeParser.prototype.ObjectLiteral?.name);
+    createObjectLiteralAst(cst: SubhutiCst): SlimeObjectExpression {
+        const astName = checkCstName(cst, SlimeParser.prototype.ObjectLiteral?.name);
         const properties: Array<SlimeObjectPropertyItem> = []
 
+        // 提取 LBrace �?RBrace tokens
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined
 
+        // ObjectLiteral: { PropertyDefinitionList? ,? }
+        // children[0] = LBrace, children[last] = RBrace (if exists)
         if (cst.children && cst.children.length > 0) {
             const firstChild = cst.children[0]
             if (firstChild && (firstChild.name === 'LBrace' || firstChild.value === '{')) {
@@ -288,13 +123,16 @@ export class LiteralCstToAst {
             let hasProperty = false
 
             for (const child of PropertyDefinitionListCst.children) {
+                // 跳过没有children的PropertyDefinition节点（SubhutiParser优化导致�?
                 if (child.name === SlimeParser.prototype.PropertyDefinition?.name && child.children && child.children.length > 0) {
+                    // 如果之前有属性但没有逗号，先推入
                     if (hasProperty) {
                         properties.push(SlimeAstUtil.createObjectPropertyItem(currentProperty!, undefined))
                     }
-                    currentProperty = converter.createPropertyDefinitionAst(child)
+                    currentProperty = this.createPropertyDefinitionAst(child)
                     hasProperty = true
                 } else if (child.name === 'Comma' || child.value === ',') {
+                    // 逗号与前面的属性配�?
                     const commaToken = SlimeTokenCreate.createCommaToken(child.loc)
                     if (hasProperty) {
                         properties.push(SlimeAstUtil.createObjectPropertyItem(currentProperty!, commaToken))
@@ -304,6 +142,7 @@ export class LiteralCstToAst {
                 }
             }
 
+            // 处理最后一个属性（如果没有尾随逗号�?
             if (hasProperty) {
                 properties.push(SlimeAstUtil.createObjectPropertyItem(currentProperty!, undefined))
             }
@@ -312,127 +151,12 @@ export class LiteralCstToAst {
     }
 
     /**
-     * 创建 TemplateLiteral 的 AST
+     * Elision（逗号空位）CST �?AST
+     * Elision -> , | Elision ,
+     * 返回 null 元素的数�?
      */
-    static createTemplateLiteralAst(cst: SubhutiCst, converter: SlimeCstToAstType): SlimeExpression {
-        SlimeCstToAstTools.checkCstName(cst, SlimeParser.prototype.TemplateLiteral?.name)
-
-        const first = cst.children[0]
-
-        // 简单模板：`hello` (无插值)
-        if (first.name === SlimeTokenConsumer.prototype.NoSubstitutionTemplate?.name ||
-            first.name === 'NoSubstitutionTemplate') {
-            const raw = first.value as string || '``'
-            const cooked = raw.slice(1, -1)
-            const quasis = [SlimeAstUtil.createTemplateElement(true, raw, cooked, first.loc)]
-            return SlimeAstUtil.createTemplateLiteral(quasis, [], cst.loc)
-        }
-
-        // 带插值模板
-        let targetCst = cst
-        if (first.name === SlimeParser.prototype.SubstitutionTemplate?.name ||
-            first.name === 'SubstitutionTemplate') {
-            targetCst = first
-        }
-
-        const quasis: any[] = []
-        const expressions: SlimeExpression[] = []
-
-        for (let i = 0; i < targetCst.children.length; i++) {
-            const child = targetCst.children[i]
-
-            if (child.name === SlimeTokenConsumer.prototype.TemplateHead?.name ||
-                child.name === 'TemplateHead') {
-                const raw = child.value as string || ''
-                const cooked = raw.slice(1, -2)
-                quasis.push(SlimeAstUtil.createTemplateElement(false, raw, cooked, child.loc))
-            }
-            else if (child.name === SlimeParser.prototype.Expression?.name ||
-                     child.name === 'Expression') {
-                expressions.push(converter.createExpressionAst(child))
-            }
-            else if (child.name === SlimeParser.prototype.TemplateSpans?.name ||
-                     child.name === 'TemplateSpans') {
-                LiteralCstToAst.processTemplateSpans(child, quasis, expressions, converter)
-            }
-        }
-
-        return SlimeAstUtil.createTemplateLiteral(quasis, expressions, cst.loc)
-    }
-
-    /**
-     * 处理 TemplateSpans
-     */
-    private static processTemplateSpans(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[], converter: SlimeCstToAstType): void {
-        const first = cst.children[0]
-
-        if (first.name === SlimeTokenConsumer.prototype.TemplateTail?.name) {
-            const raw = first.value || ''
-            const cooked = raw.slice(1, -1)
-            quasis.push(SlimeAstUtil.createTemplateElement(true, raw, cooked, first.loc))
-            return
-        }
-
-        if (first.name === SlimeParser.prototype.TemplateMiddleList?.name) {
-            LiteralCstToAst.processTemplateMiddleList(first, quasis, expressions, converter)
-
-            if (cst.children[1] && cst.children[1].name === SlimeTokenConsumer.prototype.TemplateTail?.name) {
-                const tail = cst.children[1]
-                const raw = tail.value || ''
-                const cooked = raw.slice(1, -1)
-                quasis.push(SlimeAstUtil.createTemplateElement(true, raw, cooked, tail.loc))
-            }
-        }
-    }
-
-    /**
-     * 处理 TemplateMiddleList
-     */
-    private static processTemplateMiddleList(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[], converter: SlimeCstToAstType): void {
-        for (let i = 0; i < cst.children.length; i++) {
-            const child = cst.children[i]
-
-            if (child.name === SlimeTokenConsumer.prototype.TemplateMiddle?.name ||
-                child.name === 'TemplateMiddle') {
-                const raw = child.value || ''
-                const cooked = raw.slice(1, -2)
-                quasis.push(SlimeAstUtil.createTemplateElement(false, raw, cooked, child.loc))
-            } else if (child.name === SlimeParser.prototype.Expression?.name ||
-                       child.name === 'Expression') {
-                expressions.push(converter.createExpressionAst(child))
-            } else if (child.name === SlimeParser.prototype.TemplateMiddleList?.name ||
-                       child.name === 'TemplateMiddleList') {
-                LiteralCstToAst.processTemplateMiddleList(child, quasis, expressions, converter)
-            }
-        }
-    }
-
-    /**
-     * 创建 LiteralPropertyName 的 AST
-     */
-    static createLiteralPropertyNameAst(cst: SubhutiCst, converter: SlimeCstToAstType): SlimeIdentifier | SlimeLiteral {
-        const firstChild = cst.children?.[0]
-        if (!firstChild) throw new Error('LiteralPropertyName has no children')
-
-        if (firstChild.name === SlimeParser.prototype.IdentifierName?.name ||
-            firstChild.name === 'IdentifierName') {
-            // 使用 IdentifierCstToAst
-            return IdentifierCstToAst.createIdentifierNameAst(firstChild)
-        } else if (firstChild.name === SlimeTokenConsumer.prototype.StringLiteral?.name ||
-                   firstChild.name === 'StringLiteral') {
-            return LiteralCstToAst.createStringLiteralAst(firstChild)
-        } else if (firstChild.name === SlimeTokenConsumer.prototype.NumericLiteral?.name ||
-                   firstChild.name === 'NumericLiteral') {
-            return LiteralCstToAst.createNumericLiteralAst(firstChild)
-        }
-
-        throw new Error(`Unknown LiteralPropertyName type: ${firstChild.name}`)
-    }
-
-    /**
-     * 创建 Elision 的 AST（返回空元素数量）
-     */
-    static createElisionAst(cst: SubhutiCst): number {
+    createElisionAst(cst: SubhutiCst): number {
+        // 计算逗号数量，每个逗号代表一个空�?
         let count = 0
         for (const child of cst.children || []) {
             if (child.value === ',') {
@@ -441,4 +165,151 @@ export class LiteralCstToAst {
         }
         return count
     }
+
+    createLiteralAst(cst: SubhutiCst): SlimeLiteral {
+        const astName = checkCstName(cst, SlimeParser.prototype.Literal?.name);
+        const firstChild = cst.children[0]
+        let value: SlimeLiteral
+
+        // 处理各种字面量类�?
+        const childName = firstChild.name
+
+        // 直接�?token 的情�?
+        if (childName === SlimeTokenConsumer.prototype.NumericLiteral?.name || childName === 'NumericLiteral') {
+            const rawValue = firstChild.value as string
+            value = SlimeAstUtil.createNumericLiteral(Number(rawValue), rawValue)
+        } else if (childName === SlimeTokenConsumer.prototype.True?.name || childName === 'True') {
+            value = SlimeAstUtil.createBooleanLiteral(true)
+        } else if (childName === SlimeTokenConsumer.prototype.False?.name || childName === 'False') {
+            value = SlimeAstUtil.createBooleanLiteral(false)
+        } else if (childName === SlimeTokenConsumer.prototype.NullLiteral?.name || childName === 'NullLiteral' || childName === 'Null') {
+            value = SlimeAstUtil.createNullLiteralToken()
+        } else if (childName === SlimeTokenConsumer.prototype.StringLiteral?.name || childName === 'StringLiteral') {
+            const rawValue = firstChild.value as string
+            value = SlimeAstUtil.createStringLiteral(rawValue, firstChild.loc, rawValue)
+        }
+        // 包装节点的情况（�?BooleanLiteral 包含 True/False�?
+        else if (childName === 'BooleanLiteral' || childName === SlimeParser.prototype.BooleanLiteral?.name) {
+            // BooleanLiteral �?True | False
+            const innerChild = firstChild.children?.[0]
+            if (innerChild?.name === 'True' || innerChild?.value === 'true') {
+                value = SlimeAstUtil.createBooleanLiteral(true)
+            } else {
+                value = SlimeAstUtil.createBooleanLiteral(false)
+            }
+            value.loc = innerChild?.loc || firstChild.loc
+            return value
+        }
+        // Null 字面量的包装
+        else if (childName === 'NullLiteral') {
+            value = SlimeAstUtil.createNullLiteralToken()
+        }
+        // BigInt 字面�?
+        else if (childName === 'BigIntLiteral') {
+            const rawValue = firstChild.value as string || firstChild.children?.[0]?.value as string
+            // 去掉末尾�?'n'
+            const numStr = rawValue.endsWith('n') ? rawValue.slice(0, -1) : rawValue
+            value = SlimeAstUtil.createBigIntLiteral(numStr, rawValue) as any
+        }
+        // 默认处理为字符串
+        else {
+            const rawValue = firstChild.value as string
+            if (rawValue !== undefined) {
+                value = SlimeAstUtil.createStringLiteral(rawValue, firstChild.loc, rawValue)
+            } else {
+                // 递归处理嵌套的子节点
+                const innerChild = firstChild.children?.[0]
+                if (innerChild?.value) {
+                    value = SlimeAstUtil.createStringLiteral(innerChild.value, innerChild.loc, innerChild.value)
+                } else {
+                    throw new Error(`Cannot extract value from Literal: ${childName}`)
+                }
+            }
+        }
+
+        value.loc = firstChild.loc
+        return value
+    }
+
+    /**
+     * [AST 类型映射] NumericLiteral 终端�?�?Literal AST
+     *
+     * 存在必要性：NumericLiteral �?CST 中是终端符，�?ESTree AST 中是 Literal 类型�?
+     */
+    createNumericLiteralAst(cst: SubhutiCst): SlimeNumericLiteral {
+        // 兼容多种 NumericLiteral 名称：NumericLiteral, NumericLiteralTok, Number
+        const validNames = [
+            SlimeTokenConsumer.prototype.NumericLiteral?.name,
+            'NumericLiteral',
+            'NumericLiteral',
+            'Number'
+        ]
+        if (!validNames.includes(cst.name)) {
+            throw new Error(`Expected NumericLiteral, got ${cst.name}`)
+        }
+        // 保存原始值（raw）以保持格式（如十六进制 0xFF�?
+        const rawValue = cst.value as string
+        return SlimeAstUtil.createNumericLiteral(Number(rawValue), rawValue)
+    }
+
+    /**
+     * [AST 类型映射] StringLiteral 终端�?�?Literal AST
+     *
+     * 存在必要性：StringLiteral �?CST 中是终端符，�?ESTree AST 中是 Literal 类型�?
+     */
+    createStringLiteralAst(cst: SubhutiCst): SlimeStringLiteral {
+        // 兼容多种 StringLiteral 名称：StringLiteral, StringLiteralTok, String
+        const validNames = [
+            SlimeTokenConsumer.prototype.StringLiteral?.name,
+            'StringLiteral',
+            'StringLiteral',
+            'String'
+        ]
+        if (!validNames.includes(cst.name)) {
+            throw new Error(`Expected StringLiteral, got ${cst.name}`)
+        }
+        // 保存原始值（raw）以保持引号格式
+        const rawValue = cst.value as string
+        const ast = SlimeAstUtil.createStringLiteral(rawValue, cst.loc, rawValue)
+        return ast
+    }
+
+    /**
+     * [AST 类型映射] RegularExpressionLiteral 终端�?�?Literal AST
+     *
+     * 存在必要性：RegularExpressionLiteral �?CST 中是终端符，
+     * �?ESTree AST 中是 Literal 类型，需要解析正则表达式�?pattern �?flags�?
+     *
+     * RegularExpressionLiteral: /pattern/flags
+     */
+    createRegExpLiteralAst(cst: SubhutiCst): any {
+        const rawValue = cst.value as string
+        // 解析正则表达式字面量�?pattern/flags
+        // 正则字面量格式：/.../ 后面可能跟着 flags
+        const match = rawValue.match(/^\/(.*)\/([gimsuy]*)$/)
+        if (match) {
+            const pattern = match[1]
+            const flags = match[2]
+            return {
+                type: SlimeNodeType.Literal,
+                value: new RegExp(pattern, flags),
+                raw: rawValue,
+                regex: {
+                    pattern: pattern,
+                    flags: flags
+                },
+                loc: cst.loc
+            }
+        }
+        // 如果无法解析，返回原始�?
+        return {
+            type: SlimeNodeType.Literal,
+            value: rawValue,
+            raw: rawValue,
+            loc: cst.loc
+        }
+    }
 }
+
+
+
