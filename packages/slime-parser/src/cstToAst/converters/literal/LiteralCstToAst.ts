@@ -50,6 +50,48 @@ export class LiteralCstToAst {
         return SlimeAstUtil.createNullLiteral(cst.loc);
     }
 
+    /**
+     * [AST 类型映射] RegularExpressionLiteral 终端符 -> Literal AST
+     */
+    static createRegExpLiteralAst(cst: SubhutiCst): any {
+        const rawValue = cst.value as string;
+        const match = rawValue.match(/^\/(.*)\/([gimsuy]*)$/);
+        if (match) {
+            const pattern = match[1];
+            const flags = match[2];
+            return {
+                type: "Literal",
+                value: new RegExp(pattern, flags),
+                raw: rawValue,
+                regex: {
+                    pattern: pattern,
+                    flags: flags
+                },
+                loc: cst.loc
+            };
+        }
+        return {
+            type: "Literal",
+            value: rawValue,
+            raw: rawValue,
+            loc: cst.loc
+        };
+    }
+
+    /**
+     * BigInt 字面量
+     */
+    static createBigIntLiteralAst(cst: SubhutiCst): any {
+        const rawValue = cst.value as string || (cst.children?.[0]?.value as string);
+        const numStr = rawValue.endsWith('n') ? rawValue.slice(0, -1) : rawValue;
+        return (SlimeAstUtil as any).createBigIntLiteral?.(numStr, rawValue) || {
+            type: "Literal",
+            value: BigInt(numStr),
+            raw: rawValue,
+            loc: cst.loc
+        };
+    }
+
     static createLiteralFromToken(token: any): any {
         if (token.name === 'NumericLiteral' || token.name === 'NumericLiteralTok') {
             return LiteralCstToAst.createNumericLiteralAst(token);
@@ -60,8 +102,11 @@ export class LiteralCstToAst {
         if (token.name === 'BooleanLiteral' || token.name === 'BooleanLiteralTok') {
             return LiteralCstToAst.createBooleanLiteralAst(token);
         }
-        if (token.name === 'NullLiteral' || token.name === 'NullLiteralTok') {
+        if (token.name === 'NullLiteral' || token.name === 'NullLiteralTok' || token.name === 'Null') {
             return LiteralCstToAst.createNullLiteralAst(token);
+        }
+        if (token.name === 'RegularExpressionLiteral' || token.name === 'RegularExpressionLiteralTok' || token.name === 'RegExp') {
+            return LiteralCstToAst.createRegExpLiteralAst(token);
         }
         return null;
     }
@@ -72,8 +117,16 @@ export class LiteralCstToAst {
     static createLiteralAst(cst: SubhutiCst): SlimeLiteral {
         const child = cst.children?.[0] || cst;
         const literal = LiteralCstToAst.createLiteralFromToken(child);
-        if (literal) return literal;
+        if (literal) {
+            literal.loc = child.loc || cst.loc;
+            return literal;
+        }
 
-        throw new Error(`createLiteralAst: Unknown literal type ${child.name}`);
+        const childName = child.name;
+        if (childName === 'BigIntLiteral') {
+            return LiteralCstToAst.createBigIntLiteralAst(child);
+        }
+
+        throw new Error(`createLiteralAst: Unknown literal type ${childName}`);
     }
 }
