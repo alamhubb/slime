@@ -8,11 +8,25 @@ import { decodeUnicodeEscapes, checkCstName } from "./SlimeCstToAstTools";
 import SlimeParser from "../SlimeParser";
 import SlimeTokenConsumer from "../SlimeTokenConsumer";
 
+import { register } from "../../core/CstToAstContext";
+
 /**
  * 标识符相关的 CST to AST 转换
- * 所有方法都是静态方法
  */
 export class IdentifierCstToAst {
+    /**
+     * 注册模块处理器
+     */
+    static register(): void {
+        const P = SlimeParser.prototype;
+        register(P.IdentifierReference?.name || 'IdentifierReference', IdentifierCstToAst.createIdentifierReferenceAst);
+        register(P.BindingIdentifier?.name || 'BindingIdentifier', IdentifierCstToAst.createBindingIdentifierAst);
+        register(P.LabelIdentifier?.name || 'LabelIdentifier', IdentifierCstToAst.createLabelIdentifierAst);
+        register(P.Identifier?.name || 'Identifier', IdentifierCstToAst.createIdentifierAst);
+        register(P.IdentifierName?.name || 'IdentifierName', IdentifierCstToAst.createIdentifierNameAst);
+        register('PrivateIdentifier', IdentifierCstToAst.createPrivateIdentifierAst);
+    }
+
     /**
      * 创建 IdentifierReference 的 AST
      *
