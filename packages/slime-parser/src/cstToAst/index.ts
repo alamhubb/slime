@@ -12,3 +12,5 @@ export { ClassCstToAst } from './ClassCstToAst';
 export { PropertyCstToAst } from './PropertyCstToAst';
 export { PatternCstToAst } from './PatternCstToAst';
 export { ModuleCstToAst } from './ModuleCstToAst';
+export { TemplateCstToAst } from './TemplateCstToAst';
+export { OperatorCstToAst } from './OperatorCstToAst';

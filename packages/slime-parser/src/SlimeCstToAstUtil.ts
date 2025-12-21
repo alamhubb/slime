@@ -2244,4 +2244,24 @@ export class SlimeCstToAst {
 
 const SlimeCstToAstUtil = new SlimeCstToAst()
 
+// 初始化各个 CstToAst 类的 util 引用
+import { setSlimeCstToAstUtil } from "./cstToAst/StatementCstToAst";
+import { setDeclarationCstToAstUtil } from "./cstToAst/DeclarationCstToAst";
+import { setFunctionCstToAstUtil } from "./cstToAst/FunctionCstToAst";
+import { setClassCstToAstUtil } from "./cstToAst/ClassCstToAst";
+import { setPatternCstToAstUtil } from "./cstToAst/PatternCstToAst";
+import { setModuleCstToAstUtil } from "./cstToAst/ModuleCstToAst";
+import { setTemplateCstToAstUtil } from "./cstToAst/TemplateCstToAst";
+import { setOperatorCstToAstUtil } from "./cstToAst/OperatorCstToAst";
+import { setLiteralCstToAstUtil } from "./cstToAst/LiteralCstToAst";
+setSlimeCstToAstUtil(SlimeCstToAstUtil);
+setDeclarationCstToAstUtil(SlimeCstToAstUtil);
+setFunctionCstToAstUtil(SlimeCstToAstUtil);
+setClassCstToAstUtil(SlimeCstToAstUtil);
+setPatternCstToAstUtil(SlimeCstToAstUtil);
+setModuleCstToAstUtil(SlimeCstToAstUtil);
+setTemplateCstToAstUtil(SlimeCstToAstUtil);
+setOperatorCstToAstUtil(SlimeCstToAstUtil);
+setLiteralCstToAstUtil(SlimeCstToAstUtil);
+
 export default SlimeCstToAstUtil

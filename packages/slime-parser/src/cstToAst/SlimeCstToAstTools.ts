@@ -51,3 +51,10 @@ export class SlimeCstToAstTools {
         throw new Error(errorMsg)
     }
 }
+
+/**
+ * 便捷导出 - 为了向后兼容
+ */
+export const decodeUnicodeEscapes = SlimeCstToAstTools.decodeUnicodeEscapes;
+export const checkCstName = SlimeCstToAstTools.checkCstName;
+export const throwNewError = SlimeCstToAstTools.throwNewError;
