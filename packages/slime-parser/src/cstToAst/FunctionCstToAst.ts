@@ -142,7 +142,7 @@ export class FunctionCstToAst {
         }
 
         return SlimeAstUtil.createFunctionExpression(
-            functionName, params, body, isGenerator, isAsync, cst.loc,
+            body, functionName, params, isGenerator, isAsync, cst.loc,
             functionToken, asyncToken, asteriskToken, lParenToken, rParenToken,
             lBraceToken, rBraceToken
         )
@@ -290,6 +290,21 @@ export class FunctionCstToAst {
     }
 
     /**
+     * 创建 FormalParameterList 的 AST（包装类型）- ES2025 版本
+     * 用于处理旧版 FormalParameterList 结构
+     */
+    static createFormalParameterListFromEs2025Wrapped(cst: SubhutiCst, converter: SlimeCstToAstType): SlimeFunctionParam[] {
+        return FunctionCstToAst.createFormalParameterListWrapped(cst, converter)
+    }
+
+    /**
+     * 创建 FormalParameterList 的 AST（包装类型）- 别名方法
+     */
+    static createFormalParameterListAstWrapped(cst: SubhutiCst, converter: SlimeCstToAstType): SlimeFunctionParam[] {
+        return FunctionCstToAst.createFormalParameterListWrapped(cst, converter)
+    }
+
+    /**
      * 创建 FormalParameter 的 AST
      */
     static createFormalParameterAst(cst: SubhutiCst, converter: SlimeCstToAstType): SlimePattern {
@@ -406,8 +421,8 @@ export class FunctionCstToAst {
         }
 
         return SlimeAstUtil.createArrowFunctionExpression(
-            params, body, expression, false, cst.loc,
-            arrowToken, lParenToken, rParenToken
+            body, params, expression, false, cst.loc,
+            arrowToken, undefined, lParenToken, rParenToken
         )
     }
 
@@ -635,7 +650,7 @@ export class FunctionCstToAst {
         }
 
         return SlimeAstUtil.createFunctionExpression(
-            functionName, params, body, false, true, cst.loc,
+            body, functionName, params, false, true, cst.loc,
             functionToken, asyncToken, undefined, lParenToken, rParenToken,
             lBraceToken, rBraceToken
         )
@@ -679,8 +694,8 @@ export class FunctionCstToAst {
         }
 
         return SlimeAstUtil.createArrowFunctionExpression(
-            params, body, expression, true, cst.loc,
-            arrowToken, lParenToken, rParenToken, asyncToken
+            body, params, expression, true, cst.loc,
+            arrowToken, asyncToken, lParenToken, rParenToken
         )
     }
 
@@ -809,7 +824,7 @@ export class FunctionCstToAst {
         }
 
         return SlimeAstUtil.createFunctionExpression(
-            functionName, params, body, true, false, cst.loc,
+            body, functionName, params, true, false, cst.loc,
             functionToken, undefined, asteriskToken, lParenToken, rParenToken,
             lBraceToken, rBraceToken
         )
@@ -920,7 +935,7 @@ export class FunctionCstToAst {
         }
 
         return SlimeAstUtil.createFunctionExpression(
-            functionName, params, body, true, true, cst.loc,
+            body, functionName, params, true, true, cst.loc,
             functionToken, asyncToken, asteriskToken, lParenToken, rParenToken,
             lBraceToken, rBraceToken
         )

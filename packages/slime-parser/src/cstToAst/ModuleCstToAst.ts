@@ -43,6 +43,83 @@ type SlimeCstToAstType = {
  */
 export class ModuleCstToAst {
     /**
+     * [入口方法] 将顶层 CST 转换为 Program AST
+     *
+     * 支持 Module、Script、Program 多种顶层 CST
+     */
+    static toProgram(cst: SubhutiCst, converter: SlimeCstToAstType): SlimeProgram {
+        // Support both Module and Script entry points
+        const isModule = cst.name === SlimeParser.prototype.Module?.name || cst.name === 'Module'
+        const isScript = cst.name === SlimeParser.prototype.Script?.name || cst.name === 'Script'
+        const isProgram = cst.name === SlimeParser.prototype.Program?.name || cst.name === 'Program'
+
+        if (!isModule && !isScript && !isProgram) {
+            throw new Error(`Expected CST name 'Module', 'Script' or 'Program', but got '${cst.name}'`)
+        }
+
+        let program: SlimeProgram
+        let hashbangComment: string | null = null
+
+        // If children is empty, return empty program
+        if (!cst.children || cst.children.length === 0) {
+            return SlimeAstUtil.createProgram([], isModule ? 'module' : 'script')
+        }
+
+        // 遍历子节点，处理 HashbangComment 和主体内容
+        let bodyChild: SubhutiCst | null = null
+        for (const child of cst.children) {
+            if (child.name === 'HashbangComment') {
+                // 提取 Hashbang 注释的值
+                hashbangComment = child.value || child.children?.[0]?.value || null
+            } else if (child.name === 'ModuleBody' || child.name === 'ScriptBody' ||
+                child.name === 'ModuleItemList' || child.name === SlimeParser.prototype.ModuleItemList?.name ||
+                child.name === 'StatementList' || child.name === SlimeParser.prototype.StatementList?.name) {
+                bodyChild = child
+            }
+        }
+
+        // 处理主体内容
+        if (bodyChild) {
+            if (bodyChild.name === 'ModuleBody') {
+                const moduleItemList = bodyChild.children?.[0]
+                if (moduleItemList && (moduleItemList.name === 'ModuleItemList' || moduleItemList.name === SlimeParser.prototype.ModuleItemList?.name)) {
+                    const body = ModuleCstToAst.createModuleItemListAst(moduleItemList, converter)
+                    program = SlimeAstUtil.createProgram(body, 'module')
+                } else {
+                    program = SlimeAstUtil.createProgram([], 'module')
+                }
+            } else if (bodyChild.name === SlimeParser.prototype.ModuleItemList?.name || bodyChild.name === 'ModuleItemList') {
+                const body = ModuleCstToAst.createModuleItemListAst(bodyChild, converter)
+                program = SlimeAstUtil.createProgram(body, 'module')
+            } else if (bodyChild.name === 'ScriptBody') {
+                const statementList = bodyChild.children?.[0]
+                if (statementList && (statementList.name === 'StatementList' || statementList.name === SlimeParser.prototype.StatementList?.name)) {
+                    const body = converter.createStatementListAst(statementList)
+                    program = SlimeAstUtil.createProgram(body, 'script')
+                } else {
+                    program = SlimeAstUtil.createProgram([], 'script')
+                }
+            } else if (bodyChild.name === SlimeParser.prototype.StatementList?.name || bodyChild.name === 'StatementList') {
+                const body = converter.createStatementListAst(bodyChild)
+                program = SlimeAstUtil.createProgram(body, 'script')
+            } else {
+                throw new Error(`Unexpected body child: ${bodyChild.name}`)
+            }
+        } else {
+            // 没有主体内容（可能只有 HashbangComment）
+            program = SlimeAstUtil.createProgram([], isModule ? 'module' : 'script')
+        }
+
+        // 设置 hashbang 注释（如果存在）
+        if (hashbangComment) {
+            (program as any).hashbang = hashbangComment
+        }
+
+        program.loc = cst.loc
+        return program
+    }
+
+    /**
      * Program CST 转 AST
      */
     static createProgramAst(cst: SubhutiCst, converter: SlimeCstToAstType): SlimeProgram {
@@ -54,7 +131,8 @@ export class ModuleCstToAst {
                 return ModuleCstToAst.createModuleAst(firstChild, converter)
             }
         }
-        return SlimeAstUtil.createProgram([], 'script')
+        // 如果直接就是内容，调用 toProgram
+        return ModuleCstToAst.toProgram(cst, converter)
     }
 
 

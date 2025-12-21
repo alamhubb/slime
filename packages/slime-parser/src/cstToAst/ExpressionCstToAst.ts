@@ -7,9 +7,12 @@ import {
     type SlimeMemberExpression,
     type SlimeSuper,
     type SlimeThisExpression,
+    type SlimeCallArgument,
+    type SlimeRestElement,
+    type SlimePattern,
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
-import { SlimeAstUtil, SlimeNodeType } from "slime-ast";
+import { SlimeAstUtil, SlimeNodeType, SlimeTokenCreate } from "slime-ast";
 import { SlimeCstToAstTools } from "./SlimeCstToAstTools";
 import SlimeParser from "../SlimeParser";
 import SlimeTokenConsumer from "../SlimeTokenConsumer";
@@ -20,6 +23,7 @@ type SlimeCstToAstType = {
     createAssignmentExpressionAst(cst: SubhutiCst): SlimeExpression;
     createIdentifierAst(cst: SubhutiCst): SlimeIdentifier;
     createIdentifierNameAst(cst: SubhutiCst): SlimeIdentifier;
+    createIdentifierReferenceAst(cst: SubhutiCst): SlimeIdentifier;
     createLiteralAst(cst: SubhutiCst): SlimeLiteral;
     createArrayLiteralAst(cst: SubhutiCst): SlimeExpression;
     createObjectLiteralAst(cst: SubhutiCst): SlimeExpression;
@@ -41,6 +45,11 @@ type SlimeCstToAstType = {
     createYieldExpressionAst(cst: SubhutiCst): SlimeExpression;
     createAwaitExpressionAst(cst: SubhutiCst): SlimeExpression;
     createCoverParenthesizedExpressionAndArrowParameterListAst(cst: SubhutiCst): SlimeExpression;
+    createMemberExpressionAst(cst: SubhutiCst): SlimeExpression;
+    createBindingIdentifierAst(cst: SubhutiCst): SlimeIdentifier;
+    createBindingPatternAst(cst: SubhutiCst): SlimePattern;
+    createBindingRestElementAst(cst: SubhutiCst): SlimeRestElement;
+    createInitializerAst(cst: SubhutiCst): SlimeExpression;
 };
 
 /**

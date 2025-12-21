@@ -124,73 +124,113 @@ export class DeclarationCstToAst {
 
     /**
      * 创建 LexicalDeclaration 的 AST
+     * ES2025 LexicalDeclaration: LetOrConst BindingList ;
+     * BindingList: LexicalBinding (, LexicalBinding)*
+     * LexicalBinding: BindingIdentifier Initializer? | BindingPattern Initializer
      */
     static createLexicalDeclarationAst(cst: SubhutiCst, converter: SlimeCstToAstType): SlimeVariableDeclaration {
         SlimeCstToAstTools.checkCstName(cst, SlimeParser.prototype.LexicalDeclaration?.name);
 
-        // LexicalDeclaration: LetOrConst BindingList ;
-        const letOrConstCst = cst.children.find(ch =>
-            ch.name === SlimeParser.prototype.LetOrConst?.name || ch.name === 'LetOrConst'
-        )
-
+        const children = cst.children || []
+        let kind: string = 'const' // 默认值
         let kindToken: any = undefined
-        let kindValue = 'let'
-
-        if (letOrConstCst && letOrConstCst.children && letOrConstCst.children[0]) {
-            const kindCst = letOrConstCst.children[0]
-            kindValue = kindCst.value as string
-            if (kindValue === 'let') {
-                kindToken = SlimeTokenCreate.createLetToken(kindCst.loc)
-            } else if (kindValue === 'const') {
-                kindToken = SlimeTokenCreate.createConstToken(kindCst.loc)
-            }
-        }
-
-        // 收集所有 LexicalBinding
         const declarations: SlimeVariableDeclarator[] = []
-        for (const child of cst.children) {
-            if (child.name === SlimeParser.prototype.LexicalBinding?.name || child.name === 'LexicalBinding') {
+
+        for (const child of children) {
+            if (!child) continue
+            const name = child.name
+
+            // Skip tokens (semicolons, commas)
+            if (child.loc?.type === 'Semicolon' || child.value === ';' || child.value === ',') {
+                continue
+            }
+
+            // LetOrConst 规则
+            if (name === SlimeParser.prototype.LetOrConst?.name || name === 'LetOrConst') {
+                // 内部是 LetTok 或 ConstTok
+                if (child.children && child.children.length > 0) {
+                    const tokenCst = child.children[0]
+                    kind = tokenCst.value as string || 'const'
+                    if (kind === 'let') {
+                        kindToken = SlimeTokenCreate.createLetToken(tokenCst.loc)
+                    } else if (kind === 'const') {
+                        kindToken = SlimeTokenCreate.createConstToken(tokenCst.loc)
+                    }
+                }
+                continue
+            }
+
+            // 直接是 LetTok 或 ConstTok (ES2025 可能直接使用)
+            if (name === 'Let' || child.value === 'let') {
+                kind = 'let'
+                kindToken = SlimeTokenCreate.createLetToken(child.loc)
+                continue
+            }
+            if (name === 'Const' || child.value === 'const') {
+                kind = 'const'
+                kindToken = SlimeTokenCreate.createConstToken(child.loc)
+                continue
+            }
+
+            // Handle BindingList wrapper
+            if (name === 'BindingList' || name === SlimeParser.prototype.BindingList?.name) {
+                for (const binding of child.children || []) {
+                    if (binding.name === 'LexicalBinding' || binding.name === SlimeParser.prototype.LexicalBinding?.name) {
+                        declarations.push(DeclarationCstToAst.createLexicalBindingAst(binding, converter))
+                    }
+                    // Skip commas
+                    if (binding.value === ',') continue
+                }
+                continue
+            }
+
+            // Direct LexicalBinding
+            if (name === 'LexicalBinding' || name === SlimeParser.prototype.LexicalBinding?.name) {
                 declarations.push(DeclarationCstToAst.createLexicalBindingAst(child, converter))
             }
         }
 
-        return SlimeAstUtil.createVariableDeclaration(kindToken, declarations, cst.loc)
+        return {
+            type: SlimeNodeType.VariableDeclaration,
+            kind: kind as any,
+            declarations: declarations,
+            loc: cst.loc
+        } as any
     }
 
     /**
      * 创建 LexicalBinding 的 AST
+     * LexicalBinding: BindingIdentifier Initializer? | BindingPattern Initializer
      */
     static createLexicalBindingAst(cst: SubhutiCst, converter: SlimeCstToAstType): SlimeVariableDeclarator {
         SlimeCstToAstTools.checkCstName(cst, SlimeParser.prototype.LexicalBinding?.name);
 
-        const first = cst.children[0]
-        let id: SlimeIdentifier | SlimePattern
+        const children = cst.children || []
+
+        let id: SlimeIdentifier | SlimePattern | null = null
         let init: SlimeExpression | null = null
-        let eqToken: any = undefined
+        let assignToken: any = undefined
 
-        if (first.name === SlimeParser.prototype.BindingIdentifier?.name || first.name === 'BindingIdentifier') {
-            id = converter.createBindingIdentifierAst(first)
-        } else if (first.name === SlimeParser.prototype.BindingPattern?.name || first.name === 'BindingPattern') {
-            id = converter.createBindingPatternAst(first)
-        } else {
-            id = converter.createBindingIdentifierAst(first)
-        }
+        for (const child of children) {
+            if (!child) continue
 
-        // 检查 Initializer
-        if (cst.children.length > 1) {
-            const initCst = cst.children.find(ch =>
-                ch.name === SlimeParser.prototype.Initializer?.name || ch.name === 'Initializer'
-            )
-            if (initCst) {
-                const eqCst = initCst.children?.find((ch: any) => ch.name === 'Eq' || ch.value === '=')
-                if (eqCst) {
-                    eqToken = SlimeTokenCreate.createAssignToken(eqCst.loc)
+            const name = child.name
+            if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
+                id = converter.createBindingIdentifierAst(child)
+            } else if (name === SlimeParser.prototype.BindingPattern?.name || name === 'BindingPattern') {
+                id = converter.createBindingPatternAst(child)
+            } else if (name === SlimeParser.prototype.Initializer?.name || name === 'Initializer') {
+                // Initializer: = AssignmentExpression
+                // children[0] 是 Assign token，children[1] 是 AssignmentExpression
+                if (child.children && child.children[0]) {
+                    const assignCst = child.children[0]
+                    assignToken = SlimeTokenCreate.createAssignToken(assignCst.loc)
                 }
-                init = DeclarationCstToAst.createInitializerAst(initCst, converter)
+                init = DeclarationCstToAst.createInitializerAst(child, converter)
             }
         }
 
-        return SlimeAstUtil.createVariableDeclarator(id, eqToken, init, cst.loc)
+        return SlimeAstUtil.createVariableDeclarator(id!, assignToken, init, cst.loc)
     }
 
     /**
