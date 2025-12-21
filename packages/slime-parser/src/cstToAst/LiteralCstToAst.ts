@@ -40,6 +40,27 @@ export class LiteralCstToAst {
     // ==================== 字面量相关转换方法 ====================
 
     /**
+     * 从 token 创建字面量 AST
+     * 根据 token 类型创建对应的字面量节点
+     */
+    static createLiteralFromToken(token: any): SlimeExpression {
+        const tokenName = token.tokenName
+        if (tokenName === SlimeTokenConsumer.prototype.NullLiteral?.name) {
+            return SlimeAstUtil.createNullLiteralToken()
+        } else if (tokenName === SlimeTokenConsumer.prototype.True?.name) {
+            return SlimeAstUtil.createBooleanLiteral(true)
+        } else if (tokenName === SlimeTokenConsumer.prototype.False?.name) {
+            return SlimeAstUtil.createBooleanLiteral(false)
+        } else if (tokenName === SlimeTokenConsumer.prototype.NumericLiteral?.name) {
+            return SlimeAstUtil.createNumericLiteral(Number(token.tokenValue))
+        } else if (tokenName === SlimeTokenConsumer.prototype.StringLiteral?.name) {
+            return SlimeAstUtil.createStringLiteral(token.tokenValue)
+        } else {
+            throw new Error(`Unsupported literal token: ${tokenName}`)
+        }
+    }
+
+    /**
      * 布尔字面量 CST 转 AST
      * BooleanLiteral -> true | false
      */

@@ -66,7 +66,10 @@
     - _Requirements: 1.4, 3.1_
 
 - [x] 4. 提取字面量相关方法到 LiteralCstToAst
-  - [ ] 4.1 提取 createLiteralFromToken 方法
+  - [x] 4.1 提取 createLiteralFromToken 方法
+
+
+
     - _Requirements: 1.4, 3.1_
   - [x] 4.2 提取 createElementListAst 方法
     - _Requirements: 1.4, 3.1_
