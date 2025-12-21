@@ -396,9 +396,6 @@ export class SlimeCstToAst {
         throw new Error(`No conversion method found for CST node: ${name}`)
     }
 
-
-
-
     /**
      * 重置状态钩子方法
      *
@@ -485,8 +482,6 @@ export class SlimeCstToAst {
 
 
   }*/
-
-
 
     /**
      * [核心分发方法] 根据 CST 节点类型创建对应�?Statement/Declaration AST
@@ -1221,12 +1216,6 @@ export class SlimeCstToAst {
         return SlimeAstUtil.createRestElement(id as any)
     }
 
-
-
-
-
-
-
     /**
      * CaseBlock CST �?AST
      * CaseBlock -> { CaseClauses? DefaultClause? CaseClauses? }
@@ -1264,8 +1253,6 @@ export class SlimeCstToAst {
     createDefaultClauseAst(cst: SubhutiCst): any {
         return this.createSwitchCaseAst(cst)
     }
-
-
 
     /**
      * Catch CST �?CatchClause AST
@@ -1307,7 +1294,6 @@ export class SlimeCstToAst {
         // ASI 不产生实际的 AST 节点，返�?null
         return null
     }
-
 
     /**
      * ForBinding CST �?AST
@@ -1425,8 +1411,6 @@ export class SlimeCstToAst {
         return SlimeAstUtil.createSwitchCase(consequent, test, cst.loc, caseToken, defaultToken, colonToken)
     }
 
-
-
     /**
      * 从Block CST创建BlockStatement AST
      * Block: LBrace StatementList? RBrace
@@ -1457,8 +1441,6 @@ export class SlimeCstToAst {
         return SlimeAstUtil.createBlockStatement(statements, cst.loc, lBraceToken, rBraceToken)
     }
 
-
-
     /**
      * 创建 Finally 子句 AST
      */
@@ -1469,8 +1451,6 @@ export class SlimeCstToAst {
         const blockCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Block?.name)
         return blockCst ? this.createBlockAst(blockCst) : null
     }
-
-
 
     createSuperCallAst(cst: SubhutiCst): SlimeExpression {
         const astName = checkCstName(cst, SlimeParser.prototype.SuperCall?.name);
@@ -1608,7 +1588,6 @@ export class SlimeCstToAst {
         }
     }
 
-
     createMemberExpressionFirstOr(cst: SubhutiCst): SlimeExpression | SlimeSuper {
         if (cst.name === SlimeParser.prototype.PrimaryExpression?.name || cst.name === 'PrimaryExpression') {
             return this.createPrimaryExpressionAst(cst)
@@ -1626,10 +1605,6 @@ export class SlimeCstToAst {
             throw new Error('createMemberExpressionFirstOr: 不支持的类型: ' + cst.name)
         }
     }
-
-
-
-
 
     /**
      * CoalesceExpressionHead CST 转 AST
@@ -1672,8 +1647,6 @@ export class SlimeCstToAst {
         }
         throw new Error('ExpressionBody has no children')
     }
-
-
 
 
     /**
@@ -1763,7 +1736,6 @@ export class SlimeCstToAst {
 
         return result
     }
-
 
     // 模板字符串处�?
     createTemplateLiteralAst(cst: SubhutiCst): SlimeExpression {
@@ -2038,9 +2010,6 @@ export class SlimeCstToAst {
         throw new Error(`createLiteralPropertyNameAst: Unknown type: ${first.name}`)
     }
 
-
-
-
     createLiteralFromToken(token: any): SlimeExpression {
         const tokenName = token.tokenName
         if (tokenName === SlimeTokenConsumer.prototype.NullLiteral?.name) {
@@ -2142,9 +2111,6 @@ export class SlimeCstToAst {
             ellipsisToken
         )
     }
-
-
-
 
     /**
      * 创建箭头函数�?AST
