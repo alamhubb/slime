@@ -1,7 +1,7 @@
-export * from './language/SlimeCstToAstUtil.ts'
-export { default as SlimeParser } from './language/es2025/SlimeParser.ts'
-export * from './language/es2025/SlimeParser.ts'
-export { default as SlimeTokenConsumer } from './language/es2025/SlimeTokenConsumer.ts'
-export * from './language/es2025/SlimeTokenConsumer.ts'
-export * from './language/es2025/SlimeTokens.ts'
+export * from './SlimeCstToAstUtil.ts'
+export { default as SlimeParser } from './SlimeParser.ts'
+export * from './SlimeParser.ts'
+export { default as SlimeTokenConsumer } from './SlimeTokenConsumer.ts'
+export * from './SlimeTokenConsumer.ts'
+export * from './SlimeTokens.ts'
 
