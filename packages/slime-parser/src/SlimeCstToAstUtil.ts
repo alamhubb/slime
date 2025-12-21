@@ -78,6 +78,8 @@ import { PrimaryExpressionCstToAst } from "./cstToAst/converters/expression/Prim
 import { ControlFlowCstToAst } from "./cstToAst/converters/statement/ControlFlowCstToAst.ts";
 import { OtherStatementCstToAst } from "./cstToAst/converters/statement/OtherStatementCstToAst.ts";
 import { ParametersCstToAst } from "./cstToAst/converters/function/ParametersCstToAst.ts";
+import { FunctionExpressionCstToAst } from "./cstToAst/converters/function/FunctionExpressionCstToAst.ts";
+import { ArrowFunctionCstToAst } from "./cstToAst/converters/function/ArrowFunctionCstToAst.ts";
 
 
 // ============================================
@@ -2526,60 +2528,11 @@ export class SlimeCstToAst {
     }
 
     createFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
-        // FunctionBody: FunctionStatementList | StatementList
-        // GeneratorBody, AsyncFunctionBody, AsyncGeneratorBody 都包�?FunctionBody
-        const children = cst.children || []
-
-        if (children.length === 0) {
-            return []
-        }
-
-        const first = children[0]
-        if (!first) {
-            return []
-        }
-
-        const name = first.name
-
-        // Handle nested FunctionBody (from GeneratorBody, AsyncFunctionBody, AsyncGeneratorBody)
-        if (name === 'FunctionBody' || name === SlimeParser.prototype.FunctionBody?.name) {
-            return this.createFunctionBodyAst(first)
-        }
-
-        // Handle FunctionStatementList (ES2025)
-        if (name === 'FunctionStatementList' || name === SlimeParser.prototype.FunctionStatementList?.name) {
-            return this.createFunctionStatementListAst(first)
-        }
-
-        // Handle StatementList (legacy)
-        if (name === 'StatementList' || name === SlimeParser.prototype.StatementList?.name) {
-            return this.createStatementListAst(first)
-        }
-
-        // If the first child is a statement directly, process it
-        return this.createStatementListAst(first)
+        return FunctionExpressionCstToAst.createFunctionBodyAst(cst, this)
     }
 
     createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
-        // FunctionStatementList: StatementList?
-        const children = cst.children || []
-
-        if (children.length === 0) {
-            return []
-        }
-
-        const first = children[0]
-        if (!first) {
-            return []
-        }
-
-        // If child is StatementList, process it
-        if (first.name === 'StatementList' || first.name === SlimeParser.prototype.StatementList?.name) {
-            return this.createStatementListAst(first)
-        }
-
-        // If child is a statement directly
-        return this.createStatementListItemAst(first)
+        return FunctionExpressionCstToAst.createFunctionStatementListAst(cst, this)
     }
 
     /**
@@ -3997,90 +3950,7 @@ export class SlimeCstToAst {
     }
 
     createFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.FunctionExpression?.name);
-        // Es2025Parser FunctionExpression 结构
-
-        let isAsync = false;
-        let isGenerator = false;
-        let functionId: SlimeIdentifier | null = null
-        let params: SlimeFunctionParam[] = []
-        let body: SlimeBlockStatement
-
-        // Token fields
-        let functionToken: any = undefined
-        let asyncToken: any = undefined
-        let asteriskToken: any = undefined
-        let lParenToken: any = undefined
-        let rParenToken: any = undefined
-        let lBraceToken: any = undefined
-        let rBraceToken: any = undefined
-
-        for (const child of cst.children || []) {
-            if (!child) continue
-            const name = child.name
-            const value = child.value
-
-            if (name === 'Function' || value === 'function') {
-                functionToken = SlimeTokenCreate.createFunctionToken(child.loc)
-                continue
-            }
-            if (name === 'Async' || value === 'async') {
-                asyncToken = SlimeTokenCreate.createAsyncToken(child.loc)
-                isAsync = true
-                continue
-            }
-            if (name === 'Asterisk' || value === '*') {
-                asteriskToken = SlimeTokenCreate.createAsteriskToken(child.loc)
-                isGenerator = true
-                continue
-            }
-            if (name === 'LParen' || value === '(') {
-                lParenToken = SlimeTokenCreate.createLParenToken(child.loc)
-                continue
-            }
-            if (name === 'RParen' || value === ')') {
-                rParenToken = SlimeTokenCreate.createRParenToken(child.loc)
-                continue
-            }
-            if (name === 'LBrace' || value === '{') {
-                lBraceToken = SlimeTokenCreate.createLBraceToken(child.loc)
-                continue
-            }
-            if (name === 'RBrace' || value === '}') {
-                rBraceToken = SlimeTokenCreate.createRBraceToken(child.loc)
-                continue
-            }
-
-            // BindingIdentifier（命名函数表达式�?
-            if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
-                functionId = this.createBindingIdentifierAst(child)
-                continue
-            }
-
-            // FormalParameters - 使用包装类型
-            if (name === SlimeParser.prototype.FormalParameters?.name || name === 'FormalParameters') {
-                params = this.createFormalParametersAstWrapped(child)
-                continue
-            }
-
-            // FunctionBody
-            if (name === SlimeParser.prototype.FunctionBody?.name || name === 'FunctionBody') {
-                const bodyStatements = this.createFunctionBodyAst(child)
-                body = SlimeAstUtil.createBlockStatement(bodyStatements, child.loc)
-                continue
-            }
-        }
-
-        // 空函数体
-        if (!body!) {
-            body = SlimeAstUtil.createBlockStatement([])
-        }
-
-        return SlimeAstUtil.createFunctionExpression(
-            body, functionId, params, isGenerator, isAsync, cst.loc,
-            functionToken, asyncToken, asteriskToken, lParenToken, rParenToken,
-            lBraceToken, rBraceToken
-        )
+        return FunctionExpressionCstToAst.createFunctionExpressionAst(cst, this)
     }
 
     /**
@@ -6784,96 +6654,14 @@ export class SlimeCstToAst {
      * 创建箭头函数参数 AST
      */
     createArrowParametersAst(cst: SubhutiCst): SlimePattern[] {
-        checkCstName(cst, SlimeParser.prototype.ArrowParameters?.name);
-
-        // ArrowParameters 可以是多种形式，这里简化处�?
-        if (cst.children.length === 0) {
-            return []
-        }
-
-        const first = cst.children[0]
-
-        // 单个参数：BindingIdentifier
-        if (first.name === SlimeParser.prototype.BindingIdentifier?.name) {
-            const param = this.createBindingIdentifierAst(first)
-            return [param]
-        }
-
-        // CoverParenthesizedExpressionAndArrowParameterList: 括号参数
-        if (first.name === SlimeParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name) {
-            return this.createArrowParametersFromCoverGrammar(first)
-        }
-
-        // 参数列表�? FormalParameterList )
-        if (first.name === SlimeTokenConsumer.prototype.LParen?.name) {
-            // 查找 FormalParameterList
-            const formalParameterListCst = cst.children.find(
-                child => child.name === SlimeParser.prototype.FormalParameterList?.name
-            )
-            if (formalParameterListCst) {
-                return this.createFormalParameterListAst(formalParameterListCst)
-            }
-            return []
-        }
-
-        return []
+        return ArrowFunctionCstToAst.createArrowParametersAst(cst, this)
     }
 
     /**
-     * 创建箭头函数�?AST
+     * 创建箭头函数体 AST
      */
     createConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
-        // 防御性检�?
-        if (!cst) {
-            throw new Error('createConciseBodyAst: cst is null or undefined')
-        }
-
-        // 支持 ConciseBody �?AsyncConciseBody
-        const validNames = [
-            SlimeParser.prototype.ConciseBody?.name,
-            'ConciseBody',
-            'AsyncConciseBody'
-        ]
-        if (!validNames.includes(cst.name)) {
-            throw new Error(`createConciseBodyAst: 期望 ConciseBody �?AsyncConciseBody，实�?${cst.name}`)
-        }
-
-        const first = cst.children[0]
-
-        // Es2025Parser: { FunctionBody } 格式
-        // children: [LBrace, FunctionBody/AsyncFunctionBody, RBrace]
-        if (first.name === 'LBrace') {
-            // 找到 FunctionBody �?AsyncFunctionBody
-            const functionBodyCst = cst.children.find(child =>
-                child.name === 'FunctionBody' || child.name === SlimeParser.prototype.FunctionBody?.name ||
-                child.name === 'AsyncFunctionBody' || child.name === SlimeParser.prototype.AsyncFunctionBody?.name
-            )
-            if (functionBodyCst) {
-                const bodyStatements = this.createFunctionBodyAst(functionBodyCst)
-                return SlimeAstUtil.createBlockStatement(bodyStatements, cst.loc)
-            }
-            // 空函数体
-            return SlimeAstUtil.createBlockStatement([], cst.loc)
-        }
-
-        // 否则是表达式，解析为表达�?
-        if (first.name === SlimeParser.prototype.AssignmentExpression?.name || first.name === 'AssignmentExpression') {
-            return this.createAssignmentExpressionAst(first)
-        }
-
-        // Es2025Parser: ExpressionBody 类型
-        if (first.name === 'ExpressionBody') {
-            // ExpressionBody 内部包含 AssignmentExpression
-            const innerExpr = first.children[0]
-            if (innerExpr) {
-                if (innerExpr.name === 'AssignmentExpression' || innerExpr.name === SlimeParser.prototype.AssignmentExpression?.name) {
-                    return this.createAssignmentExpressionAst(innerExpr)
-                }
-                return this.createExpressionAst(innerExpr)
-            }
-        }
-
-        return this.createExpressionAst(first)
+        return ArrowFunctionCstToAst.createConciseBodyAst(cst, this)
     }
 
     createConditionalExpressionAst(cst: SubhutiCst): SlimeExpression {
