@@ -97,30 +97,8 @@ import {
 
 // ============================================
 // Unicode 转义序列解码
-// ES2025 规范 12.9.4 - ?\uXXXX ?\u{XXXXX} 转换为实际字?
-// 参考实现：Babel、Acorn、TypeScript
+// 已迁移到 CstToAstContext.decodeUnicodeEscapes
 // ============================================
-
-/**
- * ?Unicode 转义序列解码为实际字?
- * 支持 \uXXXX ?\u{XXXXX} 格式
- *
- * @param str 可能包含 Unicode 转义的字符串
- * @returns 解码后的字符?
- */
-function decodeUnicodeEscapes(str: string | undefined): string {
-    // 如果为空或不包含转义序列，直接返回（性能优化?
-    if (!str || !str.includes('\\u')) {
-        return str || ''
-    }
-
-    return str.replace(/\\u\{([0-9a-fA-F]+)\}|\\u([0-9a-fA-F]{4})/g,
-        (match, braceCode, fourDigitCode) => {
-            const codePoint = parseInt(braceCode || fourDigitCode, 16)
-            return String.fromCodePoint(codePoint)
-        }
-    )
-}
 
 export function throwNewError(errorMsg: string = 'syntax error') {
     throw new Error(errorMsg)
@@ -424,81 +402,10 @@ export class SlimeCstToAst {
 
     /**
      * 重置状态钩子方法
-     *
      * [入口方法] 将顶层 CST 转换为 Program AST
-     *
-     * 存在必要性：这是外部调用的主入口，支持 Module、Script、Program 多种顶层 CST
-     *
-     * 注意：子类如需重置状态，应重写此方法，先调用自己的 resetState()，再调用 super.toProgram()
      */
     toProgram(cst: SubhutiCst): SlimeProgram {
-        // Support both Module and Script entry points
-        const isModule = cst.name === SlimeParser.prototype.Module?.name || cst.name === 'Module'
-        const isScript = cst.name === SlimeParser.prototype.Script?.name || cst.name === 'Script'
-        const isProgram = cst.name === SlimeParser.prototype.Program?.name || cst.name === 'Program'
-
-        if (!isModule && !isScript && !isProgram) {
-            throw new Error(`Expected CST name 'Module', 'Script' or 'Program', but got '${cst.name}'`)
-        }
-
-        let program: SlimeProgram
-        let hashbangComment: string | null = null
-
-        // If children is empty, return empty program
-        if (!cst.children || cst.children.length === 0) {
-            return SlimeAstUtil.createProgram([], isModule ? 'module' : 'script')
-        }
-
-        // 遍历子节点，处理 HashbangComment 和主体内�?
-        let bodyChild: SubhutiCst | null = null
-        for (const child of cst.children) {
-            if (child.name === 'HashbangComment') {
-                // 提取 Hashbang 注释的�?
-                hashbangComment = child.value || child.children?.[0]?.value || null
-            } else if (child.name === 'ModuleBody' || child.name === 'ScriptBody' ||
-                child.name === 'ModuleItemList' || child.name === SlimeParser.prototype.ModuleItemList?.name ||
-                child.name === 'StatementList' || child.name === SlimeParser.prototype.StatementList?.name) {
-                bodyChild = child
-            }
-        }
-
-        // 处理主体内容
-        if (bodyChild) {
-            if (bodyChild.name === 'ModuleBody') {
-                const moduleItemList = bodyChild.children?.[0]
-                if (moduleItemList && (moduleItemList.name === 'ModuleItemList' || moduleItemList.name === SlimeParser.prototype.ModuleItemList?.name)) {
-                    const body = ModuleCstToAst.createModuleItemListAst(moduleItemList)
-                    program = SlimeAstUtil.createProgram(body, 'module')
-                } else {
-                    program = SlimeAstUtil.createProgram([], 'module')
-                }
-            } else if (bodyChild.name === SlimeParser.prototype.ModuleItemList?.name || bodyChild.name === 'ModuleItemList') {
-                const body = ModuleCstToAst.createModuleItemListAst(bodyChild)
-                program = SlimeAstUtil.createProgram(body, 'module')
-            } else if (bodyChild.name === 'ScriptBody') {
-                const statementList = bodyChild.children?.[0]
-                if (statementList && (statementList.name === 'StatementList' || statementList.name === SlimeParser.prototype.StatementList?.name)) {
-                    const body = StatementCstToAst.createStatementListAst(statementList)
-                    program = SlimeAstUtil.createProgram(body, 'script')
-                } else {
-                    program = SlimeAstUtil.createProgram([], 'script')
-                }
-            } else if (bodyChild.name === SlimeParser.prototype.StatementList?.name || bodyChild.name === 'StatementList') {
-                const body = StatementCstToAst.createStatementListAst(bodyChild)
-                program = SlimeAstUtil.createProgram(body, 'script')
-            } else {
-                throw new Error(`Unexpected body child: ${bodyChild.name}`)
-            }
-        } else {
-            // 没有主体内容（可能只�?HashbangComment�?
-            program = SlimeAstUtil.createProgram([], isModule ? 'module' : 'script')
-        }
-
-        // 设置 hashbang 注释（如果存在）
-        if (hashbangComment) {
-            (program as any).hashbang = hashbangComment
-        }
-
+        const program = ModuleCstToAst.createProgramAst(cst)
         program.loc = cst.loc
         return program
     }

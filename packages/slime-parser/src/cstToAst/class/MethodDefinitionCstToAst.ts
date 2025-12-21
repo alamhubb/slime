@@ -11,6 +11,7 @@ import SlimeParser from "../../SlimeParser";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer";
 import { checkCstName, getUtil } from "../core/CstToAstContext";
 import { AccessorMethodCstToAst } from "./AccessorMethodCstToAst";
+import { ClassElementNameCstToAst } from "./ClassElementNameCstToAst";
 
 // 直接使用 ObjectLiteralCstToAst.createClassElementNameAst
 
@@ -29,38 +30,12 @@ export class MethodDefinitionCstToAst {
 
     // ==================== 核心方法 ====================
 
-    /**
-     * 检查 CST 节点是否表示 static 修饰符
-     */
     static isStaticModifier(cst: SubhutiCst | null): boolean {
-        if (!cst) return false
-        if (cst.name === SlimeTokenConsumer.prototype.Static?.name || cst.name === 'Static') {
-            return true
-        }
-        if ((cst.name === 'IdentifierName') && cst.value === 'static') {
-            return true
-        }
-        return false
+        return ClassElementNameCstToAst.isStaticModifier(cst)
     }
 
-    /**
-     * 检查是否是计算属性名
-     */
     static isComputedPropertyName(cst: SubhutiCst): boolean {
-        if (!cst || !cst.children) return false
-        const first = cst.children[0]
-        if (first?.name === SlimeParser.prototype.ComputedPropertyName?.name ||
-            first?.name === 'ComputedPropertyName') {
-            return true
-        }
-        if (first?.name === SlimeParser.prototype.PropertyName?.name ||
-            first?.name === 'PropertyName') {
-            return MethodDefinitionCstToAst.isComputedPropertyName(first)
-        }
-        if (first?.name === 'LBracket' || first?.value === '[') {
-            return true
-        }
-        return false
+        return ClassElementNameCstToAst.isComputedPropertyName(cst)
     }
 
     /**
@@ -132,9 +107,6 @@ export class MethodDefinitionCstToAst {
         return MethodDefinitionCstToAst.createMethodFromClassElementName(staticCst, cst)
     }
 
-    /**
-     * 从 async 开头的 children 创建方法
-     */
     static createAsyncMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         const children = cst.children || []
         if (children[1]?.name === 'Asterisk' || children[1]?.value === '*') {
@@ -143,9 +115,6 @@ export class MethodDefinitionCstToAst {
         return MethodDefinitionCstToAst.createAsyncMethodAst(staticCst, cst)
     }
 
-    /**
-     * 从直接的标识符创建方法定义
-     */
     static createMethodFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         let i = 0
         const children = cst.children

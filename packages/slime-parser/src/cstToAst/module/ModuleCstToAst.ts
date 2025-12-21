@@ -56,15 +56,57 @@ export class ModuleCstToAst {
     }
 
     static createProgramAst(cst: SubhutiCst): SlimeProgram {
-        const firstChild = cst.children?.[0]
-        if (firstChild) {
-            if (firstChild.name === 'Script' || firstChild.name === SlimeParser.prototype.Script?.name) {
-                return ModuleCstToAst.createScriptAst(firstChild)
-            } else if (firstChild.name === 'Module' || firstChild.name === SlimeParser.prototype.Module?.name) {
-                return ModuleCstToAst.createModuleAst(firstChild)
+        // Support both Module and Script entry points
+        const isModule = cst.name === SlimeParser.prototype.Module?.name || cst.name === 'Module'
+        const isScript = cst.name === SlimeParser.prototype.Script?.name || cst.name === 'Script'
+        const isProgram = cst.name === SlimeParser.prototype.Program?.name || cst.name === 'Program'
+
+        if (!isModule && !isScript && !isProgram) {
+            // 尝试检查第一个子节点
+            const firstChild = cst.children?.[0]
+            if (firstChild) {
+                if (firstChild.name === 'Script' || firstChild.name === SlimeParser.prototype.Script?.name) {
+                    return ModuleCstToAst.createScriptAst(firstChild)
+                } else if (firstChild.name === 'Module' || firstChild.name === SlimeParser.prototype.Module?.name) {
+                    return ModuleCstToAst.createModuleAst(firstChild)
+                }
+            }
+            throw new Error(`Expected CST name 'Module', 'Script' or 'Program', but got '${cst.name}'`)
+        }
+
+        let hashbangComment: string | null = null
+        let bodyChild: SubhutiCst | null = null
+
+        // 遍历子节点，处理 HashbangComment 和主体内容
+        for (const child of cst.children || []) {
+            if (child.name === 'HashbangComment') {
+                hashbangComment = child.value || child.children?.[0]?.value || null
+            } else if (child.name === 'ModuleBody' || child.name === 'ScriptBody' ||
+                child.name === 'ModuleItemList' || child.name === SlimeParser.prototype.ModuleItemList?.name ||
+                child.name === 'StatementList' || child.name === SlimeParser.prototype.StatementList?.name) {
+                bodyChild = child
             }
         }
-        return getUtil().toProgram(cst)
+
+        let program: SlimeProgram
+        if (bodyChild) {
+            if (bodyChild.name === 'ModuleBody' || isModule) {
+                const moduleItemList = bodyChild.name === 'ModuleBody' ? bodyChild.children?.[0] : bodyChild
+                const body = (moduleItemList && (moduleItemList.name === 'ModuleItemList' || moduleItemList.name === SlimeParser.prototype.ModuleItemList?.name))
+                    ? ModuleCstToAst.createModuleItemListAst(moduleItemList)
+                    : ModuleCstToAst.createModuleItemListAst(bodyChild)
+                program = SlimeAstUtil.createProgram(body, 'module')
+            } else {
+                const body = getUtil().createStatementListAst(bodyChild)
+                program = SlimeAstUtil.createProgram(body, 'script')
+            }
+        } else {
+            program = SlimeAstUtil.createProgram([], isModule ? 'module' : 'script')
+        }
+
+        // TODO: 完善 SlimeAstUtil.createProgram 以支持 hashbang
+        // program.hashbang = hashbangComment
+        return program
     }
 
     static createScriptAst(cst: SubhutiCst): SlimeProgram {
