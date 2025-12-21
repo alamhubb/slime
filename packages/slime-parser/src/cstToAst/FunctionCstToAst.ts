@@ -869,3 +869,60 @@ export class FunctionCstToAst {
             lBraceToken, rBraceToken
         )
     }
+
+
+    /**
+     * 创建 AsyncGeneratorExpression 的 AST
+     */
+    static createAsyncGeneratorExpressionAst(cst: SubhutiCst, converter: SlimeCstToAstType): SlimeFunctionExpression {
+        SlimeCstToAstTools.checkCstName(cst, SlimeParser.prototype.AsyncGeneratorExpression?.name);
+
+        let functionName: SlimeIdentifier | null = null
+        let params: SlimeFunctionParam[] = []
+        let body: SlimeBlockStatement = SlimeAstUtil.createBlockStatement([])
+
+        let functionToken: any = undefined
+        let asyncToken: any = undefined
+        let asteriskToken: any = undefined
+        let lParenToken: any = undefined
+        let rParenToken: any = undefined
+        let lBraceToken: any = undefined
+        let rBraceToken: any = undefined
+
+        for (const child of cst.children || []) {
+            if (!child) continue
+            const name = child.name
+            const value = child.value
+
+            if (name === 'Function' || value === 'function') {
+                functionToken = SlimeTokenCreate.createFunctionToken(child.loc)
+            } else if (name === 'Async' || value === 'async') {
+                asyncToken = SlimeTokenCreate.createAsyncToken(child.loc)
+            } else if (name === 'Asterisk' || value === '*') {
+                asteriskToken = SlimeTokenCreate.createAsteriskToken(child.loc)
+            } else if (name === 'LParen' || value === '(') {
+                lParenToken = SlimeTokenCreate.createLParenToken(child.loc)
+            } else if (name === 'RParen' || value === ')') {
+                rParenToken = SlimeTokenCreate.createRParenToken(child.loc)
+            } else if (name === 'LBrace' || value === '{') {
+                lBraceToken = SlimeTokenCreate.createLBraceToken(child.loc)
+            } else if (name === 'RBrace' || value === '}') {
+                rBraceToken = SlimeTokenCreate.createRBraceToken(child.loc)
+            } else if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
+                functionName = converter.createBindingIdentifierAst(child)
+            } else if (name === SlimeParser.prototype.FormalParameters?.name || name === 'FormalParameters') {
+                params = FunctionCstToAst.createFormalParametersAstWrapped(child, converter)
+            } else if (name === SlimeParser.prototype.AsyncGeneratorBody?.name || name === 'AsyncGeneratorBody' ||
+                       name === SlimeParser.prototype.FunctionBody?.name || name === 'FunctionBody') {
+                const statements = FunctionCstToAst.createFunctionBodyAst(child, converter)
+                body = SlimeAstUtil.createBlockStatement(statements, child.loc)
+            }
+        }
+
+        return SlimeAstUtil.createFunctionExpression(
+            functionName, params, body, true, true, cst.loc,
+            functionToken, asyncToken, asteriskToken, lParenToken, rParenToken,
+            lBraceToken, rBraceToken
+        )
+    }
+}
