@@ -4,7 +4,7 @@ import {
     type SlimeClassBody, SlimeClassDeclaration, type SlimeExpression, type SlimeFunctionExpression, SlimeIdentifier,
     type SlimeLiteral,
     type SlimeMethodDefinition, SlimeNodeType, type SlimePattern,
-    type SlimeProperty, type SlimeStatement, SlimeTokenCreate
+    type SlimeProperty, type SlimeStatement, type SlimeSuper, SlimeTokenCreate
 } from "slime-ast";
 import SlimeParser from "../SlimeParser.ts";
 import {checkCstName} from "../SlimeCstToAstUtil.ts";
@@ -1135,5 +1135,53 @@ export class ClassCstToAst {
 
         return methodDef
     }
+
+
+
+    /**
+     * 内部辅助方法：创建 MethodDefinition AST
+     */
+    private createMethodDefinitionAstInternal(cst: SubhutiCst, kind: 'method' | 'get' | 'set', generator: boolean, async: boolean): SlimeMethodDefinition {
+        // 查找属性名
+        const classElementName = cst.children?.find(ch =>
+            ch.name === SlimeParser.prototype.ClassElementName?.name ||
+            ch.name === 'ClassElementName' ||
+            ch.name === SlimeParser.prototype.PropertyName?.name ||
+            ch.name === 'PropertyName'
+        )
+
+        const key = classElementName ? this.createClassElementNameAst(classElementName) : null
+
+        // 查找参数
+        const formalParams = cst.children?.find(ch =>
+            ch.name === SlimeParser.prototype.UniqueFormalParameters?.name ||
+            ch.name === 'UniqueFormalParameters' ||
+            ch.name === SlimeParser.prototype.FormalParameters?.name ||
+            ch.name === 'FormalParameters'
+        )
+        const params = formalParams ? this.createFormalParametersAst(formalParams) : []
+
+        // 查找函数�?
+        const bodyNode = cst.children?.find(ch =>
+            ch.name === 'GeneratorBody' || ch.name === 'AsyncFunctionBody' ||
+            ch.name === 'AsyncGeneratorBody' || ch.name === 'FunctionBody' ||
+            ch.name === SlimeParser.prototype.FunctionBody?.name
+        )
+        const bodyStatements = bodyNode ? this.createFunctionBodyAst(bodyNode) : []
+        const body = SlimeAstUtil.createBlockStatement(bodyStatements, bodyNode?.loc)
+
+        const value: SlimeFunctionExpression = {
+            type: SlimeNodeType.FunctionExpression,
+            id: null,
+            params: params as any,
+            body: body,
+            generator: generator,
+            async: async,
+            loc: cst.loc
+        } as any
+
+        return SlimeAstUtil.createMethodDefinition(key, value, kind, false, false, cst.loc)
+    }
+
 
 }

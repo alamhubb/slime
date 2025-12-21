@@ -456,4 +456,92 @@ export class DeclarationCstToAst {
         variableDeclarator.loc = cst.loc
         return variableDeclarator
     }
+
+    createDeclarationAst(cst: SubhutiCst): SlimeDeclaration {
+        // Support both Declaration wrapper and direct types
+        const first = cst.name === SlimeParser.prototype.Declaration?.name || cst.name === 'Declaration'
+            ? cst.children[0]
+            : cst
+
+        const name = first.name
+
+        if (name === SlimeParser.prototype.VariableDeclaration?.name || name === 'VariableDeclaration') {
+            return this.createVariableDeclarationAst(first);
+        } else if (name === SlimeParser.prototype.LexicalDeclaration?.name || name === 'LexicalDeclaration') {
+            // LexicalDeclaration: let/const declarations
+            return this.createLexicalDeclarationAst(first);
+        } else if (name === SlimeParser.prototype.ClassDeclaration?.name || name === 'ClassDeclaration') {
+            return this.createClassDeclarationAst(first);
+        } else if (name === SlimeParser.prototype.FunctionDeclaration?.name || name === 'FunctionDeclaration') {
+            return this.createFunctionDeclarationAst(first);
+        } else if (name === SlimeParser.prototype.HoistableDeclaration?.name || name === 'HoistableDeclaration') {
+            return this.createHoistableDeclarationAst(first);
+        } else {
+            throw new Error(`Unsupported Declaration type: ${name}`)
+        }
+    }
+
+    createLexicalDeclarationAst(cst: SubhutiCst): SlimeVariableDeclaration {
+        // ES2025 LexicalDeclaration: LetOrConst BindingList ;
+        // BindingList: LexicalBinding (, LexicalBinding)*
+        // LexicalBinding: BindingIdentifier Initializer? | BindingPattern Initializer
+
+        const children = cst.children || []
+        let kind: string = 'const' // 默认�?
+        const declarations: any[] = []
+
+        for (const child of children) {
+            if (!child) continue
+            const name = child.name
+
+            // Skip tokens (semicolons, commas)
+            if (child.loc?.type === 'Semicolon' || child.value === ';' || child.value === ',') {
+                continue
+            }
+
+            // LetOrConst 规则
+            if (name === SlimeParser.prototype.LetOrConst?.name || name === 'LetOrConst') {
+                // 内部�?LetTok �?ConstTok
+                if (child.children && child.children.length > 0) {
+                    const tokenCst = child.children[0]
+                    kind = tokenCst.value as string || 'const'
+                }
+                continue
+            }
+
+            // 直接�?LetTok �?ConstTok (ES2025 可能直接使用)
+            if (name === 'Let' || child.value === 'let') {
+                kind = 'let'
+                continue
+            }
+            if (name === 'Const' || child.value === 'const') {
+                kind = 'const'
+                continue
+            }
+
+            // Handle BindingList wrapper
+            if (name === 'BindingList' || name === SlimeParser.prototype.BindingList?.name) {
+                for (const binding of child.children || []) {
+                    if (binding.name === 'LexicalBinding' || binding.name === SlimeParser.prototype.LexicalBinding?.name) {
+                        declarations.push(this.createLexicalBindingAst(binding))
+                    }
+                    // Skip commas
+                    if (binding.value === ',') continue
+                }
+                continue
+            }
+
+            // Direct LexicalBinding
+            if (name === 'LexicalBinding' || name === SlimeParser.prototype.LexicalBinding?.name) {
+                declarations.push(this.createLexicalBindingAst(child))
+            }
+        }
+
+        return {
+            type: SlimeNodeType.VariableDeclaration,
+            kind: kind as any,
+            declarations: declarations,
+            loc: cst.loc
+        } as any
+    }
 }

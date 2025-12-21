@@ -1351,4 +1351,60 @@ export class ExpressionCstToAst {
         return SlimeAstUtil.createAwaitExpression(argument, cst.loc, awaitToken)
     }
 
+
+    /**
+     * AssignmentPropertyList CST �?AST
+     */
+    createAssignmentPropertyListAst(cst: SubhutiCst): any[] {
+        const properties: any[] = []
+        for (const child of cst.children || []) {
+            if (child.name === SlimeParser.prototype.AssignmentProperty?.name ||
+                child.name === 'AssignmentProperty') {
+                properties.push(this.createAssignmentPropertyAst(child))
+            }
+        }
+        return properties
+    }
+
+    /**
+     * AssignmentProperty CST �?AST
+     */
+    createAssignmentPropertyAst(cst: SubhutiCst): any {
+        return this.createBindingPropertyAst(cst)
+    }
+
+    /**
+     * AssignmentElementList CST �?AST
+     */
+    createAssignmentElementListAst(cst: SubhutiCst): any[] {
+        return this.createBindingElementListAst(cst)
+    }
+
+    /**
+     * AssignmentElement CST �?AST
+     */
+    createAssignmentElementAst(cst: SubhutiCst): any {
+        return this.createBindingElementAst(cst)
+    }
+
+    /**
+     * AssignmentElisionElement CST �?AST
+     */
+    createAssignmentElisionElementAst(cst: SubhutiCst): any {
+        return this.createBindingElisionElementAst(cst)
+    }
+
+    /**
+     * AssignmentRestElement CST �?AST
+     */
+    createAssignmentRestElementAst(cst: SubhutiCst): any {
+        return this.createBindingRestElementAst(cst)
+    }
+
+    /**
+     * AssignmentRestProperty CST �?AST
+     */
+    createAssignmentRestPropertyAst(cst: SubhutiCst): any {
+        return this.createBindingRestPropertyAst(cst)
+    }
 }

@@ -939,4 +939,66 @@ export class StatementCstToAst {
         }
         throw new Error('IterationStatement has no children')
     }
+
+    createStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
+        const astName = checkCstName(cst, SlimeParser.prototype.StatementList?.name);
+        if (cst.children) {
+            const statements = cst.children.map(item => this.createStatementListItemAst(item)).flat()
+            return statements
+        }
+        return []
+    }
+
+    createStatementListItemAst(cst: SubhutiCst): Array<SlimeStatement> {
+        const astName = checkCstName(cst, SlimeParser.prototype.StatementListItem?.name);
+        const statements = cst.children.map(item => {
+            // 如果�?Declaration，直接处�?
+            if (item.name === SlimeParser.prototype.Declaration?.name) {
+                return [this.createDeclarationAst(item) as any]
+            }
+
+            // 如果�?Statement，需要特殊处�?FunctionExpression �?ClassExpression
+            const statement = this.createStatementAst(item)
+            const result = statement.flat()
+
+            // 检查是否是命名�?FunctionExpression �?ClassExpression（应该转�?Declaration�?
+            return result.map(stmt => {
+                if (stmt.type === SlimeNodeType.ExpressionStatement) {
+                    const expr = (stmt as SlimeExpressionStatement).expression
+
+                    // 命名�?FunctionExpression �?FunctionDeclaration
+                    if (expr.type === SlimeNodeType.FunctionExpression) {
+                        const funcExpr = expr as SlimeFunctionExpression
+                        if (funcExpr.id) {
+                            return {
+                                type: SlimeNodeType.FunctionDeclaration,
+                                id: funcExpr.id,
+                                params: funcExpr.params,
+                                body: funcExpr.body,
+                                generator: funcExpr.generator,
+                                async: funcExpr.async,
+                                loc: funcExpr.loc
+                            } as SlimeFunctionDeclaration
+                        }
+                    }
+
+                    // ClassExpression �?ClassDeclaration
+                    if (expr.type === SlimeNodeType.ClassExpression) {
+                        const classExpr = expr as any
+                        if (classExpr.id) {
+                            return {
+                                type: SlimeNodeType.ClassDeclaration,
+                                id: classExpr.id,
+                                superClass: classExpr.superClass,
+                                body: classExpr.body,
+                                loc: classExpr.loc
+                            } as any
+                        }
+                    }
+                }
+                return stmt
+            })
+        }).flat()
+        return statements
+    }
 }

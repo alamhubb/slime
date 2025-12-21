@@ -8,7 +8,8 @@ import {
     type SlimePattern,
     type SlimeRestElement,
     type SlimeFunctionParam, type SlimeMethodDefinition, type SlimeObjectPattern, type SlimeObjectPatternProperty,
-    type SlimeAssignmentProperty, type SlimeArrayPattern, type SlimeArrayPatternElement,
+    type SlimeAssignmentProperty, type SlimeArrayPattern, type SlimeArrayPatternElement, type SlimeStatement,
+    type SlimeCallArgument, type SlimeSuper,
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeTokenCreate, SlimeNodeType } from "slime-ast";
@@ -465,6 +466,726 @@ export class FunctionCstToAst {
         }
 
         return basePattern
+    }
+
+
+
+    // ==================== 函数/类相关转换方�?====================
+
+    /**
+     * GeneratorMethod CST �?AST
+     * GeneratorMethod -> * ClassElementName ( UniqueFormalParameters ) { GeneratorBody }
+     */
+    createGeneratorMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
+        return this.createMethodDefinitionAstInternal(cst, 'method', true, false)
+    }
+
+    /**
+     * GeneratorBody CST �?AST（透传�?FunctionBody�?
+     */
+    createGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
+        return this.createFunctionBodyAst(cst)
+    }
+
+
+
+    /**
+     * �?ArrowFormalParameters 提取参数
+     */
+    createArrowFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
+        // ArrowFormalParameters: ( UniqueFormalParameters )
+        const params: SlimePattern[] = []
+
+        for (const child of cst.children || []) {
+            if (child.name === 'UniqueFormalParameters' || child.name === SlimeParser.prototype.UniqueFormalParameters?.name) {
+                return this.createUniqueFormalParametersAst(child)
+            }
+            if (child.name === 'FormalParameters' || child.name === SlimeParser.prototype.FormalParameters?.name) {
+                return this.createFormalParametersAst(child)
+            }
+        }
+
+        return params
+    }
+
+    /**
+     * �?ArrowFormalParameters 提取参数 (包装类型版本)
+     */
+    createArrowFormalParametersAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+        // ArrowFormalParameters: ( UniqueFormalParameters )
+        for (const child of cst.children || []) {
+            if (child.name === 'UniqueFormalParameters' || child.name === SlimeParser.prototype.UniqueFormalParameters?.name) {
+                return this.createUniqueFormalParametersAstWrapped(child)
+            }
+            if (child.name === 'FormalParameters' || child.name === SlimeParser.prototype.FormalParameters?.name) {
+                return this.createFormalParametersAstWrapped(child)
+            }
+        }
+
+        return []
+    }
+
+    /**
+     * 从CoverParenthesizedExpressionAndArrowParameterList提取箭头函数参数
+     */
+    createArrowParametersFromCoverGrammar(cst: SubhutiCst): SlimePattern[] {
+        checkCstName(cst, SlimeParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name);
+
+        // CoverParenthesizedExpressionAndArrowParameterList 的children结构�?
+        // LParen + (FormalParameterList | Expression | ...) + RParen
+        // 或�?LParen + Expression + Comma + Ellipsis + BindingIdentifier + RParen
+
+        if (cst.children.length === 0) {
+            return []
+        }
+
+        // () - 空参�?
+        if (cst.children.length === 2) {
+            return []
+        }
+
+        const params: SlimePattern[] = []
+
+        // 查找FormalParameterList
+        const formalParameterListCst = cst.children.find(
+            child => child.name === SlimeParser.prototype.FormalParameterList?.name
+        )
+        if (formalParameterListCst) {
+            return this.createFormalParameterListAst(formalParameterListCst)
+        }
+
+        // 查找Expression（可能是逗号表达式，�?(a, b) 或单个参�?(x)�?
+        const expressionCst = cst.children.find(
+            child => child.name === SlimeParser.prototype.Expression?.name
+        )
+        if (expressionCst && expressionCst.children?.length) {
+            // 直接�?Expression �?children 上遍�?AssignmentExpression 等候选参数节�?
+            for (const child of expressionCst.children) {
+                if (child.name === 'Comma' || child.value === ',') continue
+                const param = this.convertCoverParameterCstToPattern(child, false)
+                if (param) {
+                    params.push(param)
+                }
+            }
+        }
+
+        // 检查是否有 rest 参数（Ellipsis + BindingIdentifier �?BindingPattern�?
+        const hasEllipsis = cst.children.some(
+            child => child.name === 'Ellipsis' || child.name === 'Ellipsis'
+        )
+        if (hasEllipsis) {
+            // 首先查找 BindingIdentifier / BindingPattern 作为 rest 的目�?
+            const bindingIdentifierCst = cst.children.find(
+                child => child.name === SlimeParser.prototype.BindingIdentifier?.name || child.name === 'BindingIdentifier'
+            )
+            const bindingPatternCst = bindingIdentifierCst
+                ? null
+                : cst.children.find(
+                    child => child.name === SlimeParser.prototype.BindingPattern?.name ||
+                        child.name === 'BindingPattern' ||
+                        child.name === SlimeParser.prototype.ArrayBindingPattern?.name ||
+                        child.name === 'ArrayBindingPattern' ||
+                        child.name === SlimeParser.prototype.ObjectBindingPattern?.name ||
+                        child.name === 'ObjectBindingPattern'
+                )
+
+            const restTarget = bindingIdentifierCst || bindingPatternCst
+            if (restTarget) {
+                const restParam = this.convertCoverParameterCstToPattern(restTarget, true)
+                if (restParam) {
+                    params.push(restParam)
+                }
+            }
+        } else if (params.length === 0) {
+            // 没有 Expression 也没�?rest，检查是否有单独�?BindingIdentifier
+            const bindingIdentifierCst = cst.children.find(
+                child => child.name === SlimeParser.prototype.BindingIdentifier?.name || child.name === 'BindingIdentifier'
+            )
+            if (bindingIdentifierCst) {
+                params.push(this.createBindingIdentifierAst(bindingIdentifierCst))
+            }
+        }
+
+        return params
+    }
+
+    /**
+     * 从Expression中提取箭头函数参�?
+     * 处理逗号表达�?(a, b) 或单个参�?(x)
+     */
+    extractParametersFromExpression(expressionCst: SubhutiCst): SlimePattern[] {
+        // Expression可能是：
+        // 1. 单个Identifier: x
+        // 2. 逗号表达�? a, b �?a, b, c
+        // 3. 赋值表达式（默认参数）: a = 1
+
+        // 检查是否是AssignmentExpression
+        if (expressionCst.name === SlimeParser.prototype.AssignmentExpression?.name) {
+            const assignmentAst = this.createAssignmentExpressionAst(expressionCst)
+            // 如果是简单的identifier，返回它
+            if (assignmentAst.type === SlimeNodeType.Identifier) {
+                return [assignmentAst as any]
+            }
+            // 如果是赋值（默认参数），返回AssignmentPattern
+            if (assignmentAst.type === SlimeNodeType.AssignmentExpression) {
+                return [{
+                    type: 'AssignmentPattern',
+                    left: assignmentAst.left,
+                    right: assignmentAst.right
+                } as any]
+            }
+            return [assignmentAst as any]
+        }
+
+        // 如果是Expression，检查children
+        if (expressionCst.children && expressionCst.children.length > 0) {
+            const params: SlimePattern[] = []
+
+            // 遍历children，查找所有AssignmentExpression（用逗号分隔�?
+            for (const child of expressionCst.children) {
+                if (child.name === SlimeParser.prototype.AssignmentExpression?.name) {
+                    const assignmentAst = this.createAssignmentExpressionAst(child)
+                    // 转换为参�?
+                    if (assignmentAst.type === SlimeNodeType.Identifier) {
+                        params.push(assignmentAst as any)
+                    } else if (assignmentAst.type === SlimeNodeType.AssignmentExpression) {
+                        // 默认参数
+                        params.push({
+                            type: 'AssignmentPattern',
+                            left: assignmentAst.left,
+                            right: assignmentAst.right
+                        } as any)
+                    } else if (assignmentAst.type === SlimeNodeType.ObjectExpression) {
+                        // 对象解构参数�?{ a, b }) => ...
+                        // 需要将 ObjectExpression 转换�?ObjectPattern
+                        params.push(this.convertExpressionToPattern(assignmentAst) as any)
+                    } else if (assignmentAst.type === SlimeNodeType.ArrayExpression) {
+                        // 数组解构参数�?[a, b]) => ...
+                        // 需要将 ArrayExpression 转换�?ArrayPattern
+                        params.push(this.convertExpressionToPattern(assignmentAst) as any)
+                    } else {
+                        // 其他复杂情况，尝试提取identifier
+                        const identifier = this.findFirstIdentifierInExpression(child)
+                        if (identifier) {
+                            params.push(this.createIdentifierAst(identifier) as any)
+                        }
+                    }
+                }
+            }
+
+            if (params.length > 0) {
+                return params
+            }
+        }
+
+        // 回退：尝试查找第一个identifier
+        const identifierCst = this.findFirstIdentifierInExpression(expressionCst)
+        if (identifierCst) {
+            return [this.createIdentifierAst(identifierCst) as any]
+        }
+
+        return []
+    }
+
+
+    /**
+     * 创建箭头函数参数 AST
+     */
+    createArrowParametersAst(cst: SubhutiCst): SlimePattern[] {
+        checkCstName(cst, SlimeParser.prototype.ArrowParameters?.name);
+
+        // ArrowParameters 可以是多种形式，这里简化处�?
+        if (cst.children.length === 0) {
+            return []
+        }
+
+        const first = cst.children[0]
+
+        // 单个参数：BindingIdentifier
+        if (first.name === SlimeParser.prototype.BindingIdentifier?.name) {
+            const param = this.createBindingIdentifierAst(first)
+            return [param]
+        }
+
+        // CoverParenthesizedExpressionAndArrowParameterList: 括号参数
+        if (first.name === SlimeParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name) {
+            return this.createArrowParametersFromCoverGrammar(first)
+        }
+
+        // 参数列表�? FormalParameterList )
+        if (first.name === SlimeTokenConsumer.prototype.LParen?.name) {
+            // 查找 FormalParameterList
+            const formalParameterListCst = cst.children.find(
+                child => child.name === SlimeParser.prototype.FormalParameterList?.name
+            )
+            if (formalParameterListCst) {
+                return this.createFormalParameterListAst(formalParameterListCst)
+            }
+            return []
+        }
+
+        return []
+    }
+
+
+
+    // ==================== 表达式相关转换方�?====================
+
+    /**
+     * CoverParenthesizedExpressionAndArrowParameterList CST �?AST
+     * 这是一�?cover grammar，根据上下文可能是括号表达式或箭头函数参�?
+     */
+    createCoverParenthesizedExpressionAndArrowParameterListAst(cst: SubhutiCst): SlimeExpression {
+        // 通常作为括号表达式处理，箭头函数参数有专门的处理路径
+        return this.createParenthesizedExpressionAst(cst)
+    }
+
+
+    /**
+     * ComputedPropertyName CST �?AST
+     * ComputedPropertyName -> [ AssignmentExpression ]
+     */
+    createComputedPropertyNameAst(cst: SubhutiCst): SlimeExpression {
+        const expr = cst.children?.find(ch =>
+            ch.name === SlimeParser.prototype.AssignmentExpression?.name ||
+            ch.name === 'AssignmentExpression'
+        )
+        if (expr) {
+            return this.createAssignmentExpressionAst(expr)
+        }
+        throw new Error('ComputedPropertyName missing AssignmentExpression')
+    }
+
+    /**
+     * CoverInitializedName CST �?AST
+     * CoverInitializedName -> IdentifierReference Initializer
+     */
+    createCoverInitializedNameAst(cst: SubhutiCst): any {
+        const idRef = cst.children?.find(ch =>
+            ch.name === SlimeParser.prototype.IdentifierReference?.name ||
+            ch.name === 'IdentifierReference'
+        )
+        const init = cst.children?.find(ch =>
+            ch.name === SlimeParser.prototype.Initializer?.name ||
+            ch.name === 'Initializer'
+        )
+
+        const id = idRef ? this.createIdentifierReferenceAst(idRef) : null
+        const initValue = init ? this.createInitializerAst(init) : null
+
+        return {
+            type: SlimeNodeType.AssignmentPattern,
+            left: id,
+            right: initValue,
+            loc: cst.loc
+        }
+    }
+
+    /**
+     * CoverCallExpressionAndAsyncArrowHead CST �?AST
+     * 这是一�?cover grammar，通常作为 CallExpression 处理
+     */
+    createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeExpression {
+        return this.createCallExpressionAst(cst)
+    }
+
+    /**
+     * Create FormalParameters AST
+     * ES2025 FormalParameters:
+     *   [empty]
+     *   FunctionRestParameter
+     *   FormalParameterList
+     *   FormalParameterList ,
+     *   FormalParameterList , FunctionRestParameter
+     */
+    createFormalParametersAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+        const children = cst.children || []
+        const params: SlimeFunctionParam[] = []
+
+        let currentParam: SlimePattern | null = null
+        let hasParam = false
+
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i]
+            if (!child) continue
+
+            const name = child.name
+
+            // Skip parentheses
+            if (child.value === '(' || name === 'LParen') continue
+            if (child.value === ')' || name === 'RParen') continue
+
+            // Handle comma - pair with previous param
+            if (child.value === ',' || name === 'Comma') {
+                if (hasParam) {
+                    const commaToken = SlimeTokenCreate.createCommaToken(child.loc)
+                    params.push(SlimeAstUtil.createFunctionParam(currentParam!, commaToken))
+                    hasParam = false
+                    currentParam = null
+                }
+                continue
+            }
+
+            // FormalParameterList：包�?FormalParameter (多个以逗号分隔)
+            if (name === SlimeParser.prototype.FormalParameterList?.name || name === 'FormalParameterList') {
+                // 如果之前有参数没处理，先推入
+                if (hasParam) {
+                    params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
+                    hasParam = false
+                    currentParam = null
+                }
+                params.push(...this.createFormalParameterListFromEs2025Wrapped(child))
+                continue
+            }
+
+            // FunctionRestParameter
+            if (name === SlimeParser.prototype.FunctionRestParameter?.name || name === 'FunctionRestParameter') {
+                if (hasParam) {
+                    params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
+                }
+                currentParam = this.createFunctionRestParameterAst(child)
+                hasParam = true
+                continue
+            }
+
+            // Direct FormalParameter（ES2025 结构�?
+            if (name === SlimeParser.prototype.FormalParameter?.name || name === 'FormalParameter') {
+                if (hasParam) {
+                    params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
+                }
+                currentParam = this.createFormalParameterAst(child)
+                hasParam = true
+                continue
+            }
+
+            // Direct BindingElement or BindingIdentifier
+            if (name === SlimeParser.prototype.BindingElement?.name || name === 'BindingElement') {
+                if (hasParam) {
+                    params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
+                }
+                currentParam = this.createBindingElementAst(child)
+                hasParam = true
+                continue
+            }
+
+            if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
+                if (hasParam) {
+                    params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
+                }
+                currentParam = this.createBindingIdentifierAst(child)
+                hasParam = true
+                continue
+            }
+        }
+
+        // 处理最后一个参数（没有尾随逗号�?
+        if (hasParam) {
+            params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
+        }
+
+        return params
+    }
+
+    /**
+     * �?ES2025 FormalParameterList 创建参数 AST（包装类型）
+     * FormalParameterList: FormalParameter (, FormalParameter)*
+     */
+    createFormalParameterListFromEs2025Wrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+        const children = cst.children || []
+        const params: SlimeFunctionParam[] = []
+
+        let currentParam: SlimePattern | null = null
+        let hasParam = false
+
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i]
+            if (!child) continue
+            const name = child.name
+
+            // Handle comma - pair with previous param
+            if (child.value === ',' || name === 'Comma') {
+                if (hasParam) {
+                    const commaToken = SlimeTokenCreate.createCommaToken(child.loc)
+                    params.push(SlimeAstUtil.createFunctionParam(currentParam!, commaToken))
+                    hasParam = false
+                    currentParam = null
+                }
+                continue
+            }
+
+            // FormalParameter -> BindingElement
+            if (name === SlimeParser.prototype.FormalParameter?.name || name === 'FormalParameter') {
+                if (hasParam) {
+                    params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
+                }
+                currentParam = this.createFormalParameterAst(child)
+                hasParam = true
+            }
+        }
+
+        // 处理最后一个参�?
+        if (hasParam) {
+            params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
+        }
+
+        return params
+    }
+
+
+    createFunctionRestParameterAstAlt(cst: SubhutiCst): SlimeRestElement {
+        // FunctionRestParameter: ... BindingIdentifier | ... BindingPattern
+        // 或�?FunctionRestParameter -> BindingRestElement
+        const children = cst.children || []
+        let argument: any = null
+
+        for (const child of children) {
+            if (!child) continue
+            if (child.value === '...' || child.name === 'Ellipsis') continue
+
+            if (child.name === SlimeParser.prototype.BindingIdentifier?.name || child.name === 'BindingIdentifier') {
+                argument = this.createBindingIdentifierAst(child)
+            } else if (child.name === SlimeParser.prototype.BindingRestElement?.name || child.name === 'BindingRestElement') {
+                // BindingRestElement 已经包含�?RestElement 的完整结构，直接返回
+                return this.createBindingRestElementAst(child)
+            } else if (child.name === SlimeParser.prototype.BindingPattern?.name || child.name === 'BindingPattern') {
+                argument = this.createBindingPatternAst(child)
+            }
+        }
+
+        return {
+            type: SlimeNodeType.RestElement,
+            argument: argument,
+            loc: cst.loc
+        } as any
+    }
+
+
+    /**
+     * 创建 CatchParameter AST
+     */
+    createCatchParameterAst(cst: SubhutiCst): any {
+        checkCstName(cst, SlimeParser.prototype.CatchParameter?.name);
+        // CatchParameter: BindingIdentifier | BindingPattern
+        const first = cst.children[0]
+
+        if (first.name === SlimeParser.prototype.BindingIdentifier?.name) {
+            return this.createBindingIdentifierAst(first)
+        } else if (first.name === SlimeParser.prototype.BindingPattern?.name) {
+            return this.createBindingPatternAst(first)
+        }
+
+        return null
+    }
+
+
+    createArgumentsAst(cst: SubhutiCst): Array<SlimeCallArgument> {
+        const astName = checkCstName(cst, SlimeParser.prototype.Arguments?.name);
+        const first1 = cst.children[1]
+        if (first1) {
+            if (first1.name === SlimeParser.prototype.ArgumentList?.name) {
+                const res = this.createArgumentListAst(first1)
+                return res
+            }
+        }
+        return []
+    }
+
+    createArgumentListAst(cst: SubhutiCst): Array<SlimeCallArgument> {
+        const astName = checkCstName(cst, SlimeParser.prototype.ArgumentList?.name);
+        const arguments_: Array<SlimeCallArgument> = []
+
+        // 遍历children，处�?Ellipsis + AssignmentExpression + Comma 组合
+        // 每个参数与其后面的逗号配对
+        let currentArg: SlimeExpression | SlimeSpreadElement | null = null
+        let hasArg = false
+        let pendingEllipsis: SubhutiCst | null = null
+
+        for (let i = 0; i < cst.children.length; i++) {
+            const child = cst.children[i]
+
+            if (child.name === 'Ellipsis' || child.name === 'Ellipsis') {
+                // 记录 ellipsis，下一个表达式�?spread
+                pendingEllipsis = child
+            } else if (child.name === SlimeParser.prototype.AssignmentExpression?.name) {
+                // 如果之前有参数但没有逗号，先推入
+                if (hasArg) {
+                    arguments_.push(SlimeAstUtil.createCallArgument(currentArg!, undefined))
+                }
+
+                const expr = this.createAssignmentExpressionAst(child)
+                if (pendingEllipsis) {
+                    // 创建 SpreadElement
+                    const ellipsisToken = SlimeTokenCreate.createEllipsisToken(pendingEllipsis.loc)
+                    currentArg = SlimeAstUtil.createSpreadElement(expr, child.loc, ellipsisToken)
+                    pendingEllipsis = null
+                } else {
+                    currentArg = expr
+                }
+                hasArg = true
+            } else if (child.name === SlimeParser.prototype.SpreadElement?.name) {
+                // 处理 spread 参数�?..args（旧结构兼容�?
+                if (hasArg) {
+                    arguments_.push(SlimeAstUtil.createCallArgument(currentArg!, undefined))
+                }
+                currentArg = this.createSpreadElementAst(child)
+                hasArg = true
+            } else if (child.name === 'Comma' || child.value === ',') {
+                // 逗号与前面的参数配对
+                const commaToken = SlimeTokenCreate.createCommaToken(child.loc)
+                if (hasArg) {
+                    arguments_.push(SlimeAstUtil.createCallArgument(currentArg!, commaToken))
+                    hasArg = false
+                    currentArg = null
+                }
+            }
+        }
+
+        // 处理最后一个参数（如果没有尾随逗号�?
+        if (hasArg) {
+            arguments_.push(SlimeAstUtil.createCallArgument(currentArg!, undefined))
+        }
+
+        return arguments_
+    }
+
+    /**
+     * 处理 FormalParameters CST 节点
+     */
+    createFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
+        // FormalParameters 可能包含 FormalParameterList 或为�?
+        if (!cst.children || cst.children.length === 0) {
+            return []
+        }
+
+        const params: SlimePattern[] = []
+
+        for (const child of cst.children) {
+            const name = child.name
+
+            // FormalParameterList
+            if (name === SlimeParser.prototype.FormalParameterList?.name || name === 'FormalParameterList') {
+                return this.createFormalParameterListAst(child)
+            }
+
+            // FormalParameter
+            if (name === SlimeParser.prototype.FormalParameter?.name || name === 'FormalParameter') {
+                params.push(this.createFormalParameterAst(child))
+                continue
+            }
+
+            // BindingIdentifier - 直接作为参数
+            if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
+                params.push(this.createBindingIdentifierAst(child))
+                continue
+            }
+
+            // BindingElement
+            if (name === SlimeParser.prototype.BindingElement?.name || name === 'BindingElement') {
+                params.push(this.createBindingElementAst(child))
+                continue
+            }
+
+            // FunctionRestParameter
+            if (name === SlimeParser.prototype.FunctionRestParameter?.name || name === 'FunctionRestParameter') {
+                params.push(this.createFunctionRestParameterAst(child))
+                continue
+            }
+
+            // 跳过逗号和括�?
+            if (child.value === ',' || child.value === '(' || child.value === ')') {
+                continue
+            }
+        }
+
+        return params
+    }
+
+
+    createFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
+        const astName = checkCstName(cst, SlimeParser.prototype.FunctionExpression?.name);
+        // Es2025Parser FunctionExpression 结构
+
+        let isAsync = false;
+        let isGenerator = false;
+        let functionId: SlimeIdentifier | null = null
+        let params: SlimeFunctionParam[] = []
+        let body: SlimeBlockStatement
+
+        // Token fields
+        let functionToken: any = undefined
+        let asyncToken: any = undefined
+        let asteriskToken: any = undefined
+        let lParenToken: any = undefined
+        let rParenToken: any = undefined
+        let lBraceToken: any = undefined
+        let rBraceToken: any = undefined
+
+        for (const child of cst.children || []) {
+            if (!child) continue
+            const name = child.name
+            const value = child.value
+
+            if (name === 'Function' || value === 'function') {
+                functionToken = SlimeTokenCreate.createFunctionToken(child.loc)
+                continue
+            }
+            if (name === 'Async' || value === 'async') {
+                asyncToken = SlimeTokenCreate.createAsyncToken(child.loc)
+                isAsync = true
+                continue
+            }
+            if (name === 'Asterisk' || value === '*') {
+                asteriskToken = SlimeTokenCreate.createAsteriskToken(child.loc)
+                isGenerator = true
+                continue
+            }
+            if (name === 'LParen' || value === '(') {
+                lParenToken = SlimeTokenCreate.createLParenToken(child.loc)
+                continue
+            }
+            if (name === 'RParen' || value === ')') {
+                rParenToken = SlimeTokenCreate.createRParenToken(child.loc)
+                continue
+            }
+            if (name === 'LBrace' || value === '{') {
+                lBraceToken = SlimeTokenCreate.createLBraceToken(child.loc)
+                continue
+            }
+            if (name === 'RBrace' || value === '}') {
+                rBraceToken = SlimeTokenCreate.createRBraceToken(child.loc)
+                continue
+            }
+
+            // BindingIdentifier（命名函数表达式�?
+            if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
+                functionId = this.createBindingIdentifierAst(child)
+                continue
+            }
+
+            // FormalParameters - 使用包装类型
+            if (name === SlimeParser.prototype.FormalParameters?.name || name === 'FormalParameters') {
+                params = this.createFormalParametersAstWrapped(child)
+                continue
+            }
+
+            // FunctionBody
+            if (name === SlimeParser.prototype.FunctionBody?.name || name === 'FunctionBody') {
+                const bodyStatements = this.createFunctionBodyAst(child)
+                body = SlimeAstUtil.createBlockStatement(bodyStatements, child.loc)
+                continue
+            }
+        }
+
+        // 空函数体
+        if (!body!) {
+            body = SlimeAstUtil.createBlockStatement([])
+        }
+
+        return SlimeAstUtil.createFunctionExpression(
+            body, functionId, params, isGenerator, isAsync, cst.loc,
+            functionToken, asyncToken, asteriskToken, lParenToken, rParenToken,
+            lBraceToken, rBraceToken
+        )
     }
 
 }
