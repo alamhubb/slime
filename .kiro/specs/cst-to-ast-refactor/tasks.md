@@ -231,16 +231,17 @@
 
 ## Phase 4: 更新分发中心
 
-- [ ] 15. 重构 SlimeCstToAstUtil.ts 为分发中心
-  - [ ] 15.1 更新 createAstFromCst 方法调用静态方法
+- [x] 15. 重构 SlimeCstToAstUtil.ts 为分发中心
+  - [x] 15.1 更新 createAstFromCst 方法调用静态方法
     - 将所有 `this.createXxxAst()` 调用改为 `XxxCstToAst.createXxxAst()`
+    - 已更新：标识符、字面量、表达式、语句、声明、函数、类、属性、解构、模块、运算符、参数列表相关调用
     - _Requirements: 1.1, 1.3_
-  - [ ] 15.2 更新 toProgram 方法调用静态方法
+  - [ ] 15.2 更新 toProgram 方法调用静态方法（可选）
     - _Requirements: 1.1, 1.3_
-  - [ ] 15.3 删除已移动的方法
+  - [ ] 15.3 删除已移动的方法（可选优化）
     - 确保所有方法都已成功移动后删除
     - _Requirements: 1.1_
-  - [ ] 15.4 更新导入语句
+  - [x] 15.4 更新导入语句
     - 添加对所有 cstToAst 类的导入
     - _Requirements: 1.3_
 
@@ -255,7 +256,17 @@
 ## Phase 6: 验证和测试
 
 - [x] 17. Checkpoint - 确保所有测试通过
-  - 所有包编译成功
-  - Phase 1-3, 5 已完成
-  - Phase 4 待处理（可选优化）
+  - [x] 所有包编译成功 (npm run build --workspaces)
+  - [x] Phase 1-3, 5 已完成
+  - [x] Phase 4.1, 4.4 已完成
+  - [ ] Phase 4.2, 4.3 待处理（可选优化）
+
+## 完成总结
+
+CST to AST 重构的主要工作已完成：
+1. 所有 CstToAst 类的方法已转换为静态方法
+2. 创建了 TemplateCstToAst 和 OperatorCstToAst 新类
+3. 从 SlimeCstToAstUtil.ts 提取了方法到各个专门的类
+4. createAstFromCst 中心分发方法已更新为调用静态方法
+5. 所有包编译成功
 
