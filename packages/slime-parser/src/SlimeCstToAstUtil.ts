@@ -2254,6 +2254,8 @@ import { setModuleCstToAstUtil } from "./cstToAst/ModuleCstToAst";
 import { setTemplateCstToAstUtil } from "./cstToAst/TemplateCstToAst";
 import { setOperatorCstToAstUtil } from "./cstToAst/OperatorCstToAst";
 import { setLiteralCstToAstUtil } from "./cstToAst/LiteralCstToAst";
+import { setPropertyCstToAstUtil } from "./cstToAst/PropertyCstToAst";
+import { setExpressionCstToAstUtil } from "./cstToAst/ExpressionCstToAst";
 setSlimeCstToAstUtil(SlimeCstToAstUtil);
 setDeclarationCstToAstUtil(SlimeCstToAstUtil);
 setFunctionCstToAstUtil(SlimeCstToAstUtil);
@@ -2263,5 +2265,7 @@ setModuleCstToAstUtil(SlimeCstToAstUtil);
 setTemplateCstToAstUtil(SlimeCstToAstUtil);
 setOperatorCstToAstUtil(SlimeCstToAstUtil);
 setLiteralCstToAstUtil(SlimeCstToAstUtil);
+setPropertyCstToAstUtil(SlimeCstToAstUtil);
+setExpressionCstToAstUtil(SlimeCstToAstUtil);
 
 export default SlimeCstToAstUtil

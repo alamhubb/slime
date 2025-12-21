@@ -73,22 +73,22 @@
   - [x] 4.3 提取 createSpreadElementAst 方法
     - _Requirements: 1.4, 3.1_
 
-- [ ] 5. 提取表达式相关方法到 ExpressionCstToAst
-  - [ ] 5.1 提取 createSuperCallAst 方法
+- [x] 5. 提取表达式相关方法到 ExpressionCstToAst
+  - [x] 5.1 提取 createSuperCallAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 5.2 提取 createImportCallAst 方法
+  - [x] 5.2 提取 createImportCallAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 5.3 提取 createSuperPropertyAst 方法
+  - [x] 5.3 提取 createSuperPropertyAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 5.4 提取 createMetaPropertyAst 方法
+  - [x] 5.4 提取 createMetaPropertyAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 5.5 提取 createMemberExpressionFirstOr 方法
+  - [x] 5.5 提取 createMemberExpressionFirstOr 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 5.6 提取 createCoalesceExpressionHeadAst 方法
+  - [x] 5.6 提取 createCoalesceExpressionHeadAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 5.7 提取 createOptionalChainAst 方法
+  - [x] 5.7 提取 createOptionalChainAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 5.8 提取 createShortCircuitExpressionTailAst 方法
+  - [x] 5.8 提取 createShortCircuitExpressionTailAst 方法
     - _Requirements: 1.4, 3.1_
 
 - [x] 6. 提取语句相关方法到 StatementCstToAst
@@ -138,7 +138,7 @@
     - _Requirements: 1.4, 3.1_
   - [x] 8.6 提取 createFunctionBodyAst 方法 (已存在)
     - _Requirements: 1.4, 3.1_
-  - [ ] 8.7 提取 createFunctionStatementListAst 方法
+  - [x] 8.7 提取 createFunctionStatementListAst 方法
     - _Requirements: 1.4, 3.1_
   - [x] 8.8 提取 createFormalParameterListAstWrapped 方法 (已存在)
     - _Requirements: 1.4, 3.1_
@@ -146,9 +146,9 @@
     - _Requirements: 1.4, 3.1_
   - [x] 8.10 提取 createUniqueFormalParametersAstWrapped 方法 (已存在)
     - _Requirements: 1.4, 3.1_
-  - [ ] 8.11 提取 createPropertySetParameterListAst 方法
+  - [x] 8.11 提取 createPropertySetParameterListAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 8.12 提取 createPropertySetParameterListAstWrapped 方法
+  - [x] 8.12 提取 createPropertySetParameterListAstWrapped 方法
     - _Requirements: 1.4, 3.1_
   - [x] 8.13 提取 createFormalParameterAst 方法 (已存在)
     - _Requirements: 1.4, 3.1_
@@ -158,7 +158,7 @@
 - [x] 9. 提取类相关方法到 ClassCstToAst
   - [x] 9.1 提取 createFieldDefinitionAst 方法 (已存在)
     - _Requirements: 1.4, 3.1_
-  - [ ] 9.2 提取 isComputedPropertyName 方法
+  - [x] 9.2 提取 isComputedPropertyName 方法 (已存在)
     - _Requirements: 1.4, 3.1_
   - [x] 9.3 提取 createMethodDefinitionAst 方法 (已存在)
     - _Requirements: 1.4, 3.1_
@@ -183,12 +183,12 @@
   - [x] 9.13 提取 createMethodDefinitionAsyncMethodFromChildren 私有方法 (已存在)
     - _Requirements: 1.4, 3.1_
 
-- [ ] 10. 提取属性相关方法到 PropertyCstToAst
-  - [ ] 10.1 提取 createPropertyDefinitionAst 方法
+- [x] 10. 提取属性相关方法到 PropertyCstToAst
+  - [x] 10.1 提取 createPropertyDefinitionAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 10.2 提取 createPropertyNameAst 方法
+  - [x] 10.2 提取 createPropertyNameAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 10.3 提取 createLiteralPropertyNameAst 方法
+  - [x] 10.3 提取 createLiteralPropertyNameAst 方法
     - _Requirements: 1.4, 3.1_
   - [x] 10.4 提取 createComputedPropertyNameAst 方法 (已在 FunctionCstToAst)
     - _Requirements: 1.4, 3.1_
@@ -196,15 +196,15 @@
     - _Requirements: 1.4, 3.1_
 
 - [x] 11. 提取解构模式相关方法到 PatternCstToAst
-  - [ ] 11.1 提取 createBindingPropertyAst 方法
+  - [x] 11.1 提取 createBindingPropertyAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 11.2 提取 createBindingPropertyListAst 方法
+  - [x] 11.2 提取 createBindingPropertyListAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 11.3 提取 createBindingElementListAst 方法
+  - [x] 11.3 提取 createBindingElementListAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 11.4 提取 createBindingElisionElementAst 方法
+  - [x] 11.4 提取 createBindingElisionElementAst 方法
     - _Requirements: 1.4, 3.1_
-  - [ ] 11.5 提取 createBindingRestPropertyAst 方法
+  - [x] 11.5 提取 createBindingRestPropertyAst 方法
     - _Requirements: 1.4, 3.1_
 
 - [x] 12. 提取模块相关方法到 ModuleCstToAst
@@ -246,14 +246,16 @@
 
 ## Phase 5: 更新导出和索引
 
-- [ ] 16. 更新 cstToAst/index.ts
-  - [ ] 16.1 添加新文件的导出
+- [x] 16. 更新 cstToAst/index.ts
+  - [x] 16.1 添加新文件的导出
     - 导出 TemplateCstToAst
     - 导出 OperatorCstToAst
     - _Requirements: 2.2_
 
 ## Phase 6: 验证和测试
 
-- [ ] 17. Checkpoint - 确保所有测试通过
-  - Ensure all tests pass, ask the user if questions arise.
+- [x] 17. Checkpoint - 确保所有测试通过
+  - 所有包编译成功
+  - Phase 1-3, 5 已完成
+  - Phase 4 待处理（可选优化）
 

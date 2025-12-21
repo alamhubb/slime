@@ -645,4 +645,114 @@ export class PatternCstToAst {
         }
         return null
     }
+
+    /**
+     * BindingProperty CST 转 AST
+     * BindingProperty -> SingleNameBinding | PropertyName : BindingElement
+     */
+    static createBindingPropertyAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+
+        // 检查是否是 SingleNameBinding
+        const singleNameBinding = children.find(ch =>
+            ch.name === SlimeParser.prototype.SingleNameBinding?.name ||
+            ch.name === 'SingleNameBinding'
+        )
+        if (singleNameBinding) {
+            return getUtil().createSingleNameBindingAst(singleNameBinding)
+        }
+
+        // 否则是 PropertyName : BindingElement
+        const propertyName = children.find(ch =>
+            ch.name === SlimeParser.prototype.PropertyName?.name ||
+            ch.name === 'PropertyName'
+        )
+        const bindingElement = children.find(ch =>
+            ch.name === SlimeParser.prototype.BindingElement?.name ||
+            ch.name === 'BindingElement'
+        )
+
+        const key = propertyName ? getUtil().createPropertyNameAst(propertyName) : null
+        const value = bindingElement ? getUtil().createBindingElementAst(bindingElement) : null
+
+        return {
+            type: SlimeNodeType.Property,
+            key: key,
+            value: value,
+            kind: 'init',
+            method: false,
+            shorthand: false,
+            computed: false,
+            loc: cst.loc
+        }
+    }
+
+    /**
+     * BindingPropertyList CST 转 AST
+     */
+    static createBindingPropertyListAst(cst: SubhutiCst): any[] {
+        const properties: any[] = []
+        for (const child of cst.children || []) {
+            if (child.name === SlimeParser.prototype.BindingProperty?.name ||
+                child.name === 'BindingProperty') {
+                properties.push(PatternCstToAst.createBindingPropertyAst(child))
+            }
+        }
+        return properties
+    }
+
+    /**
+     * BindingElementList CST 转 AST
+     */
+    static createBindingElementListAst(cst: SubhutiCst): any[] {
+        const elements: any[] = []
+        for (const child of cst.children || []) {
+            if (child.name === SlimeParser.prototype.BindingElement?.name ||
+                child.name === 'BindingElement') {
+                elements.push(getUtil().createBindingElementAst(child))
+            } else if (child.name === SlimeParser.prototype.BindingRestElement?.name ||
+                child.name === 'BindingRestElement') {
+                elements.push(getUtil().createBindingRestElementAst(child))
+            } else if (child.name === SlimeParser.prototype.BindingElisionElement?.name ||
+                child.name === 'BindingElisionElement') {
+                // Elision 后跟 BindingElement
+                elements.push(null) // 空位
+                const bindingElement = child.children?.find((ch: SubhutiCst) =>
+                    ch.name === SlimeParser.prototype.BindingElement?.name ||
+                    ch.name === 'BindingElement'
+                )
+                if (bindingElement) {
+                    elements.push(getUtil().createBindingElementAst(bindingElement))
+                }
+            }
+        }
+        return elements
+    }
+
+    /**
+     * BindingElisionElement CST 转 AST
+     */
+    static createBindingElisionElementAst(cst: SubhutiCst): any {
+        const bindingElement = cst.children?.find(ch =>
+            ch.name === SlimeParser.prototype.BindingElement?.name ||
+            ch.name === 'BindingElement'
+        )
+        if (bindingElement) {
+            return getUtil().createBindingElementAst(bindingElement)
+        }
+        return null
+    }
+
+    /**
+     * BindingRestProperty CST 转 AST
+     */
+    static createBindingRestPropertyAst(cst: SubhutiCst): SlimeRestElement {
+        const argument = cst.children?.find(ch =>
+            ch.name === SlimeParser.prototype.BindingIdentifier?.name ||
+            ch.name === 'BindingIdentifier'
+        )
+        const id = argument ? getUtil().createBindingIdentifierAst(argument) : null
+
+        return SlimeAstUtil.createRestElement(id as any)
+    }
 }

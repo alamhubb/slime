@@ -1268,4 +1268,60 @@ export class FunctionCstToAst {
             lBraceToken, rBraceToken
         )
     }
+
+    /**
+     * FunctionStatementList CST 到 AST
+     */
+    static createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
+        const children = cst.children || []
+
+        if (children.length === 0) {
+            return []
+        }
+
+        const first = children[0]
+        if (!first) {
+            return []
+        }
+
+        if (first.name === 'StatementList' || first.name === SlimeParser.prototype.StatementList?.name) {
+            return getUtil().createStatementListAst(first)
+        }
+
+        return getUtil().createStatementListItemAst(first)
+    }
+
+    /**
+     * PropertySetParameterList CST 到 AST
+     */
+    static createPropertySetParameterListAst(cst: SubhutiCst): SlimePattern[] {
+        if (!cst.children || cst.children.length === 0) {
+            return []
+        }
+        const first = cst.children[0]
+        if (first.name === 'FormalParameter' || first.name === SlimeParser.prototype.FormalParameter?.name) {
+            return [FunctionCstToAst.createFormalParameterAst(first)]
+        }
+        if (first.name === 'BindingElement' || first.name === SlimeParser.prototype.BindingElement?.name) {
+            return [FunctionCstToAst.createBindingElementAst(first)]
+        }
+        return []
+    }
+
+    /**
+     * PropertySetParameterList CST 到 AST (包装类型版本)
+     */
+    static createPropertySetParameterListAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+        if (!cst.children || cst.children.length === 0) {
+            return []
+        }
+        const first = cst.children[0]
+        if (first.name === 'FormalParameter' || first.name === SlimeParser.prototype.FormalParameter?.name) {
+            return [SlimeAstUtil.createFunctionParam(FunctionCstToAst.createFormalParameterAst(first), undefined)]
+        }
+        if (first.name === 'BindingElement' || first.name === SlimeParser.prototype.BindingElement?.name) {
+            return [SlimeAstUtil.createFunctionParam(FunctionCstToAst.createBindingElementAst(first), undefined)]
+        }
+        return []
+    }
 }
