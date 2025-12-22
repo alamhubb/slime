@@ -1,7 +1,7 @@
 /**
  * UnaryExpressionCstToAst - 一元/更新表达式转换
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     SlimeAstUtil, type SlimeBlockStatement,
     SlimeExpression,
@@ -9,13 +9,13 @@ import {
     type SlimeFunctionParam,
     type SlimeIdentifier
 } from "slime-ast";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
 export class UnaryExpressionCstToAst {
 
 
-    createUnaryExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createUnaryExpressionAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.UnaryExpression?.name);
 
         // 防御性检查：如果没有children，抛出更详细的错�?
@@ -49,7 +49,7 @@ export class UnaryExpressionCstToAst {
         const argumentCst = cst.children[1]
 
         // 获取运算符类�?
-        const operatorMap: {[key: string]: string} = {
+        const operatorMap: { [key: string]: string } = {
             'Exclamation': '!',
             'Plus': '+',
             'Minus': '-',
@@ -77,7 +77,7 @@ export class UnaryExpressionCstToAst {
     }
 
     // Renamed from createPostfixExpressionAst - ES2025 uses UpdateExpression
-    createUpdateExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createUpdateExpressionAst(cst: SubhutiCst): SlimeExpression {
         // Support both PostfixExpression (old) and UpdateExpression (new)
         if (cst.children.length > 1) {
             // UpdateExpression: argument ++ | argument -- | ++argument | --argument
@@ -123,7 +123,7 @@ export class UnaryExpressionCstToAst {
         return this.createExpressionAst(cst.children[0])
     }
 
-    createAdditiveExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createAdditiveExpressionAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.AdditiveExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
@@ -153,7 +153,7 @@ export class UnaryExpressionCstToAst {
         return this.createExpressionAst(cst.children[0])
     }
 
-    createMultiplicativeExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createMultiplicativeExpressionAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.MultiplicativeExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression

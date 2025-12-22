@@ -1,7 +1,7 @@
 /**
  * LiteralCstToAst - 基础字面量（数字/字符串/布尔等）转换
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     type SlimeArrayElement,
     type SlimeArrayExpression, type SlimeArrowFunctionExpression, type SlimeAssignmentExpression,
@@ -11,7 +11,7 @@ import {
     SlimeStringLiteral, SlimeTokenCreate
 } from "slime-ast";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
 export class LiteralCstToAst {
@@ -21,7 +21,7 @@ export class LiteralCstToAst {
      * 布尔字面�?CST �?AST
      * BooleanLiteral -> true | false
      */
-    createBooleanLiteralAst(cst: SubhutiCst): SlimeLiteral {
+    static createBooleanLiteralAst(cst: SubhutiCst): SlimeLiteral {
         const firstChild = cst.children?.[0]
         if (firstChild?.name === 'True' || firstChild?.value === 'true') {
             const lit = SlimeAstUtil.createBooleanLiteral(true)
@@ -39,7 +39,7 @@ export class LiteralCstToAst {
      *
      * 存在必要性：NumericLiteral �?CST 中是终端符，�?ESTree AST 中是 Literal 类型�?
      */
-    createNumericLiteralAst(cst: SubhutiCst): SlimeNumericLiteral {
+    static createNumericLiteralAst(cst: SubhutiCst): SlimeNumericLiteral {
         // 兼容多种 NumericLiteral 名称：NumericLiteral, NumericLiteralTok, Number
         const validNames = [
             SlimeTokenConsumer.prototype.NumericLiteral?.name,
@@ -61,7 +61,7 @@ export class LiteralCstToAst {
      *
      * 存在必要性：StringLiteral �?CST 中是终端符，�?ESTree AST 中是 Literal 类型�?
      */
-    createStringLiteralAst(cst: SubhutiCst): SlimeStringLiteral {
+    static createStringLiteralAst(cst: SubhutiCst): SlimeStringLiteral {
         // 兼容多种 StringLiteral 名称：StringLiteral, StringLiteralTok, String
         const validNames = [
             SlimeTokenConsumer.prototype.StringLiteral?.name,
@@ -87,7 +87,7 @@ export class LiteralCstToAst {
      *
      * RegularExpressionLiteral: /pattern/flags
      */
-    createRegExpLiteralAst(cst: SubhutiCst): any {
+    static createRegExpLiteralAst(cst: SubhutiCst): any {
         const rawValue = cst.value as string
         // 解析正则表达式字面量�?pattern/flags
         // 正则字面量格式：/.../ 后面可能跟着 flags
@@ -117,7 +117,7 @@ export class LiteralCstToAst {
 
 
 
-    createLiteralFromToken(token: any): SlimeExpression {
+    static createLiteralFromToken(token: any): SlimeExpression {
         const tokenName = token.tokenName
         if (tokenName === SlimeTokenConsumer.prototype.NullLiteral?.name) {
             return SlimeAstUtil.createNullLiteralToken()
@@ -135,7 +135,7 @@ export class LiteralCstToAst {
     }
 
 
-    createLiteralAst(cst: SubhutiCst): SlimeLiteral {
+    static createLiteralAst(cst: SubhutiCst): SlimeLiteral {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Literal?.name);
         const firstChild = cst.children[0]
         let value: SlimeLiteral
@@ -206,7 +206,7 @@ export class LiteralCstToAst {
      * Elision -> , | Elision ,
      * 返回 null 元素的数�?
      */
-    createElisionAst(cst: SubhutiCst): number {
+    static createElisionAst(cst: SubhutiCst): number {
         // 计算逗号数量，每个逗号代表一个空�?
         let count = 0
         for (const child of cst.children || []) {
@@ -219,7 +219,7 @@ export class LiteralCstToAst {
 
 
     // 处理TemplateMiddleList：处理多个TemplateMiddle+Expression�?
-    processTemplateMiddleList(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[]): void {
+    static processTemplateMiddleList(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[]): void {
         // TemplateMiddleList结构（Es2025）：
         // - children = [TemplateMiddle, Expression, TemplateMiddle, Expression, ...]
         // 或者递归结构�?
@@ -248,7 +248,7 @@ export class LiteralCstToAst {
 
 
     // 处理TemplateSpans：可能是TemplateTail或TemplateMiddleList+TemplateTail
-    processTemplateSpans(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[]): void {
+    static processTemplateSpans(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[]): void {
         const first = cst.children[0]
 
         // 情况1：直接是TemplateTail -> }` 结束
@@ -275,7 +275,7 @@ export class LiteralCstToAst {
 
 
     // 模板字符串处�?
-    createTemplateLiteralAst(cst: SubhutiCst): SlimeExpression {
+    static createTemplateLiteralAst(cst: SubhutiCst): SlimeExpression {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.TemplateLiteral?.name)
 
         const first = cst.children[0]

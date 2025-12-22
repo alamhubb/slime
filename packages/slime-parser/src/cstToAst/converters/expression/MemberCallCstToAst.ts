@@ -1,7 +1,7 @@
 /**
  * MemberCallCstToAst - 成员访问/调用表达式/可选链转换
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     SlimeAstUtil, type SlimeCallArgument,
     SlimeExpression,
@@ -9,12 +9,12 @@ import {
     SlimeTokenCreate,
     type SlimeVariableDeclarator
 } from "slime-ast";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
 export class MemberCallCstToAst {
 
-    createMemberExpressionFirstOr(cst: SubhutiCst): SlimeExpression | SlimeSuper {
+    static createMemberExpressionFirstOr(cst: SubhutiCst): SlimeExpression | SlimeSuper {
         if (cst.name === SlimeParser.prototype.PrimaryExpression?.name || cst.name === 'PrimaryExpression') {
             return this.createPrimaryExpressionAst(cst)
         } else if (cst.name === SlimeParser.prototype.SuperProperty?.name || cst.name === 'SuperProperty') {
@@ -33,7 +33,7 @@ export class MemberCallCstToAst {
     }
 
 
-    createMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.MemberExpression?.name);
 
         if (cst.children.length === 0) {
@@ -192,7 +192,7 @@ export class MemberCallCstToAst {
         return current
     }
 
-    createArgumentsAst(cst: SubhutiCst): Array<SlimeCallArgument> {
+    static createArgumentsAst(cst: SubhutiCst): Array<SlimeCallArgument> {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Arguments?.name);
         const first1 = cst.children[1]
         if (first1) {
@@ -204,7 +204,7 @@ export class MemberCallCstToAst {
         return []
     }
 
-    createArgumentListAst(cst: SubhutiCst): Array<SlimeCallArgument> {
+    static createArgumentListAst(cst: SubhutiCst): Array<SlimeCallArgument> {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArgumentList?.name);
         const arguments_: Array<SlimeCallArgument> = []
 
@@ -263,7 +263,7 @@ export class MemberCallCstToAst {
     }
 
 
-    createCallExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createCallExpressionAst(cst: SubhutiCst): SlimeExpression {
         // Support both CallExpression and CoverCallExpressionAndAsyncArrowHead
         const isCallExpr = cst.name === SlimeParser.prototype.CallExpression?.name || cst.name === 'CallExpression'
         const isCoverExpr = cst.name === 'CoverCallExpressionAndAsyncArrowHead'
@@ -395,13 +395,13 @@ export class MemberCallCstToAst {
      * CallMemberExpression CST �?AST
      * CallMemberExpression -> MemberExpression Arguments
      */
-    createCallMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createCallMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
         return this.createCallExpressionAst(cst)
     }
 
 
 
-    createNewExpressionAst(cst: SubhutiCst): any {
+    static createNewExpressionAst(cst: SubhutiCst): any {
         // 支持两种类型：NewExpression �?NewMemberExpressionArguments
         const isNewMemberExpr = cst.name === 'NewMemberExpressionArguments'
         const isNewExpr = cst.name === SlimeParser.prototype.NewExpression?.name
@@ -466,7 +466,7 @@ export class MemberCallCstToAst {
     }
 
 
-    createSuperCallAst(cst: SubhutiCst): SlimeExpression {
+    static createSuperCallAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.SuperCall?.name);
         // SuperCall -> SuperTok + Arguments
         // children[0]: SuperTok token
@@ -483,7 +483,7 @@ export class MemberCallCstToAst {
         return SlimeAstUtil.createCallExpression(superNode, argumentsAst) as SlimeExpression
     }
 
-    createSuperPropertyAst(cst: SubhutiCst): SlimeExpression {
+    static createSuperPropertyAst(cst: SubhutiCst): SlimeExpression {
         // SuperProperty:
         // 形式1: SuperTok + Dot + IdentifierName
         // 形式2: SuperTok + LBracket + Expression + RBracket
@@ -555,7 +555,7 @@ export class MemberCallCstToAst {
         }
     }
 
-    createMetaPropertyAst(cst: SubhutiCst): SlimeExpression {
+    static createMetaPropertyAst(cst: SubhutiCst): SlimeExpression {
         // MetaProperty: children[0]是NewTarget或ImportMeta
         const first = cst.children[0]
         if (first.name === SlimeParser.prototype.NewTarget?.name) {

@@ -1,5 +1,5 @@
-import {SubhutiCst} from "subhuti";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SubhutiCst } from "subhuti";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 import {
     SlimeAstUtil, type SlimeExportAllDeclaration,
@@ -9,12 +9,12 @@ import {
 } from "slime-ast";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
 
-export default class BlockCstToAst{
+export default class BlockCstToAst {
     /**
      * 从Block CST创建BlockStatement AST
      * Block: LBrace StatementList? RBrace
      */
-    createBlockAst(cst: SubhutiCst): SlimeBlockStatement {
+    static createBlockAst(cst: SubhutiCst): SlimeBlockStatement {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Block?.name)
 
         // Block 的结构：LBrace StatementList? RBrace
@@ -48,7 +48,7 @@ export default class BlockCstToAst{
      * 1. 直接�?StatementList（旧的实现）
      * 2. �?BlockStatement，需要提取内部的 Block -> StatementList
      */
-    createBlockStatementAst(cst: SubhutiCst): SlimeBlockStatement {
+    static createBlockStatementAst(cst: SubhutiCst): SlimeBlockStatement {
         let statements: Array<SlimeStatement>
 
         // 如果�?StatementList，直接转�?
@@ -100,7 +100,7 @@ export default class BlockCstToAst{
      * - IfStatement, ForStatement, WhileStatement 等具体语�?
      * - FunctionDeclaration, ClassDeclaration 等声�?
      */
-    createStatementDeclarationAst(cst: SubhutiCst) {
+    static createStatementDeclarationAst(cst: SubhutiCst) {
         // Statement - 包装节点，递归处理子节�?
         if (cst.name === SlimeParser.prototype.Statement?.name || cst.name === 'Statement') {
             if (cst.children && cst.children.length > 0) {
@@ -216,7 +216,7 @@ export default class BlockCstToAst{
     }
 
 
-    createStatementAst(cst: SubhutiCst): Array<SlimeStatement> {
+    static createStatementAst(cst: SubhutiCst): Array<SlimeStatement> {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Statement?.name);
         const statements: SlimeStatement[] = cst.children
             .map(item => this.createStatementDeclarationAst(item))
@@ -225,7 +225,7 @@ export default class BlockCstToAst{
     }
 
 
-    createStatementListItemAst(cst: SubhutiCst): Array<SlimeStatement> {
+    static createStatementListItemAst(cst: SubhutiCst): Array<SlimeStatement> {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.StatementListItem?.name);
         const statements = cst.children.map(item => {
             // 如果�?Declaration，直接处�?
@@ -279,7 +279,7 @@ export default class BlockCstToAst{
     }
 
 
-    createStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
+    static createStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.StatementList?.name);
         if (cst.children) {
             const statements = cst.children.map(item => this.createStatementListItemAst(item)).flat()

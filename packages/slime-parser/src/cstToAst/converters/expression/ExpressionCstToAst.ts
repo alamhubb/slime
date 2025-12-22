@@ -1,15 +1,15 @@
 /**
  * ExpressionCstToAst - 核心表达式转换（Expression 路由和操作符）
  */
-import {SubhutiCst} from "subhuti";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SubhutiCst } from "subhuti";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
-import {SlimeAstUtil, SlimeTokenCreate} from "slime-ast";
+import { SlimeAstUtil, SlimeTokenCreate } from "slime-ast";
 
 export class ExpressionCstToAst {
 
 
-    createYieldExpressionAst(cst: SubhutiCst): any {
+    static createYieldExpressionAst(cst: SubhutiCst): any {
         // yield [*] AssignmentExpression?
         let yieldToken: any = undefined
         let asteriskToken: any = undefined
@@ -34,7 +34,7 @@ export class ExpressionCstToAst {
         return SlimeAstUtil.createYieldExpression(argument, delegate, cst.loc, yieldToken, asteriskToken)
     }
 
-    createAwaitExpressionAst(cst: SubhutiCst): any {
+    static createAwaitExpressionAst(cst: SubhutiCst): any {
         // await UnaryExpression
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.AwaitExpression?.name);
 
@@ -51,7 +51,7 @@ export class ExpressionCstToAst {
         return SlimeAstUtil.createAwaitExpression(argument, cst.loc, awaitToken)
     }
 
-    createConditionalExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createConditionalExpressionAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ConditionalExpression?.name);
         const firstChild = cst.children[0]
         let test = this.createExpressionAst(firstChild)

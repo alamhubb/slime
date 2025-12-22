@@ -1,16 +1,16 @@
 /**
  * FunctionExpressionCstToAst - 函数表达式转换
  */
-import {SubhutiCst} from "subhuti";
-import {SlimeAstUtil, SlimeClassExpression, SlimeIdentifier} from "slime-ast";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SubhutiCst } from "subhuti";
+import { SlimeAstUtil, SlimeClassExpression, SlimeIdentifier } from "slime-ast";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
 export class FunctionExpressionCstToAst {
 
 
 
-    createFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
+    static createFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FunctionExpression?.name);
         // Es2025Parser FunctionExpression 结构
 
@@ -103,7 +103,7 @@ export class FunctionExpressionCstToAst {
 
 
     // 生成器表达式处理：function* (...) { ... }
-    createGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
+    static createGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
         // GeneratorExpression: function* [name](params) { body }
         // 旧版 CST children: [FunctionTok, Asterisk, BindingIdentifier?, LParen, FormalParameterList?, RParen, FunctionBodyDefine]
         // Es2025 CST children: [FunctionTok, Asterisk, BindingIdentifier?, LParen, FormalParameters?, RParen, LBrace, GeneratorBody, RBrace]
@@ -147,7 +147,7 @@ export class FunctionExpressionCstToAst {
     }
 
     // Async 函数表达式处理：async function (...) { ... }
-    createAsyncFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
+    static createAsyncFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
         // AsyncFunctionExpression: async function [name](params) { body }
         // Es2025 CST children: [AsyncTok, FunctionTok, BindingIdentifier?, LParen, FormalParameters?, RParen, LBrace, AsyncFunctionBody, RBrace]
 
@@ -190,7 +190,7 @@ export class FunctionExpressionCstToAst {
     }
 
     // Async Generator 表达式处理：async function* (...) { ... }
-    createAsyncGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
+    static createAsyncGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
         // AsyncGeneratorExpression: async function* [name](params) { body }
         // Es2025 CST children: [AsyncTok, FunctionTok, Asterisk, BindingIdentifier?, LParen, FormalParameters?, RParen, LBrace, AsyncGeneratorBody, RBrace]
 

@@ -1,12 +1,12 @@
-import {SubhutiCst} from "subhuti";
-import type {SlimeMethodDefinition} from "slime-ast";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SubhutiCst } from "subhuti";
+import type { SlimeMethodDefinition } from "slime-ast";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
-export default class FunctionBodyCstToAst{
+export default class FunctionBodyCstToAst {
 
 
-    createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
+    static createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
         // FunctionStatementList: StatementList?
         const children = cst.children || []
 
@@ -29,7 +29,7 @@ export default class FunctionBodyCstToAst{
     }
 
 
-    createFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
+    static createFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
         // FunctionBody: FunctionStatementList | StatementList
         // GeneratorBody, AsyncFunctionBody, AsyncGeneratorBody 都包�?FunctionBody
         const children = cst.children || []
@@ -67,7 +67,7 @@ export default class FunctionBodyCstToAst{
     /**
      * GeneratorBody CST �?AST（透传�?FunctionBody�?
      */
-    createGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
+    static createGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
         return this.createFunctionBodyAst(cst)
     }
 
@@ -75,7 +75,7 @@ export default class FunctionBodyCstToAst{
     /**
      * AsyncFunctionBody CST �?AST（透传�?FunctionBody�?
      */
-    createAsyncFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
+    static createAsyncFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
         return this.createFunctionBodyAst(cst)
     }
 
@@ -84,7 +84,7 @@ export default class FunctionBodyCstToAst{
     /**
      * AsyncGeneratorBody CST �?AST（透传�?FunctionBody�?
      */
-    createAsyncGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
+    static createAsyncGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
         return this.createFunctionBodyAst(cst)
     }
 }

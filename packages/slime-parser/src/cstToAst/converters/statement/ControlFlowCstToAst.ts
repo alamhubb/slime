@@ -1,8 +1,8 @@
 /**
  * ControlFlowCstToAst - if/for/while/do-while 转换
  */
-import {SubhutiCst} from "subhuti";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SubhutiCst } from "subhuti";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 import {
     SlimeAstUtil,
@@ -21,7 +21,7 @@ export class ControlFlowCstToAst {
      * BreakableStatement CST �?AST（透传�?
      * BreakableStatement -> IterationStatement | SwitchStatement
      */
-    createBreakableStatementAst(cst: SubhutiCst): any {
+    static createBreakableStatementAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             return this.createStatementDeclarationAst(firstChild)
@@ -33,7 +33,7 @@ export class ControlFlowCstToAst {
      * IterationStatement CST �?AST（透传�?
      * IterationStatement -> DoWhileStatement | WhileStatement | ForStatement | ForInOfStatement
      */
-    createIterationStatementAst(cst: SubhutiCst): any {
+    static createIterationStatementAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             return this.createStatementDeclarationAst(firstChild)
@@ -47,7 +47,7 @@ export class ControlFlowCstToAst {
      * if (test) consequent [else alternate]
      * ES2025: if ( Expression ) IfStatementBody [else IfStatementBody]
      */
-    createIfStatementAst(cst: SubhutiCst): any {
+    static createIfStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.IfStatement?.name);
 
         let test: any = null
@@ -125,7 +125,7 @@ export class ControlFlowCstToAst {
      * 创建 IfStatementBody AST
      * IfStatementBody: Statement | FunctionDeclaration
      */
-    createIfStatementBodyAst(cst: SubhutiCst): any {
+    static createIfStatementBodyAst(cst: SubhutiCst): any {
         const children = cst.children || []
 
         for (const child of children) {
@@ -156,7 +156,7 @@ export class ControlFlowCstToAst {
      *
      * 注意：LexicalDeclaration 内部已经包含分号（SemicolonASI�?
      */
-    createForStatementAst(cst: SubhutiCst): any {
+    static createForStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ForStatement?.name);
 
         let init: any = null
@@ -263,7 +263,7 @@ export class ControlFlowCstToAst {
     /**
      * 创建 for...in / for...of 语句 AST
      */
-    createForInOfStatementAst(cst: SubhutiCst): any {
+    static createForInOfStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ForInOfStatement?.name);
 
         // ForInOfStatement 结构（多种形式）�?
@@ -437,7 +437,7 @@ export class ControlFlowCstToAst {
     /**
      * 创建 while 语句 AST
      */
-    createWhileStatementAst(cst: SubhutiCst): any {
+    static createWhileStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.WhileStatement?.name);
         // WhileStatement: WhileTok LParen Expression RParen Statement
 
@@ -470,7 +470,7 @@ export class ControlFlowCstToAst {
     /**
      * 创建 do...while 语句 AST
      */
-    createDoWhileStatementAst(cst: SubhutiCst): any {
+    static createDoWhileStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.DoWhileStatement?.name);
         // DoWhileStatement: do Statement while ( Expression ) ;
 
@@ -512,7 +512,7 @@ export class ControlFlowCstToAst {
      * 创建 switch 语句 AST
      * SwitchStatement: switch ( Expression ) CaseBlock
      */
-    createSwitchStatementAst(cst: SubhutiCst): any {
+    static createSwitchStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.SwitchStatement?.name);
 
         let switchToken: any = undefined

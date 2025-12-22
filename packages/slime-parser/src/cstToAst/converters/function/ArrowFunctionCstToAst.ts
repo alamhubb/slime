@@ -1,7 +1,7 @@
 /**
  * ArrowFunctionCstToAst - 箭头函数转换
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     SlimeAstUtil,
     SlimeBlockStatement,
@@ -10,7 +10,7 @@ import {
     SlimeMethodDefinition,
     SlimePattern
 } from "slime-ast";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
 
@@ -19,14 +19,14 @@ export class ArrowFunctionCstToAst {
     /**
      * AsyncConciseBody CST �?AST
      */
-    createAsyncConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
+    static createAsyncConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
         return this.createConciseBodyAst(cst)
     }
 
     /**
      * AsyncArrowHead CST �?AST（透传�?
      */
-    createAsyncArrowHeadAst(cst: SubhutiCst): any {
+    static createAsyncArrowHeadAst(cst: SubhutiCst): any {
         // AsyncArrowHead 主要用于解析，实�?AST 处理�?AsyncArrowFunction �?
         return cst.children?.[0] ? this.createAstFromCst(cst.children[0]) : null
     }
@@ -34,7 +34,7 @@ export class ArrowFunctionCstToAst {
     /**
      * AsyncArrowBindingIdentifier CST �?AST
      */
-    createAsyncArrowBindingIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
+    static createAsyncArrowBindingIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
         const bindingId = cst.children?.find(ch =>
             ch.name === SlimeParser.prototype.BindingIdentifier?.name ||
             ch.name === 'BindingIdentifier'
@@ -53,7 +53,7 @@ export class ArrowFunctionCstToAst {
     /**
      * 在Expression中查找第一个Identifier（辅助方法）
      */
-    findFirstIdentifierInExpression(cst: SubhutiCst): SubhutiCst | null {
+    static findFirstIdentifierInExpression(cst: SubhutiCst): SubhutiCst | null {
         if (cst.name === SlimeTokenConsumer.prototype.IdentifierName?.name) {
             return cst
         }
@@ -70,7 +70,7 @@ export class ArrowFunctionCstToAst {
      * 从Expression中提取箭头函数参�?
      * 处理逗号表达�?(a, b) 或单个参�?(x)
      */
-    extractParametersFromExpression(expressionCst: SubhutiCst): SlimePattern[] {
+    static extractParametersFromExpression(expressionCst: SubhutiCst): SlimePattern[] {
         // Expression可能是：
         // 1. 单个Identifier: x
         // 2. 逗号表达�? a, b �?a, b, c
@@ -147,7 +147,7 @@ export class ArrowFunctionCstToAst {
     /**
      * 从CoverParenthesizedExpressionAndArrowParameterList提取箭头函数参数
      */
-    createArrowParametersFromCoverGrammar(cst: SubhutiCst): SlimePattern[] {
+    static createArrowParametersFromCoverGrammar(cst: SubhutiCst): SlimePattern[] {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name);
 
         // CoverParenthesizedExpressionAndArrowParameterList 的children结构�?
@@ -232,7 +232,7 @@ export class ArrowFunctionCstToAst {
     /**
      * �?ArrowFormalParameters 提取参数
      */
-    createArrowFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
+    static createArrowFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
         // ArrowFormalParameters: ( UniqueFormalParameters )
         const params: SlimePattern[] = []
 
@@ -252,7 +252,7 @@ export class ArrowFunctionCstToAst {
     /**
      * �?ArrowFormalParameters 提取参数 (包装类型版本)
      */
-    createArrowFormalParametersAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+    static createArrowFormalParametersAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
         // ArrowFormalParameters: ( UniqueFormalParameters )
         for (const child of cst.children || []) {
             if (child.name === 'UniqueFormalParameters' || child.name === SlimeParser.prototype.UniqueFormalParameters?.name) {
@@ -269,7 +269,7 @@ export class ArrowFunctionCstToAst {
     /**
      * 创建箭头函数参数 AST
      */
-    createArrowParametersAst(cst: SubhutiCst): SlimePattern[] {
+    static createArrowParametersAst(cst: SubhutiCst): SlimePattern[] {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArrowParameters?.name);
 
         // ArrowParameters 可以是多种形式，这里简化处�?
@@ -311,7 +311,7 @@ export class ArrowFunctionCstToAst {
     /**
      * 创建箭头函数 AST
      */
-    createArrowFunctionAst(cst: SubhutiCst): SlimeArrowFunctionExpression {
+    static createArrowFunctionAst(cst: SubhutiCst): SlimeArrowFunctionExpression {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArrowFunction?.name);
         // ArrowFunction 结构（带async）：
         // children[0]: AsyncTok (可�?
@@ -413,7 +413,7 @@ export class ArrowFunctionCstToAst {
      * AsyncArrowFunction: async AsyncArrowBindingIdentifier => AsyncConciseBody
      *                   | CoverCallExpressionAndAsyncArrowHead => AsyncConciseBody
      */
-    createAsyncArrowFunctionAst(cst: SubhutiCst): SlimeArrowFunctionExpression {
+    static createAsyncArrowFunctionAst(cst: SubhutiCst): SlimeArrowFunctionExpression {
         // AsyncArrowFunction 结构�?
         // 形式1: [AsyncTok, BindingIdentifier, Arrow, AsyncConciseBody]
         // 形式2: [CoverCallExpressionAndAsyncArrowHead, Arrow, AsyncConciseBody]
@@ -539,7 +539,7 @@ export class ArrowFunctionCstToAst {
     /**
      * �?CoverCallExpressionAndAsyncArrowHead 提取 async 箭头函数参数
      */
-    createAsyncArrowParamsFromCover(cst: SubhutiCst): SlimePattern[] {
+    static createAsyncArrowParamsFromCover(cst: SubhutiCst): SlimePattern[] {
         // CoverCallExpressionAndAsyncArrowHead 结构�?
         // [MemberExpression, Arguments] 或类似结�?
         // 我们需要从 Arguments 中提取参�?
@@ -578,7 +578,7 @@ export class ArrowFunctionCstToAst {
     /**
      * 创建箭头函数�?AST
      */
-    createConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
+    static createConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
         // 防御性检�?
         if (!cst) {
             throw new Error('createConciseBodyAst: cst is null or undefined')

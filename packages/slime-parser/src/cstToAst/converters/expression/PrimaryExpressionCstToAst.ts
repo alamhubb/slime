@@ -1,7 +1,7 @@
 /**
  * PrimaryExpressionCstToAst - 基础表达式转换
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     SlimeAstUtil,
     SlimeBlockStatement,
@@ -18,7 +18,7 @@ export class PrimaryExpressionCstToAst {
      * ComputedPropertyName CST �?AST
      * ComputedPropertyName -> [ AssignmentExpression ]
      */
-    createComputedPropertyNameAst(cst: SubhutiCst): SlimeExpression {
+    static createComputedPropertyNameAst(cst: SubhutiCst): SlimeExpression {
         const expr = cst.children?.find(ch =>
             ch.name === SlimeParser.prototype.AssignmentExpression?.name ||
             ch.name === 'AssignmentExpression'
@@ -30,7 +30,7 @@ export class PrimaryExpressionCstToAst {
     }
 
 
-    createPrimaryExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createPrimaryExpressionAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.PrimaryExpression?.name);
         const first = cst.children[0]
         if (first.name === SlimeParser.prototype.IdentifierReference?.name) {
@@ -139,7 +139,7 @@ export class PrimaryExpressionCstToAst {
      * ParenthesizedExpression CST �?AST
      * ParenthesizedExpression -> ( Expression )
      */
-    createParenthesizedExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createParenthesizedExpressionAst(cst: SubhutiCst): SlimeExpression {
         // 查找内部�?Expression
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.Expression?.name ||
@@ -165,7 +165,7 @@ export class PrimaryExpressionCstToAst {
      * CoverParenthesizedExpressionAndArrowParameterList CST �?AST
      * 这是一�?cover grammar，根据上下文可能是括号表达式或箭头函数参�?
      */
-    createCoverParenthesizedExpressionAndArrowParameterListAst(cst: SubhutiCst): SlimeExpression {
+    static createCoverParenthesizedExpressionAndArrowParameterListAst(cst: SubhutiCst): SlimeExpression {
         // 通常作为括号表达式处理，箭头函数参数有专门的处理路径
         return this.createParenthesizedExpressionAst(cst)
     }
@@ -176,7 +176,7 @@ export class PrimaryExpressionCstToAst {
      * CoverInitializedName CST �?AST
      * CoverInitializedName -> IdentifierReference Initializer
      */
-    createCoverInitializedNameAst(cst: SubhutiCst): any {
+    static createCoverInitializedNameAst(cst: SubhutiCst): any {
         const idRef = cst.children?.find(ch =>
             ch.name === SlimeParser.prototype.IdentifierReference?.name ||
             ch.name === 'IdentifierReference'
@@ -201,14 +201,14 @@ export class PrimaryExpressionCstToAst {
      * CoverCallExpressionAndAsyncArrowHead CST �?AST
      * 这是一�?cover grammar，通常作为 CallExpression 处理
      */
-    createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeExpression {
+    static createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeExpression {
         return this.createCallExpressionAst(cst)
     }
 
 
 
 
-    createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.LeftHandSideExpression?.name);
         // 容错：Parser在ASI场景下可能生成不完整的CST，返回空标识�?
         if (!cst.children || cst.children.length === 0) {

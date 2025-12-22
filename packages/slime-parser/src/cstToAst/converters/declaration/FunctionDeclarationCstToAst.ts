@@ -1,4 +1,4 @@
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     SlimeAstUtil, type SlimeBlockStatement, type SlimeClassBody, type SlimeClassDeclaration,
     SlimeClassExpression, type SlimeExpression,
@@ -6,10 +6,10 @@ import {
     type SlimeFunctionParam,
     SlimeIdentifier, SlimeNodeType, SlimeTokenCreate
 } from "slime-ast";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
-export default class FunctionDeclarationCstToAst{
+export default class FunctionDeclarationCstToAst {
 
 
     /**
@@ -18,7 +18,7 @@ export default class FunctionDeclarationCstToAst{
      * - function BindingIdentifier ( FormalParameters ) { FunctionBody }
      * Children: [FunctionTok, BindingIdentifier, LParen, FormalParameters, RParen, LBrace, FunctionBody, RBrace]
      */
-    createFunctionDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
+    static createFunctionDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
         const children = cst.children || []
 
         let functionName: SlimeIdentifier | null = null
@@ -108,7 +108,7 @@ export default class FunctionDeclarationCstToAst{
     }
 
 
-    createGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
+    static createGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
         // GeneratorDeclaration: function* name(params) { body }
         // 旧版 CST children: [FunctionTok, Asterisk, BindingIdentifier, LParen, FormalParameterList?, RParen, FunctionBodyDefine]
         // Es2025 CST children: [FunctionTok, Asterisk, BindingIdentifier, LParen, FormalParameters?, RParen, LBrace, GeneratorBody, RBrace]
@@ -159,7 +159,7 @@ export default class FunctionDeclarationCstToAst{
     }
 
 
-    createAsyncFunctionDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
+    static createAsyncFunctionDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
         // AsyncFunctionDeclaration: async function name(params) { body }
         // CST children: [AsyncTok, FunctionTok, BindingIdentifier, LParen, FormalParameters?, RParen, LBrace, AsyncFunctionBody, RBrace]
         // 或者旧�? [AsyncTok, FunctionTok, BindingIdentifier, LParen, FormalParameterList?, RParen, FunctionBodyDefine]
@@ -202,7 +202,7 @@ export default class FunctionDeclarationCstToAst{
     }
 
 
-    createAsyncGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
+    static createAsyncGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
         // AsyncGeneratorDeclaration: async function* name(params) { body }
         // CST children: [AsyncTok, FunctionTok, Asterisk, BindingIdentifier, LParen, FormalParameters?, RParen, LBrace, AsyncGeneratorBody, RBrace]
 

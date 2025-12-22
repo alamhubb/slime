@@ -1,7 +1,7 @@
 /**
  * CompoundLiteralCstToAst - 数组/对象字面量转换
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     type SlimeArrayElement,
     type SlimeArrayExpression, type SlimeArrowFunctionExpression,
@@ -20,14 +20,14 @@ import {
     SlimeTokenCreate
 } from "slime-ast";
 import SlimeParser from "../../../SlimeParser.ts";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
 
 export class CompoundLiteralCstToAst {
 
 
 
-    createPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral | SlimeExpression {
+    static createPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral | SlimeExpression {
         if (!cst || !cst.children || cst.children.length === 0) {
             throw new Error('createPropertyNameAst: invalid cst or no children')
         }
@@ -47,7 +47,7 @@ export class CompoundLiteralCstToAst {
 
 
 
-    createLiteralPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
+    static createLiteralPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
         if (!cst) {
             throw new Error('createLiteralPropertyNameAst: cst is null')
         }
@@ -99,7 +99,7 @@ export class CompoundLiteralCstToAst {
 
 
 
-    createSpreadElementAst(cst: SubhutiCst): SlimeSpreadElement {
+    static createSpreadElementAst(cst: SubhutiCst): SlimeSpreadElement {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.SpreadElement?.name);
         // SpreadElement: [Ellipsis, AssignmentExpression]
 
@@ -128,7 +128,7 @@ export class CompoundLiteralCstToAst {
 
 
 
-    createElementListAst(cst: SubhutiCst): Array<SlimeArrayElement> {
+    static createElementListAst(cst: SubhutiCst): Array<SlimeArrayElement> {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ElementList?.name);
         const elements: Array<SlimeArrayElement> = []
 
@@ -192,7 +192,7 @@ export class CompoundLiteralCstToAst {
      * ArrayLiteral CST �?ArrayExpression AST
      * ArrayLiteral -> [ Elision? ] | [ ElementList ] | [ ElementList , Elision? ]
      */
-    createArrayLiteralAst(cst: SubhutiCst): SlimeArrayExpression {
+    static createArrayLiteralAst(cst: SubhutiCst): SlimeArrayExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArrayLiteral?.name);
         // ArrayLiteral: [LBracket, ElementList?, Comma?, Elision?, RBracket]
 
@@ -239,7 +239,7 @@ export class CompoundLiteralCstToAst {
      * 对象字面�?CST �?AST（透传�?ObjectExpression�?
      * ObjectLiteral -> { } | { PropertyDefinitionList } | { PropertyDefinitionList , }
      */
-    createObjectLiteralAst(cst: SubhutiCst): SlimeObjectExpression {
+    static createObjectLiteralAst(cst: SubhutiCst): SlimeObjectExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ObjectLiteral?.name);
         const properties: Array<SlimeObjectPropertyItem> = []
 
@@ -294,7 +294,7 @@ export class CompoundLiteralCstToAst {
         return SlimeAstUtil.createObjectExpression(properties, cst.loc, lBraceToken, rBraceToken)
     }
 
-    createPropertyDefinitionAst(cst: SubhutiCst): SlimeProperty {
+    static createPropertyDefinitionAst(cst: SubhutiCst): SlimeProperty {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.PropertyDefinition?.name);
 
         // 防御性检查：如果 children 为空，说明是空对象的情况，不应该被调�?

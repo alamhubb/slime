@@ -1,7 +1,7 @@
 /**
  * ExportCstToAst - export 相关转换
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import type {
     SlimeExportAllDeclaration,
     SlimeExportDefaultDeclaration,
@@ -10,7 +10,7 @@ import type {
     SlimeStatement
 } from "slime-ast";
 import SlimeParser from "../../../SlimeParser.ts";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 
 export class ExportCstToAst {
 
@@ -18,7 +18,7 @@ export class ExportCstToAst {
      * ExportFromClause CST �?AST
      * ExportFromClause -> * | * as ModuleExportName | NamedExports
      */
-    createExportFromClauseAst(cst: SubhutiCst): any {
+    static createExportFromClauseAst(cst: SubhutiCst): any {
         const children = cst.children || []
 
         // 检查是否是 * (export all)
@@ -38,7 +38,7 @@ export class ExportCstToAst {
                 }
             } else {
                 // * (export all)
-                return {type: 'exportAll', exported: null}
+                return { type: 'exportAll', exported: null }
             }
         }
 
@@ -54,10 +54,10 @@ export class ExportCstToAst {
             }
         }
 
-        return {type: 'unknown'}
+        return { type: 'unknown' }
     }
 
-    createExportDeclarationAst(cst: SubhutiCst): SlimeExportDefaultDeclaration | SlimeExportNamedDeclaration | SlimeExportAllDeclaration {
+    static createExportDeclarationAst(cst: SubhutiCst): SlimeExportDefaultDeclaration | SlimeExportNamedDeclaration | SlimeExportAllDeclaration {
         let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ExportDeclaration?.name);
         const children = cst.children || []
 
@@ -214,7 +214,7 @@ export class ExportCstToAst {
     /**
      * 创建 NamedExports AST (export { a, b, c })
      */
-    createNamedExportsAst(cst: SubhutiCst): SlimeExportSpecifierItem[] {
+    static createNamedExportsAst(cst: SubhutiCst): SlimeExportSpecifierItem[] {
         // NamedExports: { ExportsList? }
         const specifiers: SlimeExportSpecifierItem[] = []
 
@@ -222,7 +222,7 @@ export class ExportCstToAst {
             if (child.name === SlimeParser.prototype.ExportsList?.name) {
                 return this.createExportsListAst(child)
             } else if (child.name === SlimeParser.prototype.ExportSpecifier?.name) {
-                specifiers.push({specifier: this.createExportSpecifierAst(child)})
+                specifiers.push({ specifier: this.createExportSpecifierAst(child) })
             }
         }
 
@@ -232,14 +232,14 @@ export class ExportCstToAst {
     /**
      * 创建 ExportsList AST
      */
-    createExportsListAst(cst: SubhutiCst): SlimeExportSpecifierItem[] {
+    static createExportsListAst(cst: SubhutiCst): SlimeExportSpecifierItem[] {
         const specifiers: SlimeExportSpecifierItem[] = []
         let lastSpecifier: SlimeExportSpecifier | null = null
 
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.ExportSpecifier?.name) {
                 if (lastSpecifier) {
-                    specifiers.push({specifier: lastSpecifier})
+                    specifiers.push({ specifier: lastSpecifier })
                 }
                 lastSpecifier = this.createExportSpecifierAst(child)
             } else if (child.name === SlimeTokenConsumer.prototype.Comma?.name || child.value === ',') {
@@ -254,7 +254,7 @@ export class ExportCstToAst {
         }
 
         if (lastSpecifier) {
-            specifiers.push({specifier: lastSpecifier})
+            specifiers.push({ specifier: lastSpecifier })
         }
 
         return specifiers
@@ -263,7 +263,7 @@ export class ExportCstToAst {
     /**
      * 创建 ExportSpecifier AST
      */
-    createExportSpecifierAst(cst: SubhutiCst): SlimeExportSpecifier {
+    static createExportSpecifierAst(cst: SubhutiCst): SlimeExportSpecifier {
         // ExportSpecifier: ModuleExportName | ModuleExportName as ModuleExportName
         const children = cst.children || []
         let local: any = null
@@ -294,7 +294,7 @@ export class ExportCstToAst {
     /**
      * 创建 ModuleExportName AST
      */
-    createModuleExportNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
+    static createModuleExportNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
         const first = cst.children?.[0]
         if (!first) {
             throw new Error('ModuleExportName has no children')

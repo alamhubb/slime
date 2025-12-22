@@ -1,5 +1,5 @@
-import {SubhutiCst} from "subhuti";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SubhutiCst } from "subhuti";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 import {
     SlimeBlockStatement,
@@ -9,12 +9,12 @@ import {
     SlimeTokenCreate
 } from "slime-ast";
 
-export default class SwitchCstToAst{
+export default class SwitchCstToAst {
     /**
      * CaseClause CST �?AST
      * CaseClause -> case Expression : StatementList?
      */
-    createCaseClauseAst(cst: SubhutiCst): any {
+    static createCaseClauseAst(cst: SubhutiCst): any {
         return this.createSwitchCaseAst(cst)
     }
 
@@ -22,7 +22,7 @@ export default class SwitchCstToAst{
      * DefaultClause CST �?AST
      * DefaultClause -> default : StatementList?
      */
-    createDefaultClauseAst(cst: SubhutiCst): any {
+    static createDefaultClauseAst(cst: SubhutiCst): any {
         return this.createSwitchCaseAst(cst)
     }
 
@@ -30,7 +30,7 @@ export default class SwitchCstToAst{
      * CaseClauses CST �?AST
      * CaseClauses -> CaseClause+
      */
-    createCaseClausesAst(cst: SubhutiCst): any[] {
+    static createCaseClausesAst(cst: SubhutiCst): any[] {
         const cases: any[] = []
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.CaseClause?.name || child.name === 'CaseClause') {
@@ -44,7 +44,7 @@ export default class SwitchCstToAst{
      * CaseBlock CST �?AST
      * CaseBlock -> { CaseClauses? DefaultClause? CaseClauses? }
      */
-    createCaseBlockAst(cst: SubhutiCst): any[] {
+    static createCaseBlockAst(cst: SubhutiCst): any[] {
         return this.extractCasesFromCaseBlock(cst)
     }
 
@@ -59,7 +59,7 @@ export default class SwitchCstToAst{
      * DefaultClause: default : StatementList?
      * @internal
      */
-    createSwitchCaseAst(cst: SubhutiCst): any {
+    static createSwitchCaseAst(cst: SubhutiCst): any {
         let test = null
         let consequent: any[] = []
         let caseToken: any = undefined
@@ -114,7 +114,7 @@ export default class SwitchCstToAst{
      * �?CaseBlock 提取所�?case/default 子句
      * CaseBlock: { CaseClauses? DefaultClause? CaseClauses? }
      */
-    extractCasesFromCaseBlock(caseBlockCst: SubhutiCst): any[] {
+    static extractCasesFromCaseBlock(caseBlockCst: SubhutiCst): any[] {
         const cases: any[] = []
 
         if (!caseBlockCst.children) return cases

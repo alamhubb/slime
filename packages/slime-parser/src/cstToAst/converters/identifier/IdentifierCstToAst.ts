@@ -1,7 +1,7 @@
 /**
  * IdentifierCstToAst - 标识符相关转换
  */
-import {SubhutiCst, type SubhutiSourceLocation} from "subhuti";
+import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
 import {
     SlimeAstUtil,
     SlimeClassBody, SlimeFunctionParam,
@@ -10,13 +10,13 @@ import {
     SlimePropertyDefinition,
     SlimeStatement
 } from "slime-ast";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
 
 export class IdentifierCstToAst {
 
-    createIdentifierNameAst(cst: SubhutiCst): SlimeIdentifier {
+    static createIdentifierNameAst(cst: SubhutiCst): SlimeIdentifier {
         // IdentifierName 可能�?
         // 1. 直接�?value �?token
         // 2. 包含子节点的规则节点
@@ -42,7 +42,7 @@ export class IdentifierCstToAst {
     }
 
 
-    createBindingIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
+    static createBindingIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BindingIdentifier?.name);
         // BindingIdentifier 结构�?
         // ES2025: BindingIdentifier -> Identifier -> IdentifierNameTok
@@ -76,7 +76,7 @@ export class IdentifierCstToAst {
      * PrivateIdentifier :: # IdentifierName
      * AST 表示：{ type: "Identifier", name: "#count" }
      */
-    createPrivateIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
+    static createPrivateIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
         // Es2025Parser: PrivateIdentifier 是一个直接的 token，value 已经包含 #
         // 例如：{ name: 'PrivateIdentifier', value: '#count' } �?value: '#\u{61}'
         if (cst.value) {
@@ -132,7 +132,7 @@ export class IdentifierCstToAst {
      * LabelIdentifier 用于 break/continue 语句的标签和 LabelledStatement 的标签�?
      * 结构�?IdentifierReference 相同�?
      */
-    createLabelIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
+    static createLabelIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
         const expectedName = SlimeParser.prototype.LabelIdentifier?.name || 'LabelIdentifier'
         if (cst.name !== expectedName && cst.name !== 'LabelIdentifier') {
             throw new Error(`Expected LabelIdentifier, got ${cst.name}`)
@@ -156,7 +156,7 @@ export class IdentifierCstToAst {
      * IdentifierReference 是对 Identifier 的引用包装，
      * �?ES 规范中用于区分标识符的不同使用场景�?
      */
-    createIdentifierReferenceAst(cst: SubhutiCst): SlimeIdentifier {
+    static createIdentifierReferenceAst(cst: SubhutiCst): SlimeIdentifier {
         const expectedName = SlimeParser.prototype.IdentifierReference?.name || 'IdentifierReference'
         if (cst.name !== expectedName && cst.name !== 'IdentifierReference') {
             throw new Error(`Expected IdentifierReference, got ${cst.name}`)
@@ -172,7 +172,7 @@ export class IdentifierCstToAst {
     }
 
 
-    createIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
+    static createIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
         // Support Identifier, IdentifierName, and contextual keywords (yield, await) used as identifiers
         const expectedName = SlimeParser.prototype.Identifier?.name || 'Identifier'
         const isIdentifier = cst.name === expectedName || cst.name === 'Identifier'

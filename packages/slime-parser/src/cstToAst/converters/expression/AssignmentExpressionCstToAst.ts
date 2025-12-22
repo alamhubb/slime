@@ -1,4 +1,4 @@
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     SlimeArrowFunctionExpression, SlimeAssignmentExpression, SlimeAstUtil,
     type SlimeBlockStatement, type SlimeClassExpression,
@@ -8,16 +8,16 @@ import {
     type SlimeIdentifier,
     SlimeTokenCreate
 } from "slime-ast";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
-export default class AssignmentExpressionCstToAst{
+export default class AssignmentExpressionCstToAst {
 
     /**
      * ExpressionBody CST �?AST
      * ExpressionBody -> AssignmentExpression
      */
-    createExpressionBodyAst(cst: SubhutiCst): SlimeExpression {
+    static createExpressionBodyAst(cst: SubhutiCst): SlimeExpression {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             return this.createAssignmentExpressionAst(firstChild)
@@ -27,7 +27,7 @@ export default class AssignmentExpressionCstToAst{
 
 
 
-    createAssignmentExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createAssignmentExpressionAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.AssignmentExpression?.name);
 
         if (cst.children.length === 1) {
@@ -62,7 +62,7 @@ export default class AssignmentExpressionCstToAst{
     }
 
 
-    createExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createExpressionAst(cst: SubhutiCst): SlimeExpression {
         const cached = this.expressionAstCache.get(cst)
         if (cached) {
             return cached
@@ -72,7 +72,7 @@ export default class AssignmentExpressionCstToAst{
         return result
     }
 
-    createExpressionAstUncached(cst: SubhutiCst): SlimeExpression {
+    static createExpressionAstUncached(cst: SubhutiCst): SlimeExpression {
         const astName = cst.name
         let left
         if (astName === SlimeParser.prototype.Expression?.name) {

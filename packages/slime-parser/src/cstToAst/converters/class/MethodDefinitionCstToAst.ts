@@ -1,7 +1,7 @@
 /**
  * MethodDefinitionCstToAst - 方法定义转换
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     SlimeAstUtil,
     type SlimeBlockStatement,
@@ -10,14 +10,14 @@ import {
     type SlimeIdentifier
 } from "slime-ast";
 import SlimeParser from "../../../SlimeParser.ts";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 
 export class MethodDefinitionCstToAst {
 
     /**
      * 处理 PropertySetParameterList
      */
-    createPropertySetParameterListAst(cst: SubhutiCst): SlimePattern[] {
+    static createPropertySetParameterListAst(cst: SubhutiCst): SlimePattern[] {
         // PropertySetParameterList: FormalParameter
         if (!cst.children || cst.children.length === 0) {
             return []
@@ -35,7 +35,7 @@ export class MethodDefinitionCstToAst {
 
 
     /** 返回包装类型的版�?*/
-    createPropertySetParameterListAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+    static createPropertySetParameterListAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
         // PropertySetParameterList: FormalParameter
         if (!cst.children || cst.children.length === 0) {
             return []
@@ -54,7 +54,7 @@ export class MethodDefinitionCstToAst {
     /**
      * 内部辅助方法：创建 MethodDefinition AST
      */
-    createMethodDefinitionAstInternal(cst: SubhutiCst, kind: 'method' | 'get' | 'set', generator: boolean, async: boolean): SlimeMethodDefinition {
+    static createMethodDefinitionAstInternal(cst: SubhutiCst, kind: 'method' | 'get' | 'set', generator: boolean, async: boolean): SlimeMethodDefinition {
         // 查找属性名
         const classElementName = cst.children?.find(ch =>
             ch.name === SlimeParser.prototype.ClassElementName?.name ||
@@ -102,7 +102,7 @@ export class MethodDefinitionCstToAst {
      * GeneratorMethod CST �?AST
      * GeneratorMethod -> * ClassElementName ( UniqueFormalParameters ) { GeneratorBody }
      */
-    createGeneratorMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
+    static createGeneratorMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
         return this.createMethodDefinitionAstInternal(cst, 'method', true, false)
     }
 
@@ -112,21 +112,21 @@ export class MethodDefinitionCstToAst {
      * AsyncMethod CST �?AST
      * AsyncMethod -> async ClassElementName ( UniqueFormalParameters ) { AsyncFunctionBody }
      */
-    createAsyncMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
+    static createAsyncMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
         return this.createMethodDefinitionAstInternal(cst, 'method', false, true)
     }
 
     /**
      * AsyncGeneratorMethod CST �?AST
      */
-    createAsyncGeneratorMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
+    static createAsyncGeneratorMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
         return this.createMethodDefinitionAstInternal(cst, 'method', true, true)
     }
 
 
 
 
-    createMethodDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+    static createMethodDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         // 注意：参数顺序是 (staticCst, cst)，与调用保持一�?
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.MethodDefinition?.name);
         const first = cst.children?.[0]
@@ -185,7 +185,7 @@ export class MethodDefinitionCstToAst {
      * 处理 ES2025 Parser �?IdentifierNameTok ( UniqueFormalParameters ) { FunctionBody } 结构
      * @internal
      */
-    createMethodDefinitionMethodDefinitionFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+    static createMethodDefinitionMethodDefinitionFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         let i = 0
         const children = cst.children
 
@@ -283,7 +283,7 @@ export class MethodDefinitionCstToAst {
      * 处理 ES2025 Parser �?ClassElementName ( UniqueFormalParameters ) { FunctionBody } 结构
      * @internal
      */
-    createMethodDefinitionClassElementNameAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+    static createMethodDefinitionClassElementNameAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         // children: [ClassElementName, LParen, UniqueFormalParameters?, RParen, LBrace, FunctionBody?, RBrace]
         let i = 0
         const children = cst.children
@@ -375,7 +375,7 @@ export class MethodDefinitionCstToAst {
      * 处理 ES2025 Parser 的 get ClassElementName ( ) { FunctionBody } 结构
      * @internal
      */
-    createMethodDefinitionGetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+    static createMethodDefinitionGetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         // children: [GetTok, ClassElementName, LParen, RParen, LBrace, FunctionBody?, RBrace]
         const children = cst.children
         let i = 0
@@ -452,7 +452,7 @@ export class MethodDefinitionCstToAst {
      * 处理 ES2025 Parser 的 set ClassElementName ( PropertySetParameterList ) { FunctionBody } 结构
      * @internal
      */
-    createMethodDefinitionSetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+    static createMethodDefinitionSetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         // children: [SetTok, ClassElementName, LParen, PropertySetParameterList, RParen, LBrace, FunctionBody?, RBrace]
         const children = cst.children
         let i = 0
@@ -537,7 +537,7 @@ export class MethodDefinitionCstToAst {
      * 处理 ES2025 Parser 的 IdentifierNameTok="get" ClassElementName ( ) { FunctionBody } 结构
      * @internal
      */
-    createMethodDefinitionGetterMethodFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+    static createMethodDefinitionGetterMethodFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         const children = cst.children
         let i = 0
 
@@ -613,7 +613,7 @@ export class MethodDefinitionCstToAst {
      * 处理 ES2025 Parser 的 IdentifierNameTok="set" ClassElementName ( ... ) { FunctionBody } 结构
      * @internal
      */
-    createMethodDefinitionSetterMethodFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+    static createMethodDefinitionSetterMethodFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         const children = cst.children
         let i = 0
 
@@ -701,7 +701,7 @@ export class MethodDefinitionCstToAst {
      * 处理 ES2025 Parser 的 * ClassElementName ( UniqueFormalParameters ) { GeneratorBody } 结构
      * @internal
      */
-    createMethodDefinitionGeneratorMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+    static createMethodDefinitionGeneratorMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         // GeneratorMethod children: [Asterisk, ClassElementName, LParen, UniqueFormalParameters?, RParen, LBrace, GeneratorBody, RBrace]
         const children = cst.children
         let i = 0
@@ -787,7 +787,7 @@ export class MethodDefinitionCstToAst {
      * [内部方法] generator 方法 (�?MethodDefinition children 直接处理)
      * @internal
      */
-    createMethodDefinitionGeneratorMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+    static createMethodDefinitionGeneratorMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         return this.createMethodDefinitionGeneratorMethodAst(staticCst, cst)
     }
 
@@ -796,7 +796,7 @@ export class MethodDefinitionCstToAst {
      * 处理 ES2025 Parser 的 async ClassElementName ( UniqueFormalParameters ) { AsyncFunctionBody } 结构
      * @internal
      */
-    createMethodDefinitionAsyncMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+    static createMethodDefinitionAsyncMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         // AsyncMethod children: [AsyncTok, ClassElementName, LParen, UniqueFormalParameters?, RParen, LBrace, AsyncFunctionBody, RBrace]
         const children = cst.children
         let i = 0
@@ -882,7 +882,7 @@ export class MethodDefinitionCstToAst {
      * [内部方法] async 方法 (�?MethodDefinition children 直接处理)
      * @internal
      */
-    createMethodDefinitionAsyncMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+    static createMethodDefinitionAsyncMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         // 检查是否是 AsyncGeneratorMethod (async * ...)
         const children = cst.children
         if (children[1]?.name === 'Asterisk') {
@@ -896,7 +896,7 @@ export class MethodDefinitionCstToAst {
      * 处理 ES2025 Parser 的 async * ClassElementName ( ... ) { AsyncGeneratorBody } 结构
      * @internal
      */
-    createMethodDefinitionAsyncGeneratorMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+    static createMethodDefinitionAsyncGeneratorMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         // AsyncGeneratorMethod children: [AsyncTok, Asterisk, ClassElementName, LParen, UniqueFormalParameters?, RParen, LBrace, AsyncGeneratorBody, RBrace]
         const children = cst.children
         let i = 0

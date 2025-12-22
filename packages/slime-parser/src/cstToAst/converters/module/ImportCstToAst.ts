@@ -1,14 +1,14 @@
 /**
  * ImportCstToAst - import 相关转换
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     SlimeAstUtil,
     SlimeIdentifier, type SlimeImportDeclaration,
     type SlimeModuleDeclaration, SlimePattern, type SlimeStatement, SlimeTokenCreate, SlimeVariableDeclarator
 } from "slime-ast";
 import SlimeParser from "../../../SlimeParser.ts";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 
 export class ImportCstToAst {
 
@@ -19,7 +19,7 @@ export class ImportCstToAst {
      * ImportCall: import ( AssignmentExpression ,_opt )
      *           | import ( AssignmentExpression , AssignmentExpression ,_opt )
      */
-    createImportCallAst(cst: SubhutiCst): SlimeExpression {
+    static createImportCallAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportCall?.name);
         // ImportCall -> ImportTok + LParen + AssignmentExpression + (Comma + AssignmentExpression)? + Comma? + RParen
         // children: [ImportTok, LParen, AssignmentExpression, (Comma, AssignmentExpression)?, Comma?, RParen]
@@ -44,7 +44,7 @@ export class ImportCstToAst {
      * NameSpaceImport CST �?AST
      * NameSpaceImport -> * as ImportedBinding
      */
-    createNameSpaceImportAst(cst: SubhutiCst): SlimeImportNamespaceSpecifier {
+    static createNameSpaceImportAst(cst: SubhutiCst): SlimeImportNamespaceSpecifier {
         // NameSpaceImport: Asterisk as ImportedBinding
         // children: [Asterisk, AsTok, ImportedBinding]
         let asteriskToken: any = undefined
@@ -69,7 +69,7 @@ export class ImportCstToAst {
      * NamedImports CST 转 AST
      * NamedImports -> { } | { ImportsList } | { ImportsList , }
      */
-    createNamedImportsAst(cst: SubhutiCst): Array<SlimeImportSpecifier> {
+    static createNamedImportsAst(cst: SubhutiCst): Array<SlimeImportSpecifier> {
         // NamedImports: {LBrace, ImportsList?, RBrace}
         const importsList = cst.children.find(ch => ch.name === SlimeParser.prototype.ImportsList?.name)
         if (!importsList) return []
@@ -115,7 +115,7 @@ export class ImportCstToAst {
      * ImportsList CST �?AST
      * ImportsList -> ImportSpecifier (, ImportSpecifier)*
      */
-    createImportsListAst(cst: SubhutiCst): Array<SlimeImportSpecifier> {
+    static createImportsListAst(cst: SubhutiCst): Array<SlimeImportSpecifier> {
         const specifiers: SlimeImportSpecifier[] = []
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.ImportSpecifier?.name ||
@@ -130,7 +130,7 @@ export class ImportCstToAst {
      * ImportSpecifier CST �?AST
      * ImportSpecifier -> ImportedBinding | ModuleExportName as ImportedBinding
      */
-    createImportSpecifierAst(cst: SubhutiCst): SlimeImportSpecifier {
+    static createImportSpecifierAst(cst: SubhutiCst): SlimeImportSpecifier {
         const children = cst.children || []
         let imported: SlimeIdentifier | null = null
         let local: SlimeIdentifier | null = null
@@ -154,10 +154,10 @@ export class ImportCstToAst {
 
         // 如果没有 as，imported �?local 相同
         if (!local && imported) {
-            local = {...imported}
+            local = { ...imported }
         }
         if (!imported && local) {
-            imported = {...local}
+            imported = { ...local }
         }
 
         return SlimeAstUtil.createImportSpecifier(imported!, local!, asToken)
@@ -167,7 +167,7 @@ export class ImportCstToAst {
      * AttributeKey CST �?AST
      * AttributeKey -> IdentifierName | StringLiteral
      */
-    createAttributeKeyAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
+    static createAttributeKeyAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
         const firstChild = cst.children?.[0]
         if (!firstChild) throw new Error('AttributeKey has no children')
 
@@ -185,7 +185,7 @@ export class ImportCstToAst {
      * WithEntries CST �?AST
      * WithEntries -> AttributeKey : StringLiteral (, AttributeKey : StringLiteral)*
      */
-    createWithEntriesAst(cst: SubhutiCst): any[] {
+    static createWithEntriesAst(cst: SubhutiCst): any[] {
         const entries: any[] = []
         let currentKey: any = null
 
@@ -209,7 +209,7 @@ export class ImportCstToAst {
         return entries
     }
 
-    createImportDeclarationAst(cst: SubhutiCst): SlimeImportDeclaration {
+    static createImportDeclarationAst(cst: SubhutiCst): SlimeImportDeclaration {
         let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportDeclaration?.name);
         const first = cst.children[0]
         const first1 = cst.children[1]
@@ -265,14 +265,14 @@ export class ImportCstToAst {
     }
 
     /** 解析 WithClause: with { type: "json" } */
-    createWithClauseAst(cst: SubhutiCst): { attributes: any[], withToken: any } {
+    static createWithClauseAst(cst: SubhutiCst): { attributes: any[], withToken: any } {
         // WithClause: With, LBrace, WithEntries?, RBrace
         let withToken: any = undefined
         const attributes: any[] = []
 
         for (const child of cst.children || []) {
             if (child.name === 'With' || child.value === 'with') {
-                withToken = {type: 'With', value: 'with', loc: child.loc}
+                withToken = { type: 'With', value: 'with', loc: child.loc }
             } else if (child.name === SlimeParser.prototype.WithEntries?.name || child.name === 'WithEntries') {
                 // WithEntries 包含 AttributeKey, Colon, StringLiteral, 可能有多个用逗号分隔
                 let currentKey: any = null
@@ -299,7 +299,7 @@ export class ImportCstToAst {
                                 type: 'ImportAttribute',
                                 key: currentKey,
                                 value: this.createStringLiteralAst(entry),
-                                loc: {...currentKey.loc, end: entry.loc?.end}
+                                loc: { ...currentKey.loc, end: entry.loc?.end }
                             })
                             currentKey = null
                         }
@@ -309,11 +309,11 @@ export class ImportCstToAst {
             }
         }
 
-        return {attributes, withToken}
+        return { attributes, withToken }
     }
 
 
-    createFromClauseAst(cst: SubhutiCst): { source: SlimeStringLiteral, fromToken?: any } {
+    static createFromClauseAst(cst: SubhutiCst): { source: SlimeStringLiteral, fromToken?: any } {
         let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FromClause?.name);
         const first = cst.children[0]
         const ModuleSpecifier = this.createModuleSpecifierAst(cst.children[1])
@@ -330,14 +330,14 @@ export class ImportCstToAst {
         }
     }
 
-    createModuleSpecifierAst(cst: SubhutiCst): SlimeStringLiteral {
+    static createModuleSpecifierAst(cst: SubhutiCst): SlimeStringLiteral {
         let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ModuleSpecifier?.name);
         const first = cst.children[0]
         const ast = SlimeAstUtil.createStringLiteral(first.value)
         return ast
     }
 
-    createImportClauseAst(cst: SubhutiCst): {
+    static createImportClauseAst(cst: SubhutiCst): {
         specifiers: Array<SlimeImportSpecifierItem>,
         lBraceToken?: any,
         rBraceToken?: any
@@ -385,10 +385,10 @@ export class ImportCstToAst {
             rBraceToken = namedResult.rBraceToken
         }
 
-        return {specifiers: result, lBraceToken, rBraceToken}
+        return { specifiers: result, lBraceToken, rBraceToken }
     }
 
-    createImportedDefaultBindingAst(cst: SubhutiCst): SlimeImportDefaultSpecifier {
+    static createImportedDefaultBindingAst(cst: SubhutiCst): SlimeImportDefaultSpecifier {
         let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportedDefaultBinding?.name);
         const first = cst.children[0]
         const id = this.createImportedBindingAst(first)
@@ -396,14 +396,14 @@ export class ImportCstToAst {
         return importDefaultSpecifier
     }
 
-    createImportedBindingAst(cst: SubhutiCst): SlimeIdentifier {
+    static createImportedBindingAst(cst: SubhutiCst): SlimeIdentifier {
         let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportedBinding?.name);
         const first = cst.children[0]
         return this.createBindingIdentifierAst(first)
     }
 
     /** 返回包装类型的版本，包含 brace tokens */
-    createNamedImportsListAstWrapped(cst: SubhutiCst): {
+    static createNamedImportsListAstWrapped(cst: SubhutiCst): {
         specifiers: Array<SlimeImportSpecifierItem>,
         lBraceToken?: any,
         rBraceToken?: any
@@ -423,7 +423,7 @@ export class ImportCstToAst {
 
         const importsList = cst.children.find(ch => ch.name === SlimeParser.prototype.ImportsList?.name)
         // 空命名导�?import {} from "foo" - 返回�?specifiers 但有 brace tokens
-        if (!importsList) return {specifiers: [], lBraceToken, rBraceToken}
+        if (!importsList) return { specifiers: [], lBraceToken, rBraceToken }
 
         const specifiers: Array<SlimeImportSpecifierItem> = []
         let currentSpec: SlimeImportSpecifier | null = null
@@ -483,7 +483,7 @@ export class ImportCstToAst {
             specifiers.push(SlimeAstUtil.createImportSpecifierItem(currentSpec!, undefined))
         }
 
-        return {specifiers, lBraceToken, rBraceToken}
+        return { specifiers, lBraceToken, rBraceToken }
     }
 
 }

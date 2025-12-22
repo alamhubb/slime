@@ -1,4 +1,4 @@
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     SlimeAstUtil,
     SlimeBlockStatement,
@@ -7,7 +7,7 @@ import {
     SlimeIdentifier,
     SlimeNodeType, type SlimePattern, SlimeTokenCreate, type SlimeVariableDeclarator
 } from "slime-ast";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
 
@@ -21,7 +21,7 @@ export class OtherStatementCstToAst {
      * SemicolonASI CST �?AST
      * 处理自动分号插入
      */
-    createSemicolonASIAst(cst: SubhutiCst): any {
+    static createSemicolonASIAst(cst: SubhutiCst): any {
         // ASI 不产生实际的 AST 节点，返�?null
         return null
     }
@@ -29,7 +29,7 @@ export class OtherStatementCstToAst {
     /**
      * 创建空语�?AST
      */
-    createEmptyStatementAst(cst: SubhutiCst): any {
+    static createEmptyStatementAst(cst: SubhutiCst): any {
         // 兼容 EmptyStatement 和旧�?NotEmptySemicolon
         // SlimeAstUtils.checkCstName(cst, Es2025Parser.prototype.EmptyStatement?.name);
 
@@ -52,7 +52,7 @@ export class OtherStatementCstToAst {
     /**
      * 创建 throw 语句 AST
      */
-    createThrowStatementAst(cst: SubhutiCst): any {
+    static createThrowStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ThrowStatement?.name);
         // ThrowStatement: throw Expression ;
 
@@ -76,7 +76,7 @@ export class OtherStatementCstToAst {
     /**
      * 创建 break 语句 AST
      */
-    createBreakStatementAst(cst: SubhutiCst): any {
+    static createBreakStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BreakStatement?.name);
         // BreakStatement: break Identifier? ;
 
@@ -104,7 +104,7 @@ export class OtherStatementCstToAst {
     /**
      * 创建 continue 语句 AST
      */
-    createContinueStatementAst(cst: SubhutiCst): any {
+    static createContinueStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ContinueStatement?.name);
         // ContinueStatement: continue Identifier? ;
 
@@ -133,7 +133,7 @@ export class OtherStatementCstToAst {
     /**
      * 创建 try 语句 AST
      */
-    createTryStatementAst(cst: SubhutiCst): any {
+    static createTryStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.TryStatement?.name);
         // TryStatement: TryTok Block (Catch Finally? | Finally)
 
@@ -166,7 +166,7 @@ export class OtherStatementCstToAst {
     /**
      * 创建 Finally 子句 AST
      */
-    createFinallyAst(cst: SubhutiCst): any {
+    static createFinallyAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Finally?.name);
         // Finally: FinallyTok Block
 
@@ -182,7 +182,7 @@ export class OtherStatementCstToAst {
      * Catch CST �?CatchClause AST
      * Catch -> catch ( CatchParameter ) Block | catch Block
      */
-    createCatchAst(cst: SubhutiCst): any {
+    static createCatchAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Catch?.name);
         // Catch: CatchTok LParen CatchParameter RParen Block
 
@@ -213,7 +213,7 @@ export class OtherStatementCstToAst {
     /**
      * 创建 CatchParameter AST
      */
-    createCatchParameterAst(cst: SubhutiCst): any {
+    static createCatchParameterAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.CatchParameter?.name);
         // CatchParameter: BindingIdentifier | BindingPattern
         const first = cst.children[0]
@@ -227,7 +227,7 @@ export class OtherStatementCstToAst {
         return null
     }
 
-    createReturnStatementAst(cst: SubhutiCst): SlimeReturnStatement {
+    static createReturnStatementAst(cst: SubhutiCst): SlimeReturnStatement {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ReturnStatement?.name);
 
         // return 语句可能有或没有表达�?
@@ -259,7 +259,7 @@ export class OtherStatementCstToAst {
         return SlimeAstUtil.createReturnStatement(argument, cst.loc, returnToken, semicolonToken)
     }
 
-    createExpressionStatementAst(cst: SubhutiCst): SlimeExpressionStatement {
+    static createExpressionStatementAst(cst: SubhutiCst): SlimeExpressionStatement {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ExpressionStatement?.name);
 
         let semicolonToken: any = undefined
@@ -285,7 +285,7 @@ export class OtherStatementCstToAst {
      * ES2025: LabelledStatement -> LabelIdentifier : LabelledItem
      * LabelledItem -> Statement | FunctionDeclaration
      */
-    createLabelledStatementAst(cst: SubhutiCst): any {
+    static createLabelledStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.LabelledStatement?.name);
 
         let label: any = null
@@ -347,7 +347,7 @@ export class OtherStatementCstToAst {
      * 创建 with 语句 AST
      * WithStatement: with ( Expression ) Statement
      */
-    createWithStatementAst(cst: SubhutiCst): any {
+    static createWithStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.WithStatement?.name);
 
         let object: any = null
@@ -386,7 +386,7 @@ export class OtherStatementCstToAst {
     /**
      * 创建 debugger 语句 AST
      */
-    createDebuggerStatementAst(cst: SubhutiCst): any {
+    static createDebuggerStatementAst(cst: SubhutiCst): any {
         SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.DebuggerStatement?.name);
 
         let debuggerToken: any = undefined
@@ -407,7 +407,7 @@ export class OtherStatementCstToAst {
      * LabelledItem CST �?AST（透传�?
      * LabelledItem -> Statement | FunctionDeclaration
      */
-    createLabelledItemAst(cst: SubhutiCst): any {
+    static createLabelledItemAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             return this.createStatementDeclarationAst(firstChild)

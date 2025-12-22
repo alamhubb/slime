@@ -1,4 +1,4 @@
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     SlimeBlockStatement,
     SlimeFunctionExpression,
@@ -6,17 +6,17 @@ import {
     SlimeIdentifier,
     SlimeTokenCreate
 } from "slime-ast";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
-export default class AssignmentPatternCstToAst{
+export default class AssignmentPatternCstToAst {
     // ==================== 解构相关转换方法 ====================
 
     /**
      * AssignmentPattern CST �?AST
      * AssignmentPattern -> ObjectAssignmentPattern | ArrayAssignmentPattern
      */
-    createAssignmentPatternAst(cst: SubhutiCst): any {
+    static createAssignmentPatternAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
         if (!firstChild) throw new Error('AssignmentPattern has no children')
 
@@ -34,14 +34,14 @@ export default class AssignmentPatternCstToAst{
     /**
      * ObjectAssignmentPattern CST �?AST
      */
-    createObjectAssignmentPatternAst(cst: SubhutiCst): SlimeObjectPattern {
+    static createObjectAssignmentPatternAst(cst: SubhutiCst): SlimeObjectPattern {
         return this.createObjectBindingPatternAst(cst)
     }
 
     /**
      * ArrayAssignmentPattern CST �?AST
      */
-    createArrayAssignmentPatternAst(cst: SubhutiCst): SlimeArrayPattern {
+    static createArrayAssignmentPatternAst(cst: SubhutiCst): SlimeArrayPattern {
         return this.createArrayBindingPatternAst(cst)
     }
 
@@ -49,7 +49,7 @@ export default class AssignmentPatternCstToAst{
     /**
      * AssignmentPropertyList CST �?AST
      */
-    createAssignmentPropertyListAst(cst: SubhutiCst): any[] {
+    static createAssignmentPropertyListAst(cst: SubhutiCst): any[] {
         const properties: any[] = []
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.AssignmentProperty?.name ||
@@ -63,42 +63,42 @@ export default class AssignmentPatternCstToAst{
     /**
      * AssignmentProperty CST �?AST
      */
-    createAssignmentPropertyAst(cst: SubhutiCst): any {
+    static createAssignmentPropertyAst(cst: SubhutiCst): any {
         return this.createBindingPropertyAst(cst)
     }
 
     /**
      * AssignmentElementList CST �?AST
      */
-    createAssignmentElementListAst(cst: SubhutiCst): any[] {
+    static createAssignmentElementListAst(cst: SubhutiCst): any[] {
         return this.createBindingElementListAst(cst)
     }
 
     /**
      * AssignmentElement CST �?AST
      */
-    createAssignmentElementAst(cst: SubhutiCst): any {
+    static createAssignmentElementAst(cst: SubhutiCst): any {
         return this.createBindingElementAst(cst)
     }
 
     /**
      * AssignmentElisionElement CST �?AST
      */
-    createAssignmentElisionElementAst(cst: SubhutiCst): any {
+    static createAssignmentElisionElementAst(cst: SubhutiCst): any {
         return this.createBindingElisionElementAst(cst)
     }
 
     /**
      * AssignmentRestElement CST �?AST
      */
-    createAssignmentRestElementAst(cst: SubhutiCst): any {
+    static createAssignmentRestElementAst(cst: SubhutiCst): any {
         return this.createBindingRestElementAst(cst)
     }
 
     /**
      * AssignmentRestProperty CST �?AST
      */
-    createAssignmentRestPropertyAst(cst: SubhutiCst): any {
+    static createAssignmentRestPropertyAst(cst: SubhutiCst): any {
         return this.createBindingRestPropertyAst(cst)
     }
 }

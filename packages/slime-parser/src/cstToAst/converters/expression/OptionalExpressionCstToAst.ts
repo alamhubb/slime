@@ -5,11 +5,11 @@ import {
     type SlimeIdentifier,
     SlimeNodeType
 } from "slime-ast";
-import {SubhutiCst} from "subhuti";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SubhutiCst } from "subhuti";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
-export default class OptionalExpressionCstToAst{
+export default class OptionalExpressionCstToAst {
 
     /**
      * 创建 OptionalChain AST
@@ -18,7 +18,7 @@ export default class OptionalExpressionCstToAst{
      * 注意：只有紧跟在 ?. 后面的操作是 optional: true
      * 链式的后续操作（�?foo?.().bar() 中的 .bar()）是 optional: false
      */
-    createOptionalChainAst(object: SlimeExpression, chainCst: SubhutiCst): SlimeExpression {
+    static createOptionalChainAst(object: SlimeExpression, chainCst: SubhutiCst): SlimeExpression {
         let result = object
         // 追踪是否刚遇�??. token，下一个操作是 optional
         let nextIsOptional = false
@@ -109,7 +109,7 @@ export default class OptionalExpressionCstToAst{
      *   CallExpression OptionalChain
      *   OptionalExpression OptionalChain
      */
-    createOptionalExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createOptionalExpressionAst(cst: SubhutiCst): SlimeExpression {
         // OptionalExpression 结构�?
         // children[0] = MemberExpression | CallExpression
         // children[1...n] = OptionalChain

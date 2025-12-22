@@ -1,4 +1,4 @@
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     SlimeAstUtil,
     type SlimeBlockStatement,
@@ -9,11 +9,11 @@ import {
     SlimeVariableDeclarator
 } from "slime-ast";
 import SlimeParser from "../../../SlimeParser.ts";
-import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 
-export default class FunctionParameterCstToAst{
+export default class FunctionParameterCstToAst {
 
-    createBindingRestElementAst(cst: SubhutiCst): SlimeRestElement {
+    static createBindingRestElementAst(cst: SubhutiCst): SlimeRestElement {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BindingRestElement?.name);
         // BindingRestElement: ... BindingIdentifier | ... BindingPattern
         const argumentCst = cst.children[1]
@@ -33,14 +33,14 @@ export default class FunctionParameterCstToAst{
         return SlimeAstUtil.createRestElement(argument)
     }
 
-    createFunctionRestParameterAst(cst: SubhutiCst): SlimeRestElement {
+    static createFunctionRestParameterAst(cst: SubhutiCst): SlimeRestElement {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FunctionRestParameter?.name);
         const first = cst.children[0]
         return this.createBindingRestElementAst(first)
     }
 
 
-    createFunctionRestParameterAstAlt(cst: SubhutiCst): SlimeRestElement {
+    static createFunctionRestParameterAstAlt(cst: SubhutiCst): SlimeRestElement {
         // FunctionRestParameter: ... BindingIdentifier | ... BindingPattern
         // 或�?FunctionRestParameter -> BindingRestElement
         const children = cst.children || []
@@ -67,7 +67,7 @@ export default class FunctionParameterCstToAst{
         } as any
     }
 
-    createFormalParameterAst(cst: SubhutiCst): SlimePattern {
+    static createFormalParameterAst(cst: SubhutiCst): SlimePattern {
         // FormalParameter: BindingElement
         const first = cst.children[0]
         if (first.name === 'BindingElement' || first.name === SlimeParser.prototype.BindingElement?.name) {
@@ -76,7 +76,7 @@ export default class FunctionParameterCstToAst{
         return this.createBindingElementAst(cst)
     }
 
-    createFormalParameterListAst(cst: SubhutiCst): SlimePattern[] {
+    static createFormalParameterListAst(cst: SubhutiCst): SlimePattern[] {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FormalParameterList?.name);
 
         if (!cst.children || cst.children.length === 0) {
@@ -124,7 +124,7 @@ export default class FunctionParameterCstToAst{
     /**
      * 创建 FormalParameterList AST (包装版本)
      */
-    createFormalParameterListAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+    static createFormalParameterListAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
         const params: SlimeFunctionParam[] = []
         let lastParam: SlimePattern | null = null
 
@@ -157,7 +157,7 @@ export default class FunctionParameterCstToAst{
     /**
      * 处理 FormalParameters CST 节点
      */
-    createFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
+    static createFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
         // FormalParameters 可能包含 FormalParameterList 或为�?
         if (!cst.children || cst.children.length === 0) {
             return []
@@ -216,7 +216,7 @@ export default class FunctionParameterCstToAst{
      *   FormalParameterList ,
      *   FormalParameterList , FunctionRestParameter
      */
-    createFormalParametersAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+    static createFormalParametersAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
         const children = cst.children || []
         const params: SlimeFunctionParam[] = []
 
@@ -310,7 +310,7 @@ export default class FunctionParameterCstToAst{
      * �?ES2025 FormalParameterList 创建参数 AST（包装类型）
      * FormalParameterList: FormalParameter (, FormalParameter)*
      */
-    createFormalParameterListFromEs2025Wrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+    static createFormalParameterListFromEs2025Wrapped(cst: SubhutiCst): SlimeFunctionParam[] {
         const children = cst.children || []
         const params: SlimeFunctionParam[] = []
 
@@ -354,7 +354,7 @@ export default class FunctionParameterCstToAst{
     /**
      * 处理 UniqueFormalParameters CST 节点
      */
-    createUniqueFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
+    static createUniqueFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
         // UniqueFormalParameters: FormalParameters
         if (!cst.children || cst.children.length === 0) {
             return []
@@ -368,7 +368,7 @@ export default class FunctionParameterCstToAst{
     }
 
     /** 返回包装类型的版�?*/
-    createUniqueFormalParametersAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+    static createUniqueFormalParametersAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
         // UniqueFormalParameters: FormalParameters
         if (!cst.children || cst.children.length === 0) {
             return []
