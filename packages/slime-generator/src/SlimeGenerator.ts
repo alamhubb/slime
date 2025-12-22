@@ -48,10 +48,7 @@ import type { SubhutiSourceLocation } from "subhuti";
 import { SubhutiCreateToken } from "subhuti";
 import { SubhutiMatchToken } from "subhuti";
 import { SlimeJavascriptTokensObj } from "slime-parser";
-import { SlimeJavascriptTokenType } from "slime-token";
-
-// 兼容别名
-const Es6TokenName = SlimeJavascriptTokenType;
+import {SlimeJavascriptTokenType} from "slime-token";
 
 // 创建软关键字的 token 对象（用于代码生成）
 const createSoftKeywordToken = (name: string, value: string): SubhutiCreateToken => ({
@@ -815,7 +812,7 @@ export default class SlimeJavascriptGenerator {
         if (!identifierName) {
             console.error('generatorIdentifier: node.name is undefined', JSON.stringify(node, null, 2))
         }
-        const identifier = { type: Es6TokenName.IdentifierNameTok, name: Es6TokenName.IdentifierNameTok, value: identifierName }
+        const identifier = { type: SlimeJavascriptTokenType.IdentifierName, name: SlimeJavascriptTokenType.IdentifierName, value: identifierName }
         this.addCodeAndMappings(identifier, node.loc)
     }
 
@@ -1539,7 +1536,7 @@ export default class SlimeJavascriptGenerator {
         // 这样可以在调试时准确定位到原始代码中的数字字面量位置
         // 注意：优先使用 raw 值保持原始格式（如十六进制 0xFF）
         const numValue = node.raw || String(node.value)
-        this.addCodeAndMappings({ type: Es6TokenName.NumericLiteral, name: Es6TokenName.NumericLiteral, value: numValue }, node.loc)
+        this.addCodeAndMappings({ type: SlimeJavascriptTokenType.NumericLiteral, name: SlimeJavascriptTokenType.NumericLiteral, value: numValue }, node.loc)
     }
 
     private static generatorStringLiteral(node: SlimeJavascriptStringLiteral) {
@@ -1549,7 +1546,7 @@ export default class SlimeJavascriptGenerator {
         // 注意：优先使用 raw 值保持原始格式（保留原始引号类型）
         // 如果没有 raw，使用单引号包裹 value
         const strValue = node.raw || `'${node.value}'`
-        this.addCodeAndMappings({ type: Es6TokenName.StringLiteral, name: Es6TokenName.StringLiteral, value: strValue }, node.loc)
+        this.addCodeAndMappings({ type: SlimeJavascriptTokenType.StringLiteral, name: SlimeJavascriptTokenType.StringLiteral, value: strValue }, node.loc)
     }
 
     /**
@@ -1570,11 +1567,11 @@ export default class SlimeJavascriptGenerator {
         } else if (typeof value === 'number') {
             // number 字面量（优先使用 raw 保持原始格式）
             const numValue = raw || String(value)
-            this.addCodeAndMappings({ type: Es6TokenName.NumericLiteral, name: Es6TokenName.NumericLiteral, value: numValue }, node.loc)
+            this.addCodeAndMappings({ type: SlimeJavascriptTokenType.NumericLiteral, name: SlimeJavascriptTokenType.NumericLiteral, value: numValue }, node.loc)
         } else if (typeof value === 'string') {
             // string 字面量（优先使用 raw 保持原始引号格式）
             const strValue = raw || `'${value}'`
-            this.addCodeAndMappings({ type: Es6TokenName.StringLiteral, name: Es6TokenName.StringLiteral, value: strValue }, node.loc)
+            this.addCodeAndMappings({ type: SlimeJavascriptTokenType.StringLiteral, name: SlimeJavascriptTokenType.StringLiteral, value: strValue }, node.loc)
         } else if (typeof value === 'bigint' || (raw && raw.endsWith('n'))) {
             // BigInt 字面量
             const bigintValue = raw || `${value}n`
