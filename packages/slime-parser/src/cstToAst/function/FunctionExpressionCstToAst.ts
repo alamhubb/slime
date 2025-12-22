@@ -105,10 +105,6 @@ export class FunctionExpressionCstToAst {
     }
 
 
-
-
-
-
     // 生成器表达式处理：function* (...) { ... }
     static createGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
         // GeneratorExpression: function* [name](params) { body }

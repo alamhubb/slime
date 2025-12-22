@@ -12,16 +12,16 @@ export * from './module/ModuleCstToAst.ts';
 
 // declaration
 export * from './declaration/VariableCstToAst.ts';
-export * from './declaration/FunctionDeclarationCstToAst.ts';
+export * from '../cstToAst/function/FunctionDeclarationCstToAst.ts';
 
 // class
-export * from './class/ClassDeclarationCstToAst.ts';
-export * from './class/ClassDeclarationCstToAst.ts';
-export * from './class/MethodDefinitionCstToAst.ts';
+export * from '../cstToAst/class/ClassDeclarationCstToAst.ts';
+export * from '../cstToAst/class/ClassDeclarationCstToAst.ts';
+export * from '../cstToAst/class/MethodDefinitionCstToAst.ts';
 
 // function
-export * from './function/FunctionExpressionCstToAst.ts';
-export * from './function/ArrowFunctionCstToAst.ts';
+export * from '../cstToAst/function/FunctionExpressionCstToAst.ts';
+export * from '../cstToAst/function/ArrowFunctionCstToAst.ts';
 export * from './function/FunctionParameterCstToAst.ts';
 
 // statement
