@@ -12,26 +12,29 @@ import SlimeParser from "../SlimeParser.ts";
 import SlimeCstToAstUtil from "../SlimeCstToAstUtil.ts";
 import {SlimeAstUtils} from "./SlimeAstUtils.ts";
 
-export default class OtherNot{
+export default class OtherNot {
 
 
     /**
-     * 在Expression中查找第一个Identifier（辅助方法）
+     * CoverCallExpressionAndAsyncArrowHead CST �?AST
+     * 这是一�?cover grammar，通常作为 CallExpression 处理
      */
-    static findFirstIdentifierInExpression(cst: SubhutiCst): SubhutiCst | null {
-        if (cst.name === SlimeTokenConsumer.prototype.IdentifierName?.name) {
-            return cst
-        }
-        if (cst.children) {
-            for (const child of cst.children) {
-                const found = SlimeCstToAstUtil.findFirstIdentifierInExpression(child)
-                if (found) return found
-            }
-        }
-        return null
+    static createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeCstToAstUtil.createCallExpressionAst(cst)
     }
 
 
+    static createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeExpression {
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.LeftHandSideExpression?.name);
+        // 容错：Parser在ASI场景下可能生成不完整的CST，返回空标识�?
+        if (!cst.children || cst.children.length === 0) {
+            return SlimeAstUtil.createIdentifier('', cst.loc)
+        }
+        if (cst.children.length > 1) {
+
+        }
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
+    }
 
 
     static createBindingRestElementAst(cst: SubhutiCst): SlimeRestElement {
@@ -55,8 +58,6 @@ export default class OtherNot{
     }
 
 
-
-
     static createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
         // FunctionStatementList: StatementList?
         const children = cst.children || []
@@ -78,7 +79,6 @@ export default class OtherNot{
         // If child is a statement directly
         return SlimeCstToAstUtil.createStatementListItemAst(first)
     }
-
 
 
     /**

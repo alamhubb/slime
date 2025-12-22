@@ -8,7 +8,7 @@ import {
     SlimeExpression,
     SlimeFunctionExpression,
     SlimeFunctionParam,
-    SlimeIdentifier, SlimeNodeType
+    SlimeIdentifier, SlimeNodeType, SlimePattern, SlimeRestElement
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
@@ -16,22 +16,6 @@ import {SlimeAstUtils} from "../SlimeAstUtils.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 
 export class PrimaryExpressionCstToAst {
-
-    /**
-     * ComputedPropertyName CST �?AST
-     * ComputedPropertyName -> [ AssignmentExpression ]
-     */
-    static createComputedPropertyNameAst(cst: SubhutiCst): SlimeExpression {
-        const expr = cst.children?.find(ch =>
-            ch.name === SlimeParser.prototype.AssignmentExpression?.name ||
-            ch.name === 'AssignmentExpression'
-        )
-        if (expr) {
-            return SlimeCstToAstUtil.createAssignmentExpressionAst(expr)
-        }
-        throw new Error('ComputedPropertyName missing AssignmentExpression')
-    }
-
 
     static createPrimaryExpressionAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.PrimaryExpression?.name);
@@ -137,7 +121,6 @@ export class PrimaryExpressionCstToAst {
         }
     }
 
-
     /**
      * ParenthesizedExpression CST �?AST
      * ParenthesizedExpression -> ( Expression )
@@ -162,8 +145,6 @@ export class PrimaryExpressionCstToAst {
     }
 
 
-    // ==================== 表达式相关转换方�?====================
-
     /**
      * CoverParenthesizedExpressionAndArrowParameterList CST �?AST
      * 这是一�?cover grammar，根据上下文可能是括号表达式或箭头函数参�?
@@ -175,48 +156,19 @@ export class PrimaryExpressionCstToAst {
 
 
     /**
-     * CoverInitializedName CST �?AST
-     * CoverInitializedName -> IdentifierReference Initializer
+     * 在Expression中查找第一个Identifier（辅助方法）
      */
-    static createCoverInitializedNameAst(cst: SubhutiCst): any {
-        const idRef = cst.children?.find(ch =>
-            ch.name === SlimeParser.prototype.IdentifierReference?.name ||
-            ch.name === 'IdentifierReference'
-        )
-        const init = cst.children?.find(ch =>
-            ch.name === SlimeParser.prototype.Initializer?.name ||
-            ch.name === 'Initializer'
-        )
-
-        const id = idRef ? SlimeCstToAstUtil.createIdentifierReferenceAst(idRef) : null
-        const initValue = init ? SlimeCstToAstUtil.createInitializerAst(init) : null
-
-        return {
-            type: SlimeNodeType.AssignmentPattern,
-            left: id,
-            right: initValue,
-            loc: cst.loc
+    static findFirstIdentifierInExpression(cst: SubhutiCst): SubhutiCst | null {
+        if (cst.name === SlimeTokenConsumer.prototype.IdentifierName?.name) {
+            return cst
         }
+        if (cst.children) {
+            for (const child of cst.children) {
+                const found = SlimeCstToAstUtil.findFirstIdentifierInExpression(child)
+                if (found) return found
+            }
+        }
+        return null
     }
 
-    /**
-     * CoverCallExpressionAndAsyncArrowHead CST �?AST
-     * 这是一�?cover grammar，通常作为 CallExpression 处理
-     */
-    static createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeExpression {
-        return SlimeCstToAstUtil.createCallExpressionAst(cst)
-    }
-
-
-    static createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.LeftHandSideExpression?.name);
-        // 容错：Parser在ASI场景下可能生成不完整的CST，返回空标识�?
-        if (!cst.children || cst.children.length === 0) {
-            return SlimeAstUtil.createIdentifier('', cst.loc)
-        }
-        if (cst.children.length > 1) {
-
-        }
-        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
-    }
 }
