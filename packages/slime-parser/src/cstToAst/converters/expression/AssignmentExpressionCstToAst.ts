@@ -1,6 +1,6 @@
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeArrowFunctionExpression, SlimeAstUtil,
+    SlimeArrowFunctionExpression, SlimeAssignmentExpression, SlimeAstUtil,
     type SlimeBlockStatement, type SlimeClassExpression,
     SlimeExpression,
     type SlimeFunctionExpression,

@@ -18,8 +18,6 @@ export default class SwitchCstToAst{
         return this.createSwitchCaseAst(cst)
     }
 
-
-
     /**
      * DefaultClause CST �?AST
      * DefaultClause -> default : StatementList?
