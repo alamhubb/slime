@@ -23,13 +23,14 @@ import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export class CompoundLiteralCstToAst {
+export class SlimeJavascriptCompoundLiteralCstToAstSingle {
     /**
      * 对象字面�?CST �?AST（透传�?ObjectExpression�?
      * ObjectLiteral -> { } | { PropertyDefinitionList } | { PropertyDefinitionList , }
      */
-    static createObjectLiteralAst(cst: SubhutiCst): SlimeJavascriptObjectExpression {
+    createObjectLiteralAst(cst: SubhutiCst): SlimeJavascriptObjectExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ObjectLiteral?.name);
         const properties: Array<SlimeJavascriptObjectPropertyItem> = []
 
@@ -89,7 +90,7 @@ export class CompoundLiteralCstToAst {
      * ArrayLiteral CST �?ArrayExpression AST
      * ArrayLiteral -> [ Elision? ] | [ ElementList ] | [ ElementList , Elision? ]
      */
-    static createArrayLiteralAst(cst: SubhutiCst): SlimeJavascriptArrayExpression {
+    createArrayLiteralAst(cst: SubhutiCst): SlimeJavascriptArrayExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ArrayLiteral?.name);
         // ArrayLiteral: [LBracket, ElementList?, Comma?, Elision?, RBracket]
 
@@ -133,7 +134,7 @@ export class CompoundLiteralCstToAst {
     }
 
 
-    static createSpreadElementAst(cst: SubhutiCst): SlimeJavascriptSpreadElement {
+    createSpreadElementAst(cst: SubhutiCst): SlimeJavascriptSpreadElement {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.SpreadElement?.name);
         // SpreadElement: [Ellipsis, AssignmentExpression]
 
@@ -161,7 +162,7 @@ export class CompoundLiteralCstToAst {
     }
 
 
-    static createPropertyDefinitionAst(cst: SubhutiCst): SlimeJavascriptProperty {
+    createPropertyDefinitionAst(cst: SubhutiCst): SlimeJavascriptProperty {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.PropertyDefinition?.name);
 
         // 防御性检查：如果 children 为空，说明是空对象的情况，不应该被调�?
@@ -257,7 +258,7 @@ export class CompoundLiteralCstToAst {
     }
 
 
-    static createPropertyNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral | SlimeJavascriptExpression {
+    createPropertyNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral | SlimeJavascriptExpression {
         if (!cst || !cst.children || cst.children.length === 0) {
             throw new Error('createPropertyNameAst: invalid cst or no children')
         }
@@ -276,7 +277,7 @@ export class CompoundLiteralCstToAst {
     }
 
 
-    static createLiteralPropertyNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral {
+    createLiteralPropertyNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral {
         if (!cst) {
             throw new Error('createLiteralPropertyNameAst: cst is null')
         }
@@ -331,7 +332,7 @@ export class CompoundLiteralCstToAst {
      * ComputedPropertyName CST �?AST
      * ComputedPropertyName -> [ AssignmentExpression ]
      */
-    static createComputedPropertyNameAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createComputedPropertyNameAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const expr = cst.children?.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.AssignmentExpression?.name ||
             ch.name === 'AssignmentExpression'
@@ -343,7 +344,7 @@ export class CompoundLiteralCstToAst {
     }
 
 
-    static createElementListAst(cst: SubhutiCst): Array<SlimeJavascriptArrayElement> {
+    createElementListAst(cst: SubhutiCst): Array<SlimeJavascriptArrayElement> {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ElementList?.name);
         const elements: Array<SlimeJavascriptArrayElement> = []
 
@@ -408,7 +409,7 @@ export class CompoundLiteralCstToAst {
      * CoverInitializedName CST �?AST
      * CoverInitializedName -> IdentifierReference Initializer
      */
-    static createCoverInitializedNameAst(cst: SubhutiCst): any {
+    createCoverInitializedNameAst(cst: SubhutiCst): any {
         const idRef = cst.children?.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.IdentifierReference?.name ||
             ch.name === 'IdentifierReference'
@@ -431,3 +432,5 @@ export class CompoundLiteralCstToAst {
 
 
 }
+
+export const SlimeJavascriptCompoundLiteralCstToAst = new SlimeJavascriptCompoundLiteralCstToAstSingle()

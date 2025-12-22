@@ -12,8 +12,9 @@ import {
     type SlimeJavascriptVariableDeclarator
 } from "slime-ast";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "./SlimeJavascriptVariableCstToAst.ts";
 
-export class ControlFlowCstToAst {
+export class SlimeJavascriptControlFlowCstToAstSingle {
 
 
     // ==================== 语句相关转换方法 ====================
@@ -22,7 +23,7 @@ export class ControlFlowCstToAst {
      * BreakableStatement CST �?AST（透传�?
      * BreakableStatement -> IterationStatement | SwitchStatement
      */
-    static createBreakableStatementAst(cst: SubhutiCst): any {
+    createBreakableStatementAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             return SlimeJavascriptCstToAstUtil.createStatementDeclarationAst(firstChild)
@@ -34,7 +35,7 @@ export class ControlFlowCstToAst {
      * IterationStatement CST �?AST（透传�?
      * IterationStatement -> DoWhileStatement | WhileStatement | ForStatement | ForInOfStatement
      */
-    static createIterationStatementAst(cst: SubhutiCst): any {
+    createIterationStatementAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             return SlimeJavascriptCstToAstUtil.createStatementDeclarationAst(firstChild)
@@ -48,7 +49,7 @@ export class ControlFlowCstToAst {
      * if (test) consequent [else alternate]
      * ES2025: if ( Expression ) IfStatementBody [else IfStatementBody]
      */
-    static createIfStatementAst(cst: SubhutiCst): any {
+    createIfStatementAst(cst: SubhutiCst): any {
         SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.IfStatement?.name);
 
         let test: any = null
@@ -126,7 +127,7 @@ export class ControlFlowCstToAst {
      * 创建 IfStatementBody AST
      * IfStatementBody: Statement | FunctionDeclaration
      */
-    static createIfStatementBodyAst(cst: SubhutiCst): any {
+    createIfStatementBodyAst(cst: SubhutiCst): any {
         const children = cst.children || []
 
         for (const child of children) {
@@ -157,7 +158,7 @@ export class ControlFlowCstToAst {
      *
      * 注意：LexicalDeclaration 内部已经包含分号（SemicolonASI�?
      */
-    static createForStatementAst(cst: SubhutiCst): any {
+    createForStatementAst(cst: SubhutiCst): any {
         SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ForStatement?.name);
 
         let init: any = null
@@ -264,7 +265,7 @@ export class ControlFlowCstToAst {
     /**
      * 创建 for...in / for...of 语句 AST
      */
-    static createForInOfStatementAst(cst: SubhutiCst): any {
+    createForInOfStatementAst(cst: SubhutiCst): any {
         SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ForInOfStatement?.name);
 
         // ForInOfStatement 结构（多种形式）�?
@@ -438,7 +439,7 @@ export class ControlFlowCstToAst {
     /**
      * 创建 while 语句 AST
      */
-    static createWhileStatementAst(cst: SubhutiCst): any {
+    createWhileStatementAst(cst: SubhutiCst): any {
         SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.WhileStatement?.name);
         // WhileStatement: WhileTok LParen Expression RParen Statement
 
@@ -471,7 +472,7 @@ export class ControlFlowCstToAst {
     /**
      * 创建 do...while 语句 AST
      */
-    static createDoWhileStatementAst(cst: SubhutiCst): any {
+    createDoWhileStatementAst(cst: SubhutiCst): any {
         SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.DoWhileStatement?.name);
         // DoWhileStatement: do Statement while ( Expression ) ;
 
@@ -513,7 +514,7 @@ export class ControlFlowCstToAst {
      * 创建 switch 语句 AST
      * SwitchStatement: switch ( Expression ) CaseBlock
      */
-    static createSwitchStatementAst(cst: SubhutiCst): any {
+    createSwitchStatementAst(cst: SubhutiCst): any {
         SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.SwitchStatement?.name);
 
         let switchToken: any = undefined
@@ -560,7 +561,7 @@ export class ControlFlowCstToAst {
      * CaseClause CST �?AST
      * CaseClause -> case Expression : StatementList?
      */
-    static createCaseClauseAst(cst: SubhutiCst): any {
+    createCaseClauseAst(cst: SubhutiCst): any {
         return SlimeJavascriptCstToAstUtil.createSwitchCaseAst(cst)
     }
 
@@ -568,7 +569,7 @@ export class ControlFlowCstToAst {
      * DefaultClause CST �?AST
      * DefaultClause -> default : StatementList?
      */
-    static createDefaultClauseAst(cst: SubhutiCst): any {
+    createDefaultClauseAst(cst: SubhutiCst): any {
         return SlimeJavascriptCstToAstUtil.createSwitchCaseAst(cst)
     }
 
@@ -576,7 +577,7 @@ export class ControlFlowCstToAst {
      * CaseClauses CST �?AST
      * CaseClauses -> CaseClause+
      */
-    static createCaseClausesAst(cst: SubhutiCst): any[] {
+    createCaseClausesAst(cst: SubhutiCst): any[] {
         const cases: any[] = []
         for (const child of cst.children || []) {
             if (child.name === SlimeJavascriptParser.prototype.CaseClause?.name || child.name === 'CaseClause') {
@@ -590,7 +591,7 @@ export class ControlFlowCstToAst {
      * CaseBlock CST �?AST
      * CaseBlock -> { CaseClauses? DefaultClause? CaseClauses? }
      */
-    static createCaseBlockAst(cst: SubhutiCst): any[] {
+    createCaseBlockAst(cst: SubhutiCst): any[] {
         return SlimeJavascriptCstToAstUtil.extractCasesFromCaseBlock(cst)
     }
 
@@ -605,7 +606,7 @@ export class ControlFlowCstToAst {
      * DefaultClause: default : StatementList?
      * @internal
      */
-    static createSwitchCaseAst(cst: SubhutiCst): any {
+    createSwitchCaseAst(cst: SubhutiCst): any {
         let test = null
         let consequent: any[] = []
         let caseToken: any = undefined
@@ -660,7 +661,7 @@ export class ControlFlowCstToAst {
      * �?CaseBlock 提取所�?case/default 子句
      * CaseBlock: { CaseClauses? DefaultClause? CaseClauses? }
      */
-    static extractCasesFromCaseBlock(caseBlockCst: SubhutiCst): any[] {
+    extractCasesFromCaseBlock(caseBlockCst: SubhutiCst): any[] {
         const cases: any[] = []
 
         if (!caseBlockCst.children) return cases
@@ -687,3 +688,5 @@ export class ControlFlowCstToAst {
         return cases
     }
 }
+
+export const SlimeJavascriptControlFlowCstToAst = new SlimeJavascriptControlFlowCstToAstSingle()

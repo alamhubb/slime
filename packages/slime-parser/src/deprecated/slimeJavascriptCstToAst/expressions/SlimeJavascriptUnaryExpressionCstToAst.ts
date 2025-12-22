@@ -13,10 +13,11 @@ import {
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export class UnaryExpressionCstToAst {
+export class SlimeJavascriptUnaryExpressionCstToAstSingle {
 
-    static createUnaryExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createUnaryExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.UnaryExpression?.name);
 
         // 防御性检查：如果没有children，抛出更详细的错�?
@@ -78,7 +79,7 @@ export class UnaryExpressionCstToAst {
     }
 
     // Renamed from createPostfixExpressionAst - ES2025 uses UpdateExpression
-    static createUpdateExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createUpdateExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         // Support both PostfixExpression (old) and UpdateExpression (new)
         if (cst.children.length > 1) {
             // UpdateExpression: argument ++ | argument -- | ++argument | --argument
@@ -124,7 +125,7 @@ export class UnaryExpressionCstToAst {
         return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
-    static createYieldExpressionAst(cst: SubhutiCst): any {
+    createYieldExpressionAst(cst: SubhutiCst): any {
         // yield [*] AssignmentExpression?
         let yieldToken: any = undefined
         let asteriskToken: any = undefined
@@ -149,7 +150,7 @@ export class UnaryExpressionCstToAst {
         return SlimeJavascriptAstUtil.createYieldExpression(argument, delegate, cst.loc, yieldToken, asteriskToken)
     }
 
-    static createAwaitExpressionAst(cst: SubhutiCst): any {
+    createAwaitExpressionAst(cst: SubhutiCst): any {
         // await UnaryExpression
         SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.AwaitExpression?.name);
 
@@ -168,3 +169,6 @@ export class UnaryExpressionCstToAst {
 
 
 }
+
+
+export const SlimeJavascriptUnaryExpressionCstToAst = new SlimeJavascriptUnaryExpressionCstToAstSingle()

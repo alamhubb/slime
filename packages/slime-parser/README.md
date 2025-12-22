@@ -41,7 +41,7 @@ const ast = SlimeCstToAstUtil.toProgram(cst)
 │                       slime-parser                               │
 │  ┌─────────────────┐  ┌─────────────────────────────────────┐   │
 │  │ SlimeParser.ts  │  │ cstToAst/                            │   │
-│  │ (CST 解析器)    │  │  ├─ ExpressionCstToAst.ts           │   │
+│  │ (CST 解析器)    │  │  ├─ SlimeJavascriptExpressionCstToAst.ts           │   │
 │  │                 │  │  ├─ StatementCstToAst.ts            │   │
 │  │                 │  │  ├─ FunctionCstToAst.ts             │   │
 │  │                 │  │  └─ ... (12个文件)                   │   │
@@ -62,7 +62,7 @@ const ast = SlimeCstToAstUtil.toProgram(cst)
 **调用关系示例：**
 
 ```typescript
-// 第二层 (slime-parser/cstToAst/IdentifierCstToAst.ts)
+// 第二层 (slime-parser/cstToAst/SlimeJavascriptIdentifierCstToAst.ts)
 static createIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
     const name = cst.children[0].value  // 解析 CST 结构
     return SlimeAstUtil.createIdentifier(name, cst.loc)  // 调用第一层
@@ -108,16 +108,16 @@ slime-parser/
 │   ├── SlimeCstToAstUtil.ts     # CST→AST 分发中心
 │   └── cstToAst/                # CST→AST 转换模块
 │       ├── index.ts             # 导出入口
-│       ├── IdentifierCstToAst.ts    # 标识符转换
-│       ├── LiteralCstToAst.ts       # 字面量转换
-│       ├── ExpressionCstToAst.ts    # 表达式转换
+│       ├── SlimeJavascriptIdentifierCstToAst.ts    # 标识符转换
+│       ├── SlimeJavascriptLiteralCstToAst.ts       # 字面量转换
+│       ├── SlimeJavascriptExpressionCstToAst.ts    # 表达式转换
 │       ├── StatementCstToAst.ts     # 语句转换
 │       ├── DeclarationCstToAst.ts   # 声明转换
 │       ├── FunctionCstToAst.ts      # 函数转换
 │       ├── ClassCstToAst.ts         # 类转换
 │       ├── PatternCstToAst.ts       # 解构模式转换
 │       ├── PropertyCstToAst.ts      # 属性转换
-│       ├── ModuleCstToAst.ts        # 模块转换
+│       ├── SlimeJavascriptModuleCstToAst.ts        # 模块转换
 │       ├── TemplateCstToAst.ts      # 模板字符串转换
 │       └── OperatorCstToAst.ts      # 运算符转换
 ├── package.json

@@ -15,9 +15,9 @@ import {
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
 
-export class ClassDeclarationCstToAst {
+export class SlimeJavascriptClassDeclarationCstToAstSingle {
 
-    static createClassDeclarationAst(cst: SubhutiCst): SlimeJavascriptClassDeclaration {
+    createClassDeclarationAst(cst: SubhutiCst): SlimeJavascriptClassDeclaration {
         // 检�?CST 节点名称是否�?ClassDeclaration
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ClassDeclaration?.name);
 
@@ -55,7 +55,7 @@ export class ClassDeclarationCstToAst {
         return ast
     }
 
-    static createClassExpressionAst(cst: SubhutiCst): SlimeJavascriptClassExpression {
+    createClassExpressionAst(cst: SubhutiCst): SlimeJavascriptClassExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ClassExpression?.name);
 
         let id: SlimeJavascriptIdentifier | null = null // class 表达式可选的标识�?
@@ -70,7 +70,7 @@ export class ClassDeclarationCstToAst {
         return SlimeJavascriptAstUtil.createClassExpression(id, classTail.superClass, classTail.body, cst.loc) // 生成 ClassExpression AST
     }
 
-    static createClassBodyAst(cst: SubhutiCst): SlimeJavascriptClassBody {
+    createClassBodyAst(cst: SubhutiCst): SlimeJavascriptClassBody {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ClassBody?.name);
         const elementsWrapper = cst.children && cst.children[0] // ClassBody -> ClassElementList?，第一项为列表容器
         const body: Array<SlimeJavascriptMethodDefinition | SlimeJavascriptPropertyDefinition | any> = [] // 收集类成员 (any 用于 StaticBlock)
@@ -81,7 +81,7 @@ export class ClassDeclarationCstToAst {
                     continue // 没有内容�?ClassElement 直接忽略
                 }
 
-                // 找到真正的成员定义（跳过 static �?SemicolonASI�?
+                // 找到真正的成员定义（跳过 �?SemicolonASI�?
                 let staticCst: SubhutiCst | null = null
                 let targetCst: SubhutiCst | null = null
                 let classStaticBlockCst: SubhutiCst | null = null
@@ -132,7 +132,7 @@ export class ClassDeclarationCstToAst {
     /**
      * ClassElementList CST �?AST
      */
-    static createClassElementListAst(cst: SubhutiCst): any[] {
+    createClassElementListAst(cst: SubhutiCst): any[] {
         const elements: any[] = []
         for (const child of cst.children || []) {
             if (child.name === SlimeJavascriptParser.prototype.ClassElement?.name || child.name === 'ClassElement') {
@@ -148,9 +148,9 @@ export class ClassDeclarationCstToAst {
 
     /**
      * ClassElement CST �?AST
-     * ClassElement -> MethodDefinition | static MethodDefinition | FieldDefinition | ...
+     * ClassElement -> MethodDefinition | MethodDefinition | FieldDefinition | ...
      */
-    static createClassElementAst(cst: SubhutiCst): any {
+    createClassElementAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
         if (!firstChild) return null
 
@@ -181,7 +181,7 @@ export class ClassDeclarationCstToAst {
     }
 
 
-    static createFieldDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptPropertyDefinition {
+    createFieldDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptPropertyDefinition {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.FieldDefinition?.name);
 
         // FieldDefinition -> (ClassElementName | PropertyName) + Initializer?
@@ -201,7 +201,7 @@ export class ClassDeclarationCstToAst {
             }
         }
 
-        // 检查是否有 static 修饰�?
+        // 检查是否有 修饰�?
         const isStatic = SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst)
 
         // 注意参数顺序�?key, value, computed, isStatic, loc)
@@ -211,9 +211,9 @@ export class ClassDeclarationCstToAst {
 
     /**
      * 创建 ClassStaticBlock AST (ES2022)
-     * ClassStaticBlock: static { ClassStaticBlockBody }
+     * ClassStaticBlock: { ClassStaticBlockBody }
      */
-    static createClassStaticBlockAst(cst: SubhutiCst): any {
+    createClassStaticBlockAst(cst: SubhutiCst): any {
         // CST 结构: ClassStaticBlock -> [IdentifierName:"static", LBrace, ClassStaticBlockBody, RBrace]
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined
@@ -247,7 +247,7 @@ export class ClassDeclarationCstToAst {
     /**
      * ClassStaticBlockBody CST �?AST
      */
-    static createClassStaticBlockBodyAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
+    createClassStaticBlockBodyAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
         const stmtList = cst.children?.find(ch =>
             ch.name === 'ClassStaticBlockStatementList' ||
             ch.name === SlimeJavascriptParser.prototype.ClassStaticBlockStatementList?.name
@@ -262,7 +262,7 @@ export class ClassDeclarationCstToAst {
     /**
      * ClassStaticBlockStatementList CST �?AST
      */
-    static createClassStaticBlockStatementListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
+    createClassStaticBlockStatementListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
         const stmtList = cst.children?.find(ch =>
             ch.name === 'StatementList' || ch.name === SlimeJavascriptParser.prototype.StatementList?.name
         )
@@ -273,12 +273,12 @@ export class ClassDeclarationCstToAst {
     }
 
 
-    static createClassHeritageAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createClassHeritageAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ClassHeritage?.name);
         return SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(cst.children[1]) // ClassHeritage -> extends + LeftHandSideExpression
     }
 
-    static createClassHeritageAstWithToken(cst: SubhutiCst): { superClass: SlimeJavascriptExpression; extendsToken?: any } {
+    createClassHeritageAstWithToken(cst: SubhutiCst): { superClass: SlimeJavascriptExpression; extendsToken?: any } {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ClassHeritage?.name);
         let extendsToken: any = undefined
 
@@ -293,7 +293,7 @@ export class ClassDeclarationCstToAst {
     }
 
 
-    static createClassTailAst(cst: SubhutiCst): {
+    createClassTailAst(cst: SubhutiCst): {
         superClass: SlimeJavascriptExpression | null;
         body: SlimeJavascriptClassBody;
         extendsToken?: any;
@@ -337,7 +337,7 @@ export class ClassDeclarationCstToAst {
      * ClassElementName CST �?AST
      * ClassElementName :: PropertyName | PrivateIdentifier
      */
-    static createClassElementNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral | SlimeJavascriptExpression {
+    createClassElementNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral | SlimeJavascriptExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ClassElementName?.name)
         const first = cst.children[0]
         if (!first) {
@@ -352,10 +352,10 @@ export class ClassDeclarationCstToAst {
 
 
     /**
-     * 检�?CST 节点是否表示 static 修饰�?
+     * 检�?CST 节点是否表示 修饰�?
      * 兼容 Static �?IdentifierNameTok (value='static') 两种情况
      */
-    static isStaticModifier(cst: SubhutiCst | null): boolean {
+    isStaticModifier(cst: SubhutiCst | null): boolean {
         if (!cst) return false
         // 方式1：直接是 Static
         if (cst.name === SlimeJavascriptTokenConsumer.prototype.Static?.name || cst.name === 'Static' || cst.name === 'Static') {
@@ -372,7 +372,7 @@ export class ClassDeclarationCstToAst {
     /**
      * 检�?ClassElementName/PropertyName 是否是计算属性名
      */
-    static isComputedPropertyName(cst: SubhutiCst): boolean {
+    isComputedPropertyName(cst: SubhutiCst): boolean {
         if (!cst || !cst.children) return false
 
         // 递归查找 ComputedPropertyName
@@ -394,3 +394,6 @@ export class ClassDeclarationCstToAst {
 
 
 }
+
+export const SlimeJavascriptClassDeclarationCstToAst = new SlimeJavascriptClassDeclarationCstToAstSingle()
+

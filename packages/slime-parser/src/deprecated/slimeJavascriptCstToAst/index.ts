@@ -3,43 +3,43 @@
  */
 
 // roots
-export * from './module/ModuleCstToAst.ts';
+export * from './module/SlimeJavascriptModuleCstToAst.ts';
 
 // statements
-export * from './statements/ControlFlowCstToAst.ts';
-export * from './statements/VariableCstToAst.ts';
-export * from './statements/BlockCstToAst.ts';
-export * from './statements/OtherStatementCstToAst.ts';
+export * from './statements/SlimeJavascriptControlFlowCstToAst.ts';
+export * from './statements/SlimeJavascriptVariableCstToAst.ts';
+export * from './statements/SlimeJavascriptBlockCstToAst.ts';
+export * from './statements/SlimeJavascriptOtherStatementCstToAst.ts';
 
 // expressions
-export * from './expressions/ExpressionCstToAst.ts';
-export * from './expressions/BinaryExpressionCstToAst.ts';
-export * from './expressions/UnaryExpressionCstToAst.ts';
-export * from './expressions/MemberCallCstToAst.ts';
-export * from './expressions/PrimaryExpressionCstToAst.ts';
-export * from './literal/CompoundLiteralCstToAst.ts';
+export * from './expressions/SlimeJavascriptExpressionCstToAst.ts';
+export * from './expressions/SlimeJavascriptBinaryExpressionCstToAst.ts';
+export * from './expressions/SlimeJavascriptUnaryExpressionCstToAst.ts';
+export * from './expressions/SlimeJavascriptMemberCallCstToAst.ts';
+export * from './expressions/SlimeJavascriptPrimaryExpressionCstToAst.ts';
+export * from './literal/SlimeJavascriptCompoundLiteralCstToAst.ts';
 
 // function
-export * from './function/FunctionDeclarationCstToAst.ts';
-export * from './function/FunctionExpressionCstToAst.ts';
-export * from './function/ArrowFunctionCstToAst.ts';
+export * from './function/SlimeJavascriptFunctionDeclarationCstToAst.ts';
+export * from './function/SlimeJavascriptFunctionExpressionCstToAst.ts';
+export * from './function/SlimeJavascriptArrowFunctionCstToAst.ts';
 
 // class
-export * from './class/ClassDeclarationCstToAst.ts';
-export * from './class/MethodDefinitionCstToAst.ts';
+export * from './class/SlimeJavascriptClassDeclarationCstToAst.ts';
+export * from './class/SlimeJavascriptMethodDefinitionCstToAst.ts';
 
 // module
-export * from './module/ImportCstToAst.ts';
-export * from './module/ExportCstToAst.ts';
+export * from './module/SlimeJavascriptImportCstToAst.ts';
+export * from './module/SlimeJavascriptExportCstToAst.ts';
 
 // components
-export * from './components/FunctionBodyCstToAst.ts';
-export * from './components/FunctionParameterCstToAst.ts';
-export * from './components/BindingPatternCstToAst.ts';
-export * from './components/AssignmentPatternCstToAst.ts';
-export * from './components/PatternConvertCstToAst.ts';
+export * from './components/SlimeJavascriptFunctionBodyCstToAst.ts';
+export * from './components/SlimeJavascriptFunctionParameterCstToAst.ts';
+export * from './components/SlimeJavascriptBindingPatternCstToAst.ts';
+export * from './components/SlimeJavascriptAssignmentPatternCstToAst.ts';
+export * from './components/SlimeJavascriptPatternConvertCstToAst.ts';
 
 // atoms
-export * from './identifier/IdentifierCstToAst.ts';
-export * from './literal/LiteralCstToAst.ts';
-export * from './expressions/OptionalExpressionCstToAst.ts';
+export * from './identifier/SlimeJavascriptIdentifierCstToAst.ts';
+export * from './literal/SlimeJavascriptLiteralCstToAst.ts';
+export * from './expressions/SlimeJavascriptOptionalExpressionCstToAst.ts';

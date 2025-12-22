@@ -14,10 +14,11 @@ import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
 
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export class PrimaryExpressionCstToAst {
+export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
 
-    static createPrimaryExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createPrimaryExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.PrimaryExpression?.name);
         const first = cst.children[0]
         if (first.name === SlimeJavascriptParser.prototype.IdentifierReference?.name) {
@@ -125,7 +126,7 @@ export class PrimaryExpressionCstToAst {
      * ParenthesizedExpression CST �?AST
      * ParenthesizedExpression -> ( Expression )
      */
-    static createParenthesizedExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createParenthesizedExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         // 查找内部�?Expression
         for (const child of cst.children || []) {
             if (child.name === SlimeJavascriptParser.prototype.Expression?.name ||
@@ -149,7 +150,7 @@ export class PrimaryExpressionCstToAst {
      * CoverParenthesizedExpressionAndArrowParameterList CST �?AST
      * 这是一�?cover grammar，根据上下文可能是括号表达式或箭头函数参�?
      */
-    static createCoverParenthesizedExpressionAndArrowParameterListAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createCoverParenthesizedExpressionAndArrowParameterListAst(cst: SubhutiCst): SlimeJavascriptExpression {
         // 通常作为括号表达式处理，箭头函数参数有专门的处理路径
         return SlimeJavascriptCstToAstUtil.createParenthesizedExpressionAst(cst)
     }
@@ -158,7 +159,7 @@ export class PrimaryExpressionCstToAst {
     /**
      * 在Expression中查找第一个Identifier（辅助方法）
      */
-    static findFirstIdentifierInExpression(cst: SubhutiCst): SubhutiCst | null {
+    findFirstIdentifierInExpression(cst: SubhutiCst): SubhutiCst | null {
         if (cst.name === SlimeJavascriptTokenConsumer.prototype.IdentifierName?.name) {
             return cst
         }
@@ -172,3 +173,5 @@ export class PrimaryExpressionCstToAst {
     }
 
 }
+
+export const SlimeJavascriptPrimaryExpressionCstToAst = new SlimeJavascriptPrimaryExpressionCstToAstSingle()

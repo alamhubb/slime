@@ -13,14 +13,17 @@ import {
     SlimeJavascriptTokenCreate, type SlimeJavascriptVariableDeclaration, type SlimeJavascriptVariableDeclarator,
     SlimeJavascriptAstUtil, type SlimeJavascriptPattern, type SlimeJavascriptExpression
 } from "slime-ast";
+import {SlimeJavascriptClassDeclarationCstToAstSingle} from "../class/SlimeJavascriptClassDeclarationCstToAst.ts";
 
-export class VariableCstToAst {
+
+
+export class SlimeJavascriptVariableCstToAstSingle {
 
     /**
      * 创建 var 变量声明语句 AST
      * ES2025 VariableStatement: var VariableDeclarationList ;
      */
-    static createVariableStatementAst(cst: SubhutiCst): SlimeJavascriptVariableDeclaration {
+    createVariableStatementAst(cst: SubhutiCst): SlimeJavascriptVariableDeclaration {
         const children = cst.children || []
         const declarations: SlimeJavascriptVariableDeclarator[] = []
 
@@ -49,7 +52,7 @@ export class VariableCstToAst {
     }
 
 
-    static createVariableDeclarationAst(cst: SubhutiCst): SlimeJavascriptVariableDeclaration {
+    createVariableDeclarationAst(cst: SubhutiCst): SlimeJavascriptVariableDeclaration {
         //直接返回声明
         //                 SlimeJavascriptCstToAstUtil.Statement()
         //                 SlimeJavascriptCstToAstUtil.Declaration()
@@ -75,7 +78,7 @@ export class VariableCstToAst {
     }
 
 
-    static createVariableDeclarationListAst(cst: SubhutiCst): SlimeJavascriptVariableDeclarator[] {
+    createVariableDeclarationListAst(cst: SubhutiCst): SlimeJavascriptVariableDeclarator[] {
         // 过滤出VariableDeclarator节点（跳过Comma token�?
         // 兼容 VariableDeclarator �?LexicalBinding
         let declarations = cst.children
@@ -88,7 +91,7 @@ export class VariableCstToAst {
     }
 
 
-    static createVariableDeclaratorAst(cst: SubhutiCst): SlimeJavascriptVariableDeclarator {
+    createVariableDeclaratorAst(cst: SubhutiCst): SlimeJavascriptVariableDeclarator {
         // 兼容 LexicalBinding �?VariableDeclaration
         // const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, 'LexicalBinding');
 
@@ -137,7 +140,7 @@ export class VariableCstToAst {
      * �?VariableDeclaration CST 创建 VariableDeclarator AST
      * VariableDeclaration: BindingIdentifier Initializer? | BindingPattern Initializer
      */
-    static createVariableDeclaratorFromVarDeclaration(cst: SubhutiCst): SlimeJavascriptVariableDeclarator {
+    createVariableDeclaratorFromVarDeclaration(cst: SubhutiCst): SlimeJavascriptVariableDeclarator {
         const children = cst.children || []
         let id: any = null
         let init: any = null
@@ -167,7 +170,7 @@ export class VariableCstToAst {
     /**
      * �?VariableDeclarationList 创建 VariableDeclaration AST
      */
-    static createVariableDeclarationFromList(cst: SubhutiCst, kind: string): SlimeJavascriptVariableDeclaration {
+    createVariableDeclarationFromList(cst: SubhutiCst, kind: string): SlimeJavascriptVariableDeclaration {
         const children = cst.children || []
         const declarations: SlimeJavascriptVariableDeclarator[] = []
 
@@ -193,7 +196,7 @@ export class VariableCstToAst {
     }
 
 
-    static createLexicalDeclarationAst(cst: SubhutiCst): SlimeJavascriptVariableDeclaration {
+    createLexicalDeclarationAst(cst: SubhutiCst): SlimeJavascriptVariableDeclaration {
         // ES2025 LexicalDeclaration: LetOrConst BindingList ;
         // BindingList: LexicalBinding (, LexicalBinding)*
         // LexicalBinding: BindingIdentifier Initializer? | BindingPattern Initializer
@@ -258,7 +261,7 @@ export class VariableCstToAst {
     }
 
 
-    static createLexicalBindingAst(cst: SubhutiCst): SlimeJavascriptVariableDeclarator {
+    createLexicalBindingAst(cst: SubhutiCst): SlimeJavascriptVariableDeclarator {
         // LexicalBinding: BindingIdentifier Initializer? | BindingPattern Initializer
         const children = cst.children || []
 
@@ -293,13 +296,13 @@ export class VariableCstToAst {
      * LetOrConst CST �?AST
      * LetOrConst -> let | const
      */
-    static createLetOrConstAst(cst: SubhutiCst): string {
+    createLetOrConstAst(cst: SubhutiCst): string {
         const token = cst.children?.[0]
         return token?.value || 'let'
     }
 
 
-    static createInitializerAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createInitializerAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.Initializer?.name);
         // Initializer -> Eq + AssignmentExpression
         const assignmentExpressionCst = cst.children[1]
@@ -307,7 +310,7 @@ export class VariableCstToAst {
     }
 
 
-    static createDeclarationAst(cst: SubhutiCst): SlimeJavascriptDeclaration {
+    createDeclarationAst(cst: SubhutiCst): SlimeJavascriptDeclaration {
         // Support both Declaration wrapper and direct types
         const first = cst.name === SlimeJavascriptParser.prototype.Declaration?.name || cst.name === 'Declaration'
             ? cst.children[0]
@@ -332,7 +335,7 @@ export class VariableCstToAst {
     }
 
 
-    static createHoistableDeclarationAst(cst: SubhutiCst): SlimeJavascriptDeclaration {
+    createHoistableDeclarationAst(cst: SubhutiCst): SlimeJavascriptDeclaration {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.HoistableDeclaration?.name);
         const first = cst.children[0]
         if (first.name === SlimeJavascriptParser.prototype.FunctionDeclaration?.name || first.name === 'FunctionDeclaration') {
@@ -356,7 +359,7 @@ export class VariableCstToAst {
      * ForDeclaration CST �?AST
      * ForDeclaration -> LetOrConst ForBinding
      */
-    static createForDeclarationAst(cst: SubhutiCst): any {
+    createForDeclarationAst(cst: SubhutiCst): any {
         const letOrConst = cst.children?.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.LetOrConst?.name || ch.name === 'LetOrConst'
         )
@@ -385,7 +388,7 @@ export class VariableCstToAst {
      * ForBinding CST �?AST
      * ForBinding -> BindingIdentifier | BindingPattern
      */
-    static createForBindingAst(cst: SubhutiCst): any {
+    createForBindingAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
         if (!firstChild) return null
 
@@ -399,3 +402,5 @@ export class VariableCstToAst {
 
 
 }
+
+export const SlimeJavascriptVariableCstToAst = new SlimeJavascriptVariableCstToAstSingle()

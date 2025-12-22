@@ -14,10 +14,11 @@ import {
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export class IdentifierCstToAst {
+export class SlimeJavascriptIdentifierCstToAstSingle {
 
-    static createIdentifierNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
+    createIdentifierNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
         // IdentifierName 可能�?
         // 1. 直接�?value �?token
         // 2. 包含子节点的规则节点
@@ -43,7 +44,7 @@ export class IdentifierCstToAst {
     }
 
 
-    static createBindingIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
+    createBindingIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BindingIdentifier?.name);
         // BindingIdentifier 结构�?
         // ES2025: BindingIdentifier -> Identifier -> IdentifierNameTok
@@ -77,7 +78,7 @@ export class IdentifierCstToAst {
      * PrivateIdentifier :: # IdentifierName
      * AST 表示：{ type: "Identifier", name: "#count" }
      */
-    static createPrivateIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
+    createPrivateIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
         // Es2025Parser: PrivateIdentifier 是一个直接的 token，value 已经包含 #
         // 例如：{ name: 'PrivateIdentifier', value: '#count' } �?value: '#\u{61}'
         if (cst.value) {
@@ -133,7 +134,7 @@ export class IdentifierCstToAst {
      * LabelIdentifier 用于 break/continue 语句的标签和 LabelledStatement 的标签�?
      * 结构�?IdentifierReference 相同�?
      */
-    static createLabelIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
+    createLabelIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
         const expectedName = SlimeJavascriptParser.prototype.LabelIdentifier?.name || 'LabelIdentifier'
         if (cst.name !== expectedName && cst.name !== 'LabelIdentifier') {
             throw new Error(`Expected LabelIdentifier, got ${cst.name}`)
@@ -157,7 +158,7 @@ export class IdentifierCstToAst {
      * IdentifierReference 是对 Identifier 的引用包装，
      * �?ES 规范中用于区分标识符的不同使用场景�?
      */
-    static createIdentifierReferenceAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
+    createIdentifierReferenceAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
         const expectedName = SlimeJavascriptParser.prototype.IdentifierReference?.name || 'IdentifierReference'
         if (cst.name !== expectedName && cst.name !== 'IdentifierReference') {
             throw new Error(`Expected IdentifierReference, got ${cst.name}`)
@@ -173,7 +174,7 @@ export class IdentifierCstToAst {
     }
 
 
-    static createIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
+    createIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
         // Support Identifier, IdentifierName, and contextual keywords (yield, await) used as identifiers
         const expectedName = SlimeJavascriptParser.prototype.Identifier?.name || 'Identifier'
         const isIdentifier = cst.name === expectedName || cst.name === 'Identifier'
@@ -233,3 +234,5 @@ export class IdentifierCstToAst {
         return identifier
     }
 }
+
+export const SlimeJavascriptIdentifierCstToAst = new SlimeJavascriptIdentifierCstToAstSingle()

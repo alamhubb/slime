@@ -9,8 +9,9 @@ import { SubhutiCst } from "subhuti";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export class OptionalExpressionCstToAst {
+export class SlimeJavascriptOptionalExpressionCstToAstSingle {
 
     /**
      * 创建 OptionalChain AST
@@ -19,7 +20,7 @@ export class OptionalExpressionCstToAst {
      * 注意：只有紧跟在 ?. 后面的操作是 optional: true
      * 链式的后续操作（�?foo?.().bar() 中的 .bar()）是 optional: false
      */
-    static createOptionalChainAst(object: SlimeJavascriptExpression, chainCst: SubhutiCst): SlimeJavascriptExpression {
+    createOptionalChainAst(object: SlimeJavascriptExpression, chainCst: SubhutiCst): SlimeJavascriptExpression {
         let result = object
         // 追踪是否刚遇�??. token，下一个操作是 optional
         let nextIsOptional = false
@@ -110,7 +111,7 @@ export class OptionalExpressionCstToAst {
      *   CallExpression OptionalChain
      *   OptionalExpression OptionalChain
      */
-    static createOptionalExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createOptionalExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         // OptionalExpression 结构�?
         // children[0] = MemberExpression | CallExpression
         // children[1...n] = OptionalChain
@@ -134,3 +135,5 @@ export class OptionalExpressionCstToAst {
     }
 
 }
+
+export const SlimeJavascriptOptionalExpressionCstToAst = new SlimeJavascriptOptionalExpressionCstToAstSingle()

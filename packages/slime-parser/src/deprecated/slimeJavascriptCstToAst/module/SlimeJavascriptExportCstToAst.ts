@@ -15,10 +15,11 @@ import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export class ExportCstToAst {
+export class SlimeJavascriptExportCstToAstSingle {
 
-    static createExportDeclarationAst(cst: SubhutiCst): SlimeJavascriptExportDefaultDeclaration | SlimeJavascriptExportNamedDeclaration | SlimeJavascriptExportAllDeclaration {
+    createExportDeclarationAst(cst: SubhutiCst): SlimeJavascriptExportDefaultDeclaration | SlimeJavascriptExportNamedDeclaration | SlimeJavascriptExportAllDeclaration {
         let astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ExportDeclaration?.name);
         const children = cst.children || []
 
@@ -177,7 +178,7 @@ export class ExportCstToAst {
      * ExportFromClause CST �?AST
      * ExportFromClause -> * | * as ModuleExportName | NamedExports
      */
-    static createExportFromClauseAst(cst: SubhutiCst): any {
+    createExportFromClauseAst(cst: SubhutiCst): any {
         const children = cst.children || []
 
         // 检查是否是 * (export all)
@@ -220,7 +221,7 @@ export class ExportCstToAst {
     /**
      * 创建 NamedExports AST (export { a, b, c })
      */
-    static createNamedExportsAst(cst: SubhutiCst): SlimeJavascriptExportSpecifierItem[] {
+    createNamedExportsAst(cst: SubhutiCst): SlimeJavascriptExportSpecifierItem[] {
         // NamedExports: { ExportsList? }
         const specifiers: SlimeJavascriptExportSpecifierItem[] = []
 
@@ -238,7 +239,7 @@ export class ExportCstToAst {
     /**
      * 创建 ExportsList AST
      */
-    static createExportsListAst(cst: SubhutiCst): SlimeJavascriptExportSpecifierItem[] {
+    createExportsListAst(cst: SubhutiCst): SlimeJavascriptExportSpecifierItem[] {
         const specifiers: SlimeJavascriptExportSpecifierItem[] = []
         let lastSpecifier: SlimeJavascriptExportSpecifier | null = null
 
@@ -269,7 +270,7 @@ export class ExportCstToAst {
     /**
      * 创建 ExportSpecifier AST
      */
-    static createExportSpecifierAst(cst: SubhutiCst): SlimeJavascriptExportSpecifier {
+    createExportSpecifierAst(cst: SubhutiCst): SlimeJavascriptExportSpecifier {
         // ExportSpecifier: ModuleExportName | ModuleExportName as ModuleExportName
         const children = cst.children || []
         let local: any = null
@@ -300,7 +301,7 @@ export class ExportCstToAst {
     /**
      * 创建 ModuleExportName AST
      */
-    static createModuleExportNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral {
+    createModuleExportNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral {
         const first = cst.children?.[0]
         if (!first) {
             throw new Error('ModuleExportName has no children')
@@ -317,3 +318,5 @@ export class ExportCstToAst {
     }
 
 }
+
+export const SlimeJavascriptExportCstToAst = new SlimeJavascriptExportCstToAstSingle()

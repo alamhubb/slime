@@ -12,13 +12,14 @@ import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
 import {SlimeJavascriptTokenConsumer} from "../../index.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export class FunctionParameterCstToAst {
+export class SlimeJavascriptFunctionParameterCstToAstSingle {
 
     /**
      * 处理 FormalParameters CST 节点
      */
-    static createFormalParametersAst(cst: SubhutiCst): SlimeJavascriptPattern[] {
+    createFormalParametersAst(cst: SubhutiCst): SlimeJavascriptPattern[] {
         // FormalParameters 可能包含 FormalParameterList 或为�?
         if (!cst.children || cst.children.length === 0) {
             return []
@@ -77,7 +78,7 @@ export class FunctionParameterCstToAst {
      *   FormalParameterList ,
      *   FormalParameterList , FunctionRestParameter
      */
-    static createFormalParametersAstWrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
+    createFormalParametersAstWrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
         const children = cst.children || []
         const params: SlimeJavascriptFunctionParam[] = []
 
@@ -166,7 +167,7 @@ export class FunctionParameterCstToAst {
     }
 
 
-    static createFormalParameterListAst(cst: SubhutiCst): SlimeJavascriptPattern[] {
+    createFormalParameterListAst(cst: SubhutiCst): SlimeJavascriptPattern[] {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.FormalParameterList?.name);
 
         if (!cst.children || cst.children.length === 0) {
@@ -214,7 +215,7 @@ export class FunctionParameterCstToAst {
     /**
      * 创建 FormalParameterList AST (包装版本)
      */
-    static createFormalParameterListAstWrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
+    createFormalParameterListAstWrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
         const params: SlimeJavascriptFunctionParam[] = []
         let lastParam: SlimeJavascriptPattern | null = null
 
@@ -249,7 +250,7 @@ export class FunctionParameterCstToAst {
      * �?ES2025 FormalParameterList 创建参数 AST（包装类型）
      * FormalParameterList: FormalParameter (, FormalParameter)*
      */
-    static createFormalParameterListFromEs2025Wrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
+    createFormalParameterListFromEs2025Wrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
         const children = cst.children || []
         const params: SlimeJavascriptFunctionParam[] = []
 
@@ -291,7 +292,7 @@ export class FunctionParameterCstToAst {
     }
 
 
-    static createFormalParameterAst(cst: SubhutiCst): SlimeJavascriptPattern {
+    createFormalParameterAst(cst: SubhutiCst): SlimeJavascriptPattern {
         // FormalParameter: BindingElement
         const first = cst.children[0]
         if (first.name === 'BindingElement' || first.name === SlimeJavascriptParser.prototype.BindingElement?.name) {
@@ -300,14 +301,14 @@ export class FunctionParameterCstToAst {
         return SlimeJavascriptCstToAstUtil.createBindingElementAst(cst)
     }
 
-    static createFunctionRestParameterAst(cst: SubhutiCst): SlimeJavascriptRestElement {
+    createFunctionRestParameterAst(cst: SubhutiCst): SlimeJavascriptRestElement {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.FunctionRestParameter?.name);
         const first = cst.children[0]
         return SlimeJavascriptCstToAstUtil.createBindingRestElementAst(first)
     }
 
 
-    static createFunctionRestParameterAstAlt(cst: SubhutiCst): SlimeJavascriptRestElement {
+    createFunctionRestParameterAstAlt(cst: SubhutiCst): SlimeJavascriptRestElement {
         // FunctionRestParameter: ... BindingIdentifier | ... BindingPattern
         // 或�?FunctionRestParameter -> BindingRestElement
         const children = cst.children || []
@@ -338,7 +339,7 @@ export class FunctionParameterCstToAst {
     /**
      * 处理 UniqueFormalParameters CST 节点
      */
-    static createUniqueFormalParametersAst(cst: SubhutiCst): SlimeJavascriptPattern[] {
+    createUniqueFormalParametersAst(cst: SubhutiCst): SlimeJavascriptPattern[] {
         // UniqueFormalParameters: FormalParameters
         if (!cst.children || cst.children.length === 0) {
             return []
@@ -352,7 +353,7 @@ export class FunctionParameterCstToAst {
     }
 
     /** 返回包装类型的版�?*/
-    static createUniqueFormalParametersAstWrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
+    createUniqueFormalParametersAstWrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
         // UniqueFormalParameters: FormalParameters
         if (!cst.children || cst.children.length === 0) {
             return []
@@ -370,7 +371,7 @@ export class FunctionParameterCstToAst {
      * 从Expression中提取箭头函数参�?
      * 处理逗号表达�?(a, b) 或单个参�?(x)
      */
-    static extractParametersFromExpression(expressionCst: SubhutiCst): SlimeJavascriptPattern[] {
+    extractParametersFromExpression(expressionCst: SubhutiCst): SlimeJavascriptPattern[] {
         // Expression可能是：
         // 1. 单个Identifier: x
         // 2. 逗号表达�? a, b �?a, b, c
@@ -444,3 +445,5 @@ export class FunctionParameterCstToAst {
         return []
     }
 }
+
+export const SlimeJavascriptFunctionParameterCstToAst = new SlimeJavascriptFunctionParameterCstToAstSingle()

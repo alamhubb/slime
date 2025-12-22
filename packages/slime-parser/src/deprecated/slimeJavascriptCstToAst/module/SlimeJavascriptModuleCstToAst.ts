@@ -9,8 +9,9 @@ import {
 } from "slime-ast";
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export class ModuleCstToAst {
+export class SlimeJavascriptModuleCstToAstSingle {
 
     /**
      * 重置状态钩子方法
@@ -21,7 +22,7 @@ export class ModuleCstToAst {
      *
      * 注意：子类如需重置状态，应重写此方法，先调用自己的 resetState()，再调用 super.toProgram()
      */
-    static toProgram(cst: SubhutiCst): SlimeJavascriptProgram {
+    toProgram(cst: SubhutiCst): SlimeJavascriptProgram {
         // Support both Module and Script entry points
         const isModule = cst.name === SlimeJavascriptParser.prototype.Module?.name || cst.name === 'Module'
         const isScript = cst.name === SlimeJavascriptParser.prototype.Script?.name || cst.name === 'Script'
@@ -98,7 +99,7 @@ export class ModuleCstToAst {
      *
      * 存在必要性：Program 是顶层入口规则，需要处?Script ?Module 两种情况?
      */
-    static createProgramAst(cst: SubhutiCst): SlimeJavascriptProgram {
+    createProgramAst(cst: SubhutiCst): SlimeJavascriptProgram {
         // 处理 Program -> Script | Module
         const firstChild = cst.children?.[0]
         if (firstChild) {
@@ -115,7 +116,7 @@ export class ModuleCstToAst {
     /**
      * Module CST ?AST
      */
-    static createModuleAst(cst: SubhutiCst): SlimeJavascriptProgram {
+    createModuleAst(cst: SubhutiCst): SlimeJavascriptProgram {
         const moduleBody = cst.children?.find(ch =>
             ch.name === 'ModuleBody' || ch.name === SlimeJavascriptParser.prototype.ModuleBody?.name
         )
@@ -128,7 +129,7 @@ export class ModuleCstToAst {
     /**
      * Script CST ?AST
      */
-    static createScriptAst(cst: SubhutiCst): SlimeJavascriptProgram {
+    createScriptAst(cst: SubhutiCst): SlimeJavascriptProgram {
         const scriptBody = cst.children?.find(ch =>
             ch.name === 'ScriptBody' || ch.name === SlimeJavascriptParser.prototype.ScriptBody?.name
         )
@@ -141,7 +142,7 @@ export class ModuleCstToAst {
     /**
      * ModuleBody CST ?AST
      */
-    static createModuleBodyAst(cst: SubhutiCst): SlimeJavascriptProgram {
+    createModuleBodyAst(cst: SubhutiCst): SlimeJavascriptProgram {
         const moduleItemList = cst.children?.find(ch =>
             ch.name === 'ModuleItemList' || ch.name === SlimeJavascriptParser.prototype.ModuleItemList?.name
         )
@@ -155,7 +156,7 @@ export class ModuleCstToAst {
     /**
      * ScriptBody CST ?AST
      */
-    static createScriptBodyAst(cst: SubhutiCst): SlimeJavascriptProgram {
+    createScriptBodyAst(cst: SubhutiCst): SlimeJavascriptProgram {
         const stmtList = cst.children?.find(ch =>
             ch.name === 'StatementList' || ch.name === SlimeJavascriptParser.prototype.StatementList?.name
         )
@@ -166,7 +167,7 @@ export class ModuleCstToAst {
         return SlimeJavascriptAstUtil.createProgram([], 'script')
     }
 
-    static createModuleItemListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration> {
+    createModuleItemListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration> {
         const asts = cst.children.map(item => {
             // Es2025Parser uses ModuleItem wrapper
             if (item.name === SlimeJavascriptParser.prototype.ModuleItem?.name || item.name === 'ModuleItem') {
@@ -181,7 +182,7 @@ export class ModuleCstToAst {
         return asts.flat()
     }
 
-    static createModuleItemAst(item: SubhutiCst): SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration | SlimeJavascriptStatement[] | undefined {
+    createModuleItemAst(item: SubhutiCst): SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration | SlimeJavascriptStatement[] | undefined {
         const name = item.name
         if (name === SlimeJavascriptParser.prototype.ExportDeclaration?.name || name === 'ExportDeclaration') {
             return SlimeJavascriptCstToAstUtil.createExportDeclarationAst(item)
@@ -195,3 +196,5 @@ export class ModuleCstToAst {
     }
 
 }
+
+export const SlimeJavascriptModuleCstToAst = new SlimeJavascriptModuleCstToAstSingle()

@@ -7,9 +7,10 @@ import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import {SlimeJavascriptAstUtil, SlimeJavascriptExpression, SlimeJavascriptAstTypeName, SlimeJavascriptTokenCreate} from "slime-ast";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export class ExpressionCstToAst {
-    static createExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+export class SlimeJavascriptExpressionCstToAstSingle {
+    createExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const cached = SlimeJavascriptCstToAstUtil.expressionAstCache.get(cst)
         if (cached) {
             return cached
@@ -20,7 +21,7 @@ export class ExpressionCstToAst {
     }
 
 
-    static createExpressionAstUncached(cst: SubhutiCst): SlimeJavascriptExpression {
+    createExpressionAstUncached(cst: SubhutiCst): SlimeJavascriptExpression {
         const astName = cst.name
         let left
         if (astName === SlimeJavascriptParser.prototype.Expression?.name) {
@@ -147,7 +148,7 @@ export class ExpressionCstToAst {
     }
 
 
-    static createAssignmentExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createAssignmentExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.AssignmentExpression?.name);
 
         if (cst.children.length === 1) {
@@ -185,12 +186,12 @@ export class ExpressionCstToAst {
      * AssignmentOperator CST �?AST
      * AssignmentOperator -> *= | /= | %= | += | -= | <<= | >>= | >>>= | &= | ^= | |= | **= | &&= | ||= | ??=
      */
-    static createAssignmentOperatorAst(cst: SubhutiCst): string {
+    createAssignmentOperatorAst(cst: SubhutiCst): string {
         const token = cst.children?.[0]
         return token?.value || '='
     }
 
-    static createConditionalExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createConditionalExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ConditionalExpression?.name);
         const firstChild = cst.children[0]
         let test = SlimeJavascriptCstToAstUtil.createExpressionAst(firstChild)
@@ -227,7 +228,7 @@ export class ExpressionCstToAst {
      * 创建 CoalesceExpression AST（ES2020�?
      * 处理 ?? 空值合并运算符
      */
-    static createCoalesceExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createCoalesceExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         // CoalesceExpression -> BitwiseORExpression ( ?? BitwiseORExpression )*
         if (cst.children.length === 1) {
             return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
@@ -253,7 +254,7 @@ export class ExpressionCstToAst {
      * CoalesceExpressionHead CST 转 AST
      * CoalesceExpressionHead -> CoalesceExpression | BitwiseORExpression
      */
-    static createCoalesceExpressionHeadAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createCoalesceExpressionHeadAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             return SlimeJavascriptCstToAstUtil.createExpressionAst(firstChild)
@@ -266,7 +267,7 @@ export class ExpressionCstToAst {
      * ShortCircuitExpression CST �?AST（透传�?
      * ShortCircuitExpression -> LogicalORExpression | CoalesceExpression
      */
-    static createShortCircuitExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createShortCircuitExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             return SlimeJavascriptCstToAstUtil.createExpressionAst(firstChild)
@@ -279,7 +280,7 @@ export class ExpressionCstToAst {
      * CST 结构：ShortCircuitExpressionTail -> LogicalORExpressionTail | CoalesceExpressionTail
      * LogicalORExpressionTail -> LogicalOr LogicalANDExpression LogicalORExpressionTail?
      */
-    static createShortCircuitExpressionTailAst(left: SlimeJavascriptExpression, tailCst: SubhutiCst): SlimeJavascriptExpression {
+    createShortCircuitExpressionTailAst(left: SlimeJavascriptExpression, tailCst: SubhutiCst): SlimeJavascriptExpression {
         const tailChildren = tailCst.children || []
 
         // 如果�?ShortCircuitExpressionTail，获取内部的 tail
@@ -349,3 +350,5 @@ export class ExpressionCstToAst {
 
 
 }
+
+export const SlimeJavascriptExpressionCstToAst = new SlimeJavascriptExpressionCstToAstSingle()

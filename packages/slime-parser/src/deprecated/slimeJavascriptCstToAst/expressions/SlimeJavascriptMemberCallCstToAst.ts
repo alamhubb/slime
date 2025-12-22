@@ -12,14 +12,15 @@ import {
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export class MemberCallCstToAst {
+export class SlimeJavascriptMemberCallCstToAstSingle {
 
     /**
      * ExpressionBody CST �?AST
      * ExpressionBody -> AssignmentExpression
      */
-    static createExpressionBodyAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createExpressionBodyAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             return SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(firstChild)
@@ -28,7 +29,7 @@ export class MemberCallCstToAst {
     }
 
 
-    static createMemberExpressionFirstOr(cst: SubhutiCst): SlimeJavascriptExpression | SlimeJavascriptSuper {
+    createMemberExpressionFirstOr(cst: SubhutiCst): SlimeJavascriptExpression | SlimeJavascriptSuper {
         if (cst.name === SlimeJavascriptParser.prototype.PrimaryExpression?.name || cst.name === 'PrimaryExpression') {
             return SlimeJavascriptCstToAstUtil.createPrimaryExpressionAst(cst)
         } else if (cst.name === SlimeJavascriptParser.prototype.SuperProperty?.name || cst.name === 'SuperProperty') {
@@ -47,7 +48,7 @@ export class MemberCallCstToAst {
     }
 
 
-    static createMemberExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createMemberExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.MemberExpression?.name);
 
         if (cst.children.length === 0) {
@@ -206,7 +207,7 @@ export class MemberCallCstToAst {
         return current
     }
 
-    static createArgumentsAst(cst: SubhutiCst): Array<SlimeJavascriptCallArgument> {
+    createArgumentsAst(cst: SubhutiCst): Array<SlimeJavascriptCallArgument> {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.Arguments?.name);
         const first1 = cst.children[1]
         if (first1) {
@@ -218,7 +219,7 @@ export class MemberCallCstToAst {
         return []
     }
 
-    static createArgumentListAst(cst: SubhutiCst): Array<SlimeJavascriptCallArgument> {
+    createArgumentListAst(cst: SubhutiCst): Array<SlimeJavascriptCallArgument> {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ArgumentList?.name);
         const arguments_: Array<SlimeJavascriptCallArgument> = []
 
@@ -277,7 +278,7 @@ export class MemberCallCstToAst {
     }
 
 
-    static createCallExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createCallExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         // Support both CallExpression and CoverCallExpressionAndAsyncArrowHead
         const isCallExpr = cst.name === SlimeJavascriptParser.prototype.CallExpression?.name || cst.name === 'CallExpression'
         const isCoverExpr = cst.name === 'CoverCallExpressionAndAsyncArrowHead'
@@ -409,13 +410,13 @@ export class MemberCallCstToAst {
      * CallMemberExpression CST �?AST
      * CallMemberExpression -> MemberExpression Arguments
      */
-    static createCallMemberExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createCallMemberExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         return SlimeJavascriptCstToAstUtil.createCallExpressionAst(cst)
     }
 
 
 
-    static createNewExpressionAst(cst: SubhutiCst): any {
+    createNewExpressionAst(cst: SubhutiCst): any {
         // 支持两种类型：NewExpression �?NewMemberExpressionArguments
         const isNewMemberExpr = cst.name === 'NewMemberExpressionArguments'
         const isNewExpr = cst.name === SlimeJavascriptParser.prototype.NewExpression?.name
@@ -480,7 +481,7 @@ export class MemberCallCstToAst {
     }
 
 
-    static createSuperCallAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createSuperCallAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.SuperCall?.name);
         // SuperCall -> SuperTok + Arguments
         // children[0]: SuperTok token
@@ -497,7 +498,7 @@ export class MemberCallCstToAst {
         return SlimeJavascriptAstUtil.createCallExpression(superNode, argumentsAst) as SlimeJavascriptExpression
     }
 
-    static createSuperPropertyAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createSuperPropertyAst(cst: SubhutiCst): SlimeJavascriptExpression {
         // SuperProperty:
         // 形式1: SuperTok + Dot + IdentifierName
         // 形式2: SuperTok + LBracket + Expression + RBracket
@@ -569,7 +570,7 @@ export class MemberCallCstToAst {
         }
     }
 
-    static createMetaPropertyAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createMetaPropertyAst(cst: SubhutiCst): SlimeJavascriptExpression {
         // MetaProperty: children[0]是NewTarget或ImportMeta
         const first = cst.children[0]
         if (first.name === SlimeJavascriptParser.prototype.NewTarget?.name) {
@@ -597,13 +598,13 @@ export class MemberCallCstToAst {
      * CoverCallExpressionAndAsyncArrowHead CST �?AST
      * 这是一�?cover grammar，通常作为 CallExpression 处理
      */
-    static createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeJavascriptExpression {
         return SlimeJavascriptCstToAstUtil.createCallExpressionAst(cst)
     }
 
 
 
-    static createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.LeftHandSideExpression?.name);
         // 容错：Parser在ASI场景下可能生成不完整的CST，返回空标识�?
         if (!cst.children || cst.children.length === 0) {
@@ -616,3 +617,6 @@ export class MemberCallCstToAst {
     }
 
 }
+
+
+export const SlimeJavascriptMemberCallCstToAst = new SlimeJavascriptMemberCallCstToAstSingle()

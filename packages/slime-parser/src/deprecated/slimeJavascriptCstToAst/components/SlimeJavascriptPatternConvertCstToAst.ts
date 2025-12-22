@@ -18,12 +18,13 @@ import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export class PatternConvertCstToAst {
+export class SlimeJavascriptPatternConvertCstToAstSingle {
     /**
      * �?ArrayExpression AST 转换�?ArrayPattern
      */
-    static convertArrayExpressionToPattern(expr: any): SlimeJavascriptArrayPattern {
+    convertArrayExpressionToPattern(expr: any): SlimeJavascriptArrayPattern {
         const elements: SlimeJavascriptArrayPatternElement[] = []
         for (const elem of expr.elements || []) {
             if (elem === null || elem.element === null) {
@@ -52,7 +53,7 @@ export class PatternConvertCstToAst {
      * 这用于处�?async (expr) => body 中的 expr �?pattern 的转�?
      * 注意：这个方法处�?CST 节点，convertExpressionToPattern 处理 AST 节点
      */
-    static convertCstToPattern(cst: SubhutiCst): SlimeJavascriptPattern | null {
+    convertCstToPattern(cst: SubhutiCst): SlimeJavascriptPattern | null {
         // 首先检查是否是 AssignmentExpression (默认参数 options = {})
         // 这必须在 findInnerExpr 之前处理，否则会丢失 = 和默认�?
         if (cst.name === 'AssignmentExpression' || cst.name === SlimeJavascriptParser.prototype.AssignmentExpression?.name) {
@@ -123,7 +124,7 @@ export class PatternConvertCstToAst {
      * Cover 语法下，将单个参数相关的 CST 节点转换�?Pattern
      * 仅在“参数位置”调用，用于 Arrow / AsyncArrow 等场�?
      */
-    static convertCoverParameterCstToPattern(cst: SubhutiCst, hasEllipsis: boolean): SlimeJavascriptPattern | null {
+    convertCoverParameterCstToPattern(cst: SubhutiCst, hasEllipsis: boolean): SlimeJavascriptPattern | null {
         let basePattern: SlimeJavascriptPattern | null = null
 
         // 1. 已经�?BindingIdentifier / BindingPattern 系列的，直接走绑定模式基础方法
@@ -164,7 +165,7 @@ export class PatternConvertCstToAst {
     /**
      * �?ObjectLiteral CST 转换�?ObjectPattern
      */
-    static convertObjectLiteralToPattern(cst: SubhutiCst): SlimeJavascriptObjectPattern {
+    convertObjectLiteralToPattern(cst: SubhutiCst): SlimeJavascriptObjectPattern {
         const properties: SlimeJavascriptObjectPatternProperty[] = []
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined
@@ -226,7 +227,7 @@ export class PatternConvertCstToAst {
     /**
      * �?PropertyDefinition CST 转换�?Pattern 属�?
      */
-    static convertPropertyDefinitionToPatternProperty(cst: SubhutiCst): SlimeJavascriptAssignmentProperty | null {
+    convertPropertyDefinitionToPatternProperty(cst: SubhutiCst): SlimeJavascriptAssignmentProperty | null {
         const first = cst.children?.[0]
         if (!first) return null
 
@@ -301,7 +302,7 @@ export class PatternConvertCstToAst {
     /**
      * �?ObjectExpression AST 转换�?ObjectPattern
      */
-    static convertObjectExpressionToPattern(expr: any): SlimeJavascriptObjectPattern {
+    convertObjectExpressionToPattern(expr: any): SlimeJavascriptObjectPattern {
         const properties: SlimeJavascriptObjectPatternProperty[] = []
         for (const prop of expr.properties || []) {
             const property = prop.property || prop
@@ -342,7 +343,7 @@ export class PatternConvertCstToAst {
     /**
      * �?AssignmentExpression AST 转换�?AssignmentPattern
      */
-    static convertAssignmentExpressionToPattern(expr: any): any {
+    convertAssignmentExpressionToPattern(expr: any): any {
         const left = SlimeJavascriptCstToAstUtil.convertExpressionToPatternFromAST(expr.left)
         return {
             type: SlimeJavascriptAstTypeName.AssignmentPattern,
@@ -355,7 +356,7 @@ export class PatternConvertCstToAst {
     /**
      * 将表达式 AST 转换�?Pattern
      */
-    static convertExpressionToPatternFromAST(expr: any): SlimeJavascriptPattern | null {
+    convertExpressionToPatternFromAST(expr: any): SlimeJavascriptPattern | null {
         if (!expr) return null
         if (expr.type === SlimeJavascriptAstTypeName.Identifier) {
             return expr
@@ -372,7 +373,7 @@ export class PatternConvertCstToAst {
     /**
      * �?ArrayLiteral CST 转换�?ArrayPattern
      */
-    static convertArrayLiteralToPattern(cst: SubhutiCst): SlimeJavascriptArrayPattern {
+    convertArrayLiteralToPattern(cst: SubhutiCst): SlimeJavascriptArrayPattern {
         // 简化实现：使用 createArrayBindingPatternAst 的逻辑
         const elements: SlimeJavascriptArrayPatternElement[] = []
         let lBracketToken: any = undefined
@@ -446,7 +447,7 @@ export class PatternConvertCstToAst {
      * Identifier -> Identifier
      * SpreadElement -> RestElement
      */
-    static convertExpressionToPattern(expr: any): SlimeJavascriptPattern {
+    convertExpressionToPattern(expr: any): SlimeJavascriptPattern {
         if (!expr) return expr
 
         if (expr.type === SlimeJavascriptAstTypeName.Identifier) {
@@ -548,7 +549,7 @@ export class PatternConvertCstToAst {
     }
 
 
-    static createBindingRestElementAst(cst: SubhutiCst): SlimeJavascriptRestElement {
+    createBindingRestElementAst(cst: SubhutiCst): SlimeJavascriptRestElement {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BindingRestElement?.name);
         // BindingRestElement: ... BindingIdentifier | ... BindingPattern
         const argumentCst = cst.children[1]
@@ -568,3 +569,6 @@ export class PatternConvertCstToAst {
         return SlimeJavascriptAstUtil.createRestElement(argument)
     }
 }
+
+
+export const SlimeJavascriptPatternConvertCstToAst = new SlimeJavascriptPatternConvertCstToAstSingle()

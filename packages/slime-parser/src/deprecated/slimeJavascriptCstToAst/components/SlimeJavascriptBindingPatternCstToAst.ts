@@ -17,10 +17,11 @@ import {
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export class BindingPatternCstToAst {
+export class SlimeJavascriptBindingPatternCstToAstSingle {
 
-    static createBindingElementAst(cst: SubhutiCst): any {
+    createBindingElementAst(cst: SubhutiCst): any {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BindingElement?.name);
         const first = cst.children[0]
 
@@ -56,7 +57,7 @@ export class BindingPatternCstToAst {
         return SlimeJavascriptCstToAstUtil.createSingleNameBindingAst(first)
     }
 
-    static createSingleNameBindingAst(cst: SubhutiCst): any {
+    createSingleNameBindingAst(cst: SubhutiCst): any {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.SingleNameBinding?.name);
         //BindingIdentifier + Initializer?
         const first = cst.children[0]
@@ -82,7 +83,7 @@ export class BindingPatternCstToAst {
     /**
      * BindingRestProperty CST �?AST
      */
-    static createBindingRestPropertyAst(cst: SubhutiCst): SlimeJavascriptRestElement {
+    createBindingRestPropertyAst(cst: SubhutiCst): SlimeJavascriptRestElement {
         const argument = cst.children?.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.BindingIdentifier?.name ||
             ch.name === 'BindingIdentifier'
@@ -96,7 +97,7 @@ export class BindingPatternCstToAst {
      * BindingProperty CST �?AST
      * BindingProperty -> SingleNameBinding | PropertyName : BindingElement
      */
-    static createBindingPropertyAst(cst: SubhutiCst): any {
+    createBindingPropertyAst(cst: SubhutiCst): any {
         const children = cst.children || []
 
         // 检查是否是 SingleNameBinding
@@ -136,7 +137,7 @@ export class BindingPatternCstToAst {
     /**
      * BindingPropertyList CST 转 AST
      */
-    static createBindingPropertyListAst(cst: SubhutiCst): any[] {
+    createBindingPropertyListAst(cst: SubhutiCst): any[] {
         const properties: any[] = []
         for (const child of cst.children || []) {
             if (child.name === SlimeJavascriptParser.prototype.BindingProperty?.name ||
@@ -150,7 +151,7 @@ export class BindingPatternCstToAst {
     /**
      * BindingElementList CST �?AST
      */
-    static createBindingElementListAst(cst: SubhutiCst): any[] {
+    createBindingElementListAst(cst: SubhutiCst): any[] {
         const elements: any[] = []
         for (const child of cst.children || []) {
             if (child.name === SlimeJavascriptParser.prototype.BindingElement?.name ||
@@ -178,7 +179,7 @@ export class BindingPatternCstToAst {
     /**
      * BindingElisionElement CST �?AST
      */
-    static createBindingElisionElementAst(cst: SubhutiCst): any {
+    createBindingElisionElementAst(cst: SubhutiCst): any {
         const bindingElement = cst.children?.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.BindingElement?.name ||
             ch.name === 'BindingElement'
@@ -192,7 +193,7 @@ export class BindingPatternCstToAst {
 
 
 
-    static createBindingPatternAst(cst: SubhutiCst): SlimeJavascriptPattern {
+    createBindingPatternAst(cst: SubhutiCst): SlimeJavascriptPattern {
         SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BindingPattern?.name)
 
         const child = cst.children[0]
@@ -206,7 +207,7 @@ export class BindingPatternCstToAst {
         }
     }
 
-    static createArrayBindingPatternAst(cst: SubhutiCst): SlimeJavascriptArrayPattern {
+    createArrayBindingPatternAst(cst: SubhutiCst): SlimeJavascriptArrayPattern {
         SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ArrayBindingPattern?.name)
 
         // CST结构：[LBracket, BindingElementList?, Comma?, Elision?, BindingRestElement?, RBracket]
@@ -317,7 +318,7 @@ export class BindingPatternCstToAst {
         } as SlimeJavascriptArrayPattern
     }
 
-    static createObjectBindingPatternAst(cst: SubhutiCst): SlimeJavascriptObjectPattern {
+    createObjectBindingPatternAst(cst: SubhutiCst): SlimeJavascriptObjectPattern {
         SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ObjectBindingPattern?.name)
 
         // CST结构：[LBrace, BindingPropertyList?, RBrace]
@@ -445,3 +446,5 @@ export class BindingPatternCstToAst {
         } as SlimeJavascriptObjectPattern
     }
 }
+
+export const SlimeJavascriptBindingPatternCstToAst = new SlimeJavascriptBindingPatternCstToAstSingle()
