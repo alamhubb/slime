@@ -89,7 +89,7 @@ import {
     ModuleCstToAst,
     OptionalExpressionCstToAst,
     OtherStatementCstToAst,
-    PatternConvertCstToAstTs,
+    PatternConvertCstToAst,
     PrimaryExpressionCstToAst,
     UnaryExpressionCstToAst,
     VariableCstToAst, ClassDeclarationCstToAst,
@@ -327,46 +327,46 @@ export class SlimeCstToAst {
         return AssignmentPatternCstToAst.createAssignmentRestPropertyAst(cst)
     }
 
-    // === pattern / PatternConvertCstToAstTs ===
+    // === pattern / PatternConvertCstToAst ===
 
     convertArrayExpressionToPattern(expr: any): SlimeArrayPattern {
-        return PatternConvertCstToAstTs.convertArrayExpressionToPattern(expr)
+        return PatternConvertCstToAst.convertArrayExpressionToPattern(expr)
     }
 
     convertCstToPattern(cst: SubhutiCst): SlimePattern | null {
-        return PatternConvertCstToAstTs.convertCstToPattern(cst)
+        return PatternConvertCstToAst.convertCstToPattern(cst)
     }
 
     convertCoverParameterCstToPattern(cst: SubhutiCst, hasEllipsis: boolean): SlimePattern | null {
-        return PatternConvertCstToAstTs.convertCoverParameterCstToPattern(cst, hasEllipsis)
+        return PatternConvertCstToAst.convertCoverParameterCstToPattern(cst, hasEllipsis)
     }
 
     convertObjectLiteralToPattern(cst: SubhutiCst): SlimeObjectPattern {
-        return PatternConvertCstToAstTs.convertObjectLiteralToPattern(cst)
+        return PatternConvertCstToAst.convertObjectLiteralToPattern(cst)
     }
 
     convertPropertyDefinitionToPatternProperty(cst: SubhutiCst): SlimeAssignmentProperty | null {
-        return PatternConvertCstToAstTs.convertPropertyDefinitionToPatternProperty(cst)
+        return PatternConvertCstToAst.convertPropertyDefinitionToPatternProperty(cst)
     }
 
     convertObjectExpressionToPattern(expr: any): SlimeObjectPattern {
-        return PatternConvertCstToAstTs.convertObjectExpressionToPattern(expr)
+        return PatternConvertCstToAst.convertObjectExpressionToPattern(expr)
     }
 
     convertAssignmentExpressionToPattern(expr: any): any {
-        return PatternConvertCstToAstTs.convertAssignmentExpressionToPattern(expr)
+        return PatternConvertCstToAst.convertAssignmentExpressionToPattern(expr)
     }
 
     convertExpressionToPatternFromAST(expr: any): SlimePattern | null {
-        return PatternConvertCstToAstTs.convertExpressionToPatternFromAST(expr)
+        return PatternConvertCstToAst.convertExpressionToPatternFromAST(expr)
     }
 
     convertArrayLiteralToPattern(cst: SubhutiCst): SlimeArrayPattern {
-        return PatternConvertCstToAstTs.convertArrayLiteralToPattern(cst)
+        return PatternConvertCstToAst.convertArrayLiteralToPattern(cst)
     }
 
     convertExpressionToPattern(expr: any): SlimePattern {
-        return PatternConvertCstToAstTs.convertExpressionToPattern(expr)
+        return PatternConvertCstToAst.convertExpressionToPattern(expr)
     }
 
     // === expression / ExpressionCstToAst ===
@@ -386,7 +386,7 @@ export class SlimeCstToAst {
     // === expression / PrimaryExpressionCstToAst ===
 
     createComputedPropertyNameAst(cst: SubhutiCst): SlimeExpression {
-        return PrimaryExpressionCstToAst.createComputedPropertyNameAst(cst)
+        return CompoundLiteralCstToAst.createComputedPropertyNameAst(cst)
     }
 
     createPrimaryExpressionAst(cst: SubhutiCst): SlimeExpression {
@@ -402,33 +402,33 @@ export class SlimeCstToAst {
     }
 
     createCoverInitializedNameAst(cst: SubhutiCst): any {
-        return PrimaryExpressionCstToAst.createCoverInitializedNameAst(cst)
+        return CompoundLiteralCstToAst.createCoverInitializedNameAst(cst)
     }
 
     createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeExpression {
-        return PrimaryExpressionCstToAst.createCoverCallExpressionAndAsyncArrowHeadAst(cst)
+        return MemberCallCstToAst.createCoverCallExpressionAndAsyncArrowHeadAst(cst)
     }
 
     createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeExpression {
-        return PrimaryExpressionCstToAst.createLeftHandSideExpressionAst(cst)
+        return MemberCallCstToAst.createLeftHandSideExpressionAst(cst)
     }
 
     // === expression / AssignmentExpressionCstToAst ===
 
     createExpressionBodyAst(cst: SubhutiCst): SlimeExpression {
-        return AssignmentExpressionCstToAst.createExpressionBodyAst(cst)
+        return MemberCallCstToAst.createExpressionBodyAst(cst)
     }
 
     createAssignmentExpressionAst(cst: SubhutiCst): SlimeExpression {
-        return AssignmentExpressionCstToAst.createAssignmentExpressionAst(cst)
+        return ExpressionCstToAst.createAssignmentExpressionAst(cst)
     }
 
     createExpressionAst(cst: SubhutiCst): SlimeExpression {
-        return AssignmentExpressionCstToAst.createExpressionAst(cst)
+        return ExpressionCstToAst.createExpressionAst(cst)
     }
 
     createExpressionAstUncached(cst: SubhutiCst): SlimeExpression {
-        return AssignmentExpressionCstToAst.createExpressionAstUncached(cst)
+        return ExpressionCstToAst.createExpressionAstUncached(cst)
     }
 
     // === expression / BinaryExpressionCstToAst ===
@@ -438,7 +438,7 @@ export class SlimeCstToAst {
     }
 
     createAssignmentOperatorAst(cst: SubhutiCst): string {
-        return BinaryExpressionCstToAst.createAssignmentOperatorAst(cst)
+        return ExpressionCstToAst.createAssignmentOperatorAst(cst)
     }
 
     createExponentiationExpressionAst(cst: SubhutiCst): SlimeExpression {
@@ -478,19 +478,19 @@ export class SlimeCstToAst {
     }
 
     createCoalesceExpressionAst(cst: SubhutiCst): SlimeExpression {
-        return BinaryExpressionCstToAst.createCoalesceExpressionAst(cst)
+        return ExpressionCstToAst.createCoalesceExpressionAst(cst)
     }
 
     createCoalesceExpressionHeadAst(cst: SubhutiCst): SlimeExpression {
-        return BinaryExpressionCstToAst.createCoalesceExpressionHeadAst(cst)
+        return ExpressionCstToAst.createCoalesceExpressionHeadAst(cst)
     }
 
     createShortCircuitExpressionAst(cst: SubhutiCst): SlimeExpression {
-        return BinaryExpressionCstToAst.createShortCircuitExpressionAst(cst)
+        return ExpressionCstToAst.createShortCircuitExpressionAst(cst)
     }
 
     createShortCircuitExpressionTailAst(left: SlimeExpression, tailCst: SubhutiCst): SlimeExpression {
-        return BinaryExpressionCstToAst.createShortCircuitExpressionTailAst(left, tailCst)
+        return ExpressionCstToAst.createShortCircuitExpressionTailAst(left, tailCst)
     }
 
     // === expression / UnaryExpressionCstToAst ===
@@ -504,11 +504,11 @@ export class SlimeCstToAst {
     }
 
     createAdditiveExpressionAst(cst: SubhutiCst): SlimeExpression {
-        return UnaryExpressionCstToAst.createAdditiveExpressionAst(cst)
+        return BinaryExpressionCstToAst.createAdditiveExpressionAst(cst)
     }
 
     createMultiplicativeExpressionAst(cst: SubhutiCst): SlimeExpression {
-        return UnaryExpressionCstToAst.createMultiplicativeExpressionAst(cst)
+        return BinaryExpressionCstToAst.createMultiplicativeExpressionAst(cst)
     }
 
     // === expression / MemberCallCstToAst ===
@@ -566,7 +566,7 @@ export class SlimeCstToAst {
     // === function / ArrowFunctionCstToAst ===
 
     createAsyncConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
-        return ArrowFunctionCstToAst.createAsyncConciseBodyAst(cst)
+        return FunctionBodyCstToAst.createAsyncConciseBodyAst(cst)
     }
 
     createAsyncArrowHeadAst(cst: SubhutiCst): any {
@@ -578,11 +578,11 @@ export class SlimeCstToAst {
     }
 
     findFirstIdentifierInExpression(cst: SubhutiCst): SubhutiCst | null {
-        return ArrowFunctionCstToAst.findFirstIdentifierInExpression(cst)
+        return PrimaryExpressionCstToAst.findFirstIdentifierInExpression(cst)
     }
 
     extractParametersFromExpression(expressionCst: SubhutiCst): SlimePattern[] {
-        return ArrowFunctionCstToAst.extractParametersFromExpression(expressionCst)
+        return FunctionParameterCstToAst.extractParametersFromExpression(expressionCst)
     }
 
     createArrowParametersFromCoverGrammar(cst: SubhutiCst): SlimePattern[] {
@@ -614,7 +614,7 @@ export class SlimeCstToAst {
     }
 
     createConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
-        return ArrowFunctionCstToAst.createConciseBodyAst(cst)
+        return FunctionBodyCstToAst.createConciseBodyAst(cst)
     }
 
     // === function / FunctionExpressionCstToAst ===
@@ -638,7 +638,7 @@ export class SlimeCstToAst {
     // === function / FunctionParameterCstToAst ===
 
     createBindingRestElementAst(cst: SubhutiCst): SlimeRestElement {
-        return FunctionParameterCstToAst.createBindingRestElementAst(cst)
+        return PatternConvertCstToAst.createBindingRestElementAst(cst)
     }
 
     createFunctionRestParameterAst(cst: SubhutiCst): SlimeRestElement {

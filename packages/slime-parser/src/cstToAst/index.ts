@@ -42,3 +42,4 @@ export * from './components/PatternConvertCstToAst.ts';
 // atoms
 export * from './identifier/IdentifierCstToAst.ts';
 export * from './literal/LiteralCstToAst.ts';
+export * from './expressions/OptionalExpressionCstToAst.ts';
