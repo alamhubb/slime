@@ -1,5 +1,5 @@
-import { SubhutiCst } from "subhuti";
-import { SlimeAstUtils } from "../SlimeAstUtils.ts";
+import {SubhutiCst} from "subhuti";
+import {SlimeAstUtils} from "../SlimeAstUtils.ts";
 import SlimeParser from "../../SlimeParser.ts";
 import {
     SlimeAstUtil, SlimeBlockStatement, type SlimeExportAllDeclaration,
@@ -43,7 +43,6 @@ export class BlockCstToAst {
     }
 
 
-
     /**
      * 创建 BlockStatement AST
      * 处理两种情况�?
@@ -74,8 +73,7 @@ export class BlockCstToAst {
             } else {
                 statements = []
             }
-        }
-        else {
+        } else {
             throw new Error(`Expected StatementList or BlockStatement, got ${cst.name}`)
         }
 
@@ -85,6 +83,79 @@ export class BlockCstToAst {
             loc: cst.loc
         }
         return ast
+    }
+
+
+    static createStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.StatementList?.name);
+        if (cst.children) {
+            const statements = cst.children.map(item => SlimeCstToAstUtil.createStatementListItemAst(item)).flat()
+            return statements
+        }
+        return []
+    }
+
+
+    static createStatementAst(cst: SubhutiCst): Array<SlimeStatement> {
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Statement?.name);
+        const statements: SlimeStatement[] = cst.children
+            .map(item => SlimeCstToAstUtil.createStatementDeclarationAst(item))
+            .filter(stmt => stmt !== undefined)  // 过滤�?undefined
+        return statements
+    }
+
+
+    static createStatementListItemAst(cst: SubhutiCst): Array<SlimeStatement> {
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.StatementListItem?.name);
+        const statements = cst.children.map(item => {
+            // 如果�?Declaration，直接处�?
+            if (item.name === SlimeParser.prototype.Declaration?.name) {
+                return [SlimeCstToAstUtil.createDeclarationAst(item) as any]
+            }
+
+            // 如果�?Statement，需要特殊处�?FunctionExpression �?ClassExpression
+            const statement = SlimeCstToAstUtil.createStatementAst(item)
+            const result = statement.flat()
+
+            // 检查是否是命名�?FunctionExpression �?ClassExpression（应该转�?Declaration�?
+            return result.map(stmt => {
+                if (stmt.type === SlimeNodeType.ExpressionStatement) {
+                    const expr = (stmt as SlimeExpressionStatement).expression
+
+                    // 命名�?FunctionExpression �?FunctionDeclaration
+                    if (expr.type === SlimeNodeType.FunctionExpression) {
+                        const funcExpr = expr as SlimeFunctionExpression
+                        if (funcExpr.id) {
+                            return {
+                                type: SlimeNodeType.FunctionDeclaration,
+                                id: funcExpr.id,
+                                params: funcExpr.params,
+                                body: funcExpr.body,
+                                generator: funcExpr.generator,
+                                async: funcExpr.async,
+                                loc: funcExpr.loc
+                            } as SlimeFunctionDeclaration
+                        }
+                    }
+
+                    // ClassExpression �?ClassDeclaration
+                    if (expr.type === SlimeNodeType.ClassExpression) {
+                        const classExpr = expr as any
+                        if (classExpr.id) {
+                            return {
+                                type: SlimeNodeType.ClassDeclaration,
+                                id: classExpr.id,
+                                superClass: classExpr.superClass,
+                                body: classExpr.body,
+                                loc: classExpr.loc
+                            } as any
+                        }
+                    }
+                }
+                return stmt
+            })
+        }).flat()
+        return statements
     }
 
 
@@ -215,79 +286,6 @@ export class BlockCstToAst {
         else if (cst.name === SlimeParser.prototype.ClassDeclaration?.name) {
             return SlimeCstToAstUtil.createClassDeclarationAst(cst)
         }
-    }
-
-
-    static createStatementAst(cst: SubhutiCst): Array<SlimeStatement> {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Statement?.name);
-        const statements: SlimeStatement[] = cst.children
-            .map(item => SlimeCstToAstUtil.createStatementDeclarationAst(item))
-            .filter(stmt => stmt !== undefined)  // 过滤�?undefined
-        return statements
-    }
-
-
-    static createStatementListItemAst(cst: SubhutiCst): Array<SlimeStatement> {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.StatementListItem?.name);
-        const statements = cst.children.map(item => {
-            // 如果�?Declaration，直接处�?
-            if (item.name === SlimeParser.prototype.Declaration?.name) {
-                return [SlimeCstToAstUtil.createDeclarationAst(item) as any]
-            }
-
-            // 如果�?Statement，需要特殊处�?FunctionExpression �?ClassExpression
-            const statement = SlimeCstToAstUtil.createStatementAst(item)
-            const result = statement.flat()
-
-            // 检查是否是命名�?FunctionExpression �?ClassExpression（应该转�?Declaration�?
-            return result.map(stmt => {
-                if (stmt.type === SlimeNodeType.ExpressionStatement) {
-                    const expr = (stmt as SlimeExpressionStatement).expression
-
-                    // 命名�?FunctionExpression �?FunctionDeclaration
-                    if (expr.type === SlimeNodeType.FunctionExpression) {
-                        const funcExpr = expr as SlimeFunctionExpression
-                        if (funcExpr.id) {
-                            return {
-                                type: SlimeNodeType.FunctionDeclaration,
-                                id: funcExpr.id,
-                                params: funcExpr.params,
-                                body: funcExpr.body,
-                                generator: funcExpr.generator,
-                                async: funcExpr.async,
-                                loc: funcExpr.loc
-                            } as SlimeFunctionDeclaration
-                        }
-                    }
-
-                    // ClassExpression �?ClassDeclaration
-                    if (expr.type === SlimeNodeType.ClassExpression) {
-                        const classExpr = expr as any
-                        if (classExpr.id) {
-                            return {
-                                type: SlimeNodeType.ClassDeclaration,
-                                id: classExpr.id,
-                                superClass: classExpr.superClass,
-                                body: classExpr.body,
-                                loc: classExpr.loc
-                            } as any
-                        }
-                    }
-                }
-                return stmt
-            })
-        }).flat()
-        return statements
-    }
-
-
-    static createStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.StatementList?.name);
-        if (cst.children) {
-            const statements = cst.children.map(item => SlimeCstToAstUtil.createStatementListItemAst(item)).flat()
-            return statements
-        }
-        return []
     }
 
 }
