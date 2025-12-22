@@ -11,6 +11,7 @@ import {
 import SlimeParser from "../../../SlimeParser.ts";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
+import {SlimeTokenConsumer} from "../../../index.ts";
 
 export class FunctionParameterCstToAst {
 

@@ -5,7 +5,7 @@ import { SubhutiCst } from "subhuti";
 import {
     SlimeAstUtil, type SlimeCallArgument,
     SlimeExpression,
-    type SlimeIdentifier, SlimeNodeType, type SlimePattern, type SlimeSuper,
+    type SlimeIdentifier, SlimeNodeType, type SlimePattern, SlimeSpreadElement, type SlimeSuper,
     SlimeTokenCreate,
     type SlimeVariableDeclarator
 } from "slime-ast";
