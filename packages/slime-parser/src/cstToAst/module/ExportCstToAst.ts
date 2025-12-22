@@ -1,7 +1,7 @@
 /**
  * ExportCstToAst - export 相关转换
  */
-import { SubhutiCst } from "subhuti";
+import {SubhutiCst} from "subhuti";
 import {
     SlimeAstUtil,
     SlimeExportAllDeclaration,
@@ -12,54 +12,11 @@ import {
     SlimeStatement, SlimeTokenCreate
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
-import { SlimeAstUtils } from "../SlimeAstUtils.ts";
+import {SlimeAstUtils} from "../SlimeAstUtils.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 
 export class ExportCstToAst {
-
-    /**
-     * ExportFromClause CST �?AST
-     * ExportFromClause -> * | * as ModuleExportName | NamedExports
-     */
-    static createExportFromClauseAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-
-        // 检查是否是 * (export all)
-        const asterisk = children.find(ch => ch.name === 'Asterisk' || ch.value === '*')
-        if (asterisk) {
-            const asTok = children.find(ch => ch.name === 'As' || ch.value === 'as')
-            const exportedName = children.find(ch =>
-                ch.name === SlimeParser.prototype.ModuleExportName?.name ||
-                ch.name === 'ModuleExportName'
-            )
-
-            if (asTok && exportedName) {
-                // * as name
-                return {
-                    type: 'exportAll',
-                    exported: SlimeCstToAstUtil.createModuleExportNameAst(exportedName)
-                }
-            } else {
-                // * (export all)
-                return { type: 'exportAll', exported: null }
-            }
-        }
-
-        // NamedExports
-        const namedExports = children.find(ch =>
-            ch.name === SlimeParser.prototype.NamedExports?.name ||
-            ch.name === 'NamedExports'
-        )
-        if (namedExports) {
-            return {
-                type: 'namedExports',
-                specifiers: SlimeCstToAstUtil.createNamedExportsAst(namedExports)
-            }
-        }
-
-        return { type: 'unknown' }
-    }
 
     static createExportDeclarationAst(cst: SubhutiCst): SlimeExportDefaultDeclaration | SlimeExportNamedDeclaration | SlimeExportAllDeclaration {
         let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ExportDeclaration?.name);
@@ -215,6 +172,51 @@ export class ExportCstToAst {
         throw new Error(`Unsupported export declaration structure`)
     }
 
+
+    /**
+     * ExportFromClause CST �?AST
+     * ExportFromClause -> * | * as ModuleExportName | NamedExports
+     */
+    static createExportFromClauseAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+
+        // 检查是否是 * (export all)
+        const asterisk = children.find(ch => ch.name === 'Asterisk' || ch.value === '*')
+        if (asterisk) {
+            const asTok = children.find(ch => ch.name === 'As' || ch.value === 'as')
+            const exportedName = children.find(ch =>
+                ch.name === SlimeParser.prototype.ModuleExportName?.name ||
+                ch.name === 'ModuleExportName'
+            )
+
+            if (asTok && exportedName) {
+                // * as name
+                return {
+                    type: 'exportAll',
+                    exported: SlimeCstToAstUtil.createModuleExportNameAst(exportedName)
+                }
+            } else {
+                // * (export all)
+                return {type: 'exportAll', exported: null}
+            }
+        }
+
+        // NamedExports
+        const namedExports = children.find(ch =>
+            ch.name === SlimeParser.prototype.NamedExports?.name ||
+            ch.name === 'NamedExports'
+        )
+        if (namedExports) {
+            return {
+                type: 'namedExports',
+                specifiers: SlimeCstToAstUtil.createNamedExportsAst(namedExports)
+            }
+        }
+
+        return {type: 'unknown'}
+    }
+
+
     /**
      * 创建 NamedExports AST (export { a, b, c })
      */
@@ -226,7 +228,7 @@ export class ExportCstToAst {
             if (child.name === SlimeParser.prototype.ExportsList?.name) {
                 return SlimeCstToAstUtil.createExportsListAst(child)
             } else if (child.name === SlimeParser.prototype.ExportSpecifier?.name) {
-                specifiers.push({ specifier: SlimeCstToAstUtil.createExportSpecifierAst(child) })
+                specifiers.push({specifier: SlimeCstToAstUtil.createExportSpecifierAst(child)})
             }
         }
 
@@ -243,7 +245,7 @@ export class ExportCstToAst {
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.ExportSpecifier?.name) {
                 if (lastSpecifier) {
-                    specifiers.push({ specifier: lastSpecifier })
+                    specifiers.push({specifier: lastSpecifier})
                 }
                 lastSpecifier = SlimeCstToAstUtil.createExportSpecifierAst(child)
             } else if (child.name === SlimeTokenConsumer.prototype.Comma?.name || child.value === ',') {
@@ -258,7 +260,7 @@ export class ExportCstToAst {
         }
 
         if (lastSpecifier) {
-            specifiers.push({ specifier: lastSpecifier })
+            specifiers.push({specifier: lastSpecifier})
         }
 
         return specifiers
