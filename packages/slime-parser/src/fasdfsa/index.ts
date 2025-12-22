@@ -6,8 +6,8 @@
 export * from './identifier/IdentifierCstToAst.ts';
 
 // module
-export * from './module/ExportCstToAst.ts';
-export * from './module/ImportCstToAst.ts';
+export * from '../cstToAst/module/ExportCstToAst.ts';
+export * from '../cstToAst/module/ImportCstToAst.ts';
 export * from '../cstToAst/module/ModuleCstToAst.ts';
 
 // declaration
