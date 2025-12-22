@@ -15,6 +15,19 @@ import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
 export class MemberCallCstToAst {
 
+    /**
+     * ExpressionBody CST �?AST
+     * ExpressionBody -> AssignmentExpression
+     */
+    static createExpressionBodyAst(cst: SubhutiCst): SlimeExpression {
+        const firstChild = cst.children?.[0]
+        if (firstChild) {
+            return SlimeCstToAstUtil.createAssignmentExpressionAst(firstChild)
+        }
+        throw new Error('ExpressionBody has no children')
+    }
+
+
     static createMemberExpressionFirstOr(cst: SubhutiCst): SlimeExpression | SlimeSuper {
         if (cst.name === SlimeParser.prototype.PrimaryExpression?.name || cst.name === 'PrimaryExpression') {
             return SlimeCstToAstUtil.createPrimaryExpressionAst(cst)

@@ -1,7 +1,7 @@
 /**
  * PrimaryExpressionCstToAst - 基础表达式转换
  */
-import { SubhutiCst } from "subhuti";
+import {SubhutiCst} from "subhuti";
 import {
     SlimeAstUtil,
     SlimeBlockStatement,
@@ -174,7 +174,6 @@ export class PrimaryExpressionCstToAst {
     }
 
 
-
     /**
      * CoverInitializedName CST �?AST
      * CoverInitializedName -> IdentifierReference Initializer
@@ -207,8 +206,6 @@ export class PrimaryExpressionCstToAst {
     static createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeExpression {
         return SlimeCstToAstUtil.createCallExpressionAst(cst)
     }
-
-
 
 
     static createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeExpression {
