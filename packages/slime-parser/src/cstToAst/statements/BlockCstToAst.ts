@@ -1,5 +1,5 @@
 import {SubhutiCst} from "subhuti";
-import {SlimeAstUtils} from "../SlimeAstUtils.ts";
+
 import SlimeParser from "../../SlimeParser.ts";
 import {
     SlimeAstUtil, SlimeBlockStatement, type SlimeExportAllDeclaration,
@@ -17,7 +17,7 @@ export class BlockCstToAst {
      * Block: LBrace StatementList? RBrace
      */
     static createBlockAst(cst: SubhutiCst): SlimeBlockStatement {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Block?.name)
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.Block?.name)
 
         // Block 的结构：LBrace StatementList? RBrace
         let lBraceToken: any = undefined
@@ -87,7 +87,7 @@ export class BlockCstToAst {
 
 
     static createStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.StatementList?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.StatementList?.name);
         if (cst.children) {
             const statements = cst.children.map(item => SlimeCstToAstUtil.createStatementListItemAst(item)).flat()
             return statements
@@ -97,7 +97,7 @@ export class BlockCstToAst {
 
 
     static createStatementAst(cst: SubhutiCst): Array<SlimeStatement> {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Statement?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.Statement?.name);
         const statements: SlimeStatement[] = cst.children
             .map(item => SlimeCstToAstUtil.createStatementDeclarationAst(item))
             .filter(stmt => stmt !== undefined)  // 过滤�?undefined
@@ -106,7 +106,7 @@ export class BlockCstToAst {
 
 
     static createStatementListItemAst(cst: SubhutiCst): Array<SlimeStatement> {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.StatementListItem?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.StatementListItem?.name);
         const statements = cst.children.map(item => {
             // 如果�?Declaration，直接处�?
             if (item.name === SlimeParser.prototype.Declaration?.name) {

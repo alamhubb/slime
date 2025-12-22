@@ -11,7 +11,7 @@ import {
     SlimeStringLiteral, SlimeTokenCreate
 } from "slime-ast";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
-import { SlimeAstUtils } from "../SlimeAstUtils.ts";
+
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
@@ -137,7 +137,7 @@ export class LiteralCstToAst {
 
 
     static createLiteralAst(cst: SubhutiCst): SlimeLiteral {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Literal?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.Literal?.name);
         const firstChild = cst.children[0]
         let value: SlimeLiteral
 
@@ -277,7 +277,7 @@ export class LiteralCstToAst {
 
     // 模板字符串处�?
     static createTemplateLiteralAst(cst: SubhutiCst): SlimeExpression {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.TemplateLiteral?.name)
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.TemplateLiteral?.name)
 
         const first = cst.children[0]
 

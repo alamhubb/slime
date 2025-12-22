@@ -10,13 +10,13 @@ import {
     SlimeStringLiteral, SlimeTokenCreate, SlimeVariableDeclarator
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
-import {SlimeAstUtils} from "../SlimeAstUtils.ts";
+
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
 export class ImportCstToAst {
 
     static createImportDeclarationAst(cst: SubhutiCst): SlimeImportDeclaration {
-        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportDeclaration?.name);
+        let astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ImportDeclaration?.name);
         const first = cst.children[0]
         const first1 = cst.children[1]
         let importDeclaration!: SlimeImportDeclaration
@@ -75,7 +75,7 @@ export class ImportCstToAst {
         lBraceToken?: any,
         rBraceToken?: any
     } {
-        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportClause?.name);
+        let astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ImportClause?.name);
         const result: Array<SlimeImportSpecifierItem> = []
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined
@@ -295,7 +295,7 @@ export class ImportCstToAst {
      *           | import ( AssignmentExpression , AssignmentExpression ,_opt )
      */
     static createImportCallAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportCall?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ImportCall?.name);
         // ImportCall -> ImportTok + LParen + AssignmentExpression + (Comma + AssignmentExpression)? + Comma? + RParen
         // children: [ImportTok, LParen, AssignmentExpression, (Comma, AssignmentExpression)?, Comma?, RParen]
 
@@ -454,7 +454,7 @@ export class ImportCstToAst {
 
 
     static createFromClauseAst(cst: SubhutiCst): { source: SlimeStringLiteral, fromToken?: any } {
-        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FromClause?.name);
+        let astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.FromClause?.name);
         const first = cst.children[0]
         const ModuleSpecifier = SlimeCstToAstUtil.createModuleSpecifierAst(cst.children[1])
 
@@ -471,7 +471,7 @@ export class ImportCstToAst {
     }
 
     static createModuleSpecifierAst(cst: SubhutiCst): SlimeStringLiteral {
-        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ModuleSpecifier?.name);
+        let astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ModuleSpecifier?.name);
         const first = cst.children[0]
         const ast = SlimeAstUtil.createStringLiteral(first.value)
         return ast
@@ -479,7 +479,7 @@ export class ImportCstToAst {
 
 
     static createImportedDefaultBindingAst(cst: SubhutiCst): SlimeImportDefaultSpecifier {
-        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportedDefaultBinding?.name);
+        let astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ImportedDefaultBinding?.name);
         const first = cst.children[0]
         const id = SlimeCstToAstUtil.createImportedBindingAst(first)
         const importDefaultSpecifier: SlimeImportDefaultSpecifier = SlimeAstUtil.createImportDefaultSpecifier(id)
@@ -487,7 +487,7 @@ export class ImportCstToAst {
     }
 
     static createImportedBindingAst(cst: SubhutiCst): SlimeIdentifier {
-        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportedBinding?.name);
+        let astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ImportedBinding?.name);
         const first = cst.children[0]
         return SlimeCstToAstUtil.createBindingIdentifierAst(first)
     }

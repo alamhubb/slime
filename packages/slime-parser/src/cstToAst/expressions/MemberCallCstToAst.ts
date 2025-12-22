@@ -9,7 +9,7 @@ import {
     SlimeTokenCreate,
     type SlimeVariableDeclarator
 } from "slime-ast";
-import { SlimeAstUtils } from "../SlimeAstUtils.ts";
+
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
@@ -48,7 +48,7 @@ export class MemberCallCstToAst {
 
 
     static createMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.MemberExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.MemberExpression?.name);
 
         if (cst.children.length === 0) {
             throw new Error('MemberExpression has no children')
@@ -207,7 +207,7 @@ export class MemberCallCstToAst {
     }
 
     static createArgumentsAst(cst: SubhutiCst): Array<SlimeCallArgument> {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Arguments?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.Arguments?.name);
         const first1 = cst.children[1]
         if (first1) {
             if (first1.name === SlimeParser.prototype.ArgumentList?.name) {
@@ -219,7 +219,7 @@ export class MemberCallCstToAst {
     }
 
     static createArgumentListAst(cst: SubhutiCst): Array<SlimeCallArgument> {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArgumentList?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ArgumentList?.name);
         const arguments_: Array<SlimeCallArgument> = []
 
         // 遍历children，处�?Ellipsis + AssignmentExpression + Comma 组合
@@ -481,7 +481,7 @@ export class MemberCallCstToAst {
 
 
     static createSuperCallAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.SuperCall?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.SuperCall?.name);
         // SuperCall -> SuperTok + Arguments
         // children[0]: SuperTok token
         // children[1]: Arguments CST
@@ -604,7 +604,7 @@ export class MemberCallCstToAst {
 
 
     static createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.LeftHandSideExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.LeftHandSideExpression?.name);
         // 容错：Parser在ASI场景下可能生成不完整的CST，返回空标识�?
         if (!cst.children || cst.children.length === 0) {
             return SlimeAstUtil.createIdentifier('', cst.loc)

@@ -9,7 +9,7 @@ import {
     SlimeFunctionParam,
     SlimeIdentifier, SlimeTokenCreate
 } from "slime-ast";
-import { SlimeAstUtils } from "../SlimeAstUtils.ts";
+
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
@@ -18,7 +18,7 @@ export class FunctionExpressionCstToAst {
 
 
     static createFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FunctionExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.FunctionExpression?.name);
         // Es2025Parser FunctionExpression 结构
 
         let isAsync = false;

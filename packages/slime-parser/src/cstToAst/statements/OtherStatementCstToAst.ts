@@ -7,7 +7,7 @@ import {
     SlimeIdentifier,
     SlimeNodeType, type SlimePattern, SlimeReturnStatement, SlimeTokenCreate, type SlimeVariableDeclarator
 } from "slime-ast";
-import {SlimeAstUtils} from "../SlimeAstUtils.ts";
+
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
@@ -18,7 +18,7 @@ import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 export class OtherStatementCstToAst {
 
     static createReturnStatementAst(cst: SubhutiCst): SlimeReturnStatement {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ReturnStatement?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ReturnStatement?.name);
 
         // return 语句可能有或没有表达�?
         // children[0] = ReturnTok
@@ -54,7 +54,7 @@ export class OtherStatementCstToAst {
      * 创建 break 语句 AST
      */
     static createBreakStatementAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BreakStatement?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.BreakStatement?.name);
         // BreakStatement: break Identifier? ;
 
         let breakToken: any = undefined
@@ -83,7 +83,7 @@ export class OtherStatementCstToAst {
      * 创建 continue 语句 AST
      */
     static createContinueStatementAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ContinueStatement?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ContinueStatement?.name);
         // ContinueStatement: continue Identifier? ;
 
         let continueToken: any = undefined
@@ -112,7 +112,7 @@ export class OtherStatementCstToAst {
      * 创建 try 语句 AST
      */
     static createTryStatementAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.TryStatement?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.TryStatement?.name);
         // TryStatement: TryTok Block (Catch Finally? | Finally)
 
         let tryToken: any = undefined
@@ -144,7 +144,7 @@ export class OtherStatementCstToAst {
      * Catch -> catch ( CatchParameter ) Block | catch Block
      */
     static createCatchAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Catch?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.Catch?.name);
         // Catch: CatchTok LParen CatchParameter RParen Block
 
         let catchToken: any = undefined
@@ -176,7 +176,7 @@ export class OtherStatementCstToAst {
      * 创建 CatchParameter AST
      */
     static createCatchParameterAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.CatchParameter?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.CatchParameter?.name);
         // CatchParameter: BindingIdentifier | BindingPattern
         const first = cst.children[0]
 
@@ -194,7 +194,7 @@ export class OtherStatementCstToAst {
      * 创建 Finally 子句 AST
      */
     static createFinallyAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Finally?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.Finally?.name);
         // Finally: FinallyTok Block
 
         const blockCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Block?.name)
@@ -206,7 +206,7 @@ export class OtherStatementCstToAst {
      * 创建 throw 语句 AST
      */
     static createThrowStatementAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ThrowStatement?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ThrowStatement?.name);
         // ThrowStatement: throw Expression ;
 
         let throwToken: any = undefined
@@ -228,7 +228,7 @@ export class OtherStatementCstToAst {
 
 
     static createExpressionStatementAst(cst: SubhutiCst): SlimeExpressionStatement {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ExpressionStatement?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ExpressionStatement?.name);
 
         let semicolonToken: any = undefined
         let expression: any = null
@@ -252,7 +252,7 @@ export class OtherStatementCstToAst {
      */
     static createEmptyStatementAst(cst: SubhutiCst): any {
         // 兼容 EmptyStatement 和旧�?NotEmptySemicolon
-        // SlimeAstUtils.checkCstName(cst, Es2025Parser.prototype.EmptyStatement?.name);
+        // SlimeCstToAstUtil.checkCstName(cst, Es2025Parser.prototype.EmptyStatement?.name);
 
         let semicolonToken: any = undefined
 
@@ -285,7 +285,7 @@ export class OtherStatementCstToAst {
      * 创建 debugger 语句 AST
      */
     static createDebuggerStatementAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.DebuggerStatement?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.DebuggerStatement?.name);
 
         let debuggerToken: any = undefined
         let semicolonToken: any = undefined
@@ -308,7 +308,7 @@ export class OtherStatementCstToAst {
      * LabelledItem -> Statement | FunctionDeclaration
      */
     static createLabelledStatementAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.LabelledStatement?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.LabelledStatement?.name);
 
         let label: any = null
         let body: any = null
@@ -384,7 +384,7 @@ export class OtherStatementCstToAst {
      * WithStatement: with ( Expression ) Statement
      */
     static createWithStatementAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.WithStatement?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.WithStatement?.name);
 
         let object: any = null
         let body: any = null

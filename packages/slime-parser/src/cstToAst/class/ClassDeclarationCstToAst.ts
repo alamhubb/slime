@@ -11,7 +11,7 @@ import {
     SlimePropertyDefinition, SlimeStatement,
     SlimeTokenCreate
 } from "slime-ast";
-import {SlimeAstUtils} from "../SlimeAstUtils.ts";
+
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
@@ -19,7 +19,7 @@ export class ClassDeclarationCstToAst {
 
     static createClassDeclarationAst(cst: SubhutiCst): SlimeClassDeclaration {
         // 检�?CST 节点名称是否�?ClassDeclaration
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassDeclaration?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassDeclaration?.name);
 
         // Token fields
         let classToken: any = undefined
@@ -56,7 +56,7 @@ export class ClassDeclarationCstToAst {
     }
 
     static createClassExpressionAst(cst: SubhutiCst): SlimeClassExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassExpression?.name);
 
         let id: SlimeIdentifier | null = null // class 表达式可选的标识�?
         let tailStartIndex = 1 // 默认 ClassTail 位于索引 1
@@ -71,7 +71,7 @@ export class ClassDeclarationCstToAst {
     }
 
     static createClassBodyAst(cst: SubhutiCst): SlimeClassBody {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassBody?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassBody?.name);
         const elementsWrapper = cst.children && cst.children[0] // ClassBody -> ClassElementList?，第一项为列表容器
         const body: Array<SlimeMethodDefinition | SlimePropertyDefinition | any> = [] // 收集类成员 (any 用于 StaticBlock)
         if (elementsWrapper && Array.isArray(elementsWrapper.children)) {
@@ -182,7 +182,7 @@ export class ClassDeclarationCstToAst {
 
 
     static createFieldDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimePropertyDefinition {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FieldDefinition?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.FieldDefinition?.name);
 
         // FieldDefinition -> (ClassElementName | PropertyName) + Initializer?
         // ES2022: ClassElementName = PrivateIdentifier | PropertyName
@@ -274,12 +274,12 @@ export class ClassDeclarationCstToAst {
 
 
     static createClassHeritageAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassHeritage?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassHeritage?.name);
         return SlimeCstToAstUtil.createLeftHandSideExpressionAst(cst.children[1]) // ClassHeritage -> extends + LeftHandSideExpression
     }
 
     static createClassHeritageAstWithToken(cst: SubhutiCst): { superClass: SlimeExpression; extendsToken?: any } {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassHeritage?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassHeritage?.name);
         let extendsToken: any = undefined
 
         // ClassHeritage: extends LeftHandSideExpression
@@ -300,7 +300,7 @@ export class ClassDeclarationCstToAst {
         lBraceToken?: any;
         rBraceToken?: any;
     } {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassTail?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassTail?.name);
         let superClass: SlimeExpression | null = null // 超类默认�?null
         let body: SlimeClassBody = {type: SlimeNodeType.ClassBody as any, body: [], loc: cst.loc} // 默认空类�?
         let extendsToken: any = undefined
@@ -338,7 +338,7 @@ export class ClassDeclarationCstToAst {
      * ClassElementName :: PropertyName | PrivateIdentifier
      */
     static createClassElementNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral | SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassElementName?.name)
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassElementName?.name)
         const first = cst.children[0]
         if (!first) {
             throw new Error('createClassElementNameAst: ClassElementName has no children')

@@ -15,7 +15,7 @@ import {
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import SlimeParser from "../../SlimeParser.ts";
-import { SlimeAstUtils } from "../SlimeAstUtils.ts";
+
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
@@ -549,7 +549,7 @@ export class PatternConvertCstToAst {
 
 
     static createBindingRestElementAst(cst: SubhutiCst): SlimeRestElement {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BindingRestElement?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.BindingRestElement?.name);
         // BindingRestElement: ... BindingIdentifier | ... BindingPattern
         const argumentCst = cst.children[1]
 

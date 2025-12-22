@@ -9,7 +9,7 @@ import {
     SlimeVariableDeclarator
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
-import {SlimeAstUtils} from "../SlimeAstUtils.ts";
+
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import {SlimeTokenConsumer} from "../../index.ts";
 
@@ -167,7 +167,7 @@ export class FunctionParameterCstToAst {
 
 
     static createFormalParameterListAst(cst: SubhutiCst): SlimePattern[] {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FormalParameterList?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.FormalParameterList?.name);
 
         if (!cst.children || cst.children.length === 0) {
             return []
@@ -301,7 +301,7 @@ export class FunctionParameterCstToAst {
     }
 
     static createFunctionRestParameterAst(cst: SubhutiCst): SlimeRestElement {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FunctionRestParameter?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.FunctionRestParameter?.name);
         const first = cst.children[0]
         return SlimeCstToAstUtil.createBindingRestElementAst(first)
     }

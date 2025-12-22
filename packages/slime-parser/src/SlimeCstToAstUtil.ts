@@ -94,7 +94,7 @@ import {
     UnaryExpressionCstToAst,
     VariableCstToAst, ClassDeclarationCstToAst,
 } from "./cstToAst";
-import {SlimeAstUtils} from "./cstToAst/SlimeAstUtils.ts";
+
 
 // ============================================
 // Unicode 转义序列解码
@@ -171,16 +171,9 @@ export class SlimeCstToAst {
      */
     checkCstName(cst: SubhutiCst, cstName: string) {
         if (cst.name !== cstName) {
-            SlimeAstUtils.throwNewError(cst.name)
+            throw new Error(cst.name)
         }
         return cstName
-    }
-
-    /**
-     * 抛出错误
-     */
-    throwNewError(errorMsg: string = 'syntax error') {
-        throw new Error(errorMsg)
     }
 
     readonly expressionAstCache = new WeakMap<SubhutiCst, SlimeExpression>()

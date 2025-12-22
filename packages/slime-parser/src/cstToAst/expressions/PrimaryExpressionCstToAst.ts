@@ -12,13 +12,13 @@ import {
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
-import {SlimeAstUtils} from "../SlimeAstUtils.ts";
+
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 
 export class PrimaryExpressionCstToAst {
 
     static createPrimaryExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.PrimaryExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.PrimaryExpression?.name);
         const first = cst.children[0]
         if (first.name === SlimeParser.prototype.IdentifierReference?.name) {
             return SlimeCstToAstUtil.createIdentifierAst(first.children[0])

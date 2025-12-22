@@ -10,14 +10,14 @@ import {
     type SlimeIdentifier, SlimeLiteral, SlimeMethodDefinition, SlimeNodeType, SlimePattern, SlimeTokenCreate
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
-import {SlimeAstUtils} from "../SlimeAstUtils.ts";
+
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
 export class MethodDefinitionCstToAst {
 
     static createMethodDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         // 注意：参数顺序是 (staticCst, cst)，与调用保持一�?
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.MethodDefinition?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.MethodDefinition?.name);
         const first = cst.children?.[0]
 
         if (!first) {

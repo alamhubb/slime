@@ -12,14 +12,14 @@ import {
     SlimeStatement, SlimeTokenCreate
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
-import {SlimeAstUtils} from "../SlimeAstUtils.ts";
+
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 
 export class ExportCstToAst {
 
     static createExportDeclarationAst(cst: SubhutiCst): SlimeExportDefaultDeclaration | SlimeExportNamedDeclaration | SlimeExportAllDeclaration {
-        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ExportDeclaration?.name);
+        let astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ExportDeclaration?.name);
         const children = cst.children || []
 
         // Token fields

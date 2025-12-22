@@ -12,7 +12,7 @@ import {
     SlimeTokenCreate,
     SlimeNodeType, SlimeArrowFunctionExpression, SlimeIdentifier
 } from "slime-ast";
-import {SlimeAstUtils} from "../SlimeAstUtils.ts";
+
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
@@ -24,7 +24,7 @@ export class ArrowFunctionCstToAst {
      * 创建箭头函数 AST
      */
     static createArrowFunctionAst(cst: SubhutiCst): SlimeArrowFunctionExpression {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArrowFunction?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ArrowFunction?.name);
         // ArrowFunction 结构（带async）：
         // children[0]: AsyncTok (可�?
         // children[1]: BindingIdentifier �?CoverParenthesizedExpressionAndArrowParameterList (参数)
@@ -260,7 +260,7 @@ export class ArrowFunctionCstToAst {
      * 从CoverParenthesizedExpressionAndArrowParameterList提取箭头函数参数
      */
     static createArrowParametersFromCoverGrammar(cst: SubhutiCst): SlimePattern[] {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name);
 
         // CoverParenthesizedExpressionAndArrowParameterList 的children结构�?
         // LParen + (FormalParameterList | Expression | ...) + RParen
@@ -382,7 +382,7 @@ export class ArrowFunctionCstToAst {
      * 创建箭头函数参数 AST
      */
     static createArrowParametersAst(cst: SubhutiCst): SlimePattern[] {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArrowParameters?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ArrowParameters?.name);
 
         // ArrowParameters 可以是多种形式，这里简化处�?
         if (cst.children.length === 0) {

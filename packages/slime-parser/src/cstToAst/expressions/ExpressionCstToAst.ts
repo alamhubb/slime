@@ -2,7 +2,7 @@
  * ExpressionCstToAst - 核心表达式转换（Expression 路由和操作符）
  */
 import {SubhutiCst} from "subhuti";
-import {SlimeAstUtils} from "../SlimeAstUtils.ts";
+
 import SlimeParser from "../../SlimeParser.ts";
 import {SlimeAstUtil, SlimeExpression, SlimeNodeType, SlimeTokenCreate} from "slime-ast";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
@@ -148,7 +148,7 @@ export class ExpressionCstToAst {
 
 
     static createAssignmentExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.AssignmentExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.AssignmentExpression?.name);
 
         if (cst.children.length === 1) {
             const child = cst.children[0]
@@ -191,7 +191,7 @@ export class ExpressionCstToAst {
     }
 
     static createConditionalExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ConditionalExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ConditionalExpression?.name);
         const firstChild = cst.children[0]
         let test = SlimeCstToAstUtil.createExpressionAst(firstChild)
         let alternate

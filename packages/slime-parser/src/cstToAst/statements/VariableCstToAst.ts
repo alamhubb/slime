@@ -2,7 +2,7 @@
  * VariableCstToAst - var/let/const 声明转换
  */
 import {SubhutiCst} from "subhuti";
-import {SlimeAstUtils} from "../SlimeAstUtils.ts";
+
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import {
@@ -53,7 +53,7 @@ export class VariableCstToAst {
         //直接返回声明
         //                 SlimeCstToAstUtil.Statement()
         //                 SlimeCstToAstUtil.Declaration()
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.VariableDeclaration?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.VariableDeclaration?.name);
         let kindCst: SubhutiCst = cst.children[0].children[0]
 
         // 创建 kind token
@@ -90,7 +90,7 @@ export class VariableCstToAst {
 
     static createVariableDeclaratorAst(cst: SubhutiCst): SlimeVariableDeclarator {
         // 兼容 LexicalBinding �?VariableDeclaration
-        // const astName = SlimeAstUtils.checkCstName(cst, 'LexicalBinding');
+        // const astName = SlimeCstToAstUtil.checkCstName(cst, 'LexicalBinding');
 
         // children[0]可能是BindingIdentifier或BindingPattern（解构）
         const firstChild = cst.children[0]
@@ -300,7 +300,7 @@ export class VariableCstToAst {
 
 
     static createInitializerAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Initializer?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.Initializer?.name);
         // Initializer -> Eq + AssignmentExpression
         const assignmentExpressionCst = cst.children[1]
         return SlimeCstToAstUtil.createAssignmentExpressionAst(assignmentExpressionCst)
@@ -333,7 +333,7 @@ export class VariableCstToAst {
 
 
     static createHoistableDeclarationAst(cst: SubhutiCst): SlimeDeclaration {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.HoistableDeclaration?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.HoistableDeclaration?.name);
         const first = cst.children[0]
         if (first.name === SlimeParser.prototype.FunctionDeclaration?.name || first.name === 'FunctionDeclaration') {
             return SlimeCstToAstUtil.createFunctionDeclarationAst(first)

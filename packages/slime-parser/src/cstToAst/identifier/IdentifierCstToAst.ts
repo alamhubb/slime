@@ -10,7 +10,7 @@ import {
     SlimePropertyDefinition,
     SlimeStatement
 } from "slime-ast";
-import { SlimeAstUtils } from "../SlimeAstUtils.ts";
+
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
@@ -44,7 +44,7 @@ export class IdentifierCstToAst {
 
 
     static createBindingIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BindingIdentifier?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.BindingIdentifier?.name);
         // BindingIdentifier 结构�?
         // ES2025: BindingIdentifier -> Identifier -> IdentifierNameTok
         // 或�? BindingIdentifier -> YieldTok | AwaitTok

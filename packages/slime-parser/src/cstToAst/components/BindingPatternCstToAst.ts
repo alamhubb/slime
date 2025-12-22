@@ -14,14 +14,14 @@ import {
     type SlimeCommaToken, type SlimeLBraceToken, type SlimeRBraceToken,
     type SlimeObjectPatternProperty, type SlimeAssignmentProperty
 } from "slime-ast";
-import { SlimeAstUtils } from "../SlimeAstUtils.ts";
+
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
 export class BindingPatternCstToAst {
 
     static createBindingElementAst(cst: SubhutiCst): any {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BindingElement?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.BindingElement?.name);
         const first = cst.children[0]
 
         if (first.name === SlimeParser.prototype.SingleNameBinding?.name) {
@@ -57,7 +57,7 @@ export class BindingPatternCstToAst {
     }
 
     static createSingleNameBindingAst(cst: SubhutiCst): any {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.SingleNameBinding?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.SingleNameBinding?.name);
         //BindingIdentifier + Initializer?
         const first = cst.children[0]
         const id = SlimeCstToAstUtil.createBindingIdentifierAst(first)
@@ -193,7 +193,7 @@ export class BindingPatternCstToAst {
 
 
     static createBindingPatternAst(cst: SubhutiCst): SlimePattern {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BindingPattern?.name)
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.BindingPattern?.name)
 
         const child = cst.children[0]
 
@@ -207,7 +207,7 @@ export class BindingPatternCstToAst {
     }
 
     static createArrayBindingPatternAst(cst: SubhutiCst): SlimeArrayPattern {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArrayBindingPattern?.name)
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ArrayBindingPattern?.name)
 
         // CST结构：[LBracket, BindingElementList?, Comma?, Elision?, BindingRestElement?, RBracket]
         const elements: SlimeArrayPatternElement[] = []
@@ -318,7 +318,7 @@ export class BindingPatternCstToAst {
     }
 
     static createObjectBindingPatternAst(cst: SubhutiCst): SlimeObjectPattern {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ObjectBindingPattern?.name)
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ObjectBindingPattern?.name)
 
         // CST结构：[LBrace, BindingPropertyList?, RBrace]
         const properties: SlimeObjectPatternProperty[] = []

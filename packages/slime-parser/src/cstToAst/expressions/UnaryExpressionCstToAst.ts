@@ -9,7 +9,7 @@ import {
     type SlimeFunctionParam,
     type SlimeIdentifier, SlimeNodeType, SlimeTokenCreate
 } from "slime-ast";
-import {SlimeAstUtils} from "../SlimeAstUtils.ts";
+
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
@@ -17,7 +17,7 @@ import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 export class UnaryExpressionCstToAst {
 
     static createUnaryExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.UnaryExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.UnaryExpression?.name);
 
         // 防御性检查：如果没有children，抛出更详细的错�?
         if (!cst.children || cst.children.length === 0) {
@@ -151,7 +151,7 @@ export class UnaryExpressionCstToAst {
 
     static createAwaitExpressionAst(cst: SubhutiCst): any {
         // await UnaryExpression
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.AwaitExpression?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.AwaitExpression?.name);
 
         let awaitToken: any = undefined
 
