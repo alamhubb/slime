@@ -18,5 +18,5 @@ runTests(testStage3, {
     description: 'AST → JavaScript代码，比较输入/输出的 token 序列',
     startFrom: 1,
     stopOnFail: true,
-    ParserClass: SlimeJavascriptParser
+    // ParserClass: SlimeJavascriptParser
 })

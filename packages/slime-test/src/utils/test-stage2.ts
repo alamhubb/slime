@@ -17,5 +17,5 @@ runTests(testStage2, {
     description: 'CST → AST 转换，验证 AST 结构完整性',
     startFrom: 1,
     stopOnFail: true,
-    ParserClass: SlimeJavascriptParser
+    // ParserClass: SlimeJavascriptParser
 })
