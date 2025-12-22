@@ -130,5 +130,25 @@ export class FunctionBodyCstToAst {
         return SlimeCstToAstUtil.createConciseBodyAst(cst)
     }
 
+    static createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
+        // FunctionStatementList: StatementList?
+        const children = cst.children || []
 
+        if (children.length === 0) {
+            return []
+        }
+
+        const first = children[0]
+        if (!first) {
+            return []
+        }
+
+        // If child is StatementList, process it
+        if (first.name === 'StatementList' || first.name === SlimeParser.prototype.StatementList?.name) {
+            return SlimeCstToAstUtil.createStatementListAst(first)
+        }
+
+        // If child is a statement directly
+        return SlimeCstToAstUtil.createStatementListItemAst(first)
+    }
 }
