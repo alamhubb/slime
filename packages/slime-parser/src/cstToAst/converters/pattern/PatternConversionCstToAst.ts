@@ -4,12 +4,20 @@ import {
     type SlimeExpression,
     type SlimeFunctionParam,
     SlimeNodeType,
-    type SlimePattern
+    type SlimePattern,
+    SlimeTokenCreate,
+    type SlimeArrayPattern,
+    type SlimeArrayPatternElement,
+    type SlimeObjectPattern,
+    type SlimeObjectPatternProperty,
+    type SlimeAssignmentProperty,
+    type SlimeRestElement
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import SlimeParser from "../../../SlimeParser.ts";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
 export class PatternConversionCstToAst {
     /**

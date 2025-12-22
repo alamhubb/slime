@@ -9,10 +9,14 @@ import {
     SlimeIdentifier, type SlimeObjectPattern,
     SlimePattern,
     SlimeRestElement, type SlimeReturnStatement,
-    type SlimeStatement, SlimeTokenCreate
+    type SlimeStatement, SlimeTokenCreate, SlimeNodeType,
+    type SlimeArrayPatternElement, type SlimeLBracketToken, type SlimeRBracketToken,
+    type SlimeCommaToken, type SlimeLBraceToken, type SlimeRBraceToken,
+    type SlimeObjectPatternProperty, type SlimeAssignmentProperty
 } from "slime-ast";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
 export class BindingPatternCstToAst {
 
