@@ -27,7 +27,7 @@ export * from './function/FunctionParameterCstToAst.ts';
 // statement
 export * from './statement/BlockCstToAst.ts';
 export * from './statement/ControlFlowCstToAst.ts';
-export * from './statement/FunctionBodyCstToAst.ts';
+export * from '../cstToAst/components/FunctionBodyCstToAst.ts';
 export * from './statement/OtherStatementCstToAst.ts';
 
 // expression
