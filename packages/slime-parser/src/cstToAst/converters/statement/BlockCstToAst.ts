@@ -9,7 +9,7 @@ import {
 } from "slime-ast";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
 
-export default class BlockCstToAst {
+export class BlockCstToAst {
     /**
      * 从Block CST创建BlockStatement AST
      * Block: LBrace StatementList? RBrace

@@ -3,7 +3,7 @@ import type { SlimeMethodDefinition } from "slime-ast";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
-export default class FunctionBodyCstToAst {
+export class FunctionBodyCstToAst {
 
 
     static createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {

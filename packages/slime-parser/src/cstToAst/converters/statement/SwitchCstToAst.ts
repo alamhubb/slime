@@ -9,7 +9,7 @@ import {
     SlimeTokenCreate
 } from "slime-ast";
 
-export default class SwitchCstToAst {
+export class SwitchCstToAst {
     /**
      * CaseClause CST �?AST
      * CaseClause -> case Expression : StatementList?

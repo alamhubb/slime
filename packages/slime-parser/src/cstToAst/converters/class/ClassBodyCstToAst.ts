@@ -5,7 +5,7 @@ import { SubhutiCst } from "subhuti";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
 import {
     SlimeAstUtil,
-    SlimeClassBody, SlimeClassExpression,
+    SlimeClassBody, SlimeClassDeclaration, SlimeClassExpression,
     SlimeExpression, SlimeIdentifier, SlimeLiteral,
     SlimeMethodDefinition, SlimeNodeType,
     SlimePropertyDefinition, SlimeStatement,
@@ -13,6 +13,7 @@ import {
 } from "slime-ast";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
 export class ClassBodyCstToAst {
 

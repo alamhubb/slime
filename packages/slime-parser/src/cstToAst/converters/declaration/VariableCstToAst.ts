@@ -4,12 +4,14 @@
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import {
     type SlimeBlockStatement, type SlimeClassDeclaration, type SlimeDeclaration,
     type SlimeFunctionDeclaration, type SlimeFunctionExpression,
     type SlimeFunctionParam,
     type SlimeIdentifier, SlimeNodeType, type SlimePropertyDefinition,
-    SlimeTokenCreate, type SlimeVariableDeclaration, type SlimeVariableDeclarator
+    SlimeTokenCreate, type SlimeVariableDeclaration, type SlimeVariableDeclarator,
+    SlimeAstUtil, type SlimePattern, type SlimeExpression
 } from "slime-ast";
 
 export class VariableCstToAst {

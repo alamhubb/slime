@@ -9,7 +9,7 @@ import {
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
-export default class AssignmentPatternCstToAst {
+export class AssignmentPatternCstToAst {
     // ==================== 解构相关转换方法 ====================
 
     /**

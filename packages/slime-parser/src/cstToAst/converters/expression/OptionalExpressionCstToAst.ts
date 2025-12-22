@@ -9,7 +9,7 @@ import { SubhutiCst } from "subhuti";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
-export default class OptionalExpressionCstToAst {
+export class OptionalExpressionCstToAst {
 
     /**
      * 创建 OptionalChain AST
