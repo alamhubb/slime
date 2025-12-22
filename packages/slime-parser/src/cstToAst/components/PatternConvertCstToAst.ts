@@ -11,7 +11,7 @@ import {
     type SlimeObjectPattern,
     type SlimeObjectPatternProperty,
     type SlimeAssignmentProperty,
-    type SlimeRestElement, SlimeStatement
+    type SlimeRestElement, SlimeStatement, SlimeIdentifier
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import SlimeParser from "../../SlimeParser.ts";
@@ -19,7 +19,7 @@ import { SlimeAstUtils } from "../SlimeAstUtils.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
-export class PatternConvertCstToAstTs {
+export class PatternConvertCstToAst {
     /**
      * �?ArrayExpression AST 转换�?ArrayPattern
      */
