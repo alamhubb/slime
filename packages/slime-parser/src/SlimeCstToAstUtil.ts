@@ -69,13 +69,10 @@ import SlimeParser from "./SlimeParser.ts";
 import { SlimeAstUtil, SlimeTokenCreate, SlimeNodeType } from "slime-ast";
 import {
     ArrowFunctionCstToAst,
-    AssignmentExpressionCstToAst,
     AssignmentPatternCstToAst,
     BinaryExpressionCstToAst,
     BindingPatternCstToAst,
     BlockCstToAst,
-    ClassDeclarationCstToAst,
-    ClassDeclarationCstToAst,
     CompoundLiteralCstToAst,
     ControlFlowCstToAst,
     ExpressionCstToAst,
@@ -93,12 +90,9 @@ import {
     OptionalExpressionCstToAst,
     OtherStatementCstToAst,
     PatternConvertCstToAstTs,
-    PatternConvertCstToAst,
     PrimaryExpressionCstToAst,
-    SlimeAstUtils,
-    SwitchCstToAst,
     UnaryExpressionCstToAst,
-    VariableCstToAst,
+    VariableCstToAst, ClassDeclarationCstToAst,
 } from "./cstToAst";
 
 // ============================================
@@ -378,11 +372,11 @@ export class SlimeCstToAst {
     // === expression / ExpressionCstToAst ===
 
     createYieldExpressionAst(cst: SubhutiCst): any {
-        return ExpressionCstToAst.createYieldExpressionAst(cst)
+        return UnaryExpressionCstToAst.createYieldExpressionAst(cst)
     }
 
     createAwaitExpressionAst(cst: SubhutiCst): any {
-        return ExpressionCstToAst.createAwaitExpressionAst(cst)
+        return UnaryExpressionCstToAst.createAwaitExpressionAst(cst)
     }
 
     createConditionalExpressionAst(cst: SubhutiCst): SlimeExpression {
