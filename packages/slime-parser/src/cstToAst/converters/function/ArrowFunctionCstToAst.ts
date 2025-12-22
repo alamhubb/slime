@@ -8,7 +8,9 @@ import {
     SlimeExpression,
     type SlimeFunctionParam,
     SlimeMethodDefinition,
-    SlimePattern
+    SlimePattern,
+    SlimeTokenCreate,
+    SlimeNodeType, SlimeArrowFunctionExpression, SlimeIdentifier
 } from "slime-ast";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
