@@ -14,9 +14,12 @@ import {
     Subhuti,
     SubhutiRule,
     type SubhutiCst,
+    type SubhutiParserOptions,
+    type SubhutiTokenConsumerConstructor,
 } from "subhuti"
 import SlimeTokenConsumer from "./SlimeTokenConsumer.ts"
 import SlimeJavascriptParser, { type ExpressionParams } from "./deprecated/SlimeJavascriptParser.ts";
+import { slimeJavascriptTokens } from "./deprecated/SlimeJavascriptTokens.ts";
 
 // ============================================
 // 保留字集合（用于 Identifier 验证）
@@ -52,6 +55,19 @@ import SlimeJavascriptParser, { type ExpressionParams } from "./deprecated/Slime
 @Subhuti
 export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsumer> extends SlimeJavascriptParser<T> {
 
+    /**
+     * 构造函数
+     * @param sourceCode 原始源码
+     * @param options 可选配置
+     */
+    constructor(sourceCode: string = '', options?: SubhutiParserOptions<T>) {
+        const defaultTokenConsumer = SlimeTokenConsumer as unknown as SubhutiTokenConsumerConstructor<T>
+        super(sourceCode, {
+            tokenConsumer: options?.tokenConsumer ?? defaultTokenConsumer,
+            tokenDefinitions: options?.tokenDefinitions ?? slimeJavascriptTokens
+        })
+    }
+
     // ============================================
     // TypeScript 扩展: 类型注解
     // ============================================
@@ -68,7 +84,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *     BindingIdentifier TSTypeAnnotation_opt
      */
     @SubhutiRule
-    override BindingIdentifier(params: ExpressionParams = {}): SubhutiCst | undefined {
+    override BindingIdentifier(params: ExpressionParams = {}) {
         // 首先解析基础的 BindingIdentifier
         this.Or([
             { alt: () => this.Identifier() },
@@ -76,7 +92,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
             { alt: () => this.tokenConsumer.Await() }
         ])
         // [TypeScript] 可选的类型注解
-        return this.Option(() => this.TSTypeAnnotation())
+        this.Option(() => this.TSTypeAnnotation())
     }
 
     // ============================================
@@ -90,9 +106,9 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *     : TSType
      */
     @SubhutiRule
-    TSTypeAnnotation(): SubhutiCst | undefined {
+    TSTypeAnnotation() {
         this.tokenConsumer.Colon()
-        return this.TSType()
+        this.TSType()
     }
 
     // ============================================
@@ -117,9 +133,9 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      * 4. 基础类型
      */
     @SubhutiRule
-    TSType(): SubhutiCst | undefined {
+    TSType() {
         // Phase 1: 只支持基础类型，后续阶段会扩展
-        return this.TSPrimaryType()
+        this.TSPrimaryType()
     }
 
     /**
@@ -135,8 +151,8 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *     TSArrayType (后缀)
      */
     @SubhutiRule
-    TSPrimaryType(): SubhutiCst | undefined {
-        return this.Or([
+    TSPrimaryType() {
+        this.Or([
             // 基础类型关键字
             { alt: () => this.TSKeywordType() },
             // 字面量类型
@@ -155,8 +171,8 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *     TSNumberKeyword | TSStringKeyword | TSBooleanKeyword | ...
      */
     @SubhutiRule
-    TSKeywordType(): SubhutiCst | undefined {
-        return this.Or([
+    TSKeywordType() {
+        this.Or([
             { alt: () => this.TSNumberKeyword() },
             { alt: () => this.TSStringKeyword() },
             { alt: () => this.TSBooleanKeyword() },
@@ -180,40 +196,40 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      * [TypeScript] number 类型关键字
      */
     @SubhutiRule
-    TSNumberKeyword(): SubhutiCst | undefined {
-        return this.tokenConsumer.TSNumber()
+    TSNumberKeyword() {
+        this.tokenConsumer.TSNumber()
     }
 
     /**
      * [TypeScript] string 类型关键字
      */
     @SubhutiRule
-    TSStringKeyword(): SubhutiCst | undefined {
-        return this.tokenConsumer.TSString()
+    TSStringKeyword() {
+        this.tokenConsumer.TSString()
     }
 
     /**
      * [TypeScript] boolean 类型关键字
      */
     @SubhutiRule
-    TSBooleanKeyword(): SubhutiCst | undefined {
-        return this.tokenConsumer.TSBoolean()
+    TSBooleanKeyword() {
+        this.tokenConsumer.TSBoolean()
     }
 
     /**
      * [TypeScript] any 类型关键字
      */
     @SubhutiRule
-    TSAnyKeyword(): SubhutiCst | undefined {
-        return this.tokenConsumer.TSAny()
+    TSAnyKeyword() {
+        this.tokenConsumer.TSAny()
     }
 
     /**
      * [TypeScript] unknown 类型关键字
      */
     @SubhutiRule
-    TSUnknownKeyword(): SubhutiCst | undefined {
-        return this.tokenConsumer.TSUnknown()
+    TSUnknownKeyword() {
+        this.tokenConsumer.TSUnknown()
     }
 
     /**
@@ -221,10 +237,10 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      * 注意：void 在表达式位置是硬关键字，在类型位置是软关键字
      */
     @SubhutiRule
-    TSVoidKeyword(): SubhutiCst | undefined {
+    TSVoidKeyword() {
         // 尝试作为硬关键字消费（表达式位置的 void）
         // 如果失败，尝试作为软关键字消费
-        return this.Or([
+        this.Or([
             { alt: () => this.tokenConsumer.Void() },
         ])
     }
@@ -233,8 +249,8 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      * [TypeScript] never 类型关键字
      */
     @SubhutiRule
-    TSNeverKeyword(): SubhutiCst | undefined {
-        return this.tokenConsumer.TSNever()
+    TSNeverKeyword() {
+        this.tokenConsumer.TSNever()
     }
 
     /**
@@ -242,40 +258,40 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      * 注意：null 是硬关键字
      */
     @SubhutiRule
-    TSNullKeyword(): SubhutiCst | undefined {
-        return this.tokenConsumer.NullLiteral()
+    TSNullKeyword() {
+        this.tokenConsumer.NullLiteral()
     }
 
     /**
      * [TypeScript] undefined 类型关键字
      */
     @SubhutiRule
-    TSUndefinedKeyword(): SubhutiCst | undefined {
-        return this.tokenConsumer.TSUndefined()
+    TSUndefinedKeyword() {
+        this.tokenConsumer.TSUndefined()
     }
 
     /**
      * [TypeScript] object 类型关键字
      */
     @SubhutiRule
-    TSObjectKeyword(): SubhutiCst | undefined {
-        return this.tokenConsumer.TSObject()
+    TSObjectKeyword() {
+        this.tokenConsumer.TSObject()
     }
 
     /**
      * [TypeScript] symbol 类型关键字
      */
     @SubhutiRule
-    TSSymbolKeyword(): SubhutiCst | undefined {
-        return this.tokenConsumer.TSSymbol()
+    TSSymbolKeyword() {
+        this.tokenConsumer.TSSymbol()
     }
 
     /**
      * [TypeScript] bigint 类型关键字
      */
     @SubhutiRule
-    TSBigIntKeyword(): SubhutiCst | undefined {
-        return this.tokenConsumer.TSBigint()
+    TSBigIntKeyword() {
+        this.tokenConsumer.TSBigint()
     }
 
     // ============================================
@@ -291,8 +307,8 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *     BooleanLiteral
      */
     @SubhutiRule
-    TSLiteralType(): SubhutiCst | undefined {
-        return this.Or([
+    TSLiteralType() {
+        this.Or([
             { alt: () => this.tokenConsumer.StringLiteral() },
             { alt: () => this.tokenConsumer.NumericLiteral() },
             { alt: () => this.tokenConsumer.True() },
@@ -315,7 +331,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *     TSQualifiedName
      */
     @SubhutiRule
-    TSTypeReference(): SubhutiCst | undefined {
+    TSTypeReference() {
         // 解析类型名称（可能是限定名称 Namespace.Type）
         this.TSTypeName()
         // 可选的类型参数 <T, U>
@@ -334,7 +350,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *     TSTypeName . Identifier
      */
     @SubhutiRule
-    TSTypeName(): SubhutiCst | undefined {
+    TSTypeName() {
         // 首先解析标识符
         this.Identifier()
         // 然后解析可能的限定名称 (.Identifier)*
@@ -356,7 +372,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *     TSTypeList , TSType
      */
     @SubhutiRule
-    TSTypeParameterInstantiation(): SubhutiCst | undefined {
+    TSTypeParameterInstantiation() {
         this.tokenConsumer.Less()
         // 至少一个类型参数
         this.TSType()
@@ -380,7 +396,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *     ( TSType )
      */
     @SubhutiRule
-    TSParenthesizedType(): SubhutiCst | undefined {
+    TSParenthesizedType() {
         this.tokenConsumer.LParen()
         this.TSType()
         this.tokenConsumer.RParen()
