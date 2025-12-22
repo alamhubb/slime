@@ -68,7 +68,7 @@ import {SubhutiCst, type SubhutiSourceLocation} from "subhuti";
 import SlimeParser from "./SlimeParser.ts";
 import SlimeTokenConsumer from "./SlimeTokenConsumer.ts";
 import {SlimeAstUtil, SlimeTokenCreate, SlimeNodeType} from "slime-ast";
-import {SlimeAstUtils} from "./cstToAst";
+import {ClassBodyCstToAst, SlimeAstUtils} from "./cstToAst";
 
 // ============================================
 // Unicode 转义序列解码
@@ -120,8 +120,8 @@ import {SlimeAstUtils} from "./cstToAst";
 export class SlimeCstToAst {
     readonly expressionAstCache = new WeakMap<SubhutiCst, SlimeExpression>()
 
-    createExpressionBodyAst(){
-        return
+    createClassElementNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral | SlimeExpression {
+        return ClassBodyCstToAst.createClassElementNameAst(cst)
     }
 }
 
