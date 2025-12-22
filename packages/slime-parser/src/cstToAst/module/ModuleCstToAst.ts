@@ -11,96 +11,6 @@ import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
 export class ModuleCstToAst {
-    // ==================== 模块相关转换方法 ====================
-
-    /**
-     * Program CST ?AST
-     *
-     * 存在必要性：Program 是顶层入口规则，需要处?Script ?Module 两种情况?
-     */
-    static createProgramAst(cst: SubhutiCst): SlimeProgram {
-        // 处理 Program -> Script | Module
-        const firstChild = cst.children?.[0]
-        if (firstChild) {
-            if (firstChild.name === 'Script' || firstChild.name === SlimeParser.prototype.Script?.name) {
-                return SlimeCstToAstUtil.createScriptAst(firstChild)
-            } else if (firstChild.name === 'Module' || firstChild.name === SlimeParser.prototype.Module?.name) {
-                return SlimeCstToAstUtil.createModuleAst(firstChild)
-            }
-        }
-        // 如果直接就是内容，调?toProgram
-        return SlimeCstToAstUtil.toProgram(cst)
-    }
-
-    /**
-     * Script CST ?AST
-     */
-    static createScriptAst(cst: SubhutiCst): SlimeProgram {
-        const scriptBody = cst.children?.find(ch =>
-            ch.name === 'ScriptBody' || ch.name === SlimeParser.prototype.ScriptBody?.name
-        )
-        if (scriptBody) {
-            return SlimeCstToAstUtil.createScriptBodyAst(scriptBody)
-        }
-        return SlimeAstUtil.createProgram([], 'script')
-    }
-
-    /**
-     * ScriptBody CST ?AST
-     */
-    static createScriptBodyAst(cst: SubhutiCst): SlimeProgram {
-        const stmtList = cst.children?.find(ch =>
-            ch.name === 'StatementList' || ch.name === SlimeParser.prototype.StatementList?.name
-        )
-        if (stmtList) {
-            const body = SlimeCstToAstUtil.createStatementListAst(stmtList)
-            return SlimeAstUtil.createProgram(body, 'script')
-        }
-        return SlimeAstUtil.createProgram([], 'script')
-    }
-
-    /**
-     * Module CST ?AST
-     */
-    static createModuleAst(cst: SubhutiCst): SlimeProgram {
-        const moduleBody = cst.children?.find(ch =>
-            ch.name === 'ModuleBody' || ch.name === SlimeParser.prototype.ModuleBody?.name
-        )
-        if (moduleBody) {
-            return SlimeCstToAstUtil.createModuleBodyAst(moduleBody)
-        }
-        return SlimeAstUtil.createProgram([], 'module')
-    }
-
-    /**
-     * ModuleBody CST ?AST
-     */
-    static createModuleBodyAst(cst: SubhutiCst): SlimeProgram {
-        const moduleItemList = cst.children?.find(ch =>
-            ch.name === 'ModuleItemList' || ch.name === SlimeParser.prototype.ModuleItemList?.name
-        )
-        if (moduleItemList) {
-            const body = SlimeCstToAstUtil.createModuleItemListAst(moduleItemList)
-            return SlimeAstUtil.createProgram(body, 'module')
-        }
-        return SlimeAstUtil.createProgram([], 'module')
-    }
-
-
-    static createModuleItemAst(item: SubhutiCst): SlimeStatement | SlimeModuleDeclaration | SlimeStatement[] | undefined {
-        const name = item.name
-        if (name === SlimeParser.prototype.ExportDeclaration?.name || name === 'ExportDeclaration') {
-            return SlimeCstToAstUtil.createExportDeclarationAst(item)
-        } else if (name === SlimeParser.prototype.ImportDeclaration?.name || name === 'ImportDeclaration') {
-            return SlimeCstToAstUtil.createImportDeclarationAst(item)
-        } else if (name === SlimeParser.prototype.StatementListItem?.name || name === 'StatementListItem') {
-            return SlimeCstToAstUtil.createStatementListItemAst(item)
-        }
-        console.warn(`createModuleItemAst: Unknown item type: ${name}`)
-        return undefined
-    }
-
-
 
     /**
      * 重置状态钩子方法
@@ -183,6 +93,79 @@ export class ModuleCstToAst {
         return program
     }
 
+    /**
+     * Program CST ?AST
+     *
+     * 存在必要性：Program 是顶层入口规则，需要处?Script ?Module 两种情况?
+     */
+    static createProgramAst(cst: SubhutiCst): SlimeProgram {
+        // 处理 Program -> Script | Module
+        const firstChild = cst.children?.[0]
+        if (firstChild) {
+            if (firstChild.name === 'Script' || firstChild.name === SlimeParser.prototype.Script?.name) {
+                return SlimeCstToAstUtil.createScriptAst(firstChild)
+            } else if (firstChild.name === 'Module' || firstChild.name === SlimeParser.prototype.Module?.name) {
+                return SlimeCstToAstUtil.createModuleAst(firstChild)
+            }
+        }
+        // 如果直接就是内容，调?toProgram
+        return SlimeCstToAstUtil.toProgram(cst)
+    }
+
+    /**
+     * Module CST ?AST
+     */
+    static createModuleAst(cst: SubhutiCst): SlimeProgram {
+        const moduleBody = cst.children?.find(ch =>
+            ch.name === 'ModuleBody' || ch.name === SlimeParser.prototype.ModuleBody?.name
+        )
+        if (moduleBody) {
+            return SlimeCstToAstUtil.createModuleBodyAst(moduleBody)
+        }
+        return SlimeAstUtil.createProgram([], 'module')
+    }
+
+    /**
+     * Script CST ?AST
+     */
+    static createScriptAst(cst: SubhutiCst): SlimeProgram {
+        const scriptBody = cst.children?.find(ch =>
+            ch.name === 'ScriptBody' || ch.name === SlimeParser.prototype.ScriptBody?.name
+        )
+        if (scriptBody) {
+            return SlimeCstToAstUtil.createScriptBodyAst(scriptBody)
+        }
+        return SlimeAstUtil.createProgram([], 'script')
+    }
+
+    /**
+     * ModuleBody CST ?AST
+     */
+    static createModuleBodyAst(cst: SubhutiCst): SlimeProgram {
+        const moduleItemList = cst.children?.find(ch =>
+            ch.name === 'ModuleItemList' || ch.name === SlimeParser.prototype.ModuleItemList?.name
+        )
+        if (moduleItemList) {
+            const body = SlimeCstToAstUtil.createModuleItemListAst(moduleItemList)
+            return SlimeAstUtil.createProgram(body, 'module')
+        }
+        return SlimeAstUtil.createProgram([], 'module')
+    }
+
+    /**
+     * ScriptBody CST ?AST
+     */
+    static createScriptBodyAst(cst: SubhutiCst): SlimeProgram {
+        const stmtList = cst.children?.find(ch =>
+            ch.name === 'StatementList' || ch.name === SlimeParser.prototype.StatementList?.name
+        )
+        if (stmtList) {
+            const body = SlimeCstToAstUtil.createStatementListAst(stmtList)
+            return SlimeAstUtil.createProgram(body, 'script')
+        }
+        return SlimeAstUtil.createProgram([], 'script')
+    }
+
     static createModuleItemListAst(cst: SubhutiCst): Array<SlimeStatement | SlimeModuleDeclaration> {
         const asts = cst.children.map(item => {
             // Es2025Parser uses ModuleItem wrapper
@@ -198,5 +181,17 @@ export class ModuleCstToAst {
         return asts.flat()
     }
 
+    static createModuleItemAst(item: SubhutiCst): SlimeStatement | SlimeModuleDeclaration | SlimeStatement[] | undefined {
+        const name = item.name
+        if (name === SlimeParser.prototype.ExportDeclaration?.name || name === 'ExportDeclaration') {
+            return SlimeCstToAstUtil.createExportDeclarationAst(item)
+        } else if (name === SlimeParser.prototype.ImportDeclaration?.name || name === 'ImportDeclaration') {
+            return SlimeCstToAstUtil.createImportDeclarationAst(item)
+        } else if (name === SlimeParser.prototype.StatementListItem?.name || name === 'StatementListItem') {
+            return SlimeCstToAstUtil.createStatementListItemAst(item)
+        }
+        console.warn(`createModuleItemAst: Unknown item type: ${name}`)
+        return undefined
+    }
 
 }
