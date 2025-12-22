@@ -1,4 +1,4 @@
-import { SubhutiCst } from "subhuti";
+import {SubhutiCst} from "subhuti";
 import {
     SlimeAstUtil,
     SlimeBlockStatement, SlimeExpressionStatement,
@@ -7,7 +7,7 @@ import {
     SlimeIdentifier,
     SlimeNodeType, type SlimePattern, SlimeReturnStatement, SlimeTokenCreate, type SlimeVariableDeclarator
 } from "slime-ast";
-import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
+import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
@@ -162,8 +162,6 @@ export class OtherStatementCstToAst {
     }
 
 
-
-
     /**
      * 创建 Finally 子句 AST
      */
@@ -174,9 +172,6 @@ export class OtherStatementCstToAst {
         const blockCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Block?.name)
         return blockCst ? SlimeCstToAstUtil.createBlockAst(blockCst) : null
     }
-
-
-
 
 
     /**
@@ -278,7 +273,6 @@ export class OtherStatementCstToAst {
 
         return SlimeAstUtil.createExpressionStatement(expression, cst.loc, semicolonToken)
     }
-
 
 
     /**
