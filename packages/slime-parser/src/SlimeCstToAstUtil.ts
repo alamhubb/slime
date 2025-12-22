@@ -68,44 +68,13 @@ import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
 import SlimeParser from "./SlimeParser.ts";
 import SlimeTokenConsumer from "./SlimeTokenConsumer.ts";
 import { SlimeAstUtil, SlimeTokenCreate, SlimeNodeType } from "slime-ast";
+import {SlimeAstUtils} from "./cstToAst";
 
 // ============================================
 // Unicode 转义序列解码
 // ES2025 规范 12.9.4 - �?\uXXXX �?\u{XXXXX} 转换为实际字�?
 // 参考实现：Babel、Acorn、TypeScript
 // ============================================
-
-/**
- * �?Unicode 转义序列解码为实际字�?
- * 支持 \uXXXX �?\u{XXXXX} 格式
- *
- * @param str 可能包含 Unicode 转义的字符串
- * @returns 解码后的字符�?
- */
-function decodeUnicodeEscapes(str: string | undefined): string {
-    // 如果为空或不包含转义序列，直接返回（性能优化�?
-    if (!str || !str.includes('\\u')) {
-        return str || ''
-    }
-
-    return str.replace(/\\u\{([0-9a-fA-F]+)\}|\\u([0-9a-fA-F]{4})/g,
-        (match, braceCode, fourDigitCode) => {
-            const codePoint = parseInt(braceCode || fourDigitCode, 16)
-            return String.fromCodePoint(codePoint)
-        }
-    )
-}
-
-export function checkCstName(cst: SubhutiCst, cstName: string) {
-    if (cst.name !== cstName) {
-        throwNewError(cst.name)
-    }
-    return cstName
-}
-
-export function throwNewError(errorMsg: string = 'syntax error') {
-    throw new Error(errorMsg)
-}
 
 /**
  * CST �?AST 转换�?
@@ -496,7 +465,7 @@ export class SlimeCstToAst {
         }
 
         // 解码 Unicode 转义序列（如 \u0061 -> a�?
-        const decodedName = decodeUnicodeEscapes(value)
+        const decodedName = SlimeAstUtils.decodeUnicodeEscapes(value)
         // 使用 token �?loc（包含原始值），而不是规则的 loc
         const identifier = SlimeAstUtil.createIdentifier(decodedName, tokenLoc || cst.loc)
         return identifier
@@ -898,7 +867,7 @@ export class SlimeCstToAst {
     }
 
     createImportDeclarationAst(cst: SubhutiCst): SlimeImportDeclaration {
-        let astName = checkCstName(cst, SlimeParser.prototype.ImportDeclaration?.name);
+        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportDeclaration?.name);
         const first = cst.children[0]
         const first1 = cst.children[1]
         let importDeclaration!: SlimeImportDeclaration
@@ -1002,7 +971,7 @@ export class SlimeCstToAst {
 
 
     createFromClauseAst(cst: SubhutiCst): { source: SlimeStringLiteral, fromToken?: any } {
-        let astName = checkCstName(cst, SlimeParser.prototype.FromClause?.name);
+        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FromClause?.name);
         const first = cst.children[0]
         const ModuleSpecifier = this.createModuleSpecifierAst(cst.children[1])
 
@@ -1019,14 +988,14 @@ export class SlimeCstToAst {
     }
 
     createModuleSpecifierAst(cst: SubhutiCst): SlimeStringLiteral {
-        let astName = checkCstName(cst, SlimeParser.prototype.ModuleSpecifier?.name);
+        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ModuleSpecifier?.name);
         const first = cst.children[0]
         const ast = SlimeAstUtil.createStringLiteral(first.value)
         return ast
     }
 
     createImportClauseAst(cst: SubhutiCst): { specifiers: Array<SlimeImportSpecifierItem>, lBraceToken?: any, rBraceToken?: any } {
-        let astName = checkCstName(cst, SlimeParser.prototype.ImportClause?.name);
+        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportClause?.name);
         const result: Array<SlimeImportSpecifierItem> = []
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined
@@ -1073,7 +1042,7 @@ export class SlimeCstToAst {
     }
 
     createImportedDefaultBindingAst(cst: SubhutiCst): SlimeImportDefaultSpecifier {
-        let astName = checkCstName(cst, SlimeParser.prototype.ImportedDefaultBinding?.name);
+        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportedDefaultBinding?.name);
         const first = cst.children[0]
         const id = this.createImportedBindingAst(first)
         const importDefaultSpecifier: SlimeImportDefaultSpecifier = SlimeAstUtil.createImportDefaultSpecifier(id)
@@ -1081,7 +1050,7 @@ export class SlimeCstToAst {
     }
 
     createImportedBindingAst(cst: SubhutiCst): SlimeIdentifier {
-        let astName = checkCstName(cst, SlimeParser.prototype.ImportedBinding?.name);
+        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportedBinding?.name);
         const first = cst.children[0]
         return this.createBindingIdentifierAst(first)
     }
@@ -1173,7 +1142,7 @@ export class SlimeCstToAst {
 
         // 如果直接�?value，使用它
         if (cst.value !== undefined) {
-            const decodedName = decodeUnicodeEscapes(cst.value as string)
+            const decodedName = SlimeAstUtils.decodeUnicodeEscapes(cst.value as string)
             return SlimeAstUtil.createIdentifier(decodedName, cst.loc)
         }
 
@@ -1184,7 +1153,7 @@ export class SlimeCstToAst {
         }
 
         if (current.value !== undefined) {
-            const decodedName = decodeUnicodeEscapes(current.value as string)
+            const decodedName = SlimeAstUtils.decodeUnicodeEscapes(current.value as string)
             return SlimeAstUtil.createIdentifier(decodedName, current.loc || cst.loc)
         }
 
@@ -1192,7 +1161,7 @@ export class SlimeCstToAst {
     }
 
     createBindingIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
-        const astName = checkCstName(cst, SlimeParser.prototype.BindingIdentifier?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BindingIdentifier?.name);
         // BindingIdentifier 结构�?
         // ES2025: BindingIdentifier -> Identifier -> IdentifierNameTok
         // 或�? BindingIdentifier -> YieldTok | AwaitTok
@@ -1217,14 +1186,14 @@ export class SlimeCstToAst {
 
 
     /*createImportClauseAst(cst: SubhutiCst.ts):Array<SlimeImportSpecifier | SlimeImportDefaultSpecifier | SlimeImportNamespaceSpecifier>{
-    let astName = checkCstName(cst, Es2025Parser.prototype.ImportClause?.name);
+    let astName = SlimeAstUtils.checkCstName(cst, Es2025Parser.prototype.ImportClause?.name);
 
 
   }*/
 
 
     createStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
-        const astName = checkCstName(cst, SlimeParser.prototype.StatementList?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.StatementList?.name);
         if (cst.children) {
             const statements = cst.children.map(item => this.createStatementListItemAst(item)).flat()
             return statements
@@ -1233,7 +1202,7 @@ export class SlimeCstToAst {
     }
 
     createStatementListItemAst(cst: SubhutiCst): Array<SlimeStatement> {
-        const astName = checkCstName(cst, SlimeParser.prototype.StatementListItem?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.StatementListItem?.name);
         const statements = cst.children.map(item => {
             // 如果�?Declaration，直接处�?
             if (item.name === SlimeParser.prototype.Declaration?.name) {
@@ -1286,7 +1255,7 @@ export class SlimeCstToAst {
     }
 
     createStatementAst(cst: SubhutiCst): Array<SlimeStatement> {
-        const astName = checkCstName(cst, SlimeParser.prototype.Statement?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Statement?.name);
         const statements: SlimeStatement[] = cst.children
             .map(item => this.createStatementDeclarationAst(item))
             .filter(stmt => stmt !== undefined)  // 过滤�?undefined
@@ -1423,7 +1392,7 @@ export class SlimeCstToAst {
     }
 
     createExportDeclarationAst(cst: SubhutiCst): SlimeExportDefaultDeclaration | SlimeExportNamedDeclaration | SlimeExportAllDeclaration {
-        let astName = checkCstName(cst, SlimeParser.prototype.ExportDeclaration?.name);
+        let astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ExportDeclaration?.name);
         const children = cst.children || []
 
         // Token fields
@@ -1856,7 +1825,7 @@ export class SlimeCstToAst {
     }
 
     createHoistableDeclarationAst(cst: SubhutiCst): SlimeDeclaration {
-        const astName = checkCstName(cst, SlimeParser.prototype.HoistableDeclaration?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.HoistableDeclaration?.name);
         const first = cst.children[0]
         if (first.name === SlimeParser.prototype.FunctionDeclaration?.name || first.name === 'FunctionDeclaration') {
             return this.createFunctionDeclarationAst(first)
@@ -2019,7 +1988,7 @@ export class SlimeCstToAst {
         //直接返回声明
         //                 this.Statement()
         //                 this.Declaration()
-        const astName = checkCstName(cst, SlimeParser.prototype.VariableDeclaration?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.VariableDeclaration?.name);
         let kindCst: SubhutiCst = cst.children[0].children[0]
 
         // 创建 kind token
@@ -2054,7 +2023,7 @@ export class SlimeCstToAst {
 
     createClassDeclarationAst(cst: SubhutiCst): SlimeClassDeclaration {
         // 检�?CST 节点名称是否�?ClassDeclaration
-        const astName = checkCstName(cst, SlimeParser.prototype.ClassDeclaration?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassDeclaration?.name);
 
         // Token fields
         let classToken: any = undefined
@@ -2097,7 +2066,7 @@ export class SlimeCstToAst {
         lBraceToken?: any;
         rBraceToken?: any;
     } {
-        const astName = checkCstName(cst, SlimeParser.prototype.ClassTail?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassTail?.name);
         let superClass: SlimeExpression | null = null // 超类默认�?null
         let body: SlimeClassBody = {type: SlimeNodeType.ClassBody as any, body: [], loc: cst.loc} // 默认空类�?
         let extendsToken: any = undefined
@@ -2130,12 +2099,12 @@ export class SlimeCstToAst {
     }
 
     createClassHeritageAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.ClassHeritage?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassHeritage?.name);
         return this.createLeftHandSideExpressionAst(cst.children[1]) // ClassHeritage -> extends + LeftHandSideExpression
     }
 
     createClassHeritageAstWithToken(cst: SubhutiCst): { superClass: SlimeExpression; extendsToken?: any } {
-        const astName = checkCstName(cst, SlimeParser.prototype.ClassHeritage?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassHeritage?.name);
         let extendsToken: any = undefined
 
         // ClassHeritage: extends LeftHandSideExpression
@@ -2149,14 +2118,14 @@ export class SlimeCstToAst {
     }
 
     createInitializerAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.Initializer?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Initializer?.name);
         // Initializer -> Eq + AssignmentExpression
         const assignmentExpressionCst = cst.children[1]
         return this.createAssignmentExpressionAst(assignmentExpressionCst)
     }
 
     createFieldDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimePropertyDefinition {
-        const astName = checkCstName(cst, SlimeParser.prototype.FieldDefinition?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FieldDefinition?.name);
 
         // FieldDefinition -> (ClassElementName | PropertyName) + Initializer?
         // ES2022: ClassElementName = PrivateIdentifier | PropertyName
@@ -2219,7 +2188,7 @@ export class SlimeCstToAst {
         // 例如：{ name: 'PrivateIdentifier', value: '#count' } �?value: '#\u{61}'
         if (cst.value) {
             const rawName = cst.value as string
-            const decodedName = decodeUnicodeEscapes(rawName)
+            const decodedName = SlimeAstUtils.decodeUnicodeEscapes(rawName)
             // 保存原始值和解码后的�?
             const name = decodedName.startsWith('#') ? decodedName : '#' + decodedName
             const raw = rawName.startsWith('#') ? rawName : '#' + rawName
@@ -2236,7 +2205,7 @@ export class SlimeCstToAst {
             const identifierNameCst = cst.children[1]
             const identifierCst = identifierNameCst.children[0]
             const rawName = identifierCst.value as string
-            const decodedName = decodeUnicodeEscapes(rawName)
+            const decodedName = SlimeAstUtils.decodeUnicodeEscapes(rawName)
             const identifier = SlimeAstUtil.createIdentifier('#' + decodedName)
             // 保存原始�?
             if (rawName !== decodedName) {
@@ -2250,7 +2219,7 @@ export class SlimeCstToAst {
             const child = cst.children[0]
             if (child.value) {
                 const rawName = child.value as string
-                const decodedName = decodeUnicodeEscapes(rawName)
+                const decodedName = SlimeAstUtils.decodeUnicodeEscapes(rawName)
                 const identifier = SlimeAstUtil.createIdentifier('#' + decodedName)
                 if (rawName !== decodedName) {
                     (identifier as any).raw = '#' + rawName
@@ -2280,7 +2249,7 @@ export class SlimeCstToAst {
     }
 
     createClassBodyAst(cst: SubhutiCst): SlimeClassBody {
-        const astName = checkCstName(cst, SlimeParser.prototype.ClassBody?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassBody?.name);
         const elementsWrapper = cst.children && cst.children[0] // ClassBody -> ClassElementList?，第一项为列表容器
         const body: Array<SlimeMethodDefinition | SlimePropertyDefinition | any> = [] // 收集类成员 (any 用于 StaticBlock)
         if (elementsWrapper && Array.isArray(elementsWrapper.children)) {
@@ -2501,7 +2470,7 @@ export class SlimeCstToAst {
      * ClassElementName :: PropertyName | PrivateIdentifier
      */
     createClassElementNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral | SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.ClassElementName?.name)
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassElementName?.name)
         const first = cst.children[0]
         if (!first) {
             throw new Error('createClassElementNameAst: ClassElementName has no children')
@@ -2591,7 +2560,7 @@ export class SlimeCstToAst {
     }
 
     createFormalParameterListAst(cst: SubhutiCst): SlimePattern[] {
-        const astName = checkCstName(cst, SlimeParser.prototype.FormalParameterList?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FormalParameterList?.name);
 
         if (!cst.children || cst.children.length === 0) {
             return []
@@ -2636,7 +2605,7 @@ export class SlimeCstToAst {
     }
 
     createBindingElementAst(cst: SubhutiCst): any {
-        const astName = checkCstName(cst, SlimeParser.prototype.BindingElement?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BindingElement?.name);
         const first = cst.children[0]
 
         if (first.name === SlimeParser.prototype.SingleNameBinding?.name) {
@@ -2672,7 +2641,7 @@ export class SlimeCstToAst {
     }
 
     createSingleNameBindingAst(cst: SubhutiCst): any {
-        const astName = checkCstName(cst, SlimeParser.prototype.SingleNameBinding?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.SingleNameBinding?.name);
         //BindingIdentifier + Initializer?
         const first = cst.children[0]
         const id = this.createBindingIdentifierAst(first)
@@ -2695,13 +2664,13 @@ export class SlimeCstToAst {
 
 
     createFunctionRestParameterAst(cst: SubhutiCst): SlimeRestElement {
-        const astName = checkCstName(cst, SlimeParser.prototype.FunctionRestParameter?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FunctionRestParameter?.name);
         const first = cst.children[0]
         return this.createBindingRestElementAst(first)
     }
 
     createBindingRestElementAst(cst: SubhutiCst): SlimeRestElement {
-        const astName = checkCstName(cst, SlimeParser.prototype.BindingRestElement?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BindingRestElement?.name);
         // BindingRestElement: ... BindingIdentifier | ... BindingPattern
         const argumentCst = cst.children[1]
 
@@ -2812,7 +2781,7 @@ export class SlimeCstToAst {
 
     createMethodDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         // 注意：参数顺序是 (staticCst, cst)，与调用保持一�?
-        const astName = checkCstName(cst, SlimeParser.prototype.MethodDefinition?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.MethodDefinition?.name);
         const first = cst.children?.[0]
 
         if (!first) {
@@ -3743,7 +3712,7 @@ export class SlimeCstToAst {
     }
 
     createBindingPatternAst(cst: SubhutiCst): SlimePattern {
-        checkCstName(cst, SlimeParser.prototype.BindingPattern?.name)
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BindingPattern?.name)
 
         const child = cst.children[0]
 
@@ -3757,7 +3726,7 @@ export class SlimeCstToAst {
     }
 
     createArrayBindingPatternAst(cst: SubhutiCst): SlimeArrayPattern {
-        checkCstName(cst, SlimeParser.prototype.ArrayBindingPattern?.name)
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArrayBindingPattern?.name)
 
         // CST结构：[LBracket, BindingElementList?, Comma?, Elision?, BindingRestElement?, RBracket]
         const elements: SlimeArrayPatternElement[] = []
@@ -3868,7 +3837,7 @@ export class SlimeCstToAst {
     }
 
     createObjectBindingPatternAst(cst: SubhutiCst): SlimeObjectPattern {
-        checkCstName(cst, SlimeParser.prototype.ObjectBindingPattern?.name)
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ObjectBindingPattern?.name)
 
         // CST结构：[LBrace, BindingPropertyList?, RBrace]
         const properties: SlimeObjectPatternProperty[] = []
@@ -4197,7 +4166,7 @@ export class SlimeCstToAst {
     }
 
     createFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.FunctionExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FunctionExpression?.name);
         // Es2025Parser FunctionExpression 结构
 
         let isAsync = false;
@@ -4380,7 +4349,7 @@ export class SlimeCstToAst {
     }
 
     createReturnStatementAst(cst: SubhutiCst): SlimeReturnStatement {
-        const astName = checkCstName(cst, SlimeParser.prototype.ReturnStatement?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ReturnStatement?.name);
 
         // return 语句可能有或没有表达�?
         // children[0] = ReturnTok
@@ -4412,7 +4381,7 @@ export class SlimeCstToAst {
     }
 
     createExpressionStatementAst(cst: SubhutiCst): SlimeExpressionStatement {
-        const astName = checkCstName(cst, SlimeParser.prototype.ExpressionStatement?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ExpressionStatement?.name);
 
         let semicolonToken: any = undefined
         let expression: any = null
@@ -4436,7 +4405,7 @@ export class SlimeCstToAst {
      * ES2025: if ( Expression ) IfStatementBody [else IfStatementBody]
      */
     createIfStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.IfStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.IfStatement?.name);
 
         let test: any = null
         let consequent: any = null
@@ -4544,7 +4513,7 @@ export class SlimeCstToAst {
      * 注意：LexicalDeclaration 内部已经包含分号（SemicolonASI�?
      */
     createForStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.ForStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ForStatement?.name);
 
         let init: any = null
         let test: any = null
@@ -4679,7 +4648,7 @@ export class SlimeCstToAst {
      * 创建 for...in / for...of 语句 AST
      */
     createForInOfStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.ForInOfStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ForInOfStatement?.name);
 
         // ForInOfStatement 结构（多种形式）�?
         // 普�?for-in/of: [ForTok, LParen, ForDeclaration, InTok/OfTok, Expression, RParen, Statement]
@@ -4853,7 +4822,7 @@ export class SlimeCstToAst {
      * 创建 while 语句 AST
      */
     createWhileStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.WhileStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.WhileStatement?.name);
         // WhileStatement: WhileTok LParen Expression RParen Statement
 
         let whileToken: any = undefined
@@ -4886,7 +4855,7 @@ export class SlimeCstToAst {
      * 创建 do...while 语句 AST
      */
     createDoWhileStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.DoWhileStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.DoWhileStatement?.name);
         // DoWhileStatement: do Statement while ( Expression ) ;
 
         let doToken: any = undefined
@@ -4927,7 +4896,7 @@ export class SlimeCstToAst {
      * SwitchStatement: switch ( Expression ) CaseBlock
      */
     createSwitchStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.SwitchStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.SwitchStatement?.name);
 
         let switchToken: any = undefined
         let lParenToken: any = undefined
@@ -5049,7 +5018,7 @@ export class SlimeCstToAst {
      * Catch -> catch ( CatchParameter ) Block | catch Block
      */
     createCatchAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.Catch?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Catch?.name);
         // Catch: CatchTok LParen CatchParameter RParen Block
 
         let catchToken: any = undefined
@@ -5233,7 +5202,7 @@ export class SlimeCstToAst {
      * 创建 try 语句 AST
      */
     createTryStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.TryStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.TryStatement?.name);
         // TryStatement: TryTok Block (Catch Finally? | Finally)
 
         let tryToken: any = undefined
@@ -5264,7 +5233,7 @@ export class SlimeCstToAst {
      * Block: LBrace StatementList? RBrace
      */
     createBlockAst(cst: SubhutiCst): SlimeBlockStatement {
-        checkCstName(cst, SlimeParser.prototype.Block?.name)
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Block?.name)
 
         // Block 的结构：LBrace StatementList? RBrace
         let lBraceToken: any = undefined
@@ -5293,7 +5262,7 @@ export class SlimeCstToAst {
      * 创建 CatchParameter AST
      */
     createCatchParameterAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.CatchParameter?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.CatchParameter?.name);
         // CatchParameter: BindingIdentifier | BindingPattern
         const first = cst.children[0]
 
@@ -5310,7 +5279,7 @@ export class SlimeCstToAst {
      * 创建 Finally 子句 AST
      */
     createFinallyAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.Finally?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Finally?.name);
         // Finally: FinallyTok Block
 
         const blockCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Block?.name)
@@ -5321,7 +5290,7 @@ export class SlimeCstToAst {
      * 创建 throw 语句 AST
      */
     createThrowStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.ThrowStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ThrowStatement?.name);
         // ThrowStatement: throw Expression ;
 
         let throwToken: any = undefined
@@ -5345,7 +5314,7 @@ export class SlimeCstToAst {
      * 创建 break 语句 AST
      */
     createBreakStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.BreakStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BreakStatement?.name);
         // BreakStatement: break Identifier? ;
 
         let breakToken: any = undefined
@@ -5373,7 +5342,7 @@ export class SlimeCstToAst {
      * 创建 continue 语句 AST
      */
     createContinueStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.ContinueStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ContinueStatement?.name);
         // ContinueStatement: continue Identifier? ;
 
         let continueToken: any = undefined
@@ -5403,7 +5372,7 @@ export class SlimeCstToAst {
      * LabelledItem -> Statement | FunctionDeclaration
      */
     createLabelledStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.LabelledStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.LabelledStatement?.name);
 
         let label: any = null
         let body: any = null
@@ -5465,7 +5434,7 @@ export class SlimeCstToAst {
      * WithStatement: with ( Expression ) Statement
      */
     createWithStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.WithStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.WithStatement?.name);
 
         let object: any = null
         let body: any = null
@@ -5504,7 +5473,7 @@ export class SlimeCstToAst {
      * 创建 debugger 语句 AST
      */
     createDebuggerStatementAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.DebuggerStatement?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.DebuggerStatement?.name);
 
         let debuggerToken: any = undefined
         let semicolonToken: any = undefined
@@ -5525,7 +5494,7 @@ export class SlimeCstToAst {
      */
     createEmptyStatementAst(cst: SubhutiCst): any {
         // 兼容 EmptyStatement 和旧�?NotEmptySemicolon
-        // checkCstName(cst, Es2025Parser.prototype.EmptyStatement?.name);
+        // SlimeAstUtils.checkCstName(cst, Es2025Parser.prototype.EmptyStatement?.name);
 
         let semicolonToken: any = undefined
 
@@ -5934,7 +5903,7 @@ export class SlimeCstToAst {
     }
 
     createSuperCallAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.SuperCall?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.SuperCall?.name);
         // SuperCall -> SuperTok + Arguments
         // children[0]: SuperTok token
         // children[1]: Arguments CST
@@ -5956,7 +5925,7 @@ export class SlimeCstToAst {
      *           | import ( AssignmentExpression , AssignmentExpression ,_opt )
      */
     createImportCallAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.ImportCall?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ImportCall?.name);
         // ImportCall -> ImportTok + LParen + AssignmentExpression + (Comma + AssignmentExpression)? + Comma? + RParen
         // children: [ImportTok, LParen, AssignmentExpression, (Comma, AssignmentExpression)?, Comma?, RParen]
 
@@ -6070,7 +6039,7 @@ export class SlimeCstToAst {
     }
 
     createArgumentsAst(cst: SubhutiCst): Array<SlimeCallArgument> {
-        const astName = checkCstName(cst, SlimeParser.prototype.Arguments?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Arguments?.name);
         const first1 = cst.children[1]
         if (first1) {
             if (first1.name === SlimeParser.prototype.ArgumentList?.name) {
@@ -6082,7 +6051,7 @@ export class SlimeCstToAst {
     }
 
     createArgumentListAst(cst: SubhutiCst): Array<SlimeCallArgument> {
-        const astName = checkCstName(cst, SlimeParser.prototype.ArgumentList?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArgumentList?.name);
         const arguments_: Array<SlimeCallArgument> = []
 
         // 遍历children，处�?Ellipsis + AssignmentExpression + Comma 组合
@@ -6222,7 +6191,7 @@ export class SlimeCstToAst {
     }
 
     createMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.MemberExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.MemberExpression?.name);
 
         if (cst.children.length === 0) {
             throw new Error('MemberExpression has no children')
@@ -6382,7 +6351,7 @@ export class SlimeCstToAst {
 
     createVariableDeclaratorAst(cst: SubhutiCst): SlimeVariableDeclarator {
         // 兼容 LexicalBinding �?VariableDeclaration
-        // const astName = checkCstName(cst, 'LexicalBinding');
+        // const astName = SlimeAstUtils.checkCstName(cst, 'LexicalBinding');
 
         // children[0]可能是BindingIdentifier或BindingPattern（解构）
         const firstChild = cst.children[0]
@@ -6872,7 +6841,7 @@ export class SlimeCstToAst {
     }
 
     createLogicalORExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.LogicalORExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.LogicalORExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?LogicalExpression
             // 支持多个运算符：a || b || c
@@ -6897,7 +6866,7 @@ export class SlimeCstToAst {
     }
 
     createLogicalANDExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.LogicalANDExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.LogicalANDExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?LogicalExpression
             // 支持多个运算符：a && b && c
@@ -6922,7 +6891,7 @@ export class SlimeCstToAst {
     }
 
     createBitwiseORExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.BitwiseORExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BitwiseORExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression（支持链式：a | b | c�?
             let left = this.createExpressionAst(cst.children[0])
@@ -6946,7 +6915,7 @@ export class SlimeCstToAst {
     }
 
     createBitwiseXORExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.BitwiseXORExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BitwiseXORExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression（支持链式：a ^ b ^ c�?
             let left = this.createExpressionAst(cst.children[0])
@@ -6970,7 +6939,7 @@ export class SlimeCstToAst {
     }
 
     createBitwiseANDExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.BitwiseANDExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BitwiseANDExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression（支持链式：a & b & c�?
             let left = this.createExpressionAst(cst.children[0])
@@ -6994,7 +6963,7 @@ export class SlimeCstToAst {
     }
 
     createEqualityExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.EqualityExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.EqualityExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
             const left = this.createExpressionAst(cst.children[0])
@@ -7013,7 +6982,7 @@ export class SlimeCstToAst {
     }
 
     createRelationalExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.RelationalExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.RelationalExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
             // 支持多个运算符：x < y < z => BinaryExpression(BinaryExpression(x, <, y), <, z)
@@ -7039,7 +7008,7 @@ export class SlimeCstToAst {
     }
 
     createShiftExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.ShiftExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ShiftExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
             // 支持多个运算符：x << y << z => BinaryExpression(BinaryExpression(x, <<, y), <<, z)
@@ -7065,7 +7034,7 @@ export class SlimeCstToAst {
     }
 
     createAdditiveExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.AdditiveExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.AdditiveExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
             // 支持多个运算符：x + y + z => BinaryExpression(BinaryExpression(x, +, y), +, z)
@@ -7095,7 +7064,7 @@ export class SlimeCstToAst {
     }
 
     createMultiplicativeExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.MultiplicativeExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.MultiplicativeExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
             // 支持多个运算符：a * b * c => BinaryExpression(BinaryExpression(a, *, b), *, c)
@@ -7124,7 +7093,7 @@ export class SlimeCstToAst {
     }
 
     createUnaryExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.UnaryExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.UnaryExpression?.name);
 
         // 防御性检查：如果没有children，抛出更详细的错�?
         if (!cst.children || cst.children.length === 0) {
@@ -7232,7 +7201,7 @@ export class SlimeCstToAst {
     }
 
     createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.LeftHandSideExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.LeftHandSideExpression?.name);
         // 容错：Parser在ASI场景下可能生成不完整的CST，返回空标识�?
         if (!cst.children || cst.children.length === 0) {
             return SlimeAstUtil.createIdentifier('', cst.loc)
@@ -7244,7 +7213,7 @@ export class SlimeCstToAst {
     }
 
     createPrimaryExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.PrimaryExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.PrimaryExpression?.name);
         const first = cst.children[0]
         if (first.name === SlimeParser.prototype.IdentifierReference?.name) {
             return this.createIdentifierAst(first.children[0])
@@ -7479,7 +7448,7 @@ export class SlimeCstToAst {
 
     // 模板字符串处�?
     createTemplateLiteralAst(cst: SubhutiCst): SlimeExpression {
-        checkCstName(cst, SlimeParser.prototype.TemplateLiteral?.name)
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.TemplateLiteral?.name)
 
         const first = cst.children[0]
 
@@ -7586,7 +7555,7 @@ export class SlimeCstToAst {
     }
 
     createClassExpressionAst(cst: SubhutiCst): SlimeClassExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.ClassExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassExpression?.name);
 
         let id: SlimeIdentifier | null = null // class 表达式可选的标识�?
         let tailStartIndex = 1 // 默认 ClassTail 位于索引 1
@@ -7601,7 +7570,7 @@ export class SlimeCstToAst {
     }
 
     createPropertyDefinitionAst(cst: SubhutiCst): SlimeProperty {
-        const astName = checkCstName(cst, SlimeParser.prototype.PropertyDefinition?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.PropertyDefinition?.name);
 
         // 防御性检查：如果 children 为空，说明是空对象的情况，不应该被调�?
         // 这种情况通常不会发生，因为空对象{}不会有PropertyDefinition节点
@@ -7862,7 +7831,7 @@ export class SlimeCstToAst {
     }
 
     createElementListAst(cst: SubhutiCst): Array<SlimeArrayElement> {
-        const astName = checkCstName(cst, SlimeParser.prototype.ElementList?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ElementList?.name);
         const elements: Array<SlimeArrayElement> = []
 
         // 遍历所有子节点，处�?AssignmentExpression、SpreadElement、Elision �?Comma
@@ -7920,7 +7889,7 @@ export class SlimeCstToAst {
     }
 
     createSpreadElementAst(cst: SubhutiCst): SlimeSpreadElement {
-        const astName = checkCstName(cst, SlimeParser.prototype.SpreadElement?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.SpreadElement?.name);
         // SpreadElement: [Ellipsis, AssignmentExpression]
 
         // 提取 Ellipsis token
@@ -7970,7 +7939,7 @@ export class SlimeCstToAst {
      * ArrayLiteral -> [ Elision? ] | [ ElementList ] | [ ElementList , Elision? ]
      */
     createArrayLiteralAst(cst: SubhutiCst): SlimeArrayExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.ArrayLiteral?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArrayLiteral?.name);
         // ArrayLiteral: [LBracket, ElementList?, Comma?, Elision?, RBracket]
 
         // 提取 LBracket �?RBracket tokens
@@ -8017,7 +7986,7 @@ export class SlimeCstToAst {
      * ObjectLiteral -> { } | { PropertyDefinitionList } | { PropertyDefinitionList , }
      */
     createObjectLiteralAst(cst: SubhutiCst): SlimeObjectExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.ObjectLiteral?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ObjectLiteral?.name);
         const properties: Array<SlimeObjectPropertyItem> = []
 
         // 提取 LBrace �?RBrace tokens
@@ -8088,7 +8057,7 @@ export class SlimeCstToAst {
     }
 
     createLiteralAst(cst: SubhutiCst): SlimeLiteral {
-        const astName = checkCstName(cst, SlimeParser.prototype.Literal?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Literal?.name);
         const firstChild = cst.children[0]
         let value: SlimeLiteral
 
@@ -8154,7 +8123,7 @@ export class SlimeCstToAst {
 
 
     createAssignmentExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.AssignmentExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.AssignmentExpression?.name);
 
         if (cst.children.length === 1) {
             const child = cst.children[0]
@@ -8191,7 +8160,7 @@ export class SlimeCstToAst {
      * 创建箭头函数 AST
      */
     createArrowFunctionAst(cst: SubhutiCst): SlimeArrowFunctionExpression {
-        checkCstName(cst, SlimeParser.prototype.ArrowFunction?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArrowFunction?.name);
         // ArrowFunction 结构（带async）：
         // children[0]: AsyncTok (可�?
         // children[1]: BindingIdentifier �?CoverParenthesizedExpressionAndArrowParameterList (参数)
@@ -8909,7 +8878,7 @@ export class SlimeCstToAst {
      * 从CoverParenthesizedExpressionAndArrowParameterList提取箭头函数参数
      */
     createArrowParametersFromCoverGrammar(cst: SubhutiCst): SlimePattern[] {
-        checkCstName(cst, SlimeParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name);
 
         // CoverParenthesizedExpressionAndArrowParameterList 的children结构�?
         // LParen + (FormalParameterList | Expression | ...) + RParen
@@ -9195,7 +9164,7 @@ export class SlimeCstToAst {
      * 创建箭头函数参数 AST
      */
     createArrowParametersAst(cst: SubhutiCst): SlimePattern[] {
-        checkCstName(cst, SlimeParser.prototype.ArrowParameters?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArrowParameters?.name);
 
         // ArrowParameters 可以是多种形式，这里简化处�?
         if (cst.children.length === 0) {
@@ -9288,7 +9257,7 @@ export class SlimeCstToAst {
     }
 
     createConditionalExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.ConditionalExpression?.name);
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ConditionalExpression?.name);
         const firstChild = cst.children[0]
         let test = this.createExpressionAst(firstChild)
         let alternate
@@ -9346,7 +9315,7 @@ export class SlimeCstToAst {
 
     createAwaitExpressionAst(cst: SubhutiCst): any {
         // await UnaryExpression
-        checkCstName(cst, SlimeParser.prototype.AwaitExpression?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.AwaitExpression?.name);
 
         let awaitToken: any = undefined
 

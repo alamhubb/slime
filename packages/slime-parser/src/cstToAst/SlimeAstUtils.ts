@@ -12,32 +12,33 @@ export class SlimeAstUtils {
      * @returns 解码后的字符串
      */
     static decodeUnicodeEscapes(str: string | undefined): string {
+        // 如果为空或不包含转义序列，直接返回（性能优化�?
         if (!str || !str.includes('\\u')) {
-            return str || '';
+            return str || ''
         }
 
         return str.replace(/\\u\{([0-9a-fA-F]+)\}|\\u([0-9a-fA-F]{4})/g,
             (match, braceCode, fourDigitCode) => {
-                const codePoint = parseInt(braceCode || fourDigitCode, 16);
-                return String.fromCodePoint(codePoint);
+                const codePoint = parseInt(braceCode || fourDigitCode, 16)
+                return String.fromCodePoint(codePoint)
             }
-        );
+        )
     }
 
     /**
      * 检查 CST 节点名称是否匹配
      */
-    static checkCstName(cst: SubhutiCst, cstName: string): string {
+    static checkCstName(cst: SubhutiCst, cstName: string) {
         if (cst.name !== cstName) {
-            SlimeAstUtils.throwNewError(cst.name);
+            SlimeAstUtils.throwNewError(cst.name)
         }
-        return cstName;
+        return cstName
     }
 
     /**
      * 抛出错误
      */
-    static throwNewError(errorMsg: string = 'syntax error'): never {
-        throw new Error(errorMsg);
+    static throwNewError(errorMsg: string = 'syntax error') {
+        throw new Error(errorMsg)
     }
 }
