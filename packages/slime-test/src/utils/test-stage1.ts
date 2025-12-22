@@ -16,6 +16,6 @@ runTests(testStage1, {
     description: '词法分析 → 语法分析',
     startFrom: 1,
     stopOnFail: true,
-    ParserClass: SlimeJavascriptParser
+    // ParserClass: SlimeJavascriptParser
 })
 
