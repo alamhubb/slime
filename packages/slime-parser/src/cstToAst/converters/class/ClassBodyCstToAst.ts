@@ -60,3 +60,132 @@ export class ClassBodyCstToAst {
                     }
                     continue
                 }
+
+
+                if (targetCst) {
+                    // 根据成员类型直接调用对应方法
+                    if (targetCst.name === SlimeParser.prototype.MethodDefinition?.name) {
+                        body.push(util.createMethodDefinitionAst(staticCst, targetCst))
+                    } else if (targetCst.name === SlimeParser.prototype.FieldDefinition?.name) {
+                        body.push(util.createFieldDefinitionAst(staticCst, targetCst))
+                    }
+                }
+            }
+        }
+        return {
+            type: astName as any, // 构造 ClassBody AST
+            body: body, // 挂载类成员数组
+            loc: cst.loc // 透传位置信息
+        }
+    }
+
+    /**
+     * 创建 ClassElementList AST
+     */
+    static createClassElementListAst(cst: SubhutiCst, util: SlimeCstToAst): any[] {
+        const elements: any[] = []
+        for (const child of cst.children || []) {
+            if (child.name === SlimeParser.prototype.ClassElement?.name || child.name === 'ClassElement') {
+                const element = this.createClassElementAst(child, util)
+                if (element) {
+                    elements.push(element)
+                }
+            }
+        }
+        return elements
+    }
+
+    /**
+     * 创建 ClassElement AST
+     */
+    static createClassElementAst(cst: SubhutiCst, util: SlimeCstToAst): any {
+        const firstChild = cst.children?.[0]
+        if (!firstChild) return null
+
+        // 检查是否是 static
+        let staticCst: SubhutiCst | null = null
+        let startIndex = 0
+        if (firstChild.name === 'Static' || firstChild.value === 'static') {
+            staticCst = firstChild
+            startIndex = 1
+        }
+
+        const actualChild = cst.children?.[startIndex]
+        if (!actualChild) return null
+
+        // 根据类型处理
+        if (actualChild.name === SlimeParser.prototype.MethodDefinition?.name ||
+            actualChild.name === 'MethodDefinition') {
+            return util.createMethodDefinitionAst(staticCst, actualChild)
+        } else if (actualChild.name === SlimeParser.prototype.FieldDefinition?.name ||
+            actualChild.name === 'FieldDefinition') {
+            return util.createFieldDefinitionAst(staticCst, actualChild)
+        } else if (actualChild.name === SlimeParser.prototype.ClassStaticBlock?.name ||
+            actualChild.name === 'ClassStaticBlock') {
+            return this.createClassStaticBlockAst(actualChild, util)
+        }
+
+        return null
+    }
+
+    /**
+     * 创建 ClassStaticBlock AST (ES2022)
+     * ClassStaticBlock: static { ClassStaticBlockBody }
+     */
+    static createClassStaticBlockAst(cst: SubhutiCst, util: SlimeCstToAst): any {
+        // CST 结构: ClassStaticBlock -> [IdentifierName:"static", LBrace, ClassStaticBlockBody, RBrace]
+        let lBraceToken: any = undefined
+        let rBraceToken: any = undefined
+        let bodyStatements: SlimeStatement[] = []
+
+        for (const child of cst.children || []) {
+            if (child.name === 'LBrace' || child.value === '{') {
+                lBraceToken = SlimeTokenCreate.createLBraceToken(child.loc)
+            } else if (child.name === 'RBrace' || child.value === '}') {
+                rBraceToken = SlimeTokenCreate.createRBraceToken(child.loc)
+            } else if (child.name === 'ClassStaticBlockBody') {
+                // ClassStaticBlockBody -> ClassStaticBlockStatementList -> StatementList
+                const stmtListCst = child.children?.find((c: any) =>
+                    c.name === 'ClassStaticBlockStatementList' || c.name === 'StatementList'
+                )
+                if (stmtListCst) {
+                    const actualStatementList = stmtListCst.name === 'ClassStaticBlockStatementList'
+                        ? stmtListCst.children?.find((c: any) => c.name === 'StatementList')
+                        : stmtListCst
+                    if (actualStatementList) {
+                        bodyStatements = util.createStatementListAst(actualStatementList)
+                    }
+                }
+            }
+        }
+
+        return SlimeAstUtil.createStaticBlock(bodyStatements, cst.loc, lBraceToken, rBraceToken)
+    }
+
+    /**
+     * 创建 ClassStaticBlockBody AST
+     */
+    static createClassStaticBlockBodyAst(cst: SubhutiCst, util: SlimeCstToAst): Array<SlimeStatement> {
+        const stmtList = cst.children?.find(ch =>
+            ch.name === 'ClassStaticBlockStatementList' ||
+            ch.name === SlimeParser.prototype.ClassStaticBlockStatementList?.name
+        )
+        if (stmtList) {
+            return this.createClassStaticBlockStatementListAst(stmtList, util)
+        }
+        return []
+    }
+
+    /**
+     * 创建 ClassStaticBlockStatementList AST
+     */
+    static createClassStaticBlockStatementListAst(cst: SubhutiCst, util: SlimeCstToAst): Array<SlimeStatement> {
+        const stmtList = cst.children?.find(ch =>
+            ch.name === 'StatementList' || ch.name === SlimeParser.prototype.StatementList?.name
+        )
+        if (stmtList) {
+            return util.createStatementListAst(stmtList)
+        }
+        return []
+    }
+}
