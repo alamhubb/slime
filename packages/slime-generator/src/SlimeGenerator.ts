@@ -1,53 +1,53 @@
 import {
-    type SlimeArrayExpression,
-    type SlimeArrayPattern,
-    type SlimeAssignmentPattern,
-    type SlimeBaseNode,
-    type SlimeBlockStatement,
-    type SlimeCallExpression,
-    type SlimeChainExpression,
-    type SlimeClassDeclaration,
-    type SlimeClassExpression,
-    type SlimeClassBody,
-    type SlimeDeclaration,
-    type SlimeExportNamedDeclaration,
-    type SlimeExpression,
-    type SlimeExpressionStatement,
-    type SlimeFunctionDeclaration,
-    type SlimeFunctionExpression,
-    type SlimeIdentifier,
-    type SlimeImportDeclaration,
-    type SlimeImportDefaultSpecifier,
-    type SlimeImportExpression,
-    type SlimeImportNamespaceSpecifier,
-    type SlimeImportSpecifier,
-    type SlimeLiteral,
-    type SlimeMemberExpression,
-    type SlimeModuleDeclaration,
-    type SlimeNumericLiteral,
-    type SlimeObjectExpression,
-    type SlimeObjectPattern,
-    type SlimePattern,
-    type SlimePrivateIdentifier,
-    type SlimeProgram,
-    SlimeProgramSourceType,
-    type SlimeProperty,
-    type SlimeRestElement,
-    type SlimeSpreadElement,
-    type SlimeReturnStatement,
-    type SlimeStatement,
-    type SlimeStaticBlock,
-    type SlimeStringLiteral,
-    type SlimeVariableDeclaration,
-    type SlimeVariableDeclarator,
-    type SlimeFunctionParam,
-    SlimeAstTypeName
+    type SlimeJavascriptArrayExpression,
+    type SlimeJavascriptArrayPattern,
+    type SlimeJavascriptAssignmentPattern,
+    type SlimeJavascriptBaseNode,
+    type SlimeJavascriptBlockStatement,
+    type SlimeJavascriptCallExpression,
+    type SlimeJavascriptChainExpression,
+    type SlimeJavascriptClassDeclaration,
+    type SlimeJavascriptClassExpression,
+    type SlimeJavascriptClassBody,
+    type SlimeJavascriptDeclaration,
+    type SlimeJavascriptExportNamedDeclaration,
+    type SlimeJavascriptExpression,
+    type SlimeJavascriptExpressionStatement,
+    type SlimeJavascriptFunctionDeclaration,
+    type SlimeJavascriptFunctionExpression,
+    type SlimeJavascriptIdentifier,
+    type SlimeJavascriptImportDeclaration,
+    type SlimeJavascriptImportDefaultSpecifier,
+    type SlimeJavascriptImportExpression,
+    type SlimeJavascriptImportNamespaceSpecifier,
+    type SlimeJavascriptImportSpecifier,
+    type SlimeJavascriptLiteral,
+    type SlimeJavascriptMemberExpression,
+    type SlimeJavascriptModuleDeclaration,
+    type SlimeJavascriptNumericLiteral,
+    type SlimeJavascriptObjectExpression,
+    type SlimeJavascriptObjectPattern,
+    type SlimeJavascriptPattern,
+    type SlimeJavascriptPrivateIdentifier,
+    type SlimeJavascriptProgram,
+    SlimeJavascriptProgramSourceType,
+    type SlimeJavascriptProperty,
+    type SlimeJavascriptRestElement,
+    type SlimeJavascriptSpreadElement,
+    type SlimeJavascriptReturnStatement,
+    type SlimeJavascriptStatement,
+    type SlimeJavascriptStaticBlock,
+    type SlimeJavascriptStringLiteral,
+    type SlimeJavascriptVariableDeclaration,
+    type SlimeJavascriptVariableDeclarator,
+    type SlimeJavascriptFunctionParam,
+    SlimeJavascriptAstTypeName
 } from "slime-ast";
 import SlimeCodeMapping, {SlimeCodeLocation, type SlimeGeneratorResult} from "./SlimeCodeMapping.ts";
 import type {SubhutiSourceLocation} from "subhuti";
 import {SubhutiCreateToken} from "subhuti";
 import {SubhutiMatchToken} from "subhuti";
-import { SlimeTokensObj } from "slime-parser";
+import { SlimeJavascriptTokensObj } from "slime-parser";
 import { SlimeJavascriptTokenType } from "slime-token";
 
 // 兼容别名
@@ -62,7 +62,7 @@ const createSoftKeywordToken = (name: string, value: string): SubhutiCreateToken
 
 // 扩展 es2025TokensObj，添加软关键字和别名
 const SlimeJavascriptGeneratorTokensObj = {
-    ...SlimeTokensObj,
+    ...SlimeJavascriptTokensObj,
     // 软关键字（在 ES2025 中作为 IdentifierName 处理）
     OfTok: createSoftKeywordToken('OfTok', 'of'),
     AsyncTok: createSoftKeywordToken('AsyncTok', 'async'),
@@ -72,7 +72,7 @@ const SlimeJavascriptGeneratorTokensObj = {
     SetTok: createSoftKeywordToken('SetTok', 'set'),
     FromTok: createSoftKeywordToken('FromTok', 'from'),
     // 别名（ES2025 使用不同的名称）
-    Eq: SlimeTokensObj.Assign,  // = 等号
+    Eq: SlimeJavascriptTokensObj.Assign,  // = 等号
 };
 
 const letTok = createSoftKeywordToken('Let', 'let')
@@ -80,15 +80,15 @@ const letTok = createSoftKeywordToken('Let', 'let')
 // 关键字到 Token 的映射（用于 VariableDeclaration 的 kind）
 // 注意：'let' 是软关键字，需要手动创建 token
 const SlimeJavascriptGeneratorTokenMapObj: Record<string, SubhutiCreateToken> = {
-    [SlimeTokensObj.ConstTok.value]: SlimeTokensObj.ConstTok,
+    [SlimeJavascriptTokensObj.ConstTok.value]: SlimeJavascriptTokensObj.ConstTok,
     [letTok.value]: letTok,
-    [SlimeTokensObj.VarTok.value]: SlimeTokensObj.VarTok,
+    [SlimeJavascriptTokensObj.VarTok.value]: SlimeJavascriptTokensObj.VarTok,
 };
 
-export default class SlimeGenerator {
-    static mappings: SlimeCodeMapping[] = null
-    static lastSourcePosition: SlimeCodeLocation = null
-    static generatePosition: SlimeCodeLocation = null
+export default class SlimeJavascriptGenerator {
+    static mappings: SlimeJavascriptCodeMapping[] = null
+    static lastSourcePosition: SlimeJavascriptCodeLocation = null
+    static generatePosition: SlimeJavascriptCodeLocation = null
     static sourceCodeIndex: number = null
     private static generateCode = ''
     private static generateLine = 0
@@ -120,11 +120,11 @@ export default class SlimeGenerator {
         return loc
     }
 
-    static generator(node: SlimeBaseNode, tokens: SubhutiMatchToken[]): SlimeGeneratorResult {
+    static generator(node: SlimeJavascriptBaseNode, tokens: SubhutiMatchToken[]): SlimeJavascriptGeneratorResult {
         this.mappings = []
         this.tokens = tokens
-        this.lastSourcePosition = new SlimeCodeLocation()
-        this.generatePosition = new SlimeCodeLocation()
+        this.lastSourcePosition = new SlimeJavascriptCodeLocation()
+        this.generatePosition = new SlimeJavascriptCodeLocation()
         this.sourceCodeIndex = 0
         this.generateLine = 0
         this.generateColumn = 0
@@ -138,18 +138,18 @@ export default class SlimeGenerator {
         }
     }
 
-    private static generatorProgram(node: SlimeProgram) {
+    private static generatorProgram(node: SlimeJavascriptProgram) {
         this.generatorNodes(node.body)
     }
 
-    private static generatorModuleDeclarations(node: Array<SlimeStatement | SlimeModuleDeclaration>) {
+    private static generatorModuleDeclarations(node: Array<SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration>) {
         for (const nodeElement of node) {
             this.generatorNode(nodeElement)
             // this.addSemicolonAndNewLine()
         }
     }
 
-    private static generatorImportDeclaration(node: SlimeImportDeclaration) {
+    private static generatorImportDeclaration(node: SlimeJavascriptImportDeclaration) {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ImportTok, node.loc)
         this.addSpacing()
 
@@ -162,12 +162,12 @@ export default class SlimeGenerator {
             const getSpecType = (s: any) => s.specifier?.type || s.type
             const getSpec = (s: any) => s.specifier || s
 
-            const hasDefault = node.specifiers.some((s: any) => getSpecType(s) === SlimeAstTypeName.ImportDefaultSpecifier)
-            const hasNamed = node.specifiers.some((s: any) => getSpecType(s) === SlimeAstTypeName.ImportSpecifier)
-            const hasNamespace = node.specifiers.some((s: any) => getSpecType(s) === SlimeAstTypeName.ImportNamespaceSpecifier)
+            const hasDefault = node.specifiers.some((s: any) => getSpecType(s) === SlimeJavascriptAstTypeName.ImportDefaultSpecifier)
+            const hasNamed = node.specifiers.some((s: any) => getSpecType(s) === SlimeJavascriptAstTypeName.ImportSpecifier)
+            const hasNamespace = node.specifiers.some((s: any) => getSpecType(s) === SlimeJavascriptAstTypeName.ImportNamespaceSpecifier)
 
             if (hasDefault) {
-                const defaultItem = node.specifiers.find((s: any) => getSpecType(s) === SlimeAstTypeName.ImportDefaultSpecifier)
+                const defaultItem = node.specifiers.find((s: any) => getSpecType(s) === SlimeJavascriptAstTypeName.ImportDefaultSpecifier)
                 this.generatorNode(getSpec(defaultItem))
                 if (hasNamed || hasNamespace) {
                     this.addComma()
@@ -176,11 +176,11 @@ export default class SlimeGenerator {
             }
 
             if (hasNamespace) {
-                const nsItem = node.specifiers.find((s: any) => getSpecType(s) === SlimeAstTypeName.ImportNamespaceSpecifier)
+                const nsItem = node.specifiers.find((s: any) => getSpecType(s) === SlimeJavascriptAstTypeName.ImportNamespaceSpecifier)
                 this.generatorNode(getSpec(nsItem))
             } else if (hasNamed) {
                 // import {name, greet}
-                const namedItems = node.specifiers.filter((s: any) => getSpecType(s) === SlimeAstTypeName.ImportSpecifier)
+                const namedItems = node.specifiers.filter((s: any) => getSpecType(s) === SlimeJavascriptAstTypeName.ImportSpecifier)
                 this.addLBrace()
                 namedItems.forEach((item: any, index) => {
                     if (index > 0) this.addComma()
@@ -231,7 +231,7 @@ export default class SlimeGenerator {
                 this.addSpacing()
             }
             // key: Identifier 或 Literal
-            if (attr.key.type === SlimeAstTypeName.Identifier) {
+            if (attr.key.type === SlimeJavascriptAstTypeName.Identifier) {
                 this.generatorIdentifier(attr.key)
             } else {
                 this.generatorNode(attr.key)
@@ -243,11 +243,11 @@ export default class SlimeGenerator {
         this.addRBrace(node.attributesRBraceToken?.loc) // 使用精确 token 位置
     }
 
-    private static generatorImportSpecifier(node: SlimeImportSpecifier) {
+    private static generatorImportSpecifier(node: SlimeJavascriptImportSpecifier) {
         // import {name} or import {name as localName}
         // 使用类型断言确保类型安全
-        const importedName = (node.imported as SlimeIdentifier).name
-        const localName = (node.local as SlimeIdentifier).name
+        const importedName = (node.imported as SlimeJavascriptIdentifier).name
+        const localName = (node.local as SlimeJavascriptIdentifier).name
 
         if (importedName !== localName) {
             // import {name as localName}
@@ -262,12 +262,12 @@ export default class SlimeGenerator {
         }
     }
 
-    private static generatorImportDefaultSpecifier(node: SlimeImportDefaultSpecifier) {
+    private static generatorImportDefaultSpecifier(node: SlimeJavascriptImportDefaultSpecifier) {
         this.generatorNode(node.local)
     }
 
 
-    private static generatorImportNamespaceSpecifier(node: SlimeImportNamespaceSpecifier) {
+    private static generatorImportNamespaceSpecifier(node: SlimeJavascriptImportNamespaceSpecifier) {
         // import * as name
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Asterisk, node.asteriskToken?.loc) // 使用精确 token 位置
         this.addSpacing()
@@ -277,7 +277,7 @@ export default class SlimeGenerator {
     }
 
 
-    private static generatorExportNamedDeclaration(node: SlimeExportNamedDeclaration) {
+    private static generatorExportNamedDeclaration(node: SlimeJavascriptExportNamedDeclaration) {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ExportTok, node.exportToken?.loc) // 使用精确 token 位置
         this.addSpacing()
         if (node.declaration) {
@@ -320,10 +320,10 @@ export default class SlimeGenerator {
         this.generatorNode(spec.local)
 
         // 获取比较值：Identifier 用 name，Literal 用 value
-        const localValue = spec.local.type === SlimeAstTypeName.Literal
+        const localValue = spec.local.type === SlimeJavascriptAstTypeName.Literal
             ? spec.local.value
             : spec.local.name
-        const exportedValue = spec.exported.type === SlimeAstTypeName.Literal
+        const exportedValue = spec.exported.type === SlimeJavascriptAstTypeName.Literal
             ? spec.exported.value
             : spec.exported.name
 
@@ -364,7 +364,7 @@ export default class SlimeGenerator {
     }
 
 
-    private static generatorNodes(nodes: SlimeBaseNode[]) {
+    private static generatorNodes(nodes: SlimeJavascriptBaseNode[]) {
         nodes.forEach((node, index) => {
             this.generatorNode(node)
             // 阶段2：如果不是最后一个节点，添加下一行的缩进
@@ -376,7 +376,7 @@ export default class SlimeGenerator {
     }
 
 
-    private static generatorExpressionStatement(node: SlimeExpressionStatement) {
+    private static generatorExpressionStatement(node: SlimeJavascriptExpressionStatement) {
         this.generatorNode(node.expression)
         // 添加分号
         this.addCode(SlimeJavascriptGeneratorTokensObj.Semicolon)
@@ -433,9 +433,9 @@ export default class SlimeGenerator {
         }
     }
 
-    private static generatorCallExpression(node: SlimeCallExpression) {
+    private static generatorCallExpression(node: SlimeJavascriptCallExpression) {
         // 直接输出 callee（不需要添加额外的括号，因为如果源代码需要括号，它会被解析为 ParenthesizedExpression）
-        this.generatorNode(node.callee as SlimeExpression)
+        this.generatorNode(node.callee as SlimeJavascriptExpression)
 
         // 可选调用：obj?.method() - 需要输出 ?.( 而不是 (
         if ((node as any).optional) {
@@ -452,17 +452,17 @@ export default class SlimeGenerator {
                 // 处理包装结构：{ argument: {...}, commaToken?: {...} }
                 const argument = (item as any).argument || item
                 // 检查是否是SpreadElement
-                if (argument.type === SlimeAstTypeName.SpreadElement) {
-                    this.generatorSpreadElement(argument as SlimeSpreadElement)
+                if (argument.type === SlimeJavascriptAstTypeName.SpreadElement) {
+                    this.generatorSpreadElement(argument as SlimeJavascriptSpreadElement)
                 } else {
-                    this.generatorNode(argument as SlimeExpression)
+                    this.generatorNode(argument as SlimeJavascriptExpression)
                 }
             })
         }
         this.addRParen((node as any).rParenToken?.loc) // 使用精确 token 位置
     }
 
-    private static generatorFunctionExpression(node: SlimeFunctionExpression) {
+    private static generatorFunctionExpression(node: SlimeJavascriptFunctionExpression) {
         // 如果是async函数，先输出async关键字
         if (node.async) {
             this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.AsyncTok, node.asyncToken?.loc) // 使用精确 token 位置
@@ -480,8 +480,8 @@ export default class SlimeGenerator {
             this.addSpacing()
             this.generatorNode(node.id)
         }
-        // params 是 SlimeFunctionParam[] 数组，使用精确 token 位置
-        this.generatorFunctionParams(node.params as SlimeFunctionParam[], node.lParenToken?.loc, node.rParenToken?.loc)
+        // params 是 SlimeJavascriptFunctionParam[] 数组，使用精确 token 位置
+        this.generatorFunctionParams(node.params as SlimeJavascriptFunctionParam[], node.lParenToken?.loc, node.rParenToken?.loc)
         // body可能缺失
         if (node.body && node.body.type) {
             this.generatorNode(node.body)
@@ -511,7 +511,7 @@ export default class SlimeGenerator {
         // 2. 如果只有一个简单标识符参数且没有括号 token，可以省略括号
         const hasParenTokens = node.lParenToken || node.rParenToken
         const canOmitParens = node.params && node.params.length === 1 &&
-                             firstParam?.type === SlimeAstTypeName.Identifier &&
+                             firstParam?.type === SlimeJavascriptAstTypeName.Identifier &&
                              !hasParenTokens
 
         if (canOmitParens) {
@@ -538,12 +538,12 @@ export default class SlimeGenerator {
         this.addSpacing()
 
         // 输出函数体
-        if (node.expression && node.body.type !== SlimeAstTypeName.BlockStatement) {
+        if (node.expression && node.body.type !== SlimeJavascriptAstTypeName.BlockStatement) {
             // 表达式形式：x => x * 2 或 x => ({ key: value })
 
             // ✅ 关键修复：如果body是ObjectExpression，需要加括号
             // 因为 { } 会被解析为函数体块，而不是对象字面量
-            if (node.body.type === SlimeAstTypeName.ObjectExpression) {
+            if (node.body.type === SlimeJavascriptAstTypeName.ObjectExpression) {
                 this.addLParen()
                 this.generatorNode(node.body)
                 this.addRParen()
@@ -579,11 +579,11 @@ export default class SlimeGenerator {
 
     /**
      * 生成函数参数列表
-     * @param params SlimeFunctionParam[] 参数列表
+     * @param params SlimeJavascriptFunctionParam[] 参数列表
      * @param lParenLoc 左括号精确位置
      * @param rParenLoc 右括号精确位置
      */
-    private static generatorFunctionParams(params: SlimeFunctionParam[], lParenLoc?: SubhutiSourceLocation, rParenLoc?: SubhutiSourceLocation) {
+    private static generatorFunctionParams(params: SlimeJavascriptFunctionParam[], lParenLoc?: SubhutiSourceLocation, rParenLoc?: SubhutiSourceLocation) {
         this.addLParen(lParenLoc)
         if (params && params.length > 0) {
             params.forEach((item, index) => {
@@ -592,7 +592,7 @@ export default class SlimeGenerator {
                 }
                 // 处理包装结构 { param: Pattern, commaToken?: ... }
                 const param = item.param || item
-                this.generatorNode(param as SlimePattern)
+                this.generatorNode(param as SlimeJavascriptPattern)
             })
         }
         this.addRParen(rParenLoc)
@@ -607,15 +607,15 @@ export default class SlimeGenerator {
      */
     private static isComplexNode(node: any): boolean {
         if (!node) return false
-        if (node.type === SlimeAstTypeName.CallExpression) return true
-        if (node.type === SlimeAstTypeName.ObjectExpression && node.properties?.length > 1) return true
-        if (node.type === SlimeAstTypeName.ArrayExpression) {
+        if (node.type === SlimeJavascriptAstTypeName.CallExpression) return true
+        if (node.type === SlimeJavascriptAstTypeName.ObjectExpression && node.properties?.length > 1) return true
+        if (node.type === SlimeJavascriptAstTypeName.ArrayExpression) {
             return node.elements?.some((item: any) => this.isComplexNode(item?.element))
         }
         return false
     }
 
-    private static generatorArrayExpression(node: SlimeArrayExpression) {
+    private static generatorArrayExpression(node: SlimeJavascriptArrayExpression) {
         this.addLBracket(node.loc)
 
         // 判断是否需要多行格式：数组元素中有复杂节点（如函数调用）
@@ -631,10 +631,10 @@ export default class SlimeGenerator {
                 const element = item.element
                 if (element === null || element === undefined) {
                     // 空元素：[1, , 3]
-                } else if (element.type === SlimeAstTypeName.SpreadElement) {
-                    this.generatorSpreadElement(element as SlimeSpreadElement)
+                } else if (element.type === SlimeJavascriptAstTypeName.SpreadElement) {
+                    this.generatorSpreadElement(element as SlimeJavascriptSpreadElement)
                 } else {
-                    this.generatorNode(element as SlimeExpression)
+                    this.generatorNode(element as SlimeJavascriptExpression)
                 }
 
                 // 添加逗号和换行（除了最后一个元素）
@@ -654,10 +654,10 @@ export default class SlimeGenerator {
                 const element = item.element
                 if (element === null || element === undefined) {
                     // 空元素
-                } else if (element.type === SlimeAstTypeName.SpreadElement) {
-                    this.generatorSpreadElement(element as SlimeSpreadElement)
+                } else if (element.type === SlimeJavascriptAstTypeName.SpreadElement) {
+                    this.generatorSpreadElement(element as SlimeJavascriptSpreadElement)
                 } else {
-                    this.generatorNode(element as SlimeExpression)
+                    this.generatorNode(element as SlimeJavascriptExpression)
                 }
                 if (item.commaToken) {
                     this.addComma()
@@ -668,14 +668,14 @@ export default class SlimeGenerator {
         this.addRBracket(node.loc)
     }
 
-    private static generatorObjectExpression(node: SlimeObjectExpression) {
+    private static generatorObjectExpression(node: SlimeJavascriptObjectExpression) {
         this.addLBrace()
         node.properties.forEach((item, index) => {
-            // properties 是 SlimeObjectPropertyItem[] 类型，每个元素是 { property, commaToken }
+            // properties 是 SlimeJavascriptObjectPropertyItem[] 类型，每个元素是 { property, commaToken }
             const property = item.property
             // ES2018: SpreadElement需要特殊处理
-            if (property.type === SlimeAstTypeName.SpreadElement) {
-                this.generatorSpreadElement(property as SlimeSpreadElement)
+            if (property.type === SlimeJavascriptAstTypeName.SpreadElement) {
+                this.generatorSpreadElement(property as SlimeJavascriptSpreadElement)
             } else {
                 // Property类型
                 this.generatorNode(property)
@@ -707,13 +707,13 @@ export default class SlimeGenerator {
         }
     }
 
-    private static generatorPrivateIdentifier(node: SlimePrivateIdentifier) {
+    private static generatorPrivateIdentifier(node: SlimeJavascriptPrivateIdentifier) {
         // 使用 addString() 输出私有标识符名称（如 #privateField）
         // 原因：标识符名称是动态的，不需要单独的 source map 映射
         this.addString(node.name)
     }
 
-    private static generatorProperty(node: SlimeProperty) {
+    private static generatorProperty(node: SlimeJavascriptProperty) {
         // 处理 getter/setter
         if (node.kind === 'get' || node.kind === 'set') {
             // getter: get name() { ... }
@@ -736,7 +736,7 @@ export default class SlimeGenerator {
 
             // 输出参数和函数体
             const value = node.value as any
-            this.generatorFunctionParams(value.params as SlimeFunctionParam[], value.lParenToken?.loc, value.rParenToken?.loc)
+            this.generatorFunctionParams(value.params as SlimeJavascriptFunctionParam[], value.lParenToken?.loc, value.rParenToken?.loc)
             if (value.body) {
                 this.generatorNode(value.body)
             }
@@ -765,14 +765,14 @@ export default class SlimeGenerator {
             }
 
             // 输出参数和函数体
-            this.generatorFunctionParams(value.params as SlimeFunctionParam[], value.lParenToken?.loc, value.rParenToken?.loc)
+            this.generatorFunctionParams(value.params as SlimeJavascriptFunctionParam[], value.lParenToken?.loc, value.rParenToken?.loc)
             if (value.body) {
                 this.generatorNode(value.body)
             }
         } else if (node.shorthand) {
             // 简写属性: { name } 等价于 { name: name }
             // 或带默认值: { name = 'default' } 等价于 { name: name = 'default' }
-            if (node.value && (node.value as any).type === SlimeAstTypeName.AssignmentPattern) {
+            if (node.value && (node.value as any).type === SlimeJavascriptAstTypeName.AssignmentPattern) {
                 // 带默认值的简写属性
                 this.generatorNode(node.value as any)
             } else {
@@ -794,15 +794,15 @@ export default class SlimeGenerator {
 
 
     private static patternTypes = [
-        SlimeAstTypeName.Identifier,
-        SlimeAstTypeName.ObjectPattern,
-        SlimeAstTypeName.ArrayPattern,
-        SlimeAstTypeName.RestElement,
-        SlimeAstTypeName.AssignmentPattern,
-        SlimeAstTypeName.MemberExpression,
+        SlimeJavascriptAstTypeName.Identifier,
+        SlimeJavascriptAstTypeName.ObjectPattern,
+        SlimeJavascriptAstTypeName.ArrayPattern,
+        SlimeJavascriptAstTypeName.RestElement,
+        SlimeJavascriptAstTypeName.AssignmentPattern,
+        SlimeJavascriptAstTypeName.MemberExpression,
     ]
 
-    private static generatorIdentifier(node: SlimeIdentifier) {
+    private static generatorIdentifier(node: SlimeJavascriptIdentifier) {
         // 创建标识符 token 时需要完整的 SubhutiCreateToken 接口：
         // type: 必需属性，标识 token 类型
         // name: token 名称
@@ -841,16 +841,16 @@ export default class SlimeGenerator {
         }
 
         // 输出参数列表，使用精确 token 位置
-        this.generatorFunctionParams(node.params as SlimeFunctionParam[], node.lParenToken?.loc, node.rParenToken?.loc)
+        this.generatorFunctionParams(node.params as SlimeJavascriptFunctionParam[], node.lParenToken?.loc, node.rParenToken?.loc)
 
         // 输出函数体
         if (node.body) {
             // 阶段2：函数声明后需要换行，传 true
-            this.generatorBlockStatement(node.body as SlimeBlockStatement, true)
+            this.generatorBlockStatement(node.body as SlimeJavascriptBlockStatement, true)
         }
     }
 
-    private static generatorClassDeclaration(node: SlimeClassDeclaration) {
+    private static generatorClassDeclaration(node: SlimeJavascriptClassDeclaration) {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ClassTok, node.classToken?.loc) // 使用精确 token 位置
         if (node.id) {
             this.addSpacing() // 类名与关键字之间添加空格
@@ -866,7 +866,7 @@ export default class SlimeGenerator {
         this.addNewLine() // 类声明后换行
     }
 
-    private static generatorClassExpression(node: SlimeClassExpression) {
+    private static generatorClassExpression(node: SlimeJavascriptClassExpression) {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ClassTok, node.classToken?.loc) // 使用精确 token 位置
         if (node.id) {
             this.addSpacing() // 类名与关键字之间添加空格
@@ -881,7 +881,7 @@ export default class SlimeGenerator {
         this.generatorClassBody(node.body) // 生成类主体花括号及成员
     }
 
-    private static generatorClassBody(body: SlimeClassBody) {
+    private static generatorClassBody(body: SlimeJavascriptClassBody) {
         this.addLBrace(body.lBraceToken?.loc) // 使用精确 lBraceToken 位置
         if (body?.body?.length) {
             this.addNewLine()  // { 后换行
@@ -937,7 +937,7 @@ export default class SlimeGenerator {
         // 处理 value（函数参数和函数体，但不输出 function 关键字和函数名）
         if (node.value) {
             // 只输出参数和函数体，使用精确 token 位置
-            this.generatorFunctionParams(node.value.params as SlimeFunctionParam[], node.value.lParenToken?.loc, node.value.rParenToken?.loc)
+            this.generatorFunctionParams(node.value.params as SlimeJavascriptFunctionParam[], node.value.lParenToken?.loc, node.value.rParenToken?.loc)
             if (node.value.body) {
                 this.generatorNode(node.value.body)
             }
@@ -994,7 +994,7 @@ export default class SlimeGenerator {
                         this.addComma()
                         this.addSpacing()
                     }
-                    // 参数可能是 SlimeCallArgument（包含 argument 属性）或直接的表达式
+                    // 参数可能是 SlimeJavascriptCallArgument（包含 argument 属性）或直接的表达式
                     if (arg && arg.argument) {
                         this.generatorNode(arg.argument)
                     } else {
@@ -1011,142 +1011,142 @@ export default class SlimeGenerator {
      * @param node AST 节点
      * @param addNewLineAfter 如果节点是 BlockStatement，是否在 } 后换行（默认 false）
      */
-    private static generatorNode(node: SlimeBaseNode, addNewLineAfter: boolean = false) {
+    private static generatorNode(node: SlimeJavascriptBaseNode, addNewLineAfter: boolean = false) {
         // 防御性检查：如果node为null或undefined，直接返回
         if (!node) {
             return
         }
 
-        if (node.type === SlimeAstTypeName.Program) {
-            return this.generatorProgram(node as SlimeProgram)
-        } else if (node.type === SlimeAstTypeName.PrivateIdentifier) {
-            this.generatorPrivateIdentifier(node as SlimePrivateIdentifier)
-        } else if (node.type === SlimeAstTypeName.Identifier) {
-            this.generatorIdentifier(node as SlimeIdentifier)
-        } else if (node.type === SlimeAstTypeName.ThisExpression || node.type === 'ThisExpression') {
+        if (node.type === SlimeJavascriptAstTypeName.Program) {
+            return this.generatorProgram(node as SlimeJavascriptProgram)
+        } else if (node.type === SlimeJavascriptAstTypeName.PrivateIdentifier) {
+            this.generatorPrivateIdentifier(node as SlimeJavascriptPrivateIdentifier)
+        } else if (node.type === SlimeJavascriptAstTypeName.Identifier) {
+            this.generatorIdentifier(node as SlimeJavascriptIdentifier)
+        } else if (node.type === SlimeJavascriptAstTypeName.ThisExpression || node.type === 'ThisExpression') {
             this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ThisTok, (node as any).thisToken?.loc) // 使用精确 token 位置
-        } else if (node.type === SlimeAstTypeName.NumericLiteral) {
-            this.generatorNumberLiteral(node as SlimeNumericLiteral)
-        } else if (node.type === SlimeAstTypeName.Literal) {
+        } else if (node.type === SlimeJavascriptAstTypeName.NumericLiteral) {
+            this.generatorNumberLiteral(node as SlimeJavascriptNumericLiteral)
+        } else if (node.type === SlimeJavascriptAstTypeName.Literal) {
             // ESTree 标准的 Literal 类型（包含 number, string, boolean, null, RegExp, BigInt）
-            this.generatorLiteral(node as SlimeLiteral)
-        } else if (node.type === SlimeAstTypeName.MemberExpression) {
-            this.generatorMemberExpression(node as SlimeMemberExpression)
-        } else if (node.type === SlimeAstTypeName.CallExpression) {
-            this.generatorCallExpression(node as SlimeCallExpression)
-        } else if (node.type === SlimeAstTypeName.FunctionExpression) {
-            this.generatorFunctionExpression(node as SlimeFunctionExpression)
-        } else if (node.type === SlimeAstTypeName.ArrowFunctionExpression) {
+            this.generatorLiteral(node as SlimeJavascriptLiteral)
+        } else if (node.type === SlimeJavascriptAstTypeName.MemberExpression) {
+            this.generatorMemberExpression(node as SlimeJavascriptMemberExpression)
+        } else if (node.type === SlimeJavascriptAstTypeName.CallExpression) {
+            this.generatorCallExpression(node as SlimeJavascriptCallExpression)
+        } else if (node.type === SlimeJavascriptAstTypeName.FunctionExpression) {
+            this.generatorFunctionExpression(node as SlimeJavascriptFunctionExpression)
+        } else if (node.type === SlimeJavascriptAstTypeName.ArrowFunctionExpression) {
             this.generatorArrowFunctionExpression(node as any)
-        } else if (node.type === SlimeAstTypeName.BinaryExpression) {
+        } else if (node.type === SlimeJavascriptAstTypeName.BinaryExpression) {
             this.generatorBinaryExpression(node as any)
-        } else if (node.type === SlimeAstTypeName.LogicalExpression || node.type === 'LogicalExpression') {
+        } else if (node.type === SlimeJavascriptAstTypeName.LogicalExpression || node.type === 'LogicalExpression') {
             // LogicalExpression 和 BinaryExpression 结构相同，复用同一个生成器
             this.generatorBinaryExpression(node as any)
-        } else if (node.type === SlimeAstTypeName.StringLiteral) {
-            this.generatorStringLiteral(node as SlimeStringLiteral)
-        } else if (node.type === SlimeAstTypeName.ArrayExpression) {
-            this.generatorArrayExpression(node as SlimeArrayExpression)
-        } else if (node.type === SlimeAstTypeName.ObjectExpression) {
-            this.generatorObjectExpression(node as SlimeObjectExpression)
-        } else if (node.type === SlimeAstTypeName.ParenthesizedExpression) {
+        } else if (node.type === SlimeJavascriptAstTypeName.StringLiteral) {
+            this.generatorStringLiteral(node as SlimeJavascriptStringLiteral)
+        } else if (node.type === SlimeJavascriptAstTypeName.ArrayExpression) {
+            this.generatorArrayExpression(node as SlimeJavascriptArrayExpression)
+        } else if (node.type === SlimeJavascriptAstTypeName.ObjectExpression) {
+            this.generatorObjectExpression(node as SlimeJavascriptObjectExpression)
+        } else if (node.type === SlimeJavascriptAstTypeName.ParenthesizedExpression) {
             this.generatorParenthesizedExpression(node as any)
         } else if (node.type === 'SequenceExpression') {
             this.generatorSequenceExpression(node as any)
-        } else if (node.type === SlimeAstTypeName.Property) {
-            this.generatorProperty(node as SlimeProperty)
+        } else if (node.type === SlimeJavascriptAstTypeName.Property) {
+            this.generatorProperty(node as SlimeJavascriptProperty)
 
-        } else if (node.type === SlimeAstTypeName.VariableDeclarator) {
-            this.generatorVariableDeclarator(node as SlimeVariableDeclarator)
+        } else if (node.type === SlimeJavascriptAstTypeName.VariableDeclarator) {
+            this.generatorVariableDeclarator(node as SlimeJavascriptVariableDeclarator)
 
-        } else if (node.type === SlimeAstTypeName.RestElement) {
-            this.generatorRestElement(node as SlimeRestElement)
+        } else if (node.type === SlimeJavascriptAstTypeName.RestElement) {
+            this.generatorRestElement(node as SlimeJavascriptRestElement)
 
-        } else if (node.type === SlimeAstTypeName.SpreadElement) {
-            this.generatorSpreadElement(node as SlimeSpreadElement)
+        } else if (node.type === SlimeJavascriptAstTypeName.SpreadElement) {
+            this.generatorSpreadElement(node as SlimeJavascriptSpreadElement)
 
-        } else if (node.type === SlimeAstTypeName.ObjectPattern) {
-            this.generatorObjectPattern(node as SlimeObjectPattern)
+        } else if (node.type === SlimeJavascriptAstTypeName.ObjectPattern) {
+            this.generatorObjectPattern(node as SlimeJavascriptObjectPattern)
 
-        } else if (node.type === SlimeAstTypeName.ArrayPattern) {
-            this.generatorArrayPattern(node as SlimeArrayPattern)
+        } else if (node.type === SlimeJavascriptAstTypeName.ArrayPattern) {
+            this.generatorArrayPattern(node as SlimeJavascriptArrayPattern)
 
-        } else if (node.type === SlimeAstTypeName.AssignmentPattern) {
-            this.generatorAssignmentPattern(node as SlimeAssignmentPattern)
+        } else if (node.type === SlimeJavascriptAstTypeName.AssignmentPattern) {
+            this.generatorAssignmentPattern(node as SlimeJavascriptAssignmentPattern)
 
-        } else if (node.type === SlimeAstTypeName.FunctionDeclaration) {
-            this.generatorFunctionDeclaration(node as SlimeFunctionDeclaration)
-        } else if (node.type === SlimeAstTypeName.ClassDeclaration) {
-            this.generatorClassDeclaration(node as SlimeClassDeclaration)
-        } else if (node.type === SlimeAstTypeName.ClassExpression) {
-            this.generatorClassExpression(node as SlimeClassExpression) // 新增对 ClassExpression 的处理
-        } else if (node.type === SlimeAstTypeName.MethodDefinition) {
+        } else if (node.type === SlimeJavascriptAstTypeName.FunctionDeclaration) {
+            this.generatorFunctionDeclaration(node as SlimeJavascriptFunctionDeclaration)
+        } else if (node.type === SlimeJavascriptAstTypeName.ClassDeclaration) {
+            this.generatorClassDeclaration(node as SlimeJavascriptClassDeclaration)
+        } else if (node.type === SlimeJavascriptAstTypeName.ClassExpression) {
+            this.generatorClassExpression(node as SlimeJavascriptClassExpression) // 新增对 ClassExpression 的处理
+        } else if (node.type === SlimeJavascriptAstTypeName.MethodDefinition) {
             this.generatorMethodDefinition(node as any) // 新增对 MethodDefinition 的处理
         } else if (node.type === 'PropertyDefinition') {
             this.generatorPropertyDefinition(node as any) // 新增对 PropertyDefinition 的处理
         } else if (node.type === 'NewExpression') {
             this.generatorNewExpression(node as any) // 新增对 NewExpression 的处理
-        } else if (node.type === SlimeAstTypeName.VariableDeclaration) {
-            this.generatorVariableDeclaration(node as SlimeVariableDeclaration)
-        } else if (node.type === SlimeAstTypeName.ExpressionStatement) {
-            this.generatorExpressionStatement(node as SlimeExpressionStatement)
-        } else if (node.type === SlimeAstTypeName.ReturnStatement) {
-            this.generatorReturnStatement(node as SlimeReturnStatement)
-        } else if (node.type === SlimeAstTypeName.BlockStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.VariableDeclaration) {
+            this.generatorVariableDeclaration(node as SlimeJavascriptVariableDeclaration)
+        } else if (node.type === SlimeJavascriptAstTypeName.ExpressionStatement) {
+            this.generatorExpressionStatement(node as SlimeJavascriptExpressionStatement)
+        } else if (node.type === SlimeJavascriptAstTypeName.ReturnStatement) {
+            this.generatorReturnStatement(node as SlimeJavascriptReturnStatement)
+        } else if (node.type === SlimeJavascriptAstTypeName.BlockStatement) {
             // 阶段2：传递 addNewLineAfter 参数给 BlockStatement
-            this.generatorBlockStatement(node as SlimeBlockStatement, addNewLineAfter)
-        } else if (node.type === SlimeAstTypeName.IfStatement) {
+            this.generatorBlockStatement(node as SlimeJavascriptBlockStatement, addNewLineAfter)
+        } else if (node.type === SlimeJavascriptAstTypeName.IfStatement) {
             this.generatorIfStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.ForStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.ForStatement) {
             this.generatorForStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.ForInStatement || node.type === SlimeAstTypeName.ForOfStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.ForInStatement || node.type === SlimeJavascriptAstTypeName.ForOfStatement) {
             this.generatorForInOfStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.WhileStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.WhileStatement) {
             this.generatorWhileStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.DoWhileStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.DoWhileStatement) {
             this.generatorDoWhileStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.SwitchStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.SwitchStatement) {
             this.generatorSwitchStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.SwitchCase) {
+        } else if (node.type === SlimeJavascriptAstTypeName.SwitchCase) {
             this.generatorSwitchCase(node as any)
-        } else if (node.type === SlimeAstTypeName.TryStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.TryStatement) {
             this.generatorTryStatement(node as any)
         } else if (node.type === 'CatchClause') {
             this.generatorCatchClause(node as any)
-        } else if (node.type === SlimeAstTypeName.ThrowStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.ThrowStatement) {
             this.generatorThrowStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.BreakStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.BreakStatement) {
             this.generatorBreakStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.ContinueStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.ContinueStatement) {
             this.generatorContinueStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.LabeledStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.LabeledStatement) {
             this.generatorLabeledStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.WithStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.WithStatement) {
             this.generatorWithStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.DebuggerStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.DebuggerStatement) {
             this.generatorDebuggerStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.EmptyStatement) {
+        } else if (node.type === SlimeJavascriptAstTypeName.EmptyStatement) {
             this.generatorEmptyStatement(node as any)
-        } else if (node.type === SlimeAstTypeName.ImportSpecifier) {
-            this.generatorImportSpecifier(node as SlimeImportSpecifier)
-        } else if (node.type === SlimeAstTypeName.ImportDefaultSpecifier) {
-            this.generatorImportDefaultSpecifier(node as SlimeImportDefaultSpecifier)
-        } else if (node.type === SlimeAstTypeName.ImportNamespaceSpecifier) {
-            this.generatorImportNamespaceSpecifier(node as SlimeImportNamespaceSpecifier)
-        } else if (node.type === SlimeAstTypeName.ExportNamedDeclaration) {
-            this.generatorExportNamedDeclaration(node as SlimeExportNamedDeclaration)
-        } else if (node.type === SlimeAstTypeName.ExportDefaultDeclaration) {
+        } else if (node.type === SlimeJavascriptAstTypeName.ImportSpecifier) {
+            this.generatorImportSpecifier(node as SlimeJavascriptImportSpecifier)
+        } else if (node.type === SlimeJavascriptAstTypeName.ImportDefaultSpecifier) {
+            this.generatorImportDefaultSpecifier(node as SlimeJavascriptImportDefaultSpecifier)
+        } else if (node.type === SlimeJavascriptAstTypeName.ImportNamespaceSpecifier) {
+            this.generatorImportNamespaceSpecifier(node as SlimeJavascriptImportNamespaceSpecifier)
+        } else if (node.type === SlimeJavascriptAstTypeName.ExportNamedDeclaration) {
+            this.generatorExportNamedDeclaration(node as SlimeJavascriptExportNamedDeclaration)
+        } else if (node.type === SlimeJavascriptAstTypeName.ExportDefaultDeclaration) {
             this.generatorExportDefaultDeclaration(node as any)
         } else if (node.type === 'ExportAllDeclaration') {
             this.generatorExportAllDeclaration(node as any)
-        } else if (node.type === SlimeAstTypeName.ImportDeclaration) {
-            this.generatorImportDeclaration(node as SlimeImportDeclaration)
-        } else if (node.type === SlimeAstTypeName.ImportExpression) {
-            this.generatorImportExpression(node as SlimeImportExpression)
-        } else if (node.type === SlimeAstTypeName.ChainExpression) {
-            this.generatorChainExpression(node as SlimeChainExpression)
-        } else if (node.type === SlimeAstTypeName.StaticBlock) {
-            this.generatorStaticBlock(node as SlimeStaticBlock)
+        } else if (node.type === SlimeJavascriptAstTypeName.ImportDeclaration) {
+            this.generatorImportDeclaration(node as SlimeJavascriptImportDeclaration)
+        } else if (node.type === SlimeJavascriptAstTypeName.ImportExpression) {
+            this.generatorImportExpression(node as SlimeJavascriptImportExpression)
+        } else if (node.type === SlimeJavascriptAstTypeName.ChainExpression) {
+            this.generatorChainExpression(node as SlimeJavascriptChainExpression)
+        } else if (node.type === SlimeJavascriptAstTypeName.StaticBlock) {
+            this.generatorStaticBlock(node as SlimeJavascriptStaticBlock)
         } else if (node.type === 'ConditionalExpression') {
             this.generatorConditionalExpression(node as any)
         } else if (node.type === 'AssignmentExpression') {
@@ -1157,13 +1157,13 @@ export default class SlimeGenerator {
             this.addString('null')
         } else if (node.type === 'UnaryExpression') {
             this.generatorUnaryExpression(node as any)
-        } else if (node.type === SlimeAstTypeName.UpdateExpression) {
+        } else if (node.type === SlimeJavascriptAstTypeName.UpdateExpression) {
             this.generatorUpdateExpression(node as any)
-        } else if (node.type === SlimeAstTypeName.YieldExpression) {
+        } else if (node.type === SlimeJavascriptAstTypeName.YieldExpression) {
             this.generatorYieldExpression(node as any)
-        } else if (node.type === SlimeAstTypeName.AwaitExpression) {
+        } else if (node.type === SlimeJavascriptAstTypeName.AwaitExpression) {
             this.generatorAwaitExpression(node as any)
-        } else if (node.type === SlimeAstTypeName.TemplateLiteral) {
+        } else if (node.type === SlimeJavascriptAstTypeName.TemplateLiteral) {
             this.generatorTemplateLiteral(node as any)
         } else if (node.type === "Super") {
             // Super关键字：直接输出"super"
@@ -1177,10 +1177,10 @@ export default class SlimeGenerator {
             this.generatorNode((node as any).meta)
             this.addDot((node as any).dotToken?.loc) // 使用精确 token 位置
             this.generatorNode((node as any).property)
-        } else if (node.type === SlimeAstTypeName.OptionalCallExpression) {
+        } else if (node.type === SlimeJavascriptAstTypeName.OptionalCallExpression) {
             // 可选调用：obj?.method()
             this.generatorOptionalCallExpression(node as any)
-        } else if (node.type === SlimeAstTypeName.OptionalMemberExpression) {
+        } else if (node.type === SlimeJavascriptAstTypeName.OptionalMemberExpression) {
             // 可选成员访问：obj?.prop 或 obj?.[expr]
             this.generatorOptionalMemberExpression(node as any)
         } else {
@@ -1231,22 +1231,22 @@ export default class SlimeGenerator {
         this.generatorNode(node.right)
     }
 
-    private static generatorObjectPattern(node: SlimeObjectPattern) {
+    private static generatorObjectPattern(node: SlimeJavascriptObjectPattern) {
         // 输出对象解构：{name, age} 或 {name: userName} 或 {name = "default"} 或 {a, ...rest}
-        // properties 是 SlimeObjectPatternProperty[] 类型，每个元素是 { property, commaToken }
+        // properties 是 SlimeJavascriptObjectPatternProperty[] 类型，每个元素是 { property, commaToken }
         this.addLBrace()
         node.properties.forEach((item: any, index) => {
             // 处理包装结构
             const prop = item.property !== undefined ? item.property : item
             const commaToken = item.commaToken
             // ES2018: 检查是否是RestElement
-            if (prop.type === SlimeAstTypeName.RestElement) {
-                this.generatorRestElement(prop as SlimeRestElement)
+            if (prop.type === SlimeJavascriptAstTypeName.RestElement) {
+                this.generatorRestElement(prop as SlimeJavascriptRestElement)
             } else if (prop.shorthand) {
                 // 简写形式：{name} 或 {name = "default"}
                 // 如果value是AssignmentPattern，输出完整的 name = "default"
                 // 否则只输出 name
-                if (prop.value && prop.value.type === SlimeAstTypeName.AssignmentPattern) {
+                if (prop.value && prop.value.type === SlimeJavascriptAstTypeName.AssignmentPattern) {
                     this.generatorNode(prop.value)
                 } else {
                     this.generatorNode(prop.key)
@@ -1275,9 +1275,9 @@ export default class SlimeGenerator {
         this.addRBrace()
     }
 
-    private static generatorArrayPattern(node: SlimeArrayPattern) {
+    private static generatorArrayPattern(node: SlimeJavascriptArrayPattern) {
         // 输出数组解构：[a, b, c] 或 [a, , c]（跳过元素）或 [a,,]（尾部空位）
-        // elements 是 SlimeArrayPatternElement[] 类型，每个元素是 { element, commaToken }
+        // elements 是 SlimeJavascriptArrayPatternElement[] 类型，每个元素是 { element, commaToken }
         this.addLBracket()
         node.elements.forEach((item, index) => {
             // 处理包装结构
@@ -1301,17 +1301,17 @@ export default class SlimeGenerator {
         this.addRBracket()
     }
 
-    private static generatorRestElement(node: SlimeRestElement) {
+    private static generatorRestElement(node: SlimeJavascriptRestElement) {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Ellipsis, node.ellipsisToken?.loc) // 使用精确 token 位置
         this.generatorNode(node.argument)
     }
 
-    private static generatorSpreadElement(node: SlimeSpreadElement) {
+    private static generatorSpreadElement(node: SlimeJavascriptSpreadElement) {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Ellipsis, node.ellipsisToken?.loc) // 使用精确 token 位置
         this.generatorNode(node.argument)
     }
 
-    private static generatorAssignmentPattern(node: SlimeAssignmentPattern) {
+    private static generatorAssignmentPattern(node: SlimeJavascriptAssignmentPattern) {
         // 默认值模式：name = 'Guest'
         this.generatorNode(node.left)
         this.addSpacing()
@@ -1325,7 +1325,7 @@ export default class SlimeGenerator {
      * @param node BlockStatement 节点
      * @param addNewLineAfter 是否在 } 后换行（默认 false）
      */
-    private static generatorBlockStatement(node: SlimeBlockStatement, addNewLineAfter: boolean = false) {
+    private static generatorBlockStatement(node: SlimeJavascriptBlockStatement, addNewLineAfter: boolean = false) {
         this.addLBrace(node.lBraceToken?.loc) // 使用精确 token 位置
         this.addNewLine()  // 阶段2：{ 后换行
         this.indent++      // 阶段2：增加缩进层级
@@ -1343,7 +1343,7 @@ export default class SlimeGenerator {
         }
     }
 
-    private static generatorReturnStatement(node: SlimeReturnStatement) {
+    private static generatorReturnStatement(node: SlimeJavascriptReturnStatement) {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ReturnTok, node.returnToken?.loc) // 使用精确 token 位置
         if (node.argument) {
             this.addSpacing()
@@ -1391,9 +1391,9 @@ export default class SlimeGenerator {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.RBracket, loc)
     }
 
-    private static generatorMemberExpression(node: SlimeMemberExpression) {
+    private static generatorMemberExpression(node: SlimeJavascriptMemberExpression) {
         // object.property 或 object[property] 或 object?.property
-        this.generatorNode(node.object as SlimeExpression)
+        this.generatorNode(node.object as SlimeJavascriptExpression)
 
         if (node.computed) {
             // object[property] 或 object?.[property]
@@ -1438,8 +1438,8 @@ export default class SlimeGenerator {
                 }
                 // 处理包装结构：{ argument: {...}, commaToken?: {...} }
                 const argument = arg.argument || arg
-                if (argument.type === SlimeAstTypeName.SpreadElement) {
-                    this.generatorSpreadElement(argument as SlimeSpreadElement)
+                if (argument.type === SlimeJavascriptAstTypeName.SpreadElement) {
+                    this.generatorSpreadElement(argument as SlimeJavascriptSpreadElement)
                 } else {
                     this.generatorNode(argument)
                 }
@@ -1479,7 +1479,7 @@ export default class SlimeGenerator {
      * @param node VariableDeclaration 节点
      * @param addSemicolonAndNewLine 是否添加分号和换行（默认 true）
      */
-    private static generatorVariableDeclarationCore(node: SlimeVariableDeclaration, addSemicolonAndNewLine: boolean) {
+    private static generatorVariableDeclarationCore(node: SlimeJavascriptVariableDeclaration, addSemicolonAndNewLine: boolean) {
         // 兼容两种 kind 格式：
         // 1. 对象格式: { value: 'const', loc: ... }
         // 2. 字符串格式: 'const'
@@ -1503,7 +1503,7 @@ export default class SlimeGenerator {
         // 注意：addIndent() 由 generatorNodes 根据是否是最后一个节点来决定
     }
 
-    private static generatorVariableDeclaration(node: SlimeVariableDeclaration) {
+    private static generatorVariableDeclaration(node: SlimeJavascriptVariableDeclaration) {
         // console.log(989898)
         // console.log(node.kind.loc)
         this.generatorVariableDeclarationCore(node, true)
@@ -1517,7 +1517,7 @@ export default class SlimeGenerator {
     }
 
 
-    private static generatorVariableDeclarator(node: SlimeVariableDeclarator) {
+    private static generatorVariableDeclarator(node: SlimeJavascriptVariableDeclarator) {
         this.generatorNode(node.id)
         // 如果有初始化表达式，生成等号和初始化表达式
         if (node.init) {
@@ -1533,7 +1533,7 @@ export default class SlimeGenerator {
         }
     }
 
-    private static generatorNumberLiteral(node: SlimeNumericLiteral) {
+    private static generatorNumberLiteral(node: SlimeJavascriptNumericLiteral) {
         // 数字字面量需要完整的 SubhutiCreateToken 接口（包含 type 属性）
         // 原因：调用 addCodeAndMappings() 需要创建 source map 映射
         // 这样可以在调试时准确定位到原始代码中的数字字面量位置
@@ -1542,7 +1542,7 @@ export default class SlimeGenerator {
         this.addCodeAndMappings({type: Es6TokenName.NumericLiteral, name: Es6TokenName.NumericLiteral, value: numValue}, node.loc)
     }
 
-    private static generatorStringLiteral(node: SlimeStringLiteral) {
+    private static generatorStringLiteral(node: SlimeJavascriptStringLiteral) {
         // 字符串字面量需要完整的 SubhutiCreateToken 接口（包含 type 属性）
         // 原因：调用 addCodeAndMappings() 需要创建 source map 映射
         // 这样可以在调试时准确定位到原始代码中的字符串字面量位置
@@ -1556,7 +1556,7 @@ export default class SlimeGenerator {
      * 生成 ESTree 标准的 Literal 节点
      * Literal 可以是：number, string, boolean, null, RegExp, BigInt
      */
-    private static generatorLiteral(node: SlimeLiteral) {
+    private static generatorLiteral(node: SlimeJavascriptLiteral) {
         const value = node.value
         const raw = (node as any).raw
 
@@ -1590,7 +1590,7 @@ export default class SlimeGenerator {
         }
     }
 
-    static cstLocationToSlimeLocation(cstLocation: SubhutiSourceLocation) {
+    static cstLocationToSlimeJavascriptLocation(cstLocation: SubhutiSourceLocation) {
         if (cstLocation) {
             // 验证 loc 是否有效
             if (!cstLocation.value ||
@@ -1600,7 +1600,7 @@ export default class SlimeGenerator {
                 return null;  // 无效 loc，不创建映射
             }
 
-            const sourcePosition: SlimeCodeLocation = {
+            const sourcePosition: SlimeJavascriptCodeLocation = {
                 type: cstLocation.type,
                 index: cstLocation.start.index,
                 value: cstLocation.value,
@@ -1614,7 +1614,7 @@ export default class SlimeGenerator {
         return null
     }
 
-    private static addCodeAndMappingsBySourcePosition(token: SubhutiCreateToken, sourcePosition: SlimeCodeLocation) {
+    private static addCodeAndMappingsBySourcePosition(token: SubhutiCreateToken, sourcePosition: SlimeJavascriptCodeLocation) {
 
 
         this.addMappings(token, sourcePosition)
@@ -1649,11 +1649,11 @@ export default class SlimeGenerator {
     private static addCodeAndMappings(token: SubhutiCreateToken, cstLocation: SubhutiSourceLocation = null) {
         // 空值检查
         if (!token) {
-            console.warn('SlimeGenerator.addCodeAndMappings: token is undefined')
+            console.warn('SlimeJavascriptGenerator.addCodeAndMappings: token is undefined')
             return
         }
         if (cstLocation) {
-            const sourcePosition = this.cstLocationToSlimeLocation(cstLocation)
+            const sourcePosition = this.cstLocationToSlimeJavascriptLocation(cstLocation)
             if (sourcePosition) {
                 // 有效的sourcePosition，记录映射
                 this.addCodeAndMappingsBySourcePosition(token, sourcePosition)
@@ -1742,7 +1742,7 @@ export default class SlimeGenerator {
     }
 
 
-    private static addMappings(generateToken: SubhutiCreateToken, sourcePosition: SlimeCodeLocation) {
+    private static addMappings(generateToken: SubhutiCreateToken, sourcePosition: SlimeJavascriptCodeLocation) {
         // 移除自动换行逻辑，让 Prettier 来处理格式化
         // 注释掉的代码会导致在不合适的位置插入换行（如 return 和返回值之间）
         // if (this.mappings.length) {
@@ -1752,7 +1752,7 @@ export default class SlimeGenerator {
         //   }
         // }
 
-        let generate: SlimeCodeLocation = {
+        let generate: SlimeJavascriptCodeLocation = {
             type: generateToken.name,
             index: this.generateIndex,
             value: generateToken.value,
@@ -1783,7 +1783,7 @@ export default class SlimeGenerator {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.RParen, node.rParenToken?.loc) // 使用精确 token 位置
 
         // 如果 consequent 不是 BlockStatement，需要添加空格
-        if (node.consequent.type !== SlimeAstTypeName.BlockStatement) {
+        if (node.consequent.type !== SlimeJavascriptAstTypeName.BlockStatement) {
             this.addSpacing()
         }
         // 阶段2：if 语句后需要换行，传 true
@@ -1792,7 +1792,7 @@ export default class SlimeGenerator {
         if (node.alternate) {
             this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ElseTok, node.elseToken?.loc) // 使用精确 token 位置
             // 如果 alternate 不是 BlockStatement，需要在 else 后添加空格
-            if (node.alternate.type !== SlimeAstTypeName.BlockStatement) {
+            if (node.alternate.type !== SlimeJavascriptAstTypeName.BlockStatement) {
                 this.addSpacing()
             }
             // 阶段2：else 语句后需要换行，传 true
@@ -1810,7 +1810,7 @@ export default class SlimeGenerator {
 
         // init 部分：如果是 VariableDeclaration，直接调用不添加分号
         if (node.init) {
-            if (node.init.type === SlimeAstTypeName.VariableDeclaration) {
+            if (node.init.type === SlimeJavascriptAstTypeName.VariableDeclaration) {
                 this.generatorVariableDeclarationCore(node.init, false)
             } else {
                 this.generatorNode(node.init)
@@ -1848,7 +1848,7 @@ export default class SlimeGenerator {
         // 防护：如果 left 为 null，跳过（解析器问题）
         if (!node.left) {
             // 解析器未能正确解析 left，跳过
-        } else if (node.left.type === SlimeAstTypeName.VariableDeclaration) {
+        } else if (node.left.type === SlimeJavascriptAstTypeName.VariableDeclaration) {
             this.addCode(SlimeJavascriptGeneratorTokenMapObj[node.left.kind.value.valueOf()])
             this.addSpacing()
             // 生成第一个声明的 id
@@ -1869,7 +1869,7 @@ export default class SlimeGenerator {
 
         // 生成 in 或 of
         this.addSpacing()
-        if (node.type === SlimeAstTypeName.ForInStatement) {
+        if (node.type === SlimeJavascriptAstTypeName.ForInStatement) {
             this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.InTok, node.inToken?.loc) // 使用精确 token 位置
         } else {
             this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.OfTok, node.ofToken?.loc) // 使用精确 token 位置
@@ -1907,7 +1907,7 @@ export default class SlimeGenerator {
     private static generatorDoWhileStatement(node: any) {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.DoTok, node.doToken?.loc) // 使用精确 token 位置
         // do 后紧跟语句体
-        if (node.body?.type === SlimeAstTypeName.BlockStatement) {
+        if (node.body?.type === SlimeJavascriptAstTypeName.BlockStatement) {
             // BlockStatement 自己处理大括号
             this.generatorNode(node.body)
         } else {
@@ -2106,8 +2106,8 @@ export default class SlimeGenerator {
         // 如果 declaration 不是 FunctionDeclaration 或 ClassDeclaration，则需要分号和换行
         // FunctionDeclaration 和 ClassDeclaration 自己会添加换行
         const declarationType = node.declaration?.type
-        if (declarationType !== SlimeAstTypeName.FunctionDeclaration &&
-            declarationType !== SlimeAstTypeName.ClassDeclaration) {
+        if (declarationType !== SlimeJavascriptAstTypeName.FunctionDeclaration &&
+            declarationType !== SlimeJavascriptAstTypeName.ClassDeclaration) {
             this.addCode(SlimeJavascriptGeneratorTokensObj.Semicolon)
             this.addNewLine()
         }
@@ -2117,16 +2117,16 @@ export default class SlimeGenerator {
      * 生成 ChainExpression（可选链表达式）
      * 例如: obj?.prop 或 obj?.method()
      */
-    private static generatorChainExpression(node: SlimeChainExpression) {
+    private static generatorChainExpression(node: SlimeJavascriptChainExpression) {
         // ChainExpression 只是包装器，直接生成内部表达式
-        this.generatorNode(node.expression as SlimeExpression)
+        this.generatorNode(node.expression as SlimeJavascriptExpression)
     }
 
     /**
      * 生成 ImportExpression（动态导入）
      * 例如: import('./module.js')
      */
-    private static generatorImportExpression(node: SlimeImportExpression) {
+    private static generatorImportExpression(node: SlimeJavascriptImportExpression) {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ImportTok, node.importToken?.loc) // 使用精确 token 位置
         this.addLParen(node.lParenToken?.loc) // 使用精确 token 位置
         this.generatorNode(node.source)
@@ -2137,7 +2137,7 @@ export default class SlimeGenerator {
      * 生成 StaticBlock（类的静态初始化块）
      * 例如: static { console.log('init') }
      */
-    private static generatorStaticBlock(node: SlimeStaticBlock) {
+    private static generatorStaticBlock(node: SlimeJavascriptStaticBlock) {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.StaticTok, (node as any).staticToken?.loc) // 使用精确 token 位置
         this.addSpacing()
         this.addLBrace((node as any).lBraceToken?.loc) // 使用精确 token 位置
