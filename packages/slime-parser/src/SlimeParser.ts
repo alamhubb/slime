@@ -25,7 +25,7 @@ import SlimeTokenConsumer from "./SlimeTokenConsumer.ts"
 import {
     SlimeContextualKeywordTokenTypes,
     SlimeReservedWordTokenTypes,
-    SlimeTokenType
+    SlimeJavascriptTokenType
 } from "slime-token";
 import {slimeTokens} from "./SlimeTokens.ts";
 
@@ -232,7 +232,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      * @param value 软关键字的值（如 SlimeContextualKeywordTokenTypes.LET）
      */
     protected isContextual(value: string): boolean {
-        return this.match(SlimeTokenType.IdentifierName) && this.curToken?.tokenValue === value
+        return this.match(SlimeJavascriptTokenType.IdentifierName) && this.curToken?.tokenValue === value
     }
 
     /**
@@ -314,7 +314,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
     protected isContextualPair(first: string, second: string): boolean {
         if (!this.isContextual(first)) return false
         const nextToken = this.peek(1)
-        return nextToken?.tokenName === SlimeTokenType.IdentifierName && nextToken.tokenValue === second
+        return nextToken?.tokenName === SlimeJavascriptTokenType.IdentifierName && nextToken.tokenValue === second
     }
 
     /**
@@ -354,7 +354,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      */
     private rescanSlashAsRegExp(): boolean {
         const curToken = this.curToken
-        if (!curToken || (curToken.tokenName !== SlimeTokenType.Slash && curToken.tokenName !== SlimeTokenType.DivideAssign)) {
+        if (!curToken || (curToken.tokenName !== SlimeJavascriptTokenType.Slash && curToken.tokenName !== SlimeJavascriptTokenType.DivideAssign)) {
             return false
         }
 
@@ -383,7 +383,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
 
         // 4. 创建新的 RegularExpressionLiteral token
         const newToken: SubhutiMatchToken = {
-            tokenName: SlimeTokenType.RegularExpressionLiteral,
+            tokenName: SlimeJavascriptTokenType.RegularExpressionLiteral,
             tokenValue: regexpMatch,
             index: curToken.index,
             rowNum: curToken.rowNum,
@@ -644,7 +644,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      * 使用 protected 以便子类重写 PrimaryExpression 时可以调用
      */
     protected consumeRegularExpressionLiteral(): SubhutiCst | undefined {
-        return this.consume(SlimeTokenType.RegularExpressionLiteral, LexicalGoal.InputElementRegExp)
+        return this.consume(SlimeJavascriptTokenType.RegularExpressionLiteral, LexicalGoal.InputElementRegExp)
     }
 
     /**
@@ -1846,7 +1846,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
 
         // 处理 [+In] PrivateIdentifier in ShiftExpression
         // PrivateIdentifier 是词法规则（A.1 Lexical Grammar），直接消费 token
-        if (In && this.lookahead(SlimeTokenType.PrivateIdentifier, 1)) {
+        if (In && this.lookahead(SlimeJavascriptTokenType.PrivateIdentifier, 1)) {
             this.tokenConsumer.PrivateIdentifier()
             this.tokenConsumer.In()
             this.ShiftExpression(params)
@@ -2723,7 +2723,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
     @SubhutiRule
     SemicolonASI(): SubhutiCst | undefined {
         // 检查当前 token 是否是分号
-        if (this.match(SlimeTokenType.Semicolon)) {
+        if (this.match(SlimeJavascriptTokenType.Semicolon)) {
             this.tokenConsumer.Semicolon()
             return this.curCst
         }
@@ -2764,7 +2764,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
         }
 
         // 条件 2：当前 token 是 }
-        if (this.match(SlimeTokenType.RBrace)) {
+        if (this.match(SlimeJavascriptTokenType.RBrace)) {
             return true
         }
 
@@ -2788,9 +2788,9 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
     @SubhutiRule
     ExpressionStatement(params: StatementParams = {}): SubhutiCst | undefined {
         // [lookahead ∉ {{, function, async [no LineTerminator here] function, class, let [}]
-        this.assertLookaheadNotIn([SlimeTokenType.LBrace, SlimeTokenType.Function, SlimeTokenType.Class])
-        this.assertNotContextualSequenceNoLT(SlimeContextualKeywordTokenTypes.Async, SlimeTokenType.Function)
-        this.assertNotContextualSequence(SlimeContextualKeywordTokenTypes.Let, SlimeTokenType.LBracket)
+        this.assertLookaheadNotIn([SlimeJavascriptTokenType.LBrace, SlimeJavascriptTokenType.Function, SlimeJavascriptTokenType.Class])
+        this.assertNotContextualSequenceNoLT(SlimeContextualKeywordTokenTypes.Async, SlimeJavascriptTokenType.Function)
+        this.assertNotContextualSequence(SlimeContextualKeywordTokenTypes.Let, SlimeJavascriptTokenType.LBracket)
 
         this.Expression({...params, In: true})
         return this.SemicolonASI()
@@ -2832,7 +2832,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
                     this.Expression({...params, In: true})
                     this.tokenConsumer.RParen()
                     this.IfStatementBody(params)
-                    this.assertLookaheadNot(SlimeTokenType.Else)  // [lookahead ≠ else]
+                    this.assertLookaheadNot(SlimeJavascriptTokenType.Else)  // [lookahead ≠ else]
                 }
             }
         ])
@@ -2965,7 +2965,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
                     this.tokenConsumer.For()
                     this.tokenConsumer.LParen()
                     // [lookahead ≠ let []
-                    this.assertNotContextualSequence(SlimeContextualKeywordTokenTypes.Let, SlimeTokenType.LBracket)
+                    this.assertNotContextualSequence(SlimeContextualKeywordTokenTypes.Let, SlimeJavascriptTokenType.LBracket)
                     this.Option(() => this.Expression({...params, In: false}))
                     this.tokenConsumer.Semicolon()
                     this.Option(() => this.Expression({...params, In: true}))
@@ -3033,7 +3033,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
                 alt: () => {
                     this.tokenConsumer.For()
                     this.tokenConsumer.LParen()
-                    this.assertNotContextualSequence(SlimeContextualKeywordTokenTypes.Let, SlimeTokenType.LBracket)
+                    this.assertNotContextualSequence(SlimeContextualKeywordTokenTypes.Let, SlimeJavascriptTokenType.LBracket)
                     this.LeftHandSideExpression(params)
                     this.tokenConsumer.In()
                     this.Expression({...params, In: true})
@@ -3578,7 +3578,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
             {
                 alt: () => {
                     // [lookahead ≠ {]
-                    this.assertLookaheadNot(SlimeTokenType.LBrace)
+                    this.assertLookaheadNot(SlimeJavascriptTokenType.LBrace)
                     this.ExpressionBody({...params, Await: false})
                 }
             }
@@ -3652,7 +3652,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
             {
                 alt: () => {
                     // [lookahead ≠ {]
-                    this.assertLookaheadNot(SlimeTokenType.LBrace)
+                    this.assertLookaheadNot(SlimeJavascriptTokenType.LBrace)
                     this.ExpressionBody({...params, Await: true})
                 }
             }
@@ -4829,8 +4829,8 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
                     this.tokenConsumer.Export()
                     this.tokenConsumer.Default()
                     // [lookahead ∉ {function, async [no LineTerminator here] function, class}]
-                    this.assertLookaheadNotIn([SlimeTokenType.Function, SlimeTokenType.Class])
-                    this.assertNotContextualSequenceNoLT(SlimeContextualKeywordTokenTypes.Async, SlimeTokenType.Function)
+                    this.assertLookaheadNotIn([SlimeJavascriptTokenType.Function, SlimeJavascriptTokenType.Class])
+                    this.assertNotContextualSequenceNoLT(SlimeContextualKeywordTokenTypes.Async, SlimeJavascriptTokenType.Function)
                     this.AssignmentExpression({In: true, Yield: false, Await: true})
                     this.SemicolonASI()
                 }

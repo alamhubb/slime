@@ -187,11 +187,10 @@ import {
   type SlimeLogicalOperatorToken,
   type SlimeAssignmentOperatorToken,
   type SlimeUpdateOperatorToken,
-} from "./SlimeAstNode.ts";
+} from "./SlimeJavascriptAstNode.ts";
 
-import {SlimeAstTypeName} from "./SlimeAstTypeName.ts";
+import {SlimeAstTypeName} from "./SlimeJavascriptAstTypeName.ts";
 import type { SubhutiSourceLocation } from "subhuti";
-import SlimeAstCreateUtils from "../SlimeAstCreateUtils.ts";
 
 class SlimeJavascriptAstCreateUtils {
   // ============================================
@@ -1524,6 +1523,6 @@ class SlimeJavascriptAstCreateUtils {
   }
 }
 
-const SlimeAstCreateUtil = new SlimeAstCreateUtils()
-export default SlimeAstCreateUtil
+const SlimeJavascriptAstCreateUtil = new SlimeJavascriptAstCreateUtils()
+export default SlimeJavascriptAstCreateUtil
 

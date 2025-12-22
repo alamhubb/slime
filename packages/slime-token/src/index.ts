@@ -1,2 +1,2 @@
-export * from './SlimeTokenType.ts'
+export * from './SlimeJavascriptTokenType.ts'
 

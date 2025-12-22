@@ -48,10 +48,10 @@ import type {SubhutiSourceLocation} from "subhuti";
 import {SubhutiCreateToken} from "subhuti";
 import {SubhutiMatchToken} from "subhuti";
 import { SlimeTokensObj } from "slime-parser";
-import { SlimeTokenType } from "slime-token";
+import { SlimeJavascriptTokenType } from "slime-token";
 
 // 兼容别名
-const Es6TokenName = SlimeTokenType;
+const Es6TokenName = SlimeJavascriptTokenType;
 
 // 创建软关键字的 token 对象（用于代码生成）
 const createSoftKeywordToken = (name: string, value: string): SubhutiCreateToken => ({

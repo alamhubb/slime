@@ -82,9 +82,9 @@ import type {
     SlimeLogicalOperator,
     SlimeAssignmentOperator,
     SlimeUpdateOperator,
-} from "./SlimeAstNode.ts";
+} from "./SlimeJavascriptAstNode.ts";
 import {
-    SlimeTokenType,
+    SlimeJavascriptTokenType,
     SlimeBinaryOperatorTokenTypes,
     SlimeUnaryOperatorTokenTypes,
     SlimeLogicalOperatorTokenTypes,
@@ -98,15 +98,15 @@ class SlimeTokenFactory {
     // ============================================
 
     createVarToken(loc?: SubhutiSourceLocation): SlimeVarToken {
-        return { type: SlimeTokenType.Var, value: "var", loc } as SlimeVarToken;
+        return { type: SlimeJavascriptTokenType.Var, value: "var", loc } as SlimeVarToken;
     }
 
     createLetToken(loc?: SubhutiSourceLocation): SlimeLetToken {
-        return { type: SlimeTokenType.Let, value: "let", loc } as SlimeLetToken;
+        return { type: SlimeJavascriptTokenType.Let, value: "let", loc } as SlimeLetToken;
     }
 
     createConstToken(loc?: SubhutiSourceLocation): SlimeConstToken {
-        return { type: SlimeTokenType.Const, value: "const", loc } as SlimeConstToken;
+        return { type: SlimeJavascriptTokenType.Const, value: "const", loc } as SlimeConstToken;
     }
 
     // ============================================
@@ -114,7 +114,7 @@ class SlimeTokenFactory {
     // ============================================
 
     createAssignToken(loc?: SubhutiSourceLocation): SlimeAssignToken {
-        return { type: SlimeTokenType.Assign, value: "=", loc } as SlimeAssignToken;
+        return { type: SlimeJavascriptTokenType.Assign, value: "=", loc } as SlimeAssignToken;
     }
 
     // ============================================
@@ -122,67 +122,67 @@ class SlimeTokenFactory {
     // ============================================
 
     createLParenToken(loc?: SubhutiSourceLocation): SlimeLParenToken {
-        return { type: SlimeTokenType.LParen, value: "(", loc } as SlimeLParenToken;
+        return { type: SlimeJavascriptTokenType.LParen, value: "(", loc } as SlimeLParenToken;
     }
 
     createRParenToken(loc?: SubhutiSourceLocation): SlimeRParenToken {
-        return { type: SlimeTokenType.RParen, value: ")", loc } as SlimeRParenToken;
+        return { type: SlimeJavascriptTokenType.RParen, value: ")", loc } as SlimeRParenToken;
     }
 
     createLBraceToken(loc?: SubhutiSourceLocation): SlimeLBraceToken {
-        return { type: SlimeTokenType.LBrace, value: "{", loc } as SlimeLBraceToken;
+        return { type: SlimeJavascriptTokenType.LBrace, value: "{", loc } as SlimeLBraceToken;
     }
 
     createRBraceToken(loc?: SubhutiSourceLocation): SlimeRBraceToken {
-        return { type: SlimeTokenType.RBrace, value: "}", loc } as SlimeRBraceToken;
+        return { type: SlimeJavascriptTokenType.RBrace, value: "}", loc } as SlimeRBraceToken;
     }
 
     createLBracketToken(loc?: SubhutiSourceLocation): SlimeLBracketToken {
-        return { type: SlimeTokenType.LBracket, value: "[", loc } as SlimeLBracketToken;
+        return { type: SlimeJavascriptTokenType.LBracket, value: "[", loc } as SlimeLBracketToken;
     }
 
     createRBracketToken(loc?: SubhutiSourceLocation): SlimeRBracketToken {
-        return { type: SlimeTokenType.RBracket, value: "]", loc } as SlimeRBracketToken;
+        return { type: SlimeJavascriptTokenType.RBracket, value: "]", loc } as SlimeRBracketToken;
     }
 
     createSemicolonToken(loc?: SubhutiSourceLocation): SlimeSemicolonToken {
-        return { type: SlimeTokenType.Semicolon, value: ";", loc } as SlimeSemicolonToken;
+        return { type: SlimeJavascriptTokenType.Semicolon, value: ";", loc } as SlimeSemicolonToken;
     }
 
     createCommaToken(loc?: SubhutiSourceLocation): SlimeCommaToken {
-        return { type: SlimeTokenType.Comma, value: ",", loc } as SlimeCommaToken;
+        return { type: SlimeJavascriptTokenType.Comma, value: ",", loc } as SlimeCommaToken;
     }
 
     createDotToken(loc?: SubhutiSourceLocation): SlimeDotToken {
-        return { type: SlimeTokenType.Dot, value: ".", loc } as SlimeDotToken;
+        return { type: SlimeJavascriptTokenType.Dot, value: ".", loc } as SlimeDotToken;
     }
 
     createSpreadToken(loc?: SubhutiSourceLocation): SlimeEllipsisToken {
-        return { type: SlimeTokenType.Ellipsis, value: "...", loc } as SlimeEllipsisToken;
+        return { type: SlimeJavascriptTokenType.Ellipsis, value: "...", loc } as SlimeEllipsisToken;
     }
 
     createArrowToken(loc?: SubhutiSourceLocation): SlimeArrowToken {
-        return { type: SlimeTokenType.Arrow, value: "=>", loc } as SlimeArrowToken;
+        return { type: SlimeJavascriptTokenType.Arrow, value: "=>", loc } as SlimeArrowToken;
     }
 
     createQuestionToken(loc?: SubhutiSourceLocation): SlimeQuestionToken {
-        return { type: SlimeTokenType.Question, value: "?", loc } as SlimeQuestionToken;
+        return { type: SlimeJavascriptTokenType.Question, value: "?", loc } as SlimeQuestionToken;
     }
 
     createColonToken(loc?: SubhutiSourceLocation): SlimeColonToken {
-        return { type: SlimeTokenType.Colon, value: ":", loc } as SlimeColonToken;
+        return { type: SlimeJavascriptTokenType.Colon, value: ":", loc } as SlimeColonToken;
     }
 
     createEllipsisToken(loc?: SubhutiSourceLocation): SlimeEllipsisToken {
-        return { type: SlimeTokenType.Ellipsis, value: "...", loc } as SlimeEllipsisToken;
+        return { type: SlimeJavascriptTokenType.Ellipsis, value: "...", loc } as SlimeEllipsisToken;
     }
 
     createOptionalChainingToken(loc?: SubhutiSourceLocation): SlimeOptionalChainingToken {
-        return { type: SlimeTokenType.OptionalChaining, value: "?.", loc } as SlimeOptionalChainingToken;
+        return { type: SlimeJavascriptTokenType.OptionalChaining, value: "?.", loc } as SlimeOptionalChainingToken;
     }
 
     createAsteriskToken(loc?: SubhutiSourceLocation): SlimeAsteriskToken {
-        return { type: SlimeTokenType.Asterisk, value: "*", loc } as SlimeAsteriskToken;
+        return { type: SlimeJavascriptTokenType.Asterisk, value: "*", loc } as SlimeAsteriskToken;
     }
 
     // ============================================
@@ -190,31 +190,31 @@ class SlimeTokenFactory {
     // ============================================
 
     createFunctionToken(loc?: SubhutiSourceLocation): SlimeFunctionToken {
-        return { type: SlimeTokenType.Function, value: "function", loc } as SlimeFunctionToken;
+        return { type: SlimeJavascriptTokenType.Function, value: "function", loc } as SlimeFunctionToken;
     }
 
     createAsyncToken(loc?: SubhutiSourceLocation): SlimeAsyncToken {
-        return { type: SlimeTokenType.Async, value: "async", loc } as SlimeAsyncToken;
+        return { type: SlimeJavascriptTokenType.Async, value: "async", loc } as SlimeAsyncToken;
     }
 
     createClassToken(loc?: SubhutiSourceLocation): SlimeClassToken {
-        return { type: SlimeTokenType.Class, value: "class", loc } as SlimeClassToken;
+        return { type: SlimeJavascriptTokenType.Class, value: "class", loc } as SlimeClassToken;
     }
 
     createExtendsToken(loc?: SubhutiSourceLocation): SlimeExtendsToken {
-        return { type: SlimeTokenType.Extends, value: "extends", loc } as SlimeExtendsToken;
+        return { type: SlimeJavascriptTokenType.Extends, value: "extends", loc } as SlimeExtendsToken;
     }
 
     createStaticToken(loc?: SubhutiSourceLocation): SlimeStaticToken {
-        return { type: SlimeTokenType.Static, value: "static", loc } as SlimeStaticToken;
+        return { type: SlimeJavascriptTokenType.Static, value: "static", loc } as SlimeStaticToken;
     }
 
     createGetToken(loc?: SubhutiSourceLocation): SlimeGetToken {
-        return { type: SlimeTokenType.Get, value: "get", loc } as SlimeGetToken;
+        return { type: SlimeJavascriptTokenType.Get, value: "get", loc } as SlimeGetToken;
     }
 
     createSetToken(loc?: SubhutiSourceLocation): SlimeSetToken {
-        return { type: SlimeTokenType.Set, value: "set", loc } as SlimeSetToken;
+        return { type: SlimeJavascriptTokenType.Set, value: "set", loc } as SlimeSetToken;
     }
 
     // ============================================
@@ -222,75 +222,75 @@ class SlimeTokenFactory {
     // ============================================
 
     createIfToken(loc?: SubhutiSourceLocation): SlimeIfToken {
-        return { type: SlimeTokenType.If, value: "if", loc } as SlimeIfToken;
+        return { type: SlimeJavascriptTokenType.If, value: "if", loc } as SlimeIfToken;
     }
 
     createElseToken(loc?: SubhutiSourceLocation): SlimeElseToken {
-        return { type: SlimeTokenType.Else, value: "else", loc } as SlimeElseToken;
+        return { type: SlimeJavascriptTokenType.Else, value: "else", loc } as SlimeElseToken;
     }
 
     createSwitchToken(loc?: SubhutiSourceLocation): SlimeSwitchToken {
-        return { type: SlimeTokenType.Switch, value: "switch", loc } as SlimeSwitchToken;
+        return { type: SlimeJavascriptTokenType.Switch, value: "switch", loc } as SlimeSwitchToken;
     }
 
     createCaseToken(loc?: SubhutiSourceLocation): SlimeCaseToken {
-        return { type: SlimeTokenType.Case, value: "case", loc } as SlimeCaseToken;
+        return { type: SlimeJavascriptTokenType.Case, value: "case", loc } as SlimeCaseToken;
     }
 
     createDefaultToken(loc?: SubhutiSourceLocation): SlimeDefaultToken {
-        return { type: SlimeTokenType.Default, value: "default", loc } as SlimeDefaultToken;
+        return { type: SlimeJavascriptTokenType.Default, value: "default", loc } as SlimeDefaultToken;
     }
 
     createForToken(loc?: SubhutiSourceLocation): SlimeForToken {
-        return { type: SlimeTokenType.For, value: "for", loc } as SlimeForToken;
+        return { type: SlimeJavascriptTokenType.For, value: "for", loc } as SlimeForToken;
     }
 
     createWhileToken(loc?: SubhutiSourceLocation): SlimeWhileToken {
-        return { type: SlimeTokenType.While, value: "while", loc } as SlimeWhileToken;
+        return { type: SlimeJavascriptTokenType.While, value: "while", loc } as SlimeWhileToken;
     }
 
     createDoToken(loc?: SubhutiSourceLocation): SlimeDoToken {
-        return { type: SlimeTokenType.Do, value: "do", loc } as SlimeDoToken;
+        return { type: SlimeJavascriptTokenType.Do, value: "do", loc } as SlimeDoToken;
     }
 
     createOfToken(loc?: SubhutiSourceLocation): SlimeOfToken {
-        return { type: SlimeTokenType.Of, value: "of", loc } as SlimeOfToken;
+        return { type: SlimeJavascriptTokenType.Of, value: "of", loc } as SlimeOfToken;
     }
 
     createBreakToken(loc?: SubhutiSourceLocation): SlimeBreakToken {
-        return { type: SlimeTokenType.Break, value: "break", loc } as SlimeBreakToken;
+        return { type: SlimeJavascriptTokenType.Break, value: "break", loc } as SlimeBreakToken;
     }
 
     createContinueToken(loc?: SubhutiSourceLocation): SlimeContinueToken {
-        return { type: SlimeTokenType.Continue, value: "continue", loc } as SlimeContinueToken;
+        return { type: SlimeJavascriptTokenType.Continue, value: "continue", loc } as SlimeContinueToken;
     }
 
     createReturnToken(loc?: SubhutiSourceLocation): SlimeReturnToken {
-        return { type: SlimeTokenType.Return, value: "return", loc } as SlimeReturnToken;
+        return { type: SlimeJavascriptTokenType.Return, value: "return", loc } as SlimeReturnToken;
     }
 
     createThrowToken(loc?: SubhutiSourceLocation): SlimeThrowToken {
-        return { type: SlimeTokenType.Throw, value: "throw", loc } as SlimeThrowToken;
+        return { type: SlimeJavascriptTokenType.Throw, value: "throw", loc } as SlimeThrowToken;
     }
 
     createTryToken(loc?: SubhutiSourceLocation): SlimeTryToken {
-        return { type: SlimeTokenType.Try, value: "try", loc } as SlimeTryToken;
+        return { type: SlimeJavascriptTokenType.Try, value: "try", loc } as SlimeTryToken;
     }
 
     createCatchToken(loc?: SubhutiSourceLocation): SlimeCatchToken {
-        return { type: SlimeTokenType.Catch, value: "catch", loc } as SlimeCatchToken;
+        return { type: SlimeJavascriptTokenType.Catch, value: "catch", loc } as SlimeCatchToken;
     }
 
     createFinallyToken(loc?: SubhutiSourceLocation): SlimeFinallyToken {
-        return { type: SlimeTokenType.Finally, value: "finally", loc } as SlimeFinallyToken;
+        return { type: SlimeJavascriptTokenType.Finally, value: "finally", loc } as SlimeFinallyToken;
     }
 
     createWithToken(loc?: SubhutiSourceLocation): SlimeWithToken {
-        return { type: SlimeTokenType.With, value: "with", loc } as SlimeWithToken;
+        return { type: SlimeJavascriptTokenType.With, value: "with", loc } as SlimeWithToken;
     }
 
     createDebuggerToken(loc?: SubhutiSourceLocation): SlimeDebuggerToken {
-        return { type: SlimeTokenType.Debugger, value: "debugger", loc } as SlimeDebuggerToken;
+        return { type: SlimeJavascriptTokenType.Debugger, value: "debugger", loc } as SlimeDebuggerToken;
     }
 
     // ============================================
@@ -298,31 +298,31 @@ class SlimeTokenFactory {
     // ============================================
 
     createNewToken(loc?: SubhutiSourceLocation): SlimeNewToken {
-        return { type: SlimeTokenType.New, value: "new", loc } as SlimeNewToken;
+        return { type: SlimeJavascriptTokenType.New, value: "new", loc } as SlimeNewToken;
     }
 
     createYieldToken(loc?: SubhutiSourceLocation): SlimeYieldToken {
-        return { type: SlimeTokenType.Yield, value: "yield", loc } as SlimeYieldToken;
+        return { type: SlimeJavascriptTokenType.Yield, value: "yield", loc } as SlimeYieldToken;
     }
 
     createAwaitToken(loc?: SubhutiSourceLocation): SlimeAwaitToken {
-        return { type: SlimeTokenType.Await, value: "await", loc } as SlimeAwaitToken;
+        return { type: SlimeJavascriptTokenType.Await, value: "await", loc } as SlimeAwaitToken;
     }
 
     createTypeofToken(loc?: SubhutiSourceLocation): SlimeTypeofToken {
-        return { type: SlimeTokenType.Typeof, value: "typeof", loc } as SlimeTypeofToken;
+        return { type: SlimeJavascriptTokenType.Typeof, value: "typeof", loc } as SlimeTypeofToken;
     }
 
     createVoidToken(loc?: SubhutiSourceLocation): SlimeVoidToken {
-        return { type: SlimeTokenType.Void, value: "void", loc } as SlimeVoidToken;
+        return { type: SlimeJavascriptTokenType.Void, value: "void", loc } as SlimeVoidToken;
     }
 
     createDeleteToken(loc?: SubhutiSourceLocation): SlimeDeleteToken {
-        return { type: SlimeTokenType.Delete, value: "delete", loc } as SlimeDeleteToken;
+        return { type: SlimeJavascriptTokenType.Delete, value: "delete", loc } as SlimeDeleteToken;
     }
 
     createInstanceofToken(loc?: SubhutiSourceLocation): SlimeInstanceofToken {
-        return { type: SlimeTokenType.Instanceof, value: "instanceof", loc } as SlimeInstanceofToken;
+        return { type: SlimeJavascriptTokenType.Instanceof, value: "instanceof", loc } as SlimeInstanceofToken;
     }
 
     // ============================================
@@ -330,23 +330,23 @@ class SlimeTokenFactory {
     // ============================================
 
     createImportToken(loc?: SubhutiSourceLocation): SlimeImportToken {
-        return { type: SlimeTokenType.Import, value: "import", loc } as SlimeImportToken;
+        return { type: SlimeJavascriptTokenType.Import, value: "import", loc } as SlimeImportToken;
     }
 
     createExportToken(loc?: SubhutiSourceLocation): SlimeExportToken {
-        return { type: SlimeTokenType.Export, value: "export", loc } as SlimeExportToken;
+        return { type: SlimeJavascriptTokenType.Export, value: "export", loc } as SlimeExportToken;
     }
 
     createFromToken(loc?: SubhutiSourceLocation): SlimeFromToken {
-        return { type: SlimeTokenType.From, value: "from", loc } as SlimeFromToken;
+        return { type: SlimeJavascriptTokenType.From, value: "from", loc } as SlimeFromToken;
     }
 
     createAsToken(loc?: SubhutiSourceLocation): SlimeAsToken {
-        return { type: SlimeTokenType.As, value: "as", loc } as SlimeAsToken;
+        return { type: SlimeJavascriptTokenType.As, value: "as", loc } as SlimeAsToken;
     }
 
     createInToken(loc?: SubhutiSourceLocation): SlimeInToken {
-        return { type: SlimeTokenType.In, value: "in", loc } as SlimeInToken;
+        return { type: SlimeJavascriptTokenType.In, value: "in", loc } as SlimeInToken;
     }
 
     // ============================================
