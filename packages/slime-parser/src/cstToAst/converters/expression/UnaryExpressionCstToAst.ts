@@ -17,7 +17,7 @@ export class UnaryExpressionCstToAst {
         const operand = UnaryExpressionCstToAst.createUnaryExpressionAst(cst.children![1]);
 
         if (operator === 'delete' || operator === 'void' || operator === 'typeof' || operator === '+' || operator === '-' || operator === '~' || operator === '!') {
-            return SlimeAstUtil.createUnaryExpression(operator, operand, cst.loc) as SlimeExpression;
+            return SlimeAstUtil.createUnaryExpression(operator as any, operand, cst.loc) as SlimeExpression;
         }
 
         return operand;
@@ -34,13 +34,13 @@ export class UnaryExpressionCstToAst {
         if (cst.children![0].name === 'PlusPlus' || cst.children![0].name === 'MinusMinus') {
             const operator = cst.children![0].value;
             const operand = SlimeCstToAstUtil.createExpressionAst(cst.children![1]);
-            return SlimeAstUtil.createUpdateExpression(operator, operand, true, cst.loc) as SlimeExpression;
+            return SlimeAstUtil.createUpdateExpression(operator as any, operand, true, cst.loc) as SlimeExpression;
         }
 
         // 处理后置更新 x++, x--
         const operand = SlimeCstToAstUtil.createExpressionAst(cst.children![0]);
         const operator = cst.children![1].value;
-        return SlimeAstUtil.createUpdateExpression(operator, operand, false, cst.loc) as SlimeExpression;
+        return SlimeAstUtil.createUpdateExpression(operator as any, operand, false, cst.loc) as SlimeExpression;
     }
 
     static createAwaitExpressionAst(cst: SubhutiCst): SlimeExpression {

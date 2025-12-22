@@ -35,6 +35,137 @@ import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
  * - SemicolonASI: 自动分号插入
  */
 export class OtherStatementCstToAst {
+    /**
+     * [核心分发方法] 根据 CST 节点类型创建对应的 Statement/Declaration AST
+     *
+     * ECMAScript 语法中 Statement 和 Declaration 有多种具体类型，
+     * 需要一个统一的分发方法来处理各种语句和声明。
+     */
+    static createStatementDeclarationAst(cst: SubhutiCst) {
+        // Statement - 包装节点，递归处理子节点
+        if (cst.name === SlimeParser.prototype.Statement?.name || cst.name === 'Statement') {
+            if (cst.children && cst.children.length > 0) {
+                return this.createStatementDeclarationAst(cst.children[0])
+            }
+            return undefined
+        }
+        // BreakableStatement - 包装节点
+        else if (cst.name === SlimeParser.prototype.BreakableStatement?.name) {
+            if (cst.children && cst.children.length > 0) {
+                return this.createStatementDeclarationAst(cst.children[0])
+            }
+            return undefined
+        }
+        // IterationStatement - 循环语句包装节点
+        else if (cst.name === SlimeParser.prototype.IterationStatement?.name) {
+            if (cst.children && cst.children.length > 0) {
+                return this.createStatementDeclarationAst(cst.children[0])
+            }
+            return undefined
+        }
+        // IfStatementBody - if/else 语句体包装节点
+        else if (cst.name === 'IfStatementBody') {
+            if (cst.children && cst.children.length > 0) {
+                return this.createStatementDeclarationAst(cst.children[0])
+            }
+            return undefined
+        }
+        // var 变量声明语句
+        else if (cst.name === SlimeParser.prototype.VariableStatement?.name || cst.name === 'VariableStatement') {
+            return SlimeCstToAstUtil.createVariableStatementAst(cst)
+        }
+        // 变量声明 (用于 for 循环)
+        else if (cst.name === SlimeParser.prototype.VariableDeclaration?.name) {
+            return SlimeCstToAstUtil.createVariableDeclarationAst(cst)
+        }
+        // 表达式语句
+        else if (cst.name === SlimeParser.prototype.ExpressionStatement?.name) {
+            return SlimeCstToAstUtil.createExpressionStatementAst(cst)
+        }
+        // return 语句
+        else if (cst.name === SlimeParser.prototype.ReturnStatement?.name) {
+            return this.createReturnStatementAst(cst)
+        }
+        // if 语句
+        else if (cst.name === SlimeParser.prototype.IfStatement?.name) {
+            return SlimeCstToAstUtil.createIfStatementAst(cst)
+        }
+        // for 语句
+        else if (cst.name === SlimeParser.prototype.ForStatement?.name) {
+            return SlimeCstToAstUtil.createForStatementAst(cst)
+        }
+        // for...in / for...of 语句
+        else if (cst.name === SlimeParser.prototype.ForInOfStatement?.name) {
+            return SlimeCstToAstUtil.createForInOfStatementAst(cst)
+        }
+        // while 语句
+        else if (cst.name === SlimeParser.prototype.WhileStatement?.name) {
+            return SlimeCstToAstUtil.createWhileStatementAst(cst)
+        }
+        // do...while 语句
+        else if (cst.name === SlimeParser.prototype.DoWhileStatement?.name) {
+            return SlimeCstToAstUtil.createDoWhileStatementAst(cst)
+        }
+        // 块语句
+        else if (cst.name === SlimeParser.prototype.BlockStatement?.name) {
+            return SlimeCstToAstUtil.createBlockStatementAst(cst)
+        }
+        // switch 语句
+        else if (cst.name === SlimeParser.prototype.SwitchStatement?.name) {
+            return this.createSwitchStatementAst(cst)
+        }
+        // try 语句
+        else if (cst.name === SlimeParser.prototype.TryStatement?.name) {
+            return this.createTryStatementAst(cst)
+        }
+        // throw 语句
+        else if (cst.name === SlimeParser.prototype.ThrowStatement?.name) {
+            return this.createThrowStatementAst(cst)
+        }
+        // break 语句
+        else if (cst.name === SlimeParser.prototype.BreakStatement?.name) {
+            return this.createBreakStatementAst(cst)
+        }
+        // continue 语句
+        else if (cst.name === SlimeParser.prototype.ContinueStatement?.name) {
+            return this.createContinueStatementAst(cst)
+        }
+        // 标签语句
+        else if (cst.name === SlimeParser.prototype.LabelledStatement?.name) {
+            return this.createLabelledStatementAst(cst)
+        }
+        // with 语句
+        else if (cst.name === SlimeParser.prototype.WithStatement?.name) {
+            return this.createWithStatementAst(cst)
+        }
+        // debugger 语句
+        else if (cst.name === SlimeParser.prototype.DebuggerStatement?.name) {
+            return this.createDebuggerStatementAst(cst)
+        }
+        // 空语句
+        else if (cst.name === SlimeParser.prototype.EmptyStatement?.name) {
+            return this.createEmptyStatementAst(cst)
+        }
+        // 函数声明
+        else if (cst.name === SlimeParser.prototype.FunctionDeclaration?.name) {
+            return SlimeCstToAstUtil.createFunctionDeclarationAst(cst)
+        }
+        // 类声明
+        else if (cst.name === SlimeParser.prototype.ClassDeclaration?.name) {
+            return SlimeCstToAstUtil.createClassDeclarationAst(cst)
+        }
+    }
+
+    /**
+     * 创建语句列表 AST
+     */
+    static createStatementAst(cst: SubhutiCst): Array<SlimeStatement> {
+        checkCstName(cst, SlimeParser.prototype.Statement?.name);
+        const statements: SlimeStatement[] = cst.children
+            .map(item => this.createStatementDeclarationAst(item))
+            .filter(stmt => stmt !== undefined) as SlimeStatement[]
+        return statements
+    }
 
     /**
      * 创建 try 语句 AST
