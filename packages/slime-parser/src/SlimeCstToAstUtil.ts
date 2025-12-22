@@ -10,8 +10,8 @@ import { ArrowFunctionCstToAst } from "./cstToAst/converters/function/ArrowFunct
 import { BinaryExpressionCstToAst } from "./cstToAst/converters/expression/BinaryExpressionCstToAst";
 import { PrimaryExpressionCstToAst } from "./cstToAst/converters/expression/PrimaryExpressionCstToAst";
 
-// 重新导出工具函数
-export { checkCstName, throwNewError, decodeUnicodeEscapes } from "./cstToAst/utils";
+// 重新导出工具类
+export { SlimeAstUtils } from "./cstToAst/SlimeAstUtils";
 
 /**
  * CST 到 AST 转换器
