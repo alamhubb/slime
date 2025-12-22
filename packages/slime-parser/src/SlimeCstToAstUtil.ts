@@ -92,7 +92,7 @@ import {
     ModuleCstToAst,
     OptionalExpressionCstToAst,
     OtherStatementCstToAst,
-    PatternConversionCstToAst,
+    PatternConvertCstToAstTs,
     PatternConvertCstToAst,
     PrimaryExpressionCstToAst,
     SlimeAstUtils,
@@ -333,46 +333,46 @@ export class SlimeCstToAst {
         return AssignmentPatternCstToAst.createAssignmentRestPropertyAst(cst)
     }
 
-    // === pattern / PatternConversionCstToAst ===
+    // === pattern / PatternConvertCstToAstTs ===
 
     convertArrayExpressionToPattern(expr: any): SlimeArrayPattern {
-        return PatternConversionCstToAst.convertArrayExpressionToPattern(expr)
+        return PatternConvertCstToAstTs.convertArrayExpressionToPattern(expr)
     }
 
     convertCstToPattern(cst: SubhutiCst): SlimePattern | null {
-        return PatternConversionCstToAst.convertCstToPattern(cst)
+        return PatternConvertCstToAstTs.convertCstToPattern(cst)
     }
 
     convertCoverParameterCstToPattern(cst: SubhutiCst, hasEllipsis: boolean): SlimePattern | null {
-        return PatternConversionCstToAst.convertCoverParameterCstToPattern(cst, hasEllipsis)
+        return PatternConvertCstToAstTs.convertCoverParameterCstToPattern(cst, hasEllipsis)
     }
 
     convertObjectLiteralToPattern(cst: SubhutiCst): SlimeObjectPattern {
-        return PatternConversionCstToAst.convertObjectLiteralToPattern(cst)
+        return PatternConvertCstToAstTs.convertObjectLiteralToPattern(cst)
     }
 
     convertPropertyDefinitionToPatternProperty(cst: SubhutiCst): SlimeAssignmentProperty | null {
-        return PatternConversionCstToAst.convertPropertyDefinitionToPatternProperty(cst)
+        return PatternConvertCstToAstTs.convertPropertyDefinitionToPatternProperty(cst)
     }
 
     convertObjectExpressionToPattern(expr: any): SlimeObjectPattern {
-        return PatternConversionCstToAst.convertObjectExpressionToPattern(expr)
+        return PatternConvertCstToAstTs.convertObjectExpressionToPattern(expr)
     }
 
     convertAssignmentExpressionToPattern(expr: any): any {
-        return PatternConversionCstToAst.convertAssignmentExpressionToPattern(expr)
+        return PatternConvertCstToAstTs.convertAssignmentExpressionToPattern(expr)
     }
 
     convertExpressionToPatternFromAST(expr: any): SlimePattern | null {
-        return PatternConversionCstToAst.convertExpressionToPatternFromAST(expr)
+        return PatternConvertCstToAstTs.convertExpressionToPatternFromAST(expr)
     }
 
     convertArrayLiteralToPattern(cst: SubhutiCst): SlimeArrayPattern {
-        return PatternConversionCstToAst.convertArrayLiteralToPattern(cst)
+        return PatternConvertCstToAstTs.convertArrayLiteralToPattern(cst)
     }
 
     convertExpressionToPattern(expr: any): SlimePattern {
-        return PatternConversionCstToAst.convertExpressionToPattern(expr)
+        return PatternConvertCstToAstTs.convertExpressionToPattern(expr)
     }
 
     // === expression / ExpressionCstToAst ===

@@ -19,7 +19,7 @@ import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
-export class PatternConversionCstToAst {
+export class PatternConvertCstToAstTs {
     /**
      * �?ArrayExpression AST 转换�?ArrayPattern
      */

@@ -47,7 +47,7 @@ export * from './literal/CompoundLiteralCstToAst';
 // pattern
 export * from './pattern/BindingPatternCstToAst';
 export * from './pattern/AssignmentPatternCstToAst';
-export * from './pattern/PatternConversionCstToAst';
+export * from './pattern/PatternConvertCstToAst.ts.ts';
 export * from './pattern/PatternConvertCstToAst';
 
 // misc
