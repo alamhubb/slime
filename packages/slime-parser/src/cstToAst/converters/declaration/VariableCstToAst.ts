@@ -202,4 +202,14 @@ export class VariableCstToAst {
         const token = cst.children?.[0]
         return token?.value || 'let'
     }
+
+    /**
+     * 创建 Initializer AST
+     */
+    static createInitializerAst(cst: SubhutiCst, util: SlimeCstToAst): any {
+        checkCstName(cst, SlimeParser.prototype.Initializer?.name);
+        // Initializer -> Eq + AssignmentExpression
+        const assignmentExpressionCst = cst.children[1]
+        return util.createAssignmentExpressionAst(assignmentExpressionCst)
+    }
 }

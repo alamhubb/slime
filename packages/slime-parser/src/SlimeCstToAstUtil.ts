@@ -1044,10 +1044,7 @@ export class SlimeCstToAst {
     }
 
     createInitializerAst(cst: SubhutiCst): SlimeExpression {
-        const astName = checkCstName(cst, SlimeParser.prototype.Initializer?.name);
-        // Initializer -> Eq + AssignmentExpression
-        const assignmentExpressionCst = cst.children[1]
-        return this.createAssignmentExpressionAst(assignmentExpressionCst)
+        return VariableCstToAst.createInitializerAst(cst, this)
     }
 
     createFieldDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimePropertyDefinition {
