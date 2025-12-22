@@ -11,7 +11,7 @@ export * from '../cstToAst/module/ImportCstToAst.ts';
 export * from '../cstToAst/module/ModuleCstToAst.ts';
 
 // declaration
-export * from './declaration/VariableCstToAst.ts';
+export * from '../cstToAst/statements/VariableCstToAst.ts';
 export * from '../cstToAst/function/FunctionDeclarationCstToAst.ts';
 
 // class
@@ -25,10 +25,10 @@ export * from '../cstToAst/function/ArrowFunctionCstToAst.ts';
 export * from '../cstToAst/components/FunctionParameterCstToAst.ts';
 
 // statement
-export * from './statement/BlockCstToAst.ts';
-export * from './statement/ControlFlowCstToAst.ts';
+export * from '../cstToAst/statements/BlockCstToAst.ts';
+export * from '../cstToAst/statements/ControlFlowCstToAst.ts';
 export * from '../cstToAst/components/FunctionBodyCstToAst.ts';
-export * from './statement/OtherStatementCstToAst.ts';
+export * from '../cstToAst/statements/OtherStatementCstToAst.ts';
 
 // expression
 export * from './expression/ExpressionCstToAst.ts';
@@ -44,7 +44,7 @@ export * from './literal/LiteralCstToAst.ts';
 export * from './literal/CompoundLiteralCstToAst.ts';
 
 // pattern
-export * from './pattern/BindingPatternCstToAst.ts';
-export * from './pattern/AssignmentPatternCstToAst.ts';
-export * from './pattern/PatternConvertCstToAst.ts.ts';
+export * from '../cstToAst/components/BindingPatternCstToAst.ts';
+export * from '../cstToAst/components/AssignmentPatternCstToAst.ts';
+export * from '../cstToAst/components/PatternConvertCstToAst.ts.ts';
 
