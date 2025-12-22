@@ -4,10 +4,10 @@
 import {
     type SubhutiCreateToken,
 } from "subhuti";
-import {slimeJavascriptTokens} from "./deprecated/SlimeJavascriptTokens.ts";
+import {SlimeJavascriptTokensObj} from "./deprecated/SlimeJavascriptTokens.ts";
 
 export const SlimeTokensObj = {
-    ...slimeJavascriptTokens
+    ...SlimeJavascriptTokensObj
 }
 
 const slimeTokens: SubhutiCreateToken[] = Object.values(SlimeTokensObj)
