@@ -1,4 +1,4 @@
-import {SlimeJavascriptTokenType} from "./SlimeJavascriptTokenType.ts";
+import {SlimeJavascriptTokenType} from "./deprecated/SlimeJavascriptTokenType.ts";
 
 export const SlimeTokenType = {
     ...SlimeJavascriptTokenType
