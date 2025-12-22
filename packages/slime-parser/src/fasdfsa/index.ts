@@ -22,7 +22,7 @@ export * from '../cstToAst/class/MethodDefinitionCstToAst.ts';
 // function
 export * from '../cstToAst/function/FunctionExpressionCstToAst.ts';
 export * from '../cstToAst/function/ArrowFunctionCstToAst.ts';
-export * from './function/FunctionParameterCstToAst.ts';
+export * from '../cstToAst/components/FunctionParameterCstToAst.ts';
 
 // statement
 export * from './statement/BlockCstToAst.ts';
