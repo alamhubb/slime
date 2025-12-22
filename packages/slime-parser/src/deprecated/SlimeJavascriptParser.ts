@@ -437,9 +437,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
                 return this.setParseFail()
             }
             const decoded = decodeIdentifier(value)
+            // 根据 ECMAScript 规范 12.7.2：Unicode 转义解码后的保留字不能作为标识符
+            // PEG parser 不应抛错，而是标记失败让回溯机制工作
             if (decoded !== null && ReservedWords.has(decoded)) {
-                throw new Error(`[Lexer Bug] 保留字 "${value}" 被错误识别为 IdentifierName，应该是独立的关键字 token`)
-                // return this.setParseFail()
+                return this.setParseFail()
             }
         }
 
