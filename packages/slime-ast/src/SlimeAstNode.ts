@@ -1,4 +1,4 @@
-import type {SubhutiSourceLocation} from "subhuti";
+import type { SubhutiSourceLocation } from "subhuti";
 import {
     SlimeJavascriptArrayExpression,
     SlimeJavascriptArrayPattern,
@@ -751,21 +751,8 @@ export interface SlimeCatchClause extends SlimeJavascriptCatchClause {
 }
 
 export interface SlimeIdentifier extends SlimeJavascriptIdentifier {
-}
-
-// ============================================
-// TypeScript 类型节点
-// ============================================
-
-/** [TypeScript] 类型注解节点 */
-export interface SlimeTSTypeAnnotation extends SlimeJavascriptTSTypeAnnotation {
-}
-
-/** [TypeScript] 类型联合 */
-export type SlimeTSType = SlimeTSNumberKeyword;
-
-/** [TypeScript] number 类型关键字 */
-export interface SlimeTSNumberKeyword extends SlimeJavascriptTSNumberKeyword {
+    /** [TypeScript] 类型注解 */
+    typeAnnotation?: SlimeTSTypeAnnotation;
 }
 
 export type SlimeLiteral = SlimeSimpleLiteral | SlimeRegExpLiteral | SlimeBigIntLiteral;
