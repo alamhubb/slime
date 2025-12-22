@@ -1,24 +1,31 @@
-/**
- * FunctionExpressionCstToAst - 函数表达式转换
- */
 import {SubhutiCst} from "subhuti";
-import {SlimeAstUtil, SlimeClassExpression, SlimeIdentifier} from "slime-ast";
+import {
+    SlimeAstUtil, type SlimeBlockStatement, type SlimeClassBody, type SlimeClassDeclaration,
+    SlimeClassExpression, type SlimeExpression,
+    type SlimeFunctionDeclaration,
+    type SlimeFunctionParam,
+    SlimeIdentifier, SlimeNodeType, SlimeTokenCreate
+} from "slime-ast";
 import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
-export class FunctionExpressionCstToAst {
+export default class FunctionDeclarationCstToAst{
 
 
+    /**
+     * 创建函数声明 AST
+     * ES2025 FunctionDeclaration structure:
+     * - function BindingIdentifier ( FormalParameters ) { FunctionBody }
+     * Children: [FunctionTok, BindingIdentifier, LParen, FormalParameters, RParen, LBrace, FunctionBody, RBrace]
+     */
+    createFunctionDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
+        const children = cst.children || []
 
-    createFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FunctionExpression?.name);
-        // Es2025Parser FunctionExpression 结构
-
-        let isAsync = false;
-        let isGenerator = false;
-        let functionId: SlimeIdentifier | null = null
+        let functionName: SlimeIdentifier | null = null
         let params: SlimeFunctionParam[] = []
-        let body: SlimeBlockStatement
+        let body: SlimeBlockStatement | null = null
+        let isAsync = false
+        let isGenerator = false
 
         // Token fields
         let functionToken: any = undefined
@@ -29,23 +36,16 @@ export class FunctionExpressionCstToAst {
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined
 
-        for (const child of cst.children || []) {
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i]
             if (!child) continue
-            const name = child.name
-            const value = child.value
 
+            const name = child.name
+            const value = child.value || child.loc?.value
+
+            // Collect tokens
             if (name === 'Function' || value === 'function') {
                 functionToken = SlimeTokenCreate.createFunctionToken(child.loc)
-                continue
-            }
-            if (name === 'Async' || value === 'async') {
-                asyncToken = SlimeTokenCreate.createAsyncToken(child.loc)
-                isAsync = true
-                continue
-            }
-            if (name === 'Asterisk' || value === '*') {
-                asteriskToken = SlimeTokenCreate.createAsteriskToken(child.loc)
-                isGenerator = true
                 continue
             }
             if (name === 'LParen' || value === '(') {
@@ -64,49 +64,54 @@ export class FunctionExpressionCstToAst {
                 rBraceToken = SlimeTokenCreate.createRBraceToken(child.loc)
                 continue
             }
-
-            // BindingIdentifier（命名函数表达式�?
-            if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
-                functionId = this.createBindingIdentifierAst(child)
+            if (name === 'Async' || value === 'async') {
+                asyncToken = SlimeTokenCreate.createAsyncToken(child.loc)
+                isAsync = true
+                continue
+            }
+            if (name === 'Asterisk' || value === '*') {
+                asteriskToken = SlimeTokenCreate.createAsteriskToken(child.loc)
+                isGenerator = true
                 continue
             }
 
-            // FormalParameters - 使用包装类型
+            // BindingIdentifier - function name
+            if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
+                functionName = this.createBindingIdentifierAst(child)
+                continue
+            }
+
+            // FormalParameters - function parameters (使用包装类型)
             if (name === SlimeParser.prototype.FormalParameters?.name || name === 'FormalParameters') {
                 params = this.createFormalParametersAstWrapped(child)
                 continue
             }
 
-            // FunctionBody
+            // FunctionBody - function body
             if (name === SlimeParser.prototype.FunctionBody?.name || name === 'FunctionBody') {
-                const bodyStatements = this.createFunctionBodyAst(child)
-                body = SlimeAstUtil.createBlockStatement(bodyStatements, child.loc)
+                const statements = this.createFunctionBodyAst(child)
+                body = SlimeAstUtil.createBlockStatement(statements, child.loc)
                 continue
             }
         }
 
-        // 空函数体
-        if (!body!) {
+        // Create default empty body if not found
+        if (!body) {
             body = SlimeAstUtil.createBlockStatement([])
         }
 
-        return SlimeAstUtil.createFunctionExpression(
-            body, functionId, params, isGenerator, isAsync, cst.loc,
+        return SlimeAstUtil.createFunctionDeclaration(
+            functionName, params, body, isGenerator, isAsync, cst.loc,
             functionToken, asyncToken, asteriskToken, lParenToken, rParenToken,
             lBraceToken, rBraceToken
         )
     }
 
 
-
-
-
-
-    // 生成器表达式处理：function* (...) { ... }
-    createGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
-        // GeneratorExpression: function* [name](params) { body }
-        // 旧版 CST children: [FunctionTok, Asterisk, BindingIdentifier?, LParen, FormalParameterList?, RParen, FunctionBodyDefine]
-        // Es2025 CST children: [FunctionTok, Asterisk, BindingIdentifier?, LParen, FormalParameters?, RParen, LBrace, GeneratorBody, RBrace]
+    createGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
+        // GeneratorDeclaration: function* name(params) { body }
+        // 旧版 CST children: [FunctionTok, Asterisk, BindingIdentifier, LParen, FormalParameterList?, RParen, FunctionBodyDefine]
+        // Es2025 CST children: [FunctionTok, Asterisk, BindingIdentifier, LParen, FormalParameters?, RParen, LBrace, GeneratorBody, RBrace]
 
         let id: SlimeIdentifier | null = null
         let params: SlimeFunctionParam[] = []
@@ -142,14 +147,22 @@ export class FunctionExpressionCstToAst {
             body = SlimeAstUtil.createBlockStatement([])
         }
 
-        const func = SlimeAstUtil.createFunctionExpression(body, id, params, true, false, cst.loc)
-        return func
+        return {
+            type: SlimeNodeType.FunctionDeclaration,
+            id: id,
+            params: params,
+            body: body,
+            generator: true,
+            async: false,
+            loc: cst.loc
+        } as SlimeFunctionDeclaration
     }
 
-    // Async 函数表达式处理：async function (...) { ... }
-    createAsyncFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
-        // AsyncFunctionExpression: async function [name](params) { body }
-        // Es2025 CST children: [AsyncTok, FunctionTok, BindingIdentifier?, LParen, FormalParameters?, RParen, LBrace, AsyncFunctionBody, RBrace]
+
+    createAsyncFunctionDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
+        // AsyncFunctionDeclaration: async function name(params) { body }
+        // CST children: [AsyncTok, FunctionTok, BindingIdentifier, LParen, FormalParameters?, RParen, LBrace, AsyncFunctionBody, RBrace]
+        // 或者旧�? [AsyncTok, FunctionTok, BindingIdentifier, LParen, FormalParameterList?, RParen, FunctionBodyDefine]
 
         let id: SlimeIdentifier | null = null
         let params: SlimeFunctionParam[] = []
@@ -162,7 +175,7 @@ export class FunctionExpressionCstToAst {
             id = this.createBindingIdentifierAst(bindingId)
         }
 
-        // 查找 FormalParameters �?FormalParameterList (使用包装类型)
+        // 查找 FormalParameters �?FormalParameterList
         const formalParams = cst.children.find(ch =>
             ch.name === SlimeParser.prototype.FormalParameters?.name || ch.name === 'FormalParameters' ||
             ch.name === SlimeParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
@@ -170,7 +183,7 @@ export class FunctionExpressionCstToAst {
             if (formalParams.name === 'FormalParameters' || formalParams.name === SlimeParser.prototype.FormalParameters?.name) {
                 params = this.createFormalParametersAstWrapped(formalParams)
             } else {
-                params = this.createFormalParameterListFromEs2025Wrapped(formalParams)
+                params = this.createFormalParameterListAstWrapped(formalParams)
             }
         }
 
@@ -185,14 +198,13 @@ export class FunctionExpressionCstToAst {
             body = SlimeAstUtil.createBlockStatement([])
         }
 
-        const func = SlimeAstUtil.createFunctionExpression(body, id, params, false, true, cst.loc)
-        return func
+        return SlimeAstUtil.createFunctionDeclaration(id, params, body, false, true, cst.loc)
     }
 
-    // Async Generator 表达式处理：async function* (...) { ... }
-    createAsyncGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
-        // AsyncGeneratorExpression: async function* [name](params) { body }
-        // Es2025 CST children: [AsyncTok, FunctionTok, Asterisk, BindingIdentifier?, LParen, FormalParameters?, RParen, LBrace, AsyncGeneratorBody, RBrace]
+
+    createAsyncGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
+        // AsyncGeneratorDeclaration: async function* name(params) { body }
+        // CST children: [AsyncTok, FunctionTok, Asterisk, BindingIdentifier, LParen, FormalParameters?, RParen, LBrace, AsyncGeneratorBody, RBrace]
 
         let id: SlimeIdentifier | null = null
         let params: SlimeFunctionParam[] = []
@@ -228,9 +240,15 @@ export class FunctionExpressionCstToAst {
             body = SlimeAstUtil.createBlockStatement([])
         }
 
-        const func = SlimeAstUtil.createFunctionExpression(body, id, params, true, true, cst.loc)
-        return func
+        return {
+            type: SlimeNodeType.FunctionDeclaration,
+            id: id,
+            params: params,
+            body: body,
+            generator: true,
+            async: true,
+            loc: cst.loc
+        } as SlimeFunctionDeclaration
     }
-
 
 }

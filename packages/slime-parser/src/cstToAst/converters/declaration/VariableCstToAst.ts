@@ -382,4 +382,26 @@ export class VariableCstToAst {
         }
     }
 
+
+
+    createHoistableDeclarationAst(cst: SubhutiCst): SlimeDeclaration {
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.HoistableDeclaration?.name);
+        const first = cst.children[0]
+        if (first.name === SlimeParser.prototype.FunctionDeclaration?.name || first.name === 'FunctionDeclaration') {
+            return this.createFunctionDeclarationAst(first)
+        } else if (first.name === SlimeParser.prototype.GeneratorDeclaration?.name || first.name === 'GeneratorDeclaration') {
+            // GeneratorDeclaration -> 类似FunctionDeclaration但有*�?
+            return this.createGeneratorDeclarationAst(first)
+        } else if (first.name === SlimeParser.prototype.AsyncFunctionDeclaration?.name || first.name === 'AsyncFunctionDeclaration') {
+            // AsyncFunctionDeclaration -> async function
+            return this.createAsyncFunctionDeclarationAst(first)
+        } else if (first.name === SlimeParser.prototype.AsyncGeneratorDeclaration?.name || first.name === 'AsyncGeneratorDeclaration') {
+            // AsyncGeneratorDeclaration -> async function*
+            return this.createAsyncGeneratorDeclarationAst(first)
+        } else {
+            throw new Error(`Unsupported HoistableDeclaration type: ${first.name}`)
+        }
+    }
+
+
 }
