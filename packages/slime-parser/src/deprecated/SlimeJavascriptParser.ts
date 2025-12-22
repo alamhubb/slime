@@ -1804,9 +1804,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.PrivateIdentifier()
             this.tokenConsumer.In()
             this.ShiftExpression(params)
-
+            return
         }
-
         this.ShiftExpression(params)
 
         this.Many(() => {
