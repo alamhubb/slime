@@ -263,7 +263,7 @@ export interface SlimeParenTokens {
 }
 
 /** 函数结构：小括号 + 大括号 */
-export interface SlimeFunctionTokens extends SlimeJavascriptFunctionTokens {
+export interface SlimeFunctionTokens extends Omit<SlimeBaseNode, "type">, SlimeJavascriptFunctionTokens {
 }
 
 /** 包含冒号的节点 */
@@ -280,141 +280,141 @@ export interface SlimeSemicolonTokens {
 // 关键字 Token
 // ============================================
 
-export interface SlimeFunctionToken extends SlimeJavascriptFunctionToken {
+export interface SlimeFunctionToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptFunctionToken {
 }
 
-export interface SlimeAsyncToken extends SlimeJavascriptAsyncToken {
+export interface SlimeAsyncToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptAsyncToken {
 }
 
-export interface SlimeAsteriskToken extends SlimeJavascriptAsteriskToken {
+export interface SlimeAsteriskToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptAsteriskToken {
 }
 
-export interface SlimeArrowToken extends SlimeJavascriptArrowToken {
+export interface SlimeArrowToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptArrowToken {
 }
 
 // 控制流关键字
-export interface SlimeIfToken extends SlimeJavascriptIfToken {
+export interface SlimeIfToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptIfToken {
 }
 
-export interface SlimeElseToken extends SlimeJavascriptElseToken {
+export interface SlimeElseToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptElseToken {
 }
 
-export interface SlimeForToken extends SlimeJavascriptForToken {
+export interface SlimeForToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptForToken {
 }
 
-export interface SlimeWhileToken extends SlimeJavascriptWhileToken {
+export interface SlimeWhileToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptWhileToken {
 }
 
-export interface SlimeDoToken extends SlimeJavascriptDoToken {
+export interface SlimeDoToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptDoToken {
 }
 
-export interface SlimeInToken extends SlimeJavascriptInToken {
+export interface SlimeInToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptInToken {
 }
 
-export interface SlimeOfToken extends SlimeJavascriptOfToken {
+export interface SlimeOfToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptOfToken {
 }
 
-export interface SlimeSwitchToken extends SlimeJavascriptSwitchToken {
+export interface SlimeSwitchToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptSwitchToken {
 }
 
-export interface SlimeCaseToken extends SlimeJavascriptCaseToken {
+export interface SlimeCaseToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptCaseToken {
 }
 
-export interface SlimeDefaultToken extends SlimeJavascriptDefaultToken {
+export interface SlimeDefaultToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptDefaultToken {
 }
 
-export interface SlimeBreakToken extends SlimeJavascriptBreakToken {
+export interface SlimeBreakToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBreakToken {
 }
 
-export interface SlimeContinueToken extends SlimeJavascriptContinueToken {
+export interface SlimeContinueToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptContinueToken {
 }
 
-export interface SlimeReturnToken extends SlimeJavascriptReturnToken {
+export interface SlimeReturnToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptReturnToken {
 }
 
-export interface SlimeThrowToken extends SlimeJavascriptThrowToken {
+export interface SlimeThrowToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptThrowToken {
 }
 
-export interface SlimeTryToken extends SlimeJavascriptTryToken {
+export interface SlimeTryToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptTryToken {
 }
 
-export interface SlimeCatchToken extends SlimeJavascriptCatchToken {
+export interface SlimeCatchToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptCatchToken {
 }
 
-export interface SlimeFinallyToken extends SlimeJavascriptFinallyToken {
+export interface SlimeFinallyToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptFinallyToken {
 }
 
-export interface SlimeWithToken extends SlimeJavascriptWithToken {
+export interface SlimeWithToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptWithToken {
 }
 
-export interface SlimeDebuggerToken extends SlimeJavascriptDebuggerToken {
+export interface SlimeDebuggerToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptDebuggerToken {
 }
 
-export interface SlimeAwaitToken extends SlimeJavascriptAwaitToken {
+export interface SlimeAwaitToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptAwaitToken {
 }
 
-export interface SlimeYieldToken extends SlimeJavascriptYieldToken {
+export interface SlimeYieldToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptYieldToken {
 }
 
 // 类相关关键字
-export interface SlimeClassToken extends SlimeJavascriptClassToken {
+export interface SlimeClassToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptClassToken {
 }
 
-export interface SlimeExtendsToken extends SlimeJavascriptExtendsToken {
+export interface SlimeExtendsToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptExtendsToken {
 }
 
-export interface SlimeStaticToken extends SlimeJavascriptStaticToken {
+export interface SlimeStaticToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptStaticToken {
 }
 
-export interface SlimeGetToken extends SlimeJavascriptGetToken {
+export interface SlimeGetToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptGetToken {
 }
 
-export interface SlimeSetToken extends SlimeJavascriptSetToken {
+export interface SlimeSetToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptSetToken {
 }
 
 // 操作符关键字
-export interface SlimeNewToken extends SlimeJavascriptNewToken {
+export interface SlimeNewToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptNewToken {
 }
 
-export interface SlimeTypeofToken extends SlimeJavascriptTypeofToken {
+export interface SlimeTypeofToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptTypeofToken {
 }
 
-export interface SlimeVoidToken extends SlimeJavascriptVoidToken {
+export interface SlimeVoidToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptVoidToken {
 }
 
-export interface SlimeDeleteToken extends SlimeJavascriptDeleteToken {
+export interface SlimeDeleteToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptDeleteToken {
 }
 
-export interface SlimeInstanceofToken extends SlimeJavascriptInstanceofToken {
+export interface SlimeInstanceofToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptInstanceofToken {
 }
 
 // 模块关键字
-export interface SlimeImportToken extends SlimeJavascriptImportToken {
+export interface SlimeImportToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptImportToken {
 }
 
-export interface SlimeExportToken extends SlimeJavascriptExportToken {
+export interface SlimeExportToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptExportToken {
 }
 
-export interface SlimeFromToken extends SlimeJavascriptFromToken {
+export interface SlimeFromToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptFromToken {
 }
 
-export interface SlimeAsToken extends SlimeJavascriptAsToken {
+export interface SlimeAsToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptAsToken {
 }
 
 // 展开运算符 (Ellipsis)
-export interface SlimeEllipsisToken extends SlimeJavascriptEllipsisToken {
+export interface SlimeEllipsisToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptEllipsisToken {
 }
 
 // 点号
-export interface SlimeDotToken extends SlimeJavascriptDotToken {
+export interface SlimeDotToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptDotToken {
 }
 
 // 可选链
-export interface SlimeOptionalChainingToken extends SlimeJavascriptOptionalChainingToken {
+export interface SlimeOptionalChainingToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptOptionalChainingToken {
 }
 
 // 问号
-export interface SlimeQuestionToken extends SlimeJavascriptQuestionToken {
+export interface SlimeQuestionToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptQuestionToken {
 }
 
 // ============================================
@@ -422,23 +422,23 @@ export interface SlimeQuestionToken extends SlimeJavascriptQuestionToken {
 // ============================================
 
 /** 二元运算符 Token */
-export interface SlimeBinaryOperatorToken extends SlimeJavascriptBinaryOperatorToken {
+export interface SlimeBinaryOperatorToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBinaryOperatorToken {
 }
 
 /** 一元运算符 Token */
-export interface SlimeUnaryOperatorToken extends SlimeJavascriptUnaryOperatorToken {
+export interface SlimeUnaryOperatorToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptUnaryOperatorToken {
 }
 
 /** 逻辑运算符 Token */
-export interface SlimeLogicalOperatorToken extends SlimeJavascriptLogicalOperatorToken {
+export interface SlimeLogicalOperatorToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptLogicalOperatorToken {
 }
 
 /** 赋值运算符 Token */
-export interface SlimeAssignmentOperatorToken extends SlimeJavascriptAssignmentOperatorToken {
+export interface SlimeAssignmentOperatorToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptAssignmentOperatorToken {
 }
 
 /** 更新运算符 Token */
-export interface SlimeUpdateOperatorToken extends SlimeJavascriptUpdateOperatorToken {
+export interface SlimeUpdateOperatorToken extends Omit<SlimeBaseNode, "type">, SlimeJavascriptUpdateOperatorToken {
 }
 
 // ============================================
@@ -520,7 +520,7 @@ export interface SlimeNodeMap {
 
 export type SlimeNode = SlimeNodeMap[keyof SlimeNodeMap];
 
-export interface SlimeComment extends SlimeJavascriptComment {
+export interface SlimeComment extends Omit<SlimeBaseNode, "type">, SlimeJavascriptComment {
 }
 
 /** Program source type */
@@ -530,13 +530,13 @@ export const SlimeProgramSourceType = {
 } as const;
 export type SlimeProgramSourceType = typeof SlimeJavascriptProgramSourceType[keyof typeof SlimeJavascriptProgramSourceType];
 
-export interface SlimeProgram extends SlimeJavascriptProgram {
+export interface SlimeProgram extends Omit<SlimeBaseNode, "type">, SlimeJavascriptProgram {
 }
 
-export interface SlimeDirective extends SlimeJavascriptDirective {
+export interface SlimeDirective extends Omit<SlimeBaseNode, "type">, SlimeJavascriptDirective {
 }
 
-export interface SlimeBaseFunction extends SlimeJavascriptBaseFunction {
+export interface SlimeBaseFunction extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBaseFunction {
 }
 
 export type SlimeFunction = SlimeFunctionDeclaration | SlimeFunctionExpression | SlimeArrowFunctionExpression;
@@ -563,81 +563,81 @@ export type SlimeStatement =
     | SlimeForOfStatement
     | SlimeDeclaration;
 
-export interface SlimeBaseStatement extends SlimeJavascriptBaseStatement {
+export interface SlimeBaseStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBaseStatement {
 }
 
-export interface SlimeEmptyStatement extends SlimeJavascriptEmptyStatement {
+export interface SlimeEmptyStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptEmptyStatement {
 }
 
-export interface SlimeBlockStatement extends SlimeJavascriptBlockStatement {
+export interface SlimeBlockStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBlockStatement {
 }
 
-export interface SlimeStaticBlock extends SlimeJavascriptStaticBlock {
+export interface SlimeStaticBlock extends Omit<SlimeBaseNode, "type">, SlimeJavascriptStaticBlock {
 }
 
-export interface SlimeExpressionStatement extends SlimeJavascriptExpressionStatement {
+export interface SlimeExpressionStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptExpressionStatement {
 }
 
-export interface SlimeIfStatement extends SlimeJavascriptIfStatement {
+export interface SlimeIfStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptIfStatement {
 }
 
-export interface SlimeLabeledStatement extends SlimeJavascriptLabeledStatement {
+export interface SlimeLabeledStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptLabeledStatement {
 }
 
-export interface SlimeBreakStatement extends SlimeJavascriptBreakStatement {
+export interface SlimeBreakStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBreakStatement {
 }
 
-export interface SlimeContinueStatement extends SlimeJavascriptContinueStatement {
+export interface SlimeContinueStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptContinueStatement {
 }
 
-export interface SlimeWithStatement extends SlimeJavascriptWithStatement {
+export interface SlimeWithStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptWithStatement {
 }
 
-export interface SlimeSwitchStatement extends SlimeJavascriptSwitchStatement {
+export interface SlimeSwitchStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptSwitchStatement {
 }
 
-export interface SlimeReturnStatement extends SlimeJavascriptReturnStatement {
+export interface SlimeReturnStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptReturnStatement {
 }
 
-export interface SlimeThrowStatement extends SlimeJavascriptThrowStatement {
+export interface SlimeThrowStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptThrowStatement {
 }
 
-export interface SlimeTryStatement extends SlimeJavascriptTryStatement {
+export interface SlimeTryStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptTryStatement {
 }
 
-export interface SlimeWhileStatement extends SlimeJavascriptWhileStatement {
+export interface SlimeWhileStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptWhileStatement {
 }
 
-export interface SlimeDoWhileStatement extends SlimeJavascriptDoWhileStatement {
+export interface SlimeDoWhileStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptDoWhileStatement {
 }
 
-export interface SlimeForStatement extends SlimeJavascriptForStatement {
+export interface SlimeForStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptForStatement {
 }
 
-export interface SlimeBaseForXStatement extends SlimeJavascriptBaseForXStatement {
+export interface SlimeBaseForXStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBaseForXStatement {
 }
 
-export interface SlimeForInStatement extends SlimeJavascriptForInStatement {
+export interface SlimeForInStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptForInStatement {
 }
 
-export interface SlimeDebuggerStatement extends SlimeJavascriptDebuggerStatement {
+export interface SlimeDebuggerStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptDebuggerStatement {
 }
 
 export type SlimeDeclaration = SlimeFunctionDeclaration | SlimeVariableDeclaration | SlimeClassDeclaration;
 
-export interface SlimeBaseDeclaration extends SlimeJavascriptBaseDeclaration {
+export interface SlimeBaseDeclaration extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBaseDeclaration {
 }
 
-export interface SlimeMaybeNamedFunctionDeclaration extends SlimeJavascriptMaybeNamedFunctionDeclaration {
+export interface SlimeMaybeNamedFunctionDeclaration extends Omit<SlimeBaseNode, "type">, SlimeJavascriptMaybeNamedFunctionDeclaration {
 }
 
-export interface SlimeFunctionDeclaration extends SlimeJavascriptFunctionDeclaration {
+export interface SlimeFunctionDeclaration extends Omit<SlimeBaseNode, "type">, SlimeJavascriptFunctionDeclaration {
 }
 
-export interface SlimeVariableDeclaration extends SlimeJavascriptVariableDeclaration {
+export interface SlimeVariableDeclaration extends Omit<SlimeBaseNode, "type">, SlimeJavascriptVariableDeclaration {
 }
 
-export interface SlimeVariableDeclarator extends SlimeJavascriptVariableDeclarator {
+export interface SlimeVariableDeclarator extends Omit<SlimeBaseNode, "type">, SlimeJavascriptVariableDeclarator {
 }
 
 export interface SlimeExpressionMap {
@@ -670,68 +670,68 @@ export interface SlimeExpressionMap {
 
 export type SlimeExpression = SlimeExpressionMap[keyof SlimeExpressionMap];
 
-export interface SlimeBaseExpression extends SlimeJavascriptBaseExpression {
+export interface SlimeBaseExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBaseExpression {
 }
 
 export type SlimeChainElement = SlimeSimpleCallExpression | SlimeMemberExpression;
 
-export interface SlimeChainExpression extends SlimeJavascriptChainExpression {
+export interface SlimeChainExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptChainExpression {
 }
 
-export interface SlimeThisExpression extends SlimeJavascriptThisExpression {
+export interface SlimeThisExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptThisExpression {
 }
 
-export interface SlimeArrayExpression extends SlimeJavascriptArrayExpression {
+export interface SlimeArrayExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptArrayExpression {
 }
 
-export interface SlimeObjectExpression extends SlimeJavascriptObjectExpression {
+export interface SlimeObjectExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptObjectExpression {
 }
 
-export interface SlimePrivateIdentifier extends SlimeJavascriptPrivateIdentifier {
+export interface SlimePrivateIdentifier extends Omit<SlimeBaseNode, "type">, SlimeJavascriptPrivateIdentifier {
 }
 
-export interface SlimeProperty extends SlimeJavascriptProperty {
+export interface SlimeProperty extends Omit<SlimeBaseNode, "type">, SlimeJavascriptProperty {
 }
 
-export interface SlimePropertyDefinition extends SlimeJavascriptPropertyDefinition {
+export interface SlimePropertyDefinition extends Omit<SlimeBaseNode, "type">, SlimeJavascriptPropertyDefinition {
 }
 
-export interface SlimeFunctionExpression extends SlimeJavascriptFunctionExpression {
+export interface SlimeFunctionExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptFunctionExpression {
 }
 
-export interface SlimeSequenceExpression extends SlimeJavascriptSequenceExpression {
+export interface SlimeSequenceExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptSequenceExpression {
 }
 
-export interface SlimeUnaryExpression extends SlimeJavascriptUnaryExpression {
+export interface SlimeUnaryExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptUnaryExpression {
 }
 
-export interface SlimeBinaryExpression extends SlimeJavascriptBinaryExpression {
+export interface SlimeBinaryExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBinaryExpression {
 }
 
-export interface SlimeAssignmentExpression extends SlimeJavascriptAssignmentExpression {
+export interface SlimeAssignmentExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptAssignmentExpression {
 }
 
-export interface SlimeUpdateExpression extends SlimeJavascriptUpdateExpression {
+export interface SlimeUpdateExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptUpdateExpression {
 }
 
-export interface SlimeLogicalExpression extends SlimeJavascriptLogicalExpression {
+export interface SlimeLogicalExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptLogicalExpression {
 }
 
-export interface SlimeConditionalExpression extends SlimeJavascriptConditionalExpression {
+export interface SlimeConditionalExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptConditionalExpression {
 }
 
-export interface SlimeBaseCallExpression extends SlimeJavascriptBaseCallExpression {
+export interface SlimeBaseCallExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBaseCallExpression {
 }
 
 export type SlimeCallExpression = SlimeSimpleCallExpression | SlimeNewExpression;
 
-export interface SlimeSimpleCallExpression extends SlimeJavascriptSimpleCallExpression {
+export interface SlimeSimpleCallExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptSimpleCallExpression {
 }
 
-export interface SlimeNewExpression extends SlimeJavascriptNewExpression {
+export interface SlimeNewExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptNewExpression {
 }
 
-export interface SlimeMemberExpression extends SlimeJavascriptMemberExpression {
+export interface SlimeMemberExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptMemberExpression {
 }
 
 export type SlimePattern =
@@ -742,13 +742,13 @@ export type SlimePattern =
     | SlimeAssignmentPattern
     | SlimeMemberExpression;
 
-export interface SlimeBasePattern extends SlimeJavascriptBasePattern {
+export interface SlimeBasePattern extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBasePattern {
 }
 
-export interface SlimeSwitchCase extends SlimeJavascriptSwitchCase {
+export interface SlimeSwitchCase extends Omit<SlimeBaseNode, "type">, SlimeJavascriptSwitchCase {
 }
 
-export interface SlimeCatchClause extends SlimeJavascriptCatchClause {
+export interface SlimeCatchClause extends Omit<SlimeBaseNode, "type">, SlimeJavascriptCatchClause {
 }
 
 export interface SlimeIdentifier extends SlimeJavascriptIdentifier {
@@ -777,29 +777,29 @@ export interface SlimeTSNumberKeyword extends SlimeBaseNode {
 
 export type SlimeLiteral = SlimeSimpleLiteral | SlimeRegExpLiteral | SlimeBigIntLiteral;
 
-export interface SlimeSimpleLiteral extends SlimeJavascriptSimpleLiteral {
+export interface SlimeSimpleLiteral extends Omit<SlimeBaseNode, "type">, SlimeJavascriptSimpleLiteral {
 }
 
-export interface SlimeRegExpLiteral extends SlimeJavascriptRegExpLiteral {
+export interface SlimeRegExpLiteral extends Omit<SlimeBaseNode, "type">, SlimeJavascriptRegExpLiteral {
 }
 
-export interface SlimeBigIntLiteral extends SlimeJavascriptBigIntLiteral {
+export interface SlimeBigIntLiteral extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBigIntLiteral {
 }
 
 /** String literal - 字符串字面量 */
-export interface SlimeStringLiteral extends SlimeJavascriptStringLiteral {
+export interface SlimeStringLiteral extends Omit<SlimeBaseNode, "type">, SlimeJavascriptStringLiteral {
 }
 
 /** Numeric literal - 数字字面量 */
-export interface SlimeNumericLiteral extends SlimeJavascriptNumericLiteral {
+export interface SlimeNumericLiteral extends Omit<SlimeBaseNode, "type">, SlimeJavascriptNumericLiteral {
 }
 
 /** Boolean literal - 布尔字面量 */
-export interface SlimeBooleanLiteral extends SlimeJavascriptBooleanLiteral {
+export interface SlimeBooleanLiteral extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBooleanLiteral {
 }
 
 /** Null literal - 空值字面量 */
-export interface SlimeNullLiteral extends SlimeJavascriptNullLiteral {
+export interface SlimeNullLiteral extends Omit<SlimeBaseNode, "type">, SlimeJavascriptNullLiteral {
 }
 
 export type SlimeUnaryOperator = SlimeJavascriptUnaryOperator;
@@ -812,66 +812,66 @@ export type SlimeAssignmentOperator = SlimeJavascriptAssignmentOperator;
 
 export type SlimeUpdateOperator = SlimeJavascriptUpdateOperator;
 
-export interface SlimeForOfStatement extends SlimeJavascriptForOfStatement {
+export interface SlimeForOfStatement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptForOfStatement {
 }
 
-export interface SlimeSuper extends SlimeJavascriptSuper {
+export interface SlimeSuper extends Omit<SlimeBaseNode, "type">, SlimeJavascriptSuper {
 }
 
-export interface SlimeSpreadElement extends SlimeJavascriptSpreadElement {
+export interface SlimeSpreadElement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptSpreadElement {
 }
 
-export interface SlimeArrowFunctionExpression extends SlimeJavascriptArrowFunctionExpression {
+export interface SlimeArrowFunctionExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptArrowFunctionExpression {
 }
 
-export interface SlimeYieldExpression extends SlimeJavascriptYieldExpression {
+export interface SlimeYieldExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptYieldExpression {
 }
 
-export interface SlimeTemplateLiteral extends SlimeJavascriptTemplateLiteral {
+export interface SlimeTemplateLiteral extends Omit<SlimeBaseNode, "type">, SlimeJavascriptTemplateLiteral {
 }
 
-export interface SlimeTaggedTemplateExpression extends SlimeJavascriptTaggedTemplateExpression {
+export interface SlimeTaggedTemplateExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptTaggedTemplateExpression {
 }
 
-export interface SlimeTemplateElement extends SlimeJavascriptTemplateElement {
+export interface SlimeTemplateElement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptTemplateElement {
 }
 
-export interface SlimeAssignmentProperty extends SlimeJavascriptAssignmentProperty {
+export interface SlimeAssignmentProperty extends Omit<SlimeBaseNode, "type">, SlimeJavascriptAssignmentProperty {
 }
 
-export interface SlimeObjectPattern extends SlimeJavascriptObjectPattern {
+export interface SlimeObjectPattern extends Omit<SlimeBaseNode, "type">, SlimeJavascriptObjectPattern {
 }
 
-export interface SlimeArrayPattern extends SlimeJavascriptArrayPattern {
+export interface SlimeArrayPattern extends Omit<SlimeBaseNode, "type">, SlimeJavascriptArrayPattern {
 }
 
-export interface SlimeRestElement extends SlimeJavascriptRestElement {
+export interface SlimeRestElement extends Omit<SlimeBaseNode, "type">, SlimeJavascriptRestElement {
 }
 
-export interface SlimeAssignmentPattern extends SlimeJavascriptAssignmentPattern {
+export interface SlimeAssignmentPattern extends Omit<SlimeBaseNode, "type">, SlimeJavascriptAssignmentPattern {
 }
 
 export type SlimeClass = SlimeClassDeclaration | SlimeClassExpression;
 
-export interface SlimeBaseClass extends SlimeJavascriptBaseClass {
+export interface SlimeBaseClass extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBaseClass {
 }
 
-export interface SlimeClassBody extends SlimeJavascriptClassBody {
+export interface SlimeClassBody extends Omit<SlimeBaseNode, "type">, SlimeJavascriptClassBody {
 }
 
-export interface SlimeMethodDefinition extends SlimeJavascriptMethodDefinition {
+export interface SlimeMethodDefinition extends Omit<SlimeBaseNode, "type">, SlimeJavascriptMethodDefinition {
 }
 
-export interface SlimeMaybeNamedClassDeclaration extends SlimeJavascriptMaybeNamedClassDeclaration {
+export interface SlimeMaybeNamedClassDeclaration extends Omit<SlimeBaseNode, "type">, SlimeJavascriptMaybeNamedClassDeclaration {
 }
 
-export interface SlimeClassDeclaration extends SlimeJavascriptClassDeclaration {
+export interface SlimeClassDeclaration extends Omit<SlimeBaseNode, "type">, SlimeJavascriptClassDeclaration {
 }
 
-export interface SlimeClassExpression extends SlimeJavascriptClassExpression {
+export interface SlimeClassExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptClassExpression {
 }
 
-export interface SlimeMetaProperty extends SlimeJavascriptMetaProperty {
+export interface SlimeMetaProperty extends Omit<SlimeBaseNode, "type">, SlimeJavascriptMetaProperty {
 }
 
 export type SlimeModuleDeclaration =
@@ -880,7 +880,7 @@ export type SlimeModuleDeclaration =
     | SlimeExportDefaultDeclaration
     | SlimeExportAllDeclaration;
 
-export interface SlimeBaseModuleDeclaration extends SlimeJavascriptBaseModuleDeclaration {
+export interface SlimeBaseModuleDeclaration extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBaseModuleDeclaration {
 }
 
 export type SlimeModuleSpecifier =
@@ -889,35 +889,35 @@ export type SlimeModuleSpecifier =
     | SlimeImportNamespaceSpecifier
     | SlimeExportSpecifier;
 
-export interface SlimeBaseModuleSpecifier extends SlimeJavascriptBaseModuleSpecifier {
+export interface SlimeBaseModuleSpecifier extends Omit<SlimeBaseNode, "type">, SlimeJavascriptBaseModuleSpecifier {
 }
 
-export interface SlimeImportDeclaration extends SlimeJavascriptImportDeclaration {
+export interface SlimeImportDeclaration extends Omit<SlimeBaseNode, "type">, SlimeJavascriptImportDeclaration {
 }
 
-export interface SlimeImportSpecifier extends SlimeJavascriptImportSpecifier {
+export interface SlimeImportSpecifier extends Omit<SlimeBaseNode, "type">, SlimeJavascriptImportSpecifier {
 }
 
-export interface SlimeImportExpression extends SlimeJavascriptImportExpression {
+export interface SlimeImportExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptImportExpression {
 }
 
-export interface SlimeImportDefaultSpecifier extends SlimeJavascriptImportDefaultSpecifier {
+export interface SlimeImportDefaultSpecifier extends Omit<SlimeBaseNode, "type">, SlimeJavascriptImportDefaultSpecifier {
 }
 
-export interface SlimeImportNamespaceSpecifier extends SlimeJavascriptImportNamespaceSpecifier {
+export interface SlimeImportNamespaceSpecifier extends Omit<SlimeBaseNode, "type">, SlimeJavascriptImportNamespaceSpecifier {
 }
 
-export interface SlimeExportNamedDeclaration extends SlimeJavascriptExportNamedDeclaration {
+export interface SlimeExportNamedDeclaration extends Omit<SlimeBaseNode, "type">, SlimeJavascriptExportNamedDeclaration {
 }
 
-export interface SlimeExportSpecifier extends SlimeJavascriptExportSpecifier {
+export interface SlimeExportSpecifier extends Omit<SlimeBaseNode, "type">, SlimeJavascriptExportSpecifier {
 }
 
-export interface SlimeExportDefaultDeclaration extends SlimeJavascriptExportDefaultDeclaration {
+export interface SlimeExportDefaultDeclaration extends Omit<SlimeBaseNode, "type">, SlimeJavascriptExportDefaultDeclaration {
 }
 
-export interface SlimeExportAllDeclaration extends SlimeJavascriptExportAllDeclaration {
+export interface SlimeExportAllDeclaration extends Omit<SlimeBaseNode, "type">, SlimeJavascriptExportAllDeclaration {
 }
 
-export interface SlimeAwaitExpression extends SlimeJavascriptAwaitExpression {
+export interface SlimeAwaitExpression extends Omit<SlimeBaseNode, "type">, SlimeJavascriptAwaitExpression {
 }
