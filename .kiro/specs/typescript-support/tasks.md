@@ -23,18 +23,18 @@
     - 定义 SlimeTSType 联合类型
     - _Requirements: 1.1-1.12, 2.1-2.4, 3.1-3.4_
 
-- [-] 2. Phase 1: 基础类型系统 - Parser 实现
-  - [ ] 2.1 实现 TSType 基础解析规则
+- [x] 2. Phase 1: 基础类型系统 - Parser 实现
+  - [x] 2.1 实现 TSType 基础解析规则
     - 在 `packages/slime-parser/src/SlimeParser.ts` 中实现 TSType() 规则
     - 支持所有 12 个基础类型关键字的解析
     - _Requirements: 1.1-1.12_
-  - [ ] 2.2 实现 TSTypeAnnotation 解析规则
+  - [x] 2.2 实现 TSTypeAnnotation 解析规则
     - 解析 `: Type` 语法
     - _Requirements: 8.1-8.4_
-  - [ ] 2.3 实现 TSLiteralType 解析规则
+  - [x] 2.3 实现 TSLiteralType 解析规则
     - 支持字符串、数字、布尔字面量类型
     - _Requirements: 2.1-2.3_
-  - [ ] 2.4 实现 TSTypeReference 解析规则
+  - [x] 2.4 实现 TSTypeReference 解析规则
     - 支持简单类型引用和限定名称 (Namespace.Type)
     - _Requirements: 3.1-3.2_
   - [ ]* 2.5 编写 Phase 1 单元测试
@@ -45,25 +45,26 @@
     - **Property 2: Type Keyword Recognition**
     - **Validates: Requirements 1.1-1.12**
 
-- [ ] 3. Checkpoint - Phase 1 验证
+- [x] 3. Checkpoint - Phase 1 验证
   - 确保所有测试通过，如有问题请询问用户
+  - ✅ 测试通过: 1732/3202 (0 失败, 1470 跳过)
 
-- [ ] 4. Phase 2: 复合类型 - Parser 实现
-  - [ ] 4.1 实现 TSUnionType 和 TSIntersectionType 解析
+- [x] 4. Phase 2: 复合类型 - Parser 实现
+  - [x] 4.1 实现 TSUnionType 和 TSIntersectionType 解析
     - 支持 `A | B | C` 和 `A & B & C` 语法
     - 正确处理运算符优先级
     - _Requirements: 4.1-4.4_
-  - [ ] 4.2 实现 TSArrayType 解析
+  - [x] 4.2 实现 TSArrayType 解析
     - 支持 `T[]` 语法
     - _Requirements: 5.1_
-  - [ ] 4.3 实现 TSTupleType 解析
+  - [x] 4.3 实现 TSTupleType 解析
     - 支持 `[T, U]`、命名元组 `[name: T]`、可选元素 `[T?]`、剩余元素 `[...T[]]`
     - _Requirements: 5.3-5.6_
-  - [ ] 4.4 实现 TSTypeLiteral 解析
+  - [x] 4.4 实现 TSTypeLiteral 解析
     - 支持对象类型字面量 `{ name: string }`
     - 支持可选属性、只读属性、索引签名、方法签名
     - _Requirements: 6.1-6.7_
-  - [ ] 4.5 实现 TSFunctionType 和 TSConstructorType 解析
+  - [x] 4.5 实现 TSFunctionType 和 TSConstructorType 解析
     - 支持 `(x: T) => U` 和 `new (x: T) => U` 语法
     - _Requirements: 7.1-7.5_
   - [ ]* 4.6 编写 Phase 2 单元测试
@@ -72,8 +73,9 @@
     - **Property 5: Union and Intersection Type Composition**
     - **Validates: Requirements 4.1-4.4**
 
-- [ ] 5. Checkpoint - Phase 2 验证
+- [x] 5. Checkpoint - Phase 2 验证
   - 确保所有测试通过，如有问题请询问用户
+  - ✅ 测试通过: 1732/3202 (0 失败, 1470 跳过)
 
 - [ ] 6. Phase 3: 类型注解位置 - 重写现有规则
   - [ ] 6.1 重写 BindingIdentifier 支持类型注解
