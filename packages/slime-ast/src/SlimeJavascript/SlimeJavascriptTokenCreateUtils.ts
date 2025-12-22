@@ -1,352 +1,352 @@
 /**
- * SlimeTokenCreateUtils.ts - Token 节点创建工厂
+ * SlimeJavascriptTokenCreateUtils.ts - Token 节点创建工厂
  *
  * 为每个 Token 类型提供创建方法
- * 与 SlimeAstNode.ts 中的 Token 类型一一对应
+ * 与 SlimeJavascriptAstNode.ts 中的 Token 类型一一对应
  */
 
 import type { SubhutiSourceLocation } from "subhuti";
 import type {
     // 变量声明关键字 Token
-    SlimeVarToken,
-    SlimeLetToken,
-    SlimeConstToken,
+    SlimeJavascriptVarToken,
+    SlimeJavascriptLetToken,
+    SlimeJavascriptConstToken,
     // 赋值运算符 Token
-    SlimeAssignToken,
+    SlimeJavascriptAssignToken,
     // 标点符号 Token
-    SlimeLParenToken,
-    SlimeRParenToken,
-    SlimeLBraceToken,
-    SlimeRBraceToken,
-    SlimeLBracketToken,
-    SlimeRBracketToken,
-    SlimeSemicolonToken,
-    SlimeCommaToken,
-    SlimeDotToken,
-    SlimeArrowToken,
-    SlimeQuestionToken,
-    SlimeColonToken,
-    SlimeEllipsisToken,
-    SlimeOptionalChainingToken,
-    SlimeAsteriskToken,
+    SlimeJavascriptLParenToken,
+    SlimeJavascriptRParenToken,
+    SlimeJavascriptLBraceToken,
+    SlimeJavascriptRBraceToken,
+    SlimeJavascriptLBracketToken,
+    SlimeJavascriptRBracketToken,
+    SlimeJavascriptSemicolonToken,
+    SlimeJavascriptCommaToken,
+    SlimeJavascriptDotToken,
+    SlimeJavascriptArrowToken,
+    SlimeJavascriptQuestionToken,
+    SlimeJavascriptColonToken,
+    SlimeJavascriptEllipsisToken,
+    SlimeJavascriptOptionalChainingToken,
+    SlimeJavascriptAsteriskToken,
     // 函数/类关键字 Token
-    SlimeFunctionToken,
-    SlimeAsyncToken,
-    SlimeClassToken,
-    SlimeExtendsToken,
-    SlimeStaticToken,
-    SlimeGetToken,
-    SlimeSetToken,
+    SlimeJavascriptFunctionToken,
+    SlimeJavascriptAsyncToken,
+    SlimeJavascriptClassToken,
+    SlimeJavascriptExtendsToken,
+    SlimeJavascriptStaticToken,
+    SlimeJavascriptGetToken,
+    SlimeJavascriptSetToken,
     // 控制流关键字 Token
-    SlimeIfToken,
-    SlimeElseToken,
-    SlimeSwitchToken,
-    SlimeCaseToken,
-    SlimeDefaultToken,
-    SlimeForToken,
-    SlimeWhileToken,
-    SlimeDoToken,
-    SlimeInToken,
-    SlimeOfToken,
-    SlimeBreakToken,
-    SlimeContinueToken,
-    SlimeReturnToken,
-    SlimeThrowToken,
-    SlimeTryToken,
-    SlimeCatchToken,
-    SlimeFinallyToken,
-    SlimeWithToken,
-    SlimeDebuggerToken,
+    SlimeJavascriptIfToken,
+    SlimeJavascriptElseToken,
+    SlimeJavascriptSwitchToken,
+    SlimeJavascriptCaseToken,
+    SlimeJavascriptDefaultToken,
+    SlimeJavascriptForToken,
+    SlimeJavascriptWhileToken,
+    SlimeJavascriptDoToken,
+    SlimeJavascriptInToken,
+    SlimeJavascriptOfToken,
+    SlimeJavascriptBreakToken,
+    SlimeJavascriptContinueToken,
+    SlimeJavascriptReturnToken,
+    SlimeJavascriptThrowToken,
+    SlimeJavascriptTryToken,
+    SlimeJavascriptCatchToken,
+    SlimeJavascriptFinallyToken,
+    SlimeJavascriptWithToken,
+    SlimeJavascriptDebuggerToken,
     // 操作符关键字 Token
-    SlimeNewToken,
-    SlimeYieldToken,
-    SlimeAwaitToken,
-    SlimeTypeofToken,
-    SlimeVoidToken,
-    SlimeDeleteToken,
-    SlimeInstanceofToken,
+    SlimeJavascriptNewToken,
+    SlimeJavascriptYieldToken,
+    SlimeJavascriptAwaitToken,
+    SlimeJavascriptTypeofToken,
+    SlimeJavascriptVoidToken,
+    SlimeJavascriptDeleteToken,
+    SlimeJavascriptInstanceofToken,
     // 模块关键字 Token
-    SlimeImportToken,
-    SlimeExportToken,
-    SlimeFromToken,
-    SlimeAsToken,
+    SlimeJavascriptImportToken,
+    SlimeJavascriptExportToken,
+    SlimeJavascriptFromToken,
+    SlimeJavascriptAsToken,
     // 运算符 Token
-    SlimeBinaryOperatorToken,
-    SlimeUnaryOperatorToken,
-    SlimeLogicalOperatorToken,
-    SlimeAssignmentOperatorToken,
-    SlimeUpdateOperatorToken,
+    SlimeJavascriptBinaryOperatorToken,
+    SlimeJavascriptUnaryOperatorToken,
+    SlimeJavascriptLogicalOperatorToken,
+    SlimeJavascriptAssignmentOperatorToken,
+    SlimeJavascriptUpdateOperatorToken,
     // 运算符值类型
-    SlimeBinaryOperator,
-    SlimeUnaryOperator,
-    SlimeLogicalOperator,
-    SlimeAssignmentOperator,
-    SlimeUpdateOperator,
+    SlimeJavascriptBinaryOperator,
+    SlimeJavascriptUnaryOperator,
+    SlimeJavascriptLogicalOperator,
+    SlimeJavascriptAssignmentOperator,
+    SlimeJavascriptUpdateOperator,
 } from "./SlimeJavascriptAstNode.ts";
 import {
     SlimeJavascriptTokenType,
-    SlimeBinaryOperatorTokenTypes,
-    SlimeUnaryOperatorTokenTypes,
-    SlimeLogicalOperatorTokenTypes,
-    SlimeAssignmentOperatorTokenTypes,
-    SlimeUpdateOperatorTokenTypes,
+    SlimeJavascriptBinaryOperatorTokenTypes,
+    SlimeJavascriptUnaryOperatorTokenTypes,
+    SlimeJavascriptLogicalOperatorTokenTypes,
+    SlimeJavascriptAssignmentOperatorTokenTypes,
+    SlimeJavascriptUpdateOperatorTokenTypes,
 } from "slime-token";
 
-class SlimeTokenFactory {
+class SlimeJavascriptTokenFactory {
     // ============================================
     // 变量声明关键字 Token
     // ============================================
 
-    createVarToken(loc?: SubhutiSourceLocation): SlimeVarToken {
-        return { type: SlimeJavascriptTokenType.Var, value: "var", loc } as SlimeVarToken;
+    createVarToken(loc?: SubhutiSourceLocation): SlimeJavascriptVarToken {
+        return { type: SlimeJavascriptTokenType.Var, value: "var", loc } as SlimeJavascriptVarToken;
     }
 
-    createLetToken(loc?: SubhutiSourceLocation): SlimeLetToken {
-        return { type: SlimeJavascriptTokenType.Let, value: "let", loc } as SlimeLetToken;
+    createLetToken(loc?: SubhutiSourceLocation): SlimeJavascriptLetToken {
+        return { type: SlimeJavascriptTokenType.Let, value: "let", loc } as SlimeJavascriptLetToken;
     }
 
-    createConstToken(loc?: SubhutiSourceLocation): SlimeConstToken {
-        return { type: SlimeJavascriptTokenType.Const, value: "const", loc } as SlimeConstToken;
+    createConstToken(loc?: SubhutiSourceLocation): SlimeJavascriptConstToken {
+        return { type: SlimeJavascriptTokenType.Const, value: "const", loc } as SlimeJavascriptConstToken;
     }
 
     // ============================================
     // 赋值运算符 Token
     // ============================================
 
-    createAssignToken(loc?: SubhutiSourceLocation): SlimeAssignToken {
-        return { type: SlimeJavascriptTokenType.Assign, value: "=", loc } as SlimeAssignToken;
+    createAssignToken(loc?: SubhutiSourceLocation): SlimeJavascriptAssignToken {
+        return { type: SlimeJavascriptTokenType.Assign, value: "=", loc } as SlimeJavascriptAssignToken;
     }
 
     // ============================================
     // 标点符号 Token
     // ============================================
 
-    createLParenToken(loc?: SubhutiSourceLocation): SlimeLParenToken {
-        return { type: SlimeJavascriptTokenType.LParen, value: "(", loc } as SlimeLParenToken;
+    createLParenToken(loc?: SubhutiSourceLocation): SlimeJavascriptLParenToken {
+        return { type: SlimeJavascriptTokenType.LParen, value: "(", loc } as SlimeJavascriptLParenToken;
     }
 
-    createRParenToken(loc?: SubhutiSourceLocation): SlimeRParenToken {
-        return { type: SlimeJavascriptTokenType.RParen, value: ")", loc } as SlimeRParenToken;
+    createRParenToken(loc?: SubhutiSourceLocation): SlimeJavascriptRParenToken {
+        return { type: SlimeJavascriptTokenType.RParen, value: ")", loc } as SlimeJavascriptRParenToken;
     }
 
-    createLBraceToken(loc?: SubhutiSourceLocation): SlimeLBraceToken {
-        return { type: SlimeJavascriptTokenType.LBrace, value: "{", loc } as SlimeLBraceToken;
+    createLBraceToken(loc?: SubhutiSourceLocation): SlimeJavascriptLBraceToken {
+        return { type: SlimeJavascriptTokenType.LBrace, value: "{", loc } as SlimeJavascriptLBraceToken;
     }
 
-    createRBraceToken(loc?: SubhutiSourceLocation): SlimeRBraceToken {
-        return { type: SlimeJavascriptTokenType.RBrace, value: "}", loc } as SlimeRBraceToken;
+    createRBraceToken(loc?: SubhutiSourceLocation): SlimeJavascriptRBraceToken {
+        return { type: SlimeJavascriptTokenType.RBrace, value: "}", loc } as SlimeJavascriptRBraceToken;
     }
 
-    createLBracketToken(loc?: SubhutiSourceLocation): SlimeLBracketToken {
-        return { type: SlimeJavascriptTokenType.LBracket, value: "[", loc } as SlimeLBracketToken;
+    createLBracketToken(loc?: SubhutiSourceLocation): SlimeJavascriptLBracketToken {
+        return { type: SlimeJavascriptTokenType.LBracket, value: "[", loc } as SlimeJavascriptLBracketToken;
     }
 
-    createRBracketToken(loc?: SubhutiSourceLocation): SlimeRBracketToken {
-        return { type: SlimeJavascriptTokenType.RBracket, value: "]", loc } as SlimeRBracketToken;
+    createRBracketToken(loc?: SubhutiSourceLocation): SlimeJavascriptRBracketToken {
+        return { type: SlimeJavascriptTokenType.RBracket, value: "]", loc } as SlimeJavascriptRBracketToken;
     }
 
-    createSemicolonToken(loc?: SubhutiSourceLocation): SlimeSemicolonToken {
-        return { type: SlimeJavascriptTokenType.Semicolon, value: ";", loc } as SlimeSemicolonToken;
+    createSemicolonToken(loc?: SubhutiSourceLocation): SlimeJavascriptSemicolonToken {
+        return { type: SlimeJavascriptTokenType.Semicolon, value: ";", loc } as SlimeJavascriptSemicolonToken;
     }
 
-    createCommaToken(loc?: SubhutiSourceLocation): SlimeCommaToken {
-        return { type: SlimeJavascriptTokenType.Comma, value: ",", loc } as SlimeCommaToken;
+    createCommaToken(loc?: SubhutiSourceLocation): SlimeJavascriptCommaToken {
+        return { type: SlimeJavascriptTokenType.Comma, value: ",", loc } as SlimeJavascriptCommaToken;
     }
 
-    createDotToken(loc?: SubhutiSourceLocation): SlimeDotToken {
-        return { type: SlimeJavascriptTokenType.Dot, value: ".", loc } as SlimeDotToken;
+    createDotToken(loc?: SubhutiSourceLocation): SlimeJavascriptDotToken {
+        return { type: SlimeJavascriptTokenType.Dot, value: ".", loc } as SlimeJavascriptDotToken;
     }
 
-    createSpreadToken(loc?: SubhutiSourceLocation): SlimeEllipsisToken {
-        return { type: SlimeJavascriptTokenType.Ellipsis, value: "...", loc } as SlimeEllipsisToken;
+    createSpreadToken(loc?: SubhutiSourceLocation): SlimeJavascriptEllipsisToken {
+        return { type: SlimeJavascriptTokenType.Ellipsis, value: "...", loc } as SlimeJavascriptEllipsisToken;
     }
 
-    createArrowToken(loc?: SubhutiSourceLocation): SlimeArrowToken {
-        return { type: SlimeJavascriptTokenType.Arrow, value: "=>", loc } as SlimeArrowToken;
+    createArrowToken(loc?: SubhutiSourceLocation): SlimeJavascriptArrowToken {
+        return { type: SlimeJavascriptTokenType.Arrow, value: "=>", loc } as SlimeJavascriptArrowToken;
     }
 
-    createQuestionToken(loc?: SubhutiSourceLocation): SlimeQuestionToken {
-        return { type: SlimeJavascriptTokenType.Question, value: "?", loc } as SlimeQuestionToken;
+    createQuestionToken(loc?: SubhutiSourceLocation): SlimeJavascriptQuestionToken {
+        return { type: SlimeJavascriptTokenType.Question, value: "?", loc } as SlimeJavascriptQuestionToken;
     }
 
-    createColonToken(loc?: SubhutiSourceLocation): SlimeColonToken {
-        return { type: SlimeJavascriptTokenType.Colon, value: ":", loc } as SlimeColonToken;
+    createColonToken(loc?: SubhutiSourceLocation): SlimeJavascriptColonToken {
+        return { type: SlimeJavascriptTokenType.Colon, value: ":", loc } as SlimeJavascriptColonToken;
     }
 
-    createEllipsisToken(loc?: SubhutiSourceLocation): SlimeEllipsisToken {
-        return { type: SlimeJavascriptTokenType.Ellipsis, value: "...", loc } as SlimeEllipsisToken;
+    createEllipsisToken(loc?: SubhutiSourceLocation): SlimeJavascriptEllipsisToken {
+        return { type: SlimeJavascriptTokenType.Ellipsis, value: "...", loc } as SlimeJavascriptEllipsisToken;
     }
 
-    createOptionalChainingToken(loc?: SubhutiSourceLocation): SlimeOptionalChainingToken {
-        return { type: SlimeJavascriptTokenType.OptionalChaining, value: "?.", loc } as SlimeOptionalChainingToken;
+    createOptionalChainingToken(loc?: SubhutiSourceLocation): SlimeJavascriptOptionalChainingToken {
+        return { type: SlimeJavascriptTokenType.OptionalChaining, value: "?.", loc } as SlimeJavascriptOptionalChainingToken;
     }
 
-    createAsteriskToken(loc?: SubhutiSourceLocation): SlimeAsteriskToken {
-        return { type: SlimeJavascriptTokenType.Asterisk, value: "*", loc } as SlimeAsteriskToken;
+    createAsteriskToken(loc?: SubhutiSourceLocation): SlimeJavascriptAsteriskToken {
+        return { type: SlimeJavascriptTokenType.Asterisk, value: "*", loc } as SlimeJavascriptAsteriskToken;
     }
 
     // ============================================
     // 函数/类关键字 Token
     // ============================================
 
-    createFunctionToken(loc?: SubhutiSourceLocation): SlimeFunctionToken {
-        return { type: SlimeJavascriptTokenType.Function, value: "function", loc } as SlimeFunctionToken;
+    createFunctionToken(loc?: SubhutiSourceLocation): SlimeJavascriptFunctionToken {
+        return { type: SlimeJavascriptTokenType.Function, value: "function", loc } as SlimeJavascriptFunctionToken;
     }
 
-    createAsyncToken(loc?: SubhutiSourceLocation): SlimeAsyncToken {
-        return { type: SlimeJavascriptTokenType.Async, value: "async", loc } as SlimeAsyncToken;
+    createAsyncToken(loc?: SubhutiSourceLocation): SlimeJavascriptAsyncToken {
+        return { type: SlimeJavascriptTokenType.Async, value: "async", loc } as SlimeJavascriptAsyncToken;
     }
 
-    createClassToken(loc?: SubhutiSourceLocation): SlimeClassToken {
-        return { type: SlimeJavascriptTokenType.Class, value: "class", loc } as SlimeClassToken;
+    createClassToken(loc?: SubhutiSourceLocation): SlimeJavascriptClassToken {
+        return { type: SlimeJavascriptTokenType.Class, value: "class", loc } as SlimeJavascriptClassToken;
     }
 
-    createExtendsToken(loc?: SubhutiSourceLocation): SlimeExtendsToken {
-        return { type: SlimeJavascriptTokenType.Extends, value: "extends", loc } as SlimeExtendsToken;
+    createExtendsToken(loc?: SubhutiSourceLocation): SlimeJavascriptExtendsToken {
+        return { type: SlimeJavascriptTokenType.Extends, value: "extends", loc } as SlimeJavascriptExtendsToken;
     }
 
-    createStaticToken(loc?: SubhutiSourceLocation): SlimeStaticToken {
-        return { type: SlimeJavascriptTokenType.Static, value: "static", loc } as SlimeStaticToken;
+    createStaticToken(loc?: SubhutiSourceLocation): SlimeJavascriptStaticToken {
+        return { type: SlimeJavascriptTokenType.Static, value: "static", loc } as SlimeJavascriptStaticToken;
     }
 
-    createGetToken(loc?: SubhutiSourceLocation): SlimeGetToken {
-        return { type: SlimeJavascriptTokenType.Get, value: "get", loc } as SlimeGetToken;
+    createGetToken(loc?: SubhutiSourceLocation): SlimeJavascriptGetToken {
+        return { type: SlimeJavascriptTokenType.Get, value: "get", loc } as SlimeJavascriptGetToken;
     }
 
-    createSetToken(loc?: SubhutiSourceLocation): SlimeSetToken {
-        return { type: SlimeJavascriptTokenType.Set, value: "set", loc } as SlimeSetToken;
+    createSetToken(loc?: SubhutiSourceLocation): SlimeJavascriptSetToken {
+        return { type: SlimeJavascriptTokenType.Set, value: "set", loc } as SlimeJavascriptSetToken;
     }
 
     // ============================================
     // 控制流关键字 Token
     // ============================================
 
-    createIfToken(loc?: SubhutiSourceLocation): SlimeIfToken {
-        return { type: SlimeJavascriptTokenType.If, value: "if", loc } as SlimeIfToken;
+    createIfToken(loc?: SubhutiSourceLocation): SlimeJavascriptIfToken {
+        return { type: SlimeJavascriptTokenType.If, value: "if", loc } as SlimeJavascriptIfToken;
     }
 
-    createElseToken(loc?: SubhutiSourceLocation): SlimeElseToken {
-        return { type: SlimeJavascriptTokenType.Else, value: "else", loc } as SlimeElseToken;
+    createElseToken(loc?: SubhutiSourceLocation): SlimeJavascriptElseToken {
+        return { type: SlimeJavascriptTokenType.Else, value: "else", loc } as SlimeJavascriptElseToken;
     }
 
-    createSwitchToken(loc?: SubhutiSourceLocation): SlimeSwitchToken {
-        return { type: SlimeJavascriptTokenType.Switch, value: "switch", loc } as SlimeSwitchToken;
+    createSwitchToken(loc?: SubhutiSourceLocation): SlimeJavascriptSwitchToken {
+        return { type: SlimeJavascriptTokenType.Switch, value: "switch", loc } as SlimeJavascriptSwitchToken;
     }
 
-    createCaseToken(loc?: SubhutiSourceLocation): SlimeCaseToken {
-        return { type: SlimeJavascriptTokenType.Case, value: "case", loc } as SlimeCaseToken;
+    createCaseToken(loc?: SubhutiSourceLocation): SlimeJavascriptCaseToken {
+        return { type: SlimeJavascriptTokenType.Case, value: "case", loc } as SlimeJavascriptCaseToken;
     }
 
-    createDefaultToken(loc?: SubhutiSourceLocation): SlimeDefaultToken {
-        return { type: SlimeJavascriptTokenType.Default, value: "default", loc } as SlimeDefaultToken;
+    createDefaultToken(loc?: SubhutiSourceLocation): SlimeJavascriptDefaultToken {
+        return { type: SlimeJavascriptTokenType.Default, value: "default", loc } as SlimeJavascriptDefaultToken;
     }
 
-    createForToken(loc?: SubhutiSourceLocation): SlimeForToken {
-        return { type: SlimeJavascriptTokenType.For, value: "for", loc } as SlimeForToken;
+    createForToken(loc?: SubhutiSourceLocation): SlimeJavascriptForToken {
+        return { type: SlimeJavascriptTokenType.For, value: "for", loc } as SlimeJavascriptForToken;
     }
 
-    createWhileToken(loc?: SubhutiSourceLocation): SlimeWhileToken {
-        return { type: SlimeJavascriptTokenType.While, value: "while", loc } as SlimeWhileToken;
+    createWhileToken(loc?: SubhutiSourceLocation): SlimeJavascriptWhileToken {
+        return { type: SlimeJavascriptTokenType.While, value: "while", loc } as SlimeJavascriptWhileToken;
     }
 
-    createDoToken(loc?: SubhutiSourceLocation): SlimeDoToken {
-        return { type: SlimeJavascriptTokenType.Do, value: "do", loc } as SlimeDoToken;
+    createDoToken(loc?: SubhutiSourceLocation): SlimeJavascriptDoToken {
+        return { type: SlimeJavascriptTokenType.Do, value: "do", loc } as SlimeJavascriptDoToken;
     }
 
-    createOfToken(loc?: SubhutiSourceLocation): SlimeOfToken {
-        return { type: SlimeJavascriptTokenType.Of, value: "of", loc } as SlimeOfToken;
+    createOfToken(loc?: SubhutiSourceLocation): SlimeJavascriptOfToken {
+        return { type: SlimeJavascriptTokenType.Of, value: "of", loc } as SlimeJavascriptOfToken;
     }
 
-    createBreakToken(loc?: SubhutiSourceLocation): SlimeBreakToken {
-        return { type: SlimeJavascriptTokenType.Break, value: "break", loc } as SlimeBreakToken;
+    createBreakToken(loc?: SubhutiSourceLocation): SlimeJavascriptBreakToken {
+        return { type: SlimeJavascriptTokenType.Break, value: "break", loc } as SlimeJavascriptBreakToken;
     }
 
-    createContinueToken(loc?: SubhutiSourceLocation): SlimeContinueToken {
-        return { type: SlimeJavascriptTokenType.Continue, value: "continue", loc } as SlimeContinueToken;
+    createContinueToken(loc?: SubhutiSourceLocation): SlimeJavascriptContinueToken {
+        return { type: SlimeJavascriptTokenType.Continue, value: "continue", loc } as SlimeJavascriptContinueToken;
     }
 
-    createReturnToken(loc?: SubhutiSourceLocation): SlimeReturnToken {
-        return { type: SlimeJavascriptTokenType.Return, value: "return", loc } as SlimeReturnToken;
+    createReturnToken(loc?: SubhutiSourceLocation): SlimeJavascriptReturnToken {
+        return { type: SlimeJavascriptTokenType.Return, value: "return", loc } as SlimeJavascriptReturnToken;
     }
 
-    createThrowToken(loc?: SubhutiSourceLocation): SlimeThrowToken {
-        return { type: SlimeJavascriptTokenType.Throw, value: "throw", loc } as SlimeThrowToken;
+    createThrowToken(loc?: SubhutiSourceLocation): SlimeJavascriptThrowToken {
+        return { type: SlimeJavascriptTokenType.Throw, value: "throw", loc } as SlimeJavascriptThrowToken;
     }
 
-    createTryToken(loc?: SubhutiSourceLocation): SlimeTryToken {
-        return { type: SlimeJavascriptTokenType.Try, value: "try", loc } as SlimeTryToken;
+    createTryToken(loc?: SubhutiSourceLocation): SlimeJavascriptTryToken {
+        return { type: SlimeJavascriptTokenType.Try, value: "try", loc } as SlimeJavascriptTryToken;
     }
 
-    createCatchToken(loc?: SubhutiSourceLocation): SlimeCatchToken {
-        return { type: SlimeJavascriptTokenType.Catch, value: "catch", loc } as SlimeCatchToken;
+    createCatchToken(loc?: SubhutiSourceLocation): SlimeJavascriptCatchToken {
+        return { type: SlimeJavascriptTokenType.Catch, value: "catch", loc } as SlimeJavascriptCatchToken;
     }
 
-    createFinallyToken(loc?: SubhutiSourceLocation): SlimeFinallyToken {
-        return { type: SlimeJavascriptTokenType.Finally, value: "finally", loc } as SlimeFinallyToken;
+    createFinallyToken(loc?: SubhutiSourceLocation): SlimeJavascriptFinallyToken {
+        return { type: SlimeJavascriptTokenType.Finally, value: "finally", loc } as SlimeJavascriptFinallyToken;
     }
 
-    createWithToken(loc?: SubhutiSourceLocation): SlimeWithToken {
-        return { type: SlimeJavascriptTokenType.With, value: "with", loc } as SlimeWithToken;
+    createWithToken(loc?: SubhutiSourceLocation): SlimeJavascriptWithToken {
+        return { type: SlimeJavascriptTokenType.With, value: "with", loc } as SlimeJavascriptWithToken;
     }
 
-    createDebuggerToken(loc?: SubhutiSourceLocation): SlimeDebuggerToken {
-        return { type: SlimeJavascriptTokenType.Debugger, value: "debugger", loc } as SlimeDebuggerToken;
+    createDebuggerToken(loc?: SubhutiSourceLocation): SlimeJavascriptDebuggerToken {
+        return { type: SlimeJavascriptTokenType.Debugger, value: "debugger", loc } as SlimeJavascriptDebuggerToken;
     }
 
     // ============================================
     // 操作符关键字 Token
     // ============================================
 
-    createNewToken(loc?: SubhutiSourceLocation): SlimeNewToken {
-        return { type: SlimeJavascriptTokenType.New, value: "new", loc } as SlimeNewToken;
+    createNewToken(loc?: SubhutiSourceLocation): SlimeJavascriptNewToken {
+        return { type: SlimeJavascriptTokenType.New, value: "new", loc } as SlimeJavascriptNewToken;
     }
 
-    createYieldToken(loc?: SubhutiSourceLocation): SlimeYieldToken {
-        return { type: SlimeJavascriptTokenType.Yield, value: "yield", loc } as SlimeYieldToken;
+    createYieldToken(loc?: SubhutiSourceLocation): SlimeJavascriptYieldToken {
+        return { type: SlimeJavascriptTokenType.Yield, value: "yield", loc } as SlimeJavascriptYieldToken;
     }
 
-    createAwaitToken(loc?: SubhutiSourceLocation): SlimeAwaitToken {
-        return { type: SlimeJavascriptTokenType.Await, value: "await", loc } as SlimeAwaitToken;
+    createAwaitToken(loc?: SubhutiSourceLocation): SlimeJavascriptAwaitToken {
+        return { type: SlimeJavascriptTokenType.Await, value: "await", loc } as SlimeJavascriptAwaitToken;
     }
 
-    createTypeofToken(loc?: SubhutiSourceLocation): SlimeTypeofToken {
-        return { type: SlimeJavascriptTokenType.Typeof, value: "typeof", loc } as SlimeTypeofToken;
+    createTypeofToken(loc?: SubhutiSourceLocation): SlimeJavascriptTypeofToken {
+        return { type: SlimeJavascriptTokenType.Typeof, value: "typeof", loc } as SlimeJavascriptTypeofToken;
     }
 
-    createVoidToken(loc?: SubhutiSourceLocation): SlimeVoidToken {
-        return { type: SlimeJavascriptTokenType.Void, value: "void", loc } as SlimeVoidToken;
+    createVoidToken(loc?: SubhutiSourceLocation): SlimeJavascriptVoidToken {
+        return { type: SlimeJavascriptTokenType.Void, value: "void", loc } as SlimeJavascriptVoidToken;
     }
 
-    createDeleteToken(loc?: SubhutiSourceLocation): SlimeDeleteToken {
-        return { type: SlimeJavascriptTokenType.Delete, value: "delete", loc } as SlimeDeleteToken;
+    createDeleteToken(loc?: SubhutiSourceLocation): SlimeJavascriptDeleteToken {
+        return { type: SlimeJavascriptTokenType.Delete, value: "delete", loc } as SlimeJavascriptDeleteToken;
     }
 
-    createInstanceofToken(loc?: SubhutiSourceLocation): SlimeInstanceofToken {
-        return { type: SlimeJavascriptTokenType.Instanceof, value: "instanceof", loc } as SlimeInstanceofToken;
+    createInstanceofToken(loc?: SubhutiSourceLocation): SlimeJavascriptInstanceofToken {
+        return { type: SlimeJavascriptTokenType.Instanceof, value: "instanceof", loc } as SlimeJavascriptInstanceofToken;
     }
 
     // ============================================
     // 模块关键字 Token
     // ============================================
 
-    createImportToken(loc?: SubhutiSourceLocation): SlimeImportToken {
-        return { type: SlimeJavascriptTokenType.Import, value: "import", loc } as SlimeImportToken;
+    createImportToken(loc?: SubhutiSourceLocation): SlimeJavascriptImportToken {
+        return { type: SlimeJavascriptTokenType.Import, value: "import", loc } as SlimeJavascriptImportToken;
     }
 
-    createExportToken(loc?: SubhutiSourceLocation): SlimeExportToken {
-        return { type: SlimeJavascriptTokenType.Export, value: "export", loc } as SlimeExportToken;
+    createExportToken(loc?: SubhutiSourceLocation): SlimeJavascriptExportToken {
+        return { type: SlimeJavascriptTokenType.Export, value: "export", loc } as SlimeJavascriptExportToken;
     }
 
-    createFromToken(loc?: SubhutiSourceLocation): SlimeFromToken {
-        return { type: SlimeJavascriptTokenType.From, value: "from", loc } as SlimeFromToken;
+    createFromToken(loc?: SubhutiSourceLocation): SlimeJavascriptFromToken {
+        return { type: SlimeJavascriptTokenType.From, value: "from", loc } as SlimeJavascriptFromToken;
     }
 
-    createAsToken(loc?: SubhutiSourceLocation): SlimeAsToken {
-        return { type: SlimeJavascriptTokenType.As, value: "as", loc } as SlimeAsToken;
+    createAsToken(loc?: SubhutiSourceLocation): SlimeJavascriptAsToken {
+        return { type: SlimeJavascriptTokenType.As, value: "as", loc } as SlimeJavascriptAsToken;
     }
 
-    createInToken(loc?: SubhutiSourceLocation): SlimeInToken {
-        return { type: SlimeJavascriptTokenType.In, value: "in", loc } as SlimeInToken;
+    createInToken(loc?: SubhutiSourceLocation): SlimeJavascriptInToken {
+        return { type: SlimeJavascriptTokenType.In, value: "in", loc } as SlimeJavascriptInToken;
     }
 
     // ============================================
@@ -357,103 +357,103 @@ class SlimeTokenFactory {
      * 创建二元运算符 Token
      * 支持: == != === !== < <= > >= << >> >>> + - * / % ** | ^ & in instanceof
      */
-    createBinaryOperatorToken(operator: SlimeBinaryOperator, loc?: SubhutiSourceLocation): SlimeBinaryOperatorToken {
-        const typeMap: Record<SlimeBinaryOperator, string> = {
-            "==": SlimeBinaryOperatorTokenTypes.Equal,
-            "!=": SlimeBinaryOperatorTokenTypes.NotEqual,
-            "===": SlimeBinaryOperatorTokenTypes.StrictEqual,
-            "!==": SlimeBinaryOperatorTokenTypes.StrictNotEqual,
-            "<": SlimeBinaryOperatorTokenTypes.Less,
-            "<=": SlimeBinaryOperatorTokenTypes.LessEqual,
-            ">": SlimeBinaryOperatorTokenTypes.Greater,
-            ">=": SlimeBinaryOperatorTokenTypes.GreaterEqual,
-            "<<": SlimeBinaryOperatorTokenTypes.LeftShift,
-            ">>": SlimeBinaryOperatorTokenTypes.RightShift,
-            ">>>": SlimeBinaryOperatorTokenTypes.UnsignedRightShift,
-            "+": SlimeBinaryOperatorTokenTypes.Plus,
-            "-": SlimeBinaryOperatorTokenTypes.Minus,
-            "*": SlimeBinaryOperatorTokenTypes.Asterisk,
-            "/": SlimeBinaryOperatorTokenTypes.Slash,
-            "%": SlimeBinaryOperatorTokenTypes.Modulo,
-            "**": SlimeBinaryOperatorTokenTypes.Exponentiation,
-            "|": SlimeBinaryOperatorTokenTypes.BitwiseOr,
-            "^": SlimeBinaryOperatorTokenTypes.BitwiseXor,
-            "&": SlimeBinaryOperatorTokenTypes.BitwiseAnd,
-            "in": SlimeBinaryOperatorTokenTypes.In,
-            "instanceof": SlimeBinaryOperatorTokenTypes.Instanceof,
+    createBinaryOperatorToken(operator: SlimeJavascriptBinaryOperator, loc?: SubhutiSourceLocation): SlimeJavascriptBinaryOperatorToken {
+        const typeMap: Record<SlimeJavascriptBinaryOperator, string> = {
+            "==": SlimeJavascriptBinaryOperatorTokenTypes.Equal,
+            "!=": SlimeJavascriptBinaryOperatorTokenTypes.NotEqual,
+            "===": SlimeJavascriptBinaryOperatorTokenTypes.StrictEqual,
+            "!==": SlimeJavascriptBinaryOperatorTokenTypes.StrictNotEqual,
+            "<": SlimeJavascriptBinaryOperatorTokenTypes.Less,
+            "<=": SlimeJavascriptBinaryOperatorTokenTypes.LessEqual,
+            ">": SlimeJavascriptBinaryOperatorTokenTypes.Greater,
+            ">=": SlimeJavascriptBinaryOperatorTokenTypes.GreaterEqual,
+            "<<": SlimeJavascriptBinaryOperatorTokenTypes.LeftShift,
+            ">>": SlimeJavascriptBinaryOperatorTokenTypes.RightShift,
+            ">>>": SlimeJavascriptBinaryOperatorTokenTypes.UnsignedRightShift,
+            "+": SlimeJavascriptBinaryOperatorTokenTypes.Plus,
+            "-": SlimeJavascriptBinaryOperatorTokenTypes.Minus,
+            "*": SlimeJavascriptBinaryOperatorTokenTypes.Asterisk,
+            "/": SlimeJavascriptBinaryOperatorTokenTypes.Slash,
+            "%": SlimeJavascriptBinaryOperatorTokenTypes.Modulo,
+            "**": SlimeJavascriptBinaryOperatorTokenTypes.Exponentiation,
+            "|": SlimeJavascriptBinaryOperatorTokenTypes.BitwiseOr,
+            "^": SlimeJavascriptBinaryOperatorTokenTypes.BitwiseXor,
+            "&": SlimeJavascriptBinaryOperatorTokenTypes.BitwiseAnd,
+            "in": SlimeJavascriptBinaryOperatorTokenTypes.In,
+            "instanceof": SlimeJavascriptBinaryOperatorTokenTypes.Instanceof,
         };
-        return { type: typeMap[operator], value: operator, loc } as SlimeBinaryOperatorToken;
+        return { type: typeMap[operator], value: operator, loc } as SlimeJavascriptBinaryOperatorToken;
     }
 
     /**
      * 创建一元运算符 Token
      * 支持: - + ! ~ typeof void delete
      */
-    createUnaryOperatorToken(operator: SlimeUnaryOperator, loc?: SubhutiSourceLocation): SlimeUnaryOperatorToken {
-        const typeMap: Record<SlimeUnaryOperator, string> = {
-            "-": SlimeUnaryOperatorTokenTypes.Minus,
-            "+": SlimeUnaryOperatorTokenTypes.Plus,
-            "!": SlimeUnaryOperatorTokenTypes.LogicalNot,
-            "~": SlimeUnaryOperatorTokenTypes.BitwiseNot,
-            "typeof": SlimeUnaryOperatorTokenTypes.Typeof,
-            "void": SlimeUnaryOperatorTokenTypes.Void,
-            "delete": SlimeUnaryOperatorTokenTypes.Delete,
+    createUnaryOperatorToken(operator: SlimeJavascriptUnaryOperator, loc?: SubhutiSourceLocation): SlimeJavascriptUnaryOperatorToken {
+        const typeMap: Record<SlimeJavascriptUnaryOperator, string> = {
+            "-": SlimeJavascriptUnaryOperatorTokenTypes.Minus,
+            "+": SlimeJavascriptUnaryOperatorTokenTypes.Plus,
+            "!": SlimeJavascriptUnaryOperatorTokenTypes.LogicalNot,
+            "~": SlimeJavascriptUnaryOperatorTokenTypes.BitwiseNot,
+            "typeof": SlimeJavascriptUnaryOperatorTokenTypes.Typeof,
+            "void": SlimeJavascriptUnaryOperatorTokenTypes.Void,
+            "delete": SlimeJavascriptUnaryOperatorTokenTypes.Delete,
         };
-        return { type: typeMap[operator], value: operator, loc } as SlimeUnaryOperatorToken;
+        return { type: typeMap[operator], value: operator, loc } as SlimeJavascriptUnaryOperatorToken;
     }
 
     /**
      * 创建逻辑运算符 Token
      * 支持: || && ??
      */
-    createLogicalOperatorToken(operator: SlimeLogicalOperator, loc?: SubhutiSourceLocation): SlimeLogicalOperatorToken {
-        const typeMap: Record<SlimeLogicalOperator, string> = {
-            "||": SlimeLogicalOperatorTokenTypes.LogicalOr,
-            "&&": SlimeLogicalOperatorTokenTypes.LogicalAnd,
-            "??": SlimeLogicalOperatorTokenTypes.NullishCoalescing,
+    createLogicalOperatorToken(operator: SlimeJavascriptLogicalOperator, loc?: SubhutiSourceLocation): SlimeJavascriptLogicalOperatorToken {
+        const typeMap: Record<SlimeJavascriptLogicalOperator, string> = {
+            "||": SlimeJavascriptLogicalOperatorTokenTypes.LogicalOr,
+            "&&": SlimeJavascriptLogicalOperatorTokenTypes.LogicalAnd,
+            "??": SlimeJavascriptLogicalOperatorTokenTypes.NullishCoalescing,
         };
-        return { type: typeMap[operator], value: operator, loc } as SlimeLogicalOperatorToken;
+        return { type: typeMap[operator], value: operator, loc } as SlimeJavascriptLogicalOperatorToken;
     }
 
     /**
      * 创建赋值运算符 Token
      * 支持: = += -= *= /= %= **= <<= >>= >>>= |= ^= &= ||= &&= ??=
      */
-    createAssignmentOperatorToken(operator: SlimeAssignmentOperator, loc?: SubhutiSourceLocation): SlimeAssignmentOperatorToken {
-        const typeMap: Record<SlimeAssignmentOperator, string> = {
-            "=": SlimeAssignmentOperatorTokenTypes.Assign,
-            "+=": SlimeAssignmentOperatorTokenTypes.PlusAssign,
-            "-=": SlimeAssignmentOperatorTokenTypes.MinusAssign,
-            "*=": SlimeAssignmentOperatorTokenTypes.MultiplyAssign,
-            "/=": SlimeAssignmentOperatorTokenTypes.DivideAssign,
-            "%=": SlimeAssignmentOperatorTokenTypes.ModuloAssign,
-            "**=": SlimeAssignmentOperatorTokenTypes.ExponentiationAssign,
-            "<<=": SlimeAssignmentOperatorTokenTypes.LeftShiftAssign,
-            ">>=": SlimeAssignmentOperatorTokenTypes.RightShiftAssign,
-            ">>>=": SlimeAssignmentOperatorTokenTypes.UnsignedRightShiftAssign,
-            "|=": SlimeAssignmentOperatorTokenTypes.BitwiseOrAssign,
-            "^=": SlimeAssignmentOperatorTokenTypes.BitwiseXorAssign,
-            "&=": SlimeAssignmentOperatorTokenTypes.BitwiseAndAssign,
-            "||=": SlimeAssignmentOperatorTokenTypes.LogicalOrAssign,
-            "&&=": SlimeAssignmentOperatorTokenTypes.LogicalAndAssign,
-            "??=": SlimeAssignmentOperatorTokenTypes.NullishCoalescingAssign,
+    createAssignmentOperatorToken(operator: SlimeJavascriptAssignmentOperator, loc?: SubhutiSourceLocation): SlimeJavascriptAssignmentOperatorToken {
+        const typeMap: Record<SlimeJavascriptAssignmentOperator, string> = {
+            "=": SlimeJavascriptAssignmentOperatorTokenTypes.Assign,
+            "+=": SlimeJavascriptAssignmentOperatorTokenTypes.PlusAssign,
+            "-=": SlimeJavascriptAssignmentOperatorTokenTypes.MinusAssign,
+            "*=": SlimeJavascriptAssignmentOperatorTokenTypes.MultiplyAssign,
+            "/=": SlimeJavascriptAssignmentOperatorTokenTypes.DivideAssign,
+            "%=": SlimeJavascriptAssignmentOperatorTokenTypes.ModuloAssign,
+            "**=": SlimeJavascriptAssignmentOperatorTokenTypes.ExponentiationAssign,
+            "<<=": SlimeJavascriptAssignmentOperatorTokenTypes.LeftShiftAssign,
+            ">>=": SlimeJavascriptAssignmentOperatorTokenTypes.RightShiftAssign,
+            ">>>=": SlimeJavascriptAssignmentOperatorTokenTypes.UnsignedRightShiftAssign,
+            "|=": SlimeJavascriptAssignmentOperatorTokenTypes.BitwiseOrAssign,
+            "^=": SlimeJavascriptAssignmentOperatorTokenTypes.BitwiseXorAssign,
+            "&=": SlimeJavascriptAssignmentOperatorTokenTypes.BitwiseAndAssign,
+            "||=": SlimeJavascriptAssignmentOperatorTokenTypes.LogicalOrAssign,
+            "&&=": SlimeJavascriptAssignmentOperatorTokenTypes.LogicalAndAssign,
+            "??=": SlimeJavascriptAssignmentOperatorTokenTypes.NullishCoalescingAssign,
         };
-        return { type: typeMap[operator], value: operator, loc } as SlimeAssignmentOperatorToken;
+        return { type: typeMap[operator], value: operator, loc } as SlimeJavascriptAssignmentOperatorToken;
     }
 
     /**
      * 创建更新运算符 Token
      * 支持: ++ --
      */
-    createUpdateOperatorToken(operator: SlimeUpdateOperator, loc?: SubhutiSourceLocation): SlimeUpdateOperatorToken {
-        const typeMap: Record<SlimeUpdateOperator, string> = {
-            "++": SlimeUpdateOperatorTokenTypes.Increment,
-            "--": SlimeUpdateOperatorTokenTypes.Decrement,
+    createUpdateOperatorToken(operator: SlimeJavascriptUpdateOperator, loc?: SubhutiSourceLocation): SlimeJavascriptUpdateOperatorToken {
+        const typeMap: Record<SlimeJavascriptUpdateOperator, string> = {
+            "++": SlimeJavascriptUpdateOperatorTokenTypes.Increment,
+            "--": SlimeJavascriptUpdateOperatorTokenTypes.Decrement,
         };
-        return { type: typeMap[operator], value: operator, loc } as SlimeUpdateOperatorToken;
+        return { type: typeMap[operator], value: operator, loc } as SlimeJavascriptUpdateOperatorToken;
     }
 }
 
-const SlimeTokenCreateUtils = new SlimeTokenFactory();
-export default SlimeTokenCreateUtils;
+const SlimeJavascriptTokenCreateUtils = new SlimeJavascriptTokenFactory();
+export default SlimeJavascriptTokenCreateUtils;
 

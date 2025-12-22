@@ -16,7 +16,7 @@
  * 赋值运算符 Token 类型
  * 对应: = += -= *= /= %= **= <<= >>= >>>= &= |= ^= &&= ||= ??=
  */
-export const SlimeAssignmentOperatorTokenTypes = {
+export const SlimeJavascriptAssignmentOperatorTokenTypes = {
     Assign: 'Assign',                                       // =
     PlusAssign: 'PlusAssign',                               // +=
     MinusAssign: 'MinusAssign',                             // -=
@@ -39,7 +39,7 @@ export const SlimeAssignmentOperatorTokenTypes = {
  * 更新运算符 Token 类型
  * 对应: ++ --
  */
-export const SlimeUpdateOperatorTokenTypes = {
+export const SlimeJavascriptUpdateOperatorTokenTypes = {
     Increment: 'Increment',   // ++
     Decrement: 'Decrement',   // --
 } as const;
@@ -48,7 +48,7 @@ export const SlimeUpdateOperatorTokenTypes = {
  * 一元运算符 Token 类型
  * 对应: - + ! ~ typeof void delete
  */
-export const SlimeUnaryOperatorTokenTypes = {
+export const SlimeJavascriptUnaryOperatorTokenTypes = {
     Minus: 'Minus',           // -
     Plus: 'Plus',             // +
     LogicalNot: 'LogicalNot', // !
@@ -62,7 +62,7 @@ export const SlimeUnaryOperatorTokenTypes = {
  * 二元运算符 Token 类型
  * 对应: == != === !== < > <= >= << >> >>> + - * / % ** | ^ & in instanceof
  */
-export const SlimeBinaryOperatorTokenTypes = {
+export const SlimeJavascriptBinaryOperatorTokenTypes = {
     // 相等运算符
     Equal: 'Equal',                       // ==
     NotEqual: 'NotEqual',                 // !=
@@ -97,7 +97,7 @@ export const SlimeBinaryOperatorTokenTypes = {
  * 逻辑运算符 Token 类型
  * 对应: || && ??
  */
-export const SlimeLogicalOperatorTokenTypes = {
+export const SlimeJavascriptLogicalOperatorTokenTypes = {
     LogicalOr: 'LogicalOr',               // ||
     LogicalAnd: 'LogicalAnd',             // &&
     NullishCoalescing: 'NullishCoalescing', // ??
@@ -120,7 +120,7 @@ export const SlimeLogicalOperatorTokenTypes = {
  * - target: 元属性 `new.target` (NewTarget)
  * - meta: 元属性 `import.meta` (ImportMeta)
  */
-export const SlimeContextualKeywordTokenTypes = {
+export const SlimeJavascriptContextualKeywordTokenTypes = {
     // 注意：值必须使用小写，与实际源码中的写法一致
     // consumeIdentifierValue() 会比较 token.tokenValue === value
     Async: 'async',     // async function, async () =>
@@ -146,10 +146,10 @@ export const SlimeContextualKeywordTokenTypes = {
  *
  * 注意：
  * - let 在 ES2025 规范中不是 ReservedWord，在非严格模式下可作为标识符
- *   因此 let 被放在 SlimeContextualKeywordTokenTypes 作为软关键字处理
+ *   因此 let 被放在 SlimeJavascriptContextualKeywordTokenTypes 作为软关键字处理
  * - delete, typeof, void, in, instanceof 同时也是运算符（已在运算符分组中定义）
  */
-export const SlimeReservedWordTokenTypes = {
+export const SlimeJavascriptReservedWordTokenTypes = {
     Await: 'Await',
     Break: 'Break',
     Case: 'Case',
@@ -245,21 +245,21 @@ export const SlimeJavascriptTokenType = {
     // ============================================
     // A.1.7 Reserved Words（从分组常量引入）
     // ============================================
-    ...SlimeReservedWordTokenTypes,
+    ...SlimeJavascriptReservedWordTokenTypes,
 
     // ============================================
     // 运算符 Token（从分组常量引入）
     // ============================================
-    ...SlimeAssignmentOperatorTokenTypes,
-    ...SlimeUpdateOperatorTokenTypes,
-    ...SlimeUnaryOperatorTokenTypes,
-    ...SlimeBinaryOperatorTokenTypes,
-    ...SlimeLogicalOperatorTokenTypes,
+    ...SlimeJavascriptAssignmentOperatorTokenTypes,
+    ...SlimeJavascriptUpdateOperatorTokenTypes,
+    ...SlimeJavascriptUnaryOperatorTokenTypes,
+    ...SlimeJavascriptBinaryOperatorTokenTypes,
+    ...SlimeJavascriptLogicalOperatorTokenTypes,
 
     // ============================================
     // 软关键字（从分组常量引入）
     // ============================================
-    ...SlimeContextualKeywordTokenTypes,
+    ...SlimeJavascriptContextualKeywordTokenTypes,
 
 } as const;
 

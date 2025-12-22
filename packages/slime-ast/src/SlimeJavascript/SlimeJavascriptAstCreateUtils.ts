@@ -1,195 +1,195 @@
 /**
- * SlimeAstCreateUtils.ts - AST 节点创建工厂
+ * SlimeJavascriptAstCreateUtils.ts - AST 节点创建工厂
  *
  * 为每个 AST 节点类型提供创建方法
- * Token 创建方法请使用 SlimeTokenCreateUtils.ts
- * 与 SlimeAstNode.ts 中的 AST 类型一一对应
+ * Token 创建方法请使用 SlimeJavascriptTokenCreateUtils.ts
+ * 与 SlimeJavascriptAstNode.ts 中的 AST 类型一一对应
  */
 
 import {
   // Base types
-  type SlimeBaseNode,
-  SlimeProgramSourceType,
+  type SlimeJavascriptBaseNode,
+  SlimeJavascriptProgramSourceType,
 
   // Program
-  type SlimeProgram,
-  type SlimeDirective,
+  type SlimeJavascriptProgram,
+  type SlimeJavascriptDirective,
 
   // Statements
-  type SlimeStatement,
-  type SlimeBlockStatement,
-  type SlimeEmptyStatement,
-  type SlimeExpressionStatement,
-  type SlimeIfStatement,
-  type SlimeLabeledStatement,
-  type SlimeBreakStatement,
-  type SlimeContinueStatement,
-  type SlimeWithStatement,
-  type SlimeSwitchStatement,
-  type SlimeReturnStatement,
-  type SlimeThrowStatement,
-  type SlimeTryStatement,
-  type SlimeWhileStatement,
-  type SlimeDoWhileStatement,
-  type SlimeForStatement,
-  type SlimeForInStatement,
-  type SlimeForOfStatement,
-  type SlimeDebuggerStatement,
-  type SlimeStaticBlock,
-  type SlimeSwitchCase,
-  type SlimeCatchClause,
+  type SlimeJavascriptStatement,
+  type SlimeJavascriptBlockStatement,
+  type SlimeJavascriptEmptyStatement,
+  type SlimeJavascriptExpressionStatement,
+  type SlimeJavascriptIfStatement,
+  type SlimeJavascriptLabeledStatement,
+  type SlimeJavascriptBreakStatement,
+  type SlimeJavascriptContinueStatement,
+  type SlimeJavascriptWithStatement,
+  type SlimeJavascriptSwitchStatement,
+  type SlimeJavascriptReturnStatement,
+  type SlimeJavascriptThrowStatement,
+  type SlimeJavascriptTryStatement,
+  type SlimeJavascriptWhileStatement,
+  type SlimeJavascriptDoWhileStatement,
+  type SlimeJavascriptForStatement,
+  type SlimeJavascriptForInStatement,
+  type SlimeJavascriptForOfStatement,
+  type SlimeJavascriptDebuggerStatement,
+  type SlimeJavascriptStaticBlock,
+  type SlimeJavascriptSwitchCase,
+  type SlimeJavascriptCatchClause,
 
   // Declarations
-  type SlimeDeclaration,
-  type SlimeFunctionDeclaration,
-  type SlimeVariableDeclaration,
-  type SlimeVariableDeclarator,
-  type SlimeClassDeclaration,
-  type SlimeMaybeNamedFunctionDeclaration,
-  type SlimeMaybeNamedClassDeclaration,
+  type SlimeJavascriptDeclaration,
+  type SlimeJavascriptFunctionDeclaration,
+  type SlimeJavascriptVariableDeclaration,
+  type SlimeJavascriptVariableDeclarator,
+  type SlimeJavascriptClassDeclaration,
+  type SlimeJavascriptMaybeNamedFunctionDeclaration,
+  type SlimeJavascriptMaybeNamedClassDeclaration,
 
   // Expressions
-  type SlimeExpression,
-  type SlimeThisExpression,
-  type SlimeArrayExpression,
-  type SlimeObjectExpression,
-  type SlimeFunctionExpression,
-  type SlimeArrowFunctionExpression,
-  type SlimeYieldExpression,
-  type SlimeAwaitExpression,
-  type SlimeUnaryExpression,
-  type SlimeBinaryExpression,
-  type SlimeLogicalExpression,
-  type SlimeAssignmentExpression,
-  type SlimeUpdateExpression,
-  type SlimeConditionalExpression,
-  type SlimeSimpleCallExpression,
-  type SlimeNewExpression,
-  type SlimeMemberExpression,
-  type SlimeChainExpression,
-  type SlimeChainElement,
-  type SlimeSequenceExpression,
-  type SlimeTemplateLiteral,
-  type SlimeTaggedTemplateExpression,
-  type SlimeTemplateElement,
-  type SlimeMetaProperty,
-  type SlimeImportExpression,
-  type SlimeClassExpression,
+  type SlimeJavascriptExpression,
+  type SlimeJavascriptThisExpression,
+  type SlimeJavascriptArrayExpression,
+  type SlimeJavascriptObjectExpression,
+  type SlimeJavascriptFunctionExpression,
+  type SlimeJavascriptArrowFunctionExpression,
+  type SlimeJavascriptYieldExpression,
+  type SlimeJavascriptAwaitExpression,
+  type SlimeJavascriptUnaryExpression,
+  type SlimeJavascriptBinaryExpression,
+  type SlimeJavascriptLogicalExpression,
+  type SlimeJavascriptAssignmentExpression,
+  type SlimeJavascriptUpdateExpression,
+  type SlimeJavascriptConditionalExpression,
+  type SlimeJavascriptSimpleCallExpression,
+  type SlimeJavascriptNewExpression,
+  type SlimeJavascriptMemberExpression,
+  type SlimeJavascriptChainExpression,
+  type SlimeJavascriptChainElement,
+  type SlimeJavascriptSequenceExpression,
+  type SlimeJavascriptTemplateLiteral,
+  type SlimeJavascriptTaggedTemplateExpression,
+  type SlimeJavascriptTemplateElement,
+  type SlimeJavascriptMetaProperty,
+  type SlimeJavascriptImportExpression,
+  type SlimeJavascriptClassExpression,
 
   // Literals
-  type SlimeLiteral,
-  type SlimeSimpleLiteral,
-  type SlimeRegExpLiteral,
-  type SlimeBigIntLiteral,
-  type SlimeStringLiteral,
-  type SlimeNumericLiteral,
-  type SlimeBooleanLiteral,
-  type SlimeNullLiteral,
+  type SlimeJavascriptLiteral,
+  type SlimeJavascriptSimpleLiteral,
+  type SlimeJavascriptRegExpLiteral,
+  type SlimeJavascriptBigIntLiteral,
+  type SlimeJavascriptStringLiteral,
+  type SlimeJavascriptNumericLiteral,
+  type SlimeJavascriptBooleanLiteral,
+  type SlimeJavascriptNullLiteral,
 
   // Patterns
-  type SlimePattern,
-  type SlimeObjectPattern,
-  type SlimeArrayPattern,
-  type SlimeRestElement,
-  type SlimeAssignmentPattern,
-  type SlimeAssignmentProperty,
+  type SlimeJavascriptPattern,
+  type SlimeJavascriptObjectPattern,
+  type SlimeJavascriptArrayPattern,
+  type SlimeJavascriptRestElement,
+  type SlimeJavascriptAssignmentPattern,
+  type SlimeJavascriptAssignmentProperty,
 
   // Properties
-  type SlimeProperty,
-  type SlimePropertyDefinition,
-  type SlimeSpreadElement,
+  type SlimeJavascriptProperty,
+  type SlimeJavascriptPropertyDefinition,
+  type SlimeJavascriptSpreadElement,
 
   // Wrapper types (for comma token association)
-  type SlimeArrayElement,
-  type SlimeObjectPropertyItem,
-  type SlimeFunctionParam,
-  type SlimeCallArgument,
-  type SlimeArrayPatternElement,
-  type SlimeObjectPatternProperty,
-  type SlimeImportSpecifierItem,
-  type SlimeExportSpecifierItem,
+  type SlimeJavascriptArrayElement,
+  type SlimeJavascriptObjectPropertyItem,
+  type SlimeJavascriptFunctionParam,
+  type SlimeJavascriptCallArgument,
+  type SlimeJavascriptArrayPatternElement,
+  type SlimeJavascriptObjectPatternProperty,
+  type SlimeJavascriptImportSpecifierItem,
+  type SlimeJavascriptExportSpecifierItem,
 
   // Classes
-  type SlimeClassBody,
-  type SlimeMethodDefinition,
+  type SlimeJavascriptClassBody,
+  type SlimeJavascriptMethodDefinition,
 
   // Modules
-  type SlimeModuleDeclaration,
-  type SlimeImportDeclaration,
-  type SlimeImportSpecifier,
-  type SlimeImportDefaultSpecifier,
-  type SlimeImportNamespaceSpecifier,
-  type SlimeExportNamedDeclaration,
-  type SlimeExportDefaultDeclaration,
-  type SlimeExportAllDeclaration,
-  type SlimeExportSpecifier,
+  type SlimeJavascriptModuleDeclaration,
+  type SlimeJavascriptImportDeclaration,
+  type SlimeJavascriptImportSpecifier,
+  type SlimeJavascriptImportDefaultSpecifier,
+  type SlimeJavascriptImportNamespaceSpecifier,
+  type SlimeJavascriptExportNamedDeclaration,
+  type SlimeJavascriptExportDefaultDeclaration,
+  type SlimeJavascriptExportAllDeclaration,
+  type SlimeJavascriptExportSpecifier,
 
   // Special nodes
-  type SlimeSuper,
-  type SlimeIdentifier,
-  type SlimePrivateIdentifier,
+  type SlimeJavascriptSuper,
+  type SlimeJavascriptIdentifier,
+  type SlimeJavascriptPrivateIdentifier,
 
   // Token types
-  type SlimeVariableDeclarationKindToken,
-  type SlimeLBraceToken,
-  type SlimeRBraceToken,
-  type SlimeLBracketToken,
-  type SlimeRBracketToken,
-  type SlimeLParenToken,
-  type SlimeRParenToken,
-  type SlimeDotToken,
-  type SlimeColonToken,
-  type SlimeSemicolonToken,
-  type SlimeCommaToken,
-  type SlimeFromToken,
-  type SlimeExportToken,
-  type SlimeImportToken,
-  type SlimeAssignToken,
-  type SlimeArrowToken,
-  type SlimeQuestionToken,
-  type SlimeEllipsisToken,
-  type SlimeAsteriskToken,
-  type SlimeAsToken,
-  type SlimeIfToken,
-  type SlimeElseToken,
-  type SlimeForToken,
-  type SlimeWhileToken,
-  type SlimeDoToken,
-  type SlimeInToken,
-  type SlimeOfToken,
-  type SlimeSwitchToken,
-  type SlimeCaseToken,
-  type SlimeDefaultToken,
-  type SlimeBreakToken,
-  type SlimeContinueToken,
-  type SlimeReturnToken,
-  type SlimeThrowToken,
-  type SlimeTryToken,
-  type SlimeCatchToken,
-  type SlimeFinallyToken,
-  type SlimeWithToken,
-  type SlimeDebuggerToken,
-  type SlimeNewToken,
-  type SlimeYieldToken,
-  type SlimeAwaitToken,
-  type SlimeFunctionToken,
-  type SlimeAsyncToken,
-  type SlimeClassToken,
-  type SlimeExtendsToken,
-  type SlimeStaticToken,
-  type SlimeGetToken,
-  type SlimeSetToken,
-  type SlimeOptionalChainingToken,
+  type SlimeJavascriptVariableDeclarationKindToken,
+  type SlimeJavascriptLBraceToken,
+  type SlimeJavascriptRBraceToken,
+  type SlimeJavascriptLBracketToken,
+  type SlimeJavascriptRBracketToken,
+  type SlimeJavascriptLParenToken,
+  type SlimeJavascriptRParenToken,
+  type SlimeJavascriptDotToken,
+  type SlimeJavascriptColonToken,
+  type SlimeJavascriptSemicolonToken,
+  type SlimeJavascriptCommaToken,
+  type SlimeJavascriptFromToken,
+  type SlimeJavascriptExportToken,
+  type SlimeJavascriptImportToken,
+  type SlimeJavascriptAssignToken,
+  type SlimeJavascriptArrowToken,
+  type SlimeJavascriptQuestionToken,
+  type SlimeJavascriptEllipsisToken,
+  type SlimeJavascriptAsteriskToken,
+  type SlimeJavascriptAsToken,
+  type SlimeJavascriptIfToken,
+  type SlimeJavascriptElseToken,
+  type SlimeJavascriptForToken,
+  type SlimeJavascriptWhileToken,
+  type SlimeJavascriptDoToken,
+  type SlimeJavascriptInToken,
+  type SlimeJavascriptOfToken,
+  type SlimeJavascriptSwitchToken,
+  type SlimeJavascriptCaseToken,
+  type SlimeJavascriptDefaultToken,
+  type SlimeJavascriptBreakToken,
+  type SlimeJavascriptContinueToken,
+  type SlimeJavascriptReturnToken,
+  type SlimeJavascriptThrowToken,
+  type SlimeJavascriptTryToken,
+  type SlimeJavascriptCatchToken,
+  type SlimeJavascriptFinallyToken,
+  type SlimeJavascriptWithToken,
+  type SlimeJavascriptDebuggerToken,
+  type SlimeJavascriptNewToken,
+  type SlimeJavascriptYieldToken,
+  type SlimeJavascriptAwaitToken,
+  type SlimeJavascriptFunctionToken,
+  type SlimeJavascriptAsyncToken,
+  type SlimeJavascriptClassToken,
+  type SlimeJavascriptExtendsToken,
+  type SlimeJavascriptStaticToken,
+  type SlimeJavascriptGetToken,
+  type SlimeJavascriptSetToken,
+  type SlimeJavascriptOptionalChainingToken,
 
   // Operator tokens
-  type SlimeBinaryOperatorToken,
-  type SlimeUnaryOperatorToken,
-  type SlimeLogicalOperatorToken,
-  type SlimeAssignmentOperatorToken,
-  type SlimeUpdateOperatorToken,
+  type SlimeJavascriptBinaryOperatorToken,
+  type SlimeJavascriptUnaryOperatorToken,
+  type SlimeJavascriptLogicalOperatorToken,
+  type SlimeJavascriptAssignmentOperatorToken,
+  type SlimeJavascriptUpdateOperatorToken,
 } from "./SlimeJavascriptAstNode.ts";
 
-import {SlimeAstTypeName} from "./SlimeJavascriptAstTypeName.ts";
+import {SlimeJavascriptAstTypeName} from "./SlimeJavascriptAstTypeName.ts";
 import type { SubhutiSourceLocation } from "subhuti";
 
 class SlimeJavascriptAstCreateUtils {
@@ -197,7 +197,7 @@ class SlimeJavascriptAstCreateUtils {
   // 通用辅助方法
   // ============================================
 
-  commonLocType<T extends SlimeBaseNode>(node: T): T {
+  commonLocType<T extends SlimeJavascriptBaseNode>(node: T): T {
     if (!node.loc) {
       node.loc = {
         value: null,
@@ -221,9 +221,9 @@ class SlimeJavascriptAstCreateUtils {
   // Program
   // ============================================
 
-  createProgram(body: Array<SlimeDirective | SlimeStatement | SlimeModuleDeclaration>, sourceType: SlimeProgramSourceType = SlimeProgramSourceType.Script): SlimeProgram {
+  createProgram(body: Array<SlimeJavascriptDirective | SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration>, sourceType: SlimeJavascriptProgramSourceType = SlimeJavascriptProgramSourceType.Script): SlimeJavascriptProgram {
     return this.commonLocType({
-      type: SlimeAstTypeName.Program,
+      type: SlimeJavascriptAstTypeName.Program,
       sourceType: sourceType,
       body: body
     })
@@ -233,9 +233,9 @@ class SlimeJavascriptAstCreateUtils {
   // Expressions
   // ============================================
 
-  createMemberExpression(object: SlimeExpression | SlimeSuper, dot: SlimeDotToken, property?: SlimeExpression | SlimePrivateIdentifier): SlimeMemberExpression {
+  createMemberExpression(object: SlimeJavascriptExpression | SlimeJavascriptSuper, dot: SlimeJavascriptDotToken, property?: SlimeJavascriptExpression | SlimeJavascriptPrivateIdentifier): SlimeJavascriptMemberExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.MemberExpression,
+      type: SlimeJavascriptAstTypeName.MemberExpression,
       object: object,
       dot: dot,
       property: property,
@@ -246,13 +246,13 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createArrayExpression(
-    elements?: Array<SlimeArrayElement>,
+    elements?: Array<SlimeJavascriptArrayElement>,
     loc?: SubhutiSourceLocation,
-    lBracketToken?: SlimeLBracketToken,
-    rBracketToken?: SlimeRBracketToken
-  ): SlimeArrayExpression {
+    lBracketToken?: SlimeJavascriptLBracketToken,
+    rBracketToken?: SlimeJavascriptRBracketToken
+  ): SlimeJavascriptArrayExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.ArrayExpression,
+      type: SlimeJavascriptAstTypeName.ArrayExpression,
       elements: elements || [],
       lBracketToken: lBracketToken,
       rBracketToken: rBracketToken,
@@ -262,15 +262,15 @@ class SlimeJavascriptAstCreateUtils {
 
   /** 创建数组元素包装 */
   createArrayElement(
-    element: SlimeExpression | SlimeSpreadElement | null,
-    commaToken?: SlimeCommaToken
-  ): SlimeArrayElement {
+    element: SlimeJavascriptExpression | SlimeJavascriptSpreadElement | null,
+    commaToken?: SlimeJavascriptCommaToken
+  ): SlimeJavascriptArrayElement {
     return { element, commaToken }
   }
 
-  createPropertyAst(key: SlimeExpression | SlimePrivateIdentifier, value: SlimeExpression | SlimePattern): SlimeProperty {
+  createPropertyAst(key: SlimeJavascriptExpression | SlimeJavascriptPrivateIdentifier, value: SlimeJavascriptExpression | SlimeJavascriptPattern): SlimeJavascriptProperty {
     return this.commonLocType({
-      type: SlimeAstTypeName.Property,
+      type: SlimeJavascriptAstTypeName.Property,
       key: key,
       value: value,
       kind: "init",
@@ -281,13 +281,13 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createObjectExpression(
-    properties: Array<SlimeObjectPropertyItem> = [],
+    properties: Array<SlimeJavascriptObjectPropertyItem> = [],
     loc?: SubhutiSourceLocation,
-    lBraceToken?: SlimeLBraceToken,
-    rBraceToken?: SlimeRBraceToken
-  ): SlimeObjectExpression {
+    lBraceToken?: SlimeJavascriptLBraceToken,
+    rBraceToken?: SlimeJavascriptRBraceToken
+  ): SlimeJavascriptObjectExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.ObjectExpression,
+      type: SlimeJavascriptAstTypeName.ObjectExpression,
       properties: properties,
       lBraceToken: lBraceToken,
       rBraceToken: rBraceToken,
@@ -297,23 +297,23 @@ class SlimeJavascriptAstCreateUtils {
 
   /** 创建对象属性包装 */
   createObjectPropertyItem(
-    property: SlimeProperty | SlimeSpreadElement,
-    commaToken?: SlimeCommaToken
-  ): SlimeObjectPropertyItem {
+    property: SlimeJavascriptProperty | SlimeJavascriptSpreadElement,
+    commaToken?: SlimeJavascriptCommaToken
+  ): SlimeJavascriptObjectPropertyItem {
     return { property, commaToken }
   }
 
-  createParenthesizedExpression(expression: SlimeExpression, loc?: SubhutiSourceLocation): any {
+  createParenthesizedExpression(expression: SlimeJavascriptExpression, loc?: SubhutiSourceLocation): any {
     return this.commonLocType({
-      type: SlimeAstTypeName.ParenthesizedExpression,
+      type: SlimeJavascriptAstTypeName.ParenthesizedExpression,
       expression: expression,
       loc: loc
     })
   }
 
-  createClassExpression(id?: SlimeIdentifier | null, superClass?: SlimeExpression | null, body?: SlimeClassBody, loc?: SubhutiSourceLocation): SlimeClassExpression {
+  createClassExpression(id?: SlimeJavascriptIdentifier | null, superClass?: SlimeJavascriptExpression | null, body?: SlimeJavascriptClassBody, loc?: SubhutiSourceLocation): SlimeJavascriptClassExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.ClassExpression,  // 节点类型
+      type: SlimeJavascriptAstTypeName.ClassExpression,  // 节点类型
       id: id,                               // 类名（可选，匿名类为 null）
       body: body,                           // 类体（包含方法和属性）
       superClass: superClass,               // 父类表达式（可选，没有 extends 时为 null 或 undefined）
@@ -322,14 +322,14 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createCallExpression(
-    callee: SlimeExpression | SlimeSuper,
-    args: Array<SlimeCallArgument>,
+    callee: SlimeJavascriptExpression | SlimeJavascriptSuper,
+    args: Array<SlimeJavascriptCallArgument>,
     loc?: SubhutiSourceLocation,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken
-  ): SlimeSimpleCallExpression {
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken
+  ): SlimeJavascriptSimpleCallExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.CallExpression,
+      type: SlimeJavascriptAstTypeName.CallExpression,
       callee: callee,
       arguments: args,
       optional: false,
@@ -341,50 +341,50 @@ class SlimeJavascriptAstCreateUtils {
 
   /** 创建调用参数包装 */
   createCallArgument(
-    argument: SlimeExpression | SlimeSpreadElement,
-    commaToken?: SlimeCommaToken
-  ): SlimeCallArgument {
+    argument: SlimeJavascriptExpression | SlimeJavascriptSpreadElement,
+    commaToken?: SlimeJavascriptCommaToken
+  ): SlimeJavascriptCallArgument {
     return { argument, commaToken }
   }
 
   /** 创建函数参数包装 */
   createFunctionParam(
-    param: SlimePattern,
-    commaToken?: SlimeCommaToken
-  ): SlimeFunctionParam {
+    param: SlimeJavascriptPattern,
+    commaToken?: SlimeJavascriptCommaToken
+  ): SlimeJavascriptFunctionParam {
     return { param, commaToken }
   }
 
-  createThisExpression(loc?: SubhutiSourceLocation): SlimeThisExpression {
+  createThisExpression(loc?: SubhutiSourceLocation): SlimeJavascriptThisExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.ThisExpression,
+      type: SlimeJavascriptAstTypeName.ThisExpression,
       loc: loc
     })
   }
 
-  createChainExpression(expression: SlimeChainElement, loc?: SubhutiSourceLocation): SlimeChainExpression {
+  createChainExpression(expression: SlimeJavascriptChainElement, loc?: SubhutiSourceLocation): SlimeJavascriptChainExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.ChainExpression,
+      type: SlimeJavascriptAstTypeName.ChainExpression,
       expression: expression,
       loc: loc
     })
   }
 
-  createSequenceExpression(expressions: SlimeExpression[], loc?: SubhutiSourceLocation): SlimeSequenceExpression {
+  createSequenceExpression(expressions: SlimeJavascriptExpression[], loc?: SubhutiSourceLocation): SlimeJavascriptSequenceExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.SequenceExpression,
+      type: SlimeJavascriptAstTypeName.SequenceExpression,
       expressions: expressions,
       loc: loc
     })
   }
 
   createUnaryExpression(
-    operator: SlimeUnaryOperatorToken,
-    argument: SlimeExpression,
+    operator: SlimeJavascriptUnaryOperatorToken,
+    argument: SlimeJavascriptExpression,
     loc?: SubhutiSourceLocation
-  ): SlimeUnaryExpression {
+  ): SlimeJavascriptUnaryExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.UnaryExpression,
+      type: SlimeJavascriptAstTypeName.UnaryExpression,
       operator: operator,
       prefix: true,
       argument: argument,
@@ -393,13 +393,13 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createBinaryExpression(
-    operator: SlimeBinaryOperatorToken,
-    left: SlimeExpression | SlimePrivateIdentifier,
-    right: SlimeExpression,
+    operator: SlimeJavascriptBinaryOperatorToken,
+    left: SlimeJavascriptExpression | SlimeJavascriptPrivateIdentifier,
+    right: SlimeJavascriptExpression,
     loc?: SubhutiSourceLocation
-  ): SlimeBinaryExpression {
+  ): SlimeJavascriptBinaryExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.BinaryExpression,
+      type: SlimeJavascriptAstTypeName.BinaryExpression,
       operator: operator,
       left: left,
       right: right,
@@ -408,13 +408,13 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createAssignmentExpression(
-    operator: SlimeAssignmentOperatorToken,
-    left: SlimePattern | SlimeMemberExpression,
-    right: SlimeExpression,
+    operator: SlimeJavascriptAssignmentOperatorToken,
+    left: SlimeJavascriptPattern | SlimeJavascriptMemberExpression,
+    right: SlimeJavascriptExpression,
     loc?: SubhutiSourceLocation
-  ): SlimeAssignmentExpression {
+  ): SlimeJavascriptAssignmentExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.AssignmentExpression,
+      type: SlimeJavascriptAstTypeName.AssignmentExpression,
       operator: operator,
       left: left,
       right: right,
@@ -423,13 +423,13 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createUpdateExpression(
-    operator: SlimeUpdateOperatorToken,
-    argument: SlimeExpression,
+    operator: SlimeJavascriptUpdateOperatorToken,
+    argument: SlimeJavascriptExpression,
     prefix: boolean,
     loc?: SubhutiSourceLocation
-  ): SlimeUpdateExpression {
+  ): SlimeJavascriptUpdateExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.UpdateExpression,
+      type: SlimeJavascriptAstTypeName.UpdateExpression,
       operator: operator,
       argument: argument,
       prefix: prefix,
@@ -438,13 +438,13 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createLogicalExpression(
-    operator: SlimeLogicalOperatorToken,
-    left: SlimeExpression,
-    right: SlimeExpression,
+    operator: SlimeJavascriptLogicalOperatorToken,
+    left: SlimeJavascriptExpression,
+    right: SlimeJavascriptExpression,
     loc?: SubhutiSourceLocation
-  ): SlimeLogicalExpression {
+  ): SlimeJavascriptLogicalExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.LogicalExpression,
+      type: SlimeJavascriptAstTypeName.LogicalExpression,
       operator: operator,
       left: left,
       right: right,
@@ -453,15 +453,15 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createConditionalExpression(
-    test: SlimeExpression,
-    consequent: SlimeExpression,
-    alternate: SlimeExpression,
+    test: SlimeJavascriptExpression,
+    consequent: SlimeJavascriptExpression,
+    alternate: SlimeJavascriptExpression,
     loc?: SubhutiSourceLocation,
-    questionToken?: SlimeQuestionToken,
-    colonToken?: SlimeColonToken
-  ): SlimeConditionalExpression {
+    questionToken?: SlimeJavascriptQuestionToken,
+    colonToken?: SlimeJavascriptColonToken
+  ): SlimeJavascriptConditionalExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.ConditionalExpression,
+      type: SlimeJavascriptAstTypeName.ConditionalExpression,
       test: test,
       consequent: consequent,
       alternate: alternate,
@@ -472,15 +472,15 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createNewExpression(
-    callee: SlimeExpression,
-    args: Array<SlimeCallArgument>,
+    callee: SlimeJavascriptExpression,
+    args: Array<SlimeJavascriptCallArgument>,
     loc?: SubhutiSourceLocation,
-    newToken?: SlimeNewToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken
-  ): SlimeNewExpression {
+    newToken?: SlimeJavascriptNewToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken
+  ): SlimeJavascriptNewExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.NewExpression,
+      type: SlimeJavascriptAstTypeName.NewExpression,
       callee: callee,
       arguments: args,
       newToken: newToken,
@@ -491,18 +491,18 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createArrowFunctionExpression(
-    body: SlimeBlockStatement | SlimeExpression,
-    params: SlimeFunctionParam[],
+    body: SlimeJavascriptBlockStatement | SlimeJavascriptExpression,
+    params: SlimeJavascriptFunctionParam[],
     expression: boolean,
     async: boolean = false,
     loc?: SubhutiSourceLocation,
-    arrowToken?: SlimeArrowToken,
-    asyncToken?: SlimeAsyncToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken
-  ): SlimeArrowFunctionExpression {
+    arrowToken?: SlimeJavascriptArrowToken,
+    asyncToken?: SlimeJavascriptAsyncToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken
+  ): SlimeJavascriptArrowFunctionExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.ArrowFunctionExpression,
+      type: SlimeJavascriptAstTypeName.ArrowFunctionExpression,
       body: body,
       params: params,
       expression: expression,
@@ -516,14 +516,14 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createYieldExpression(
-    argument?: SlimeExpression | null,
+    argument?: SlimeJavascriptExpression | null,
     delegate: boolean = false,
     loc?: SubhutiSourceLocation,
-    yieldToken?: SlimeYieldToken,
-    asteriskToken?: SlimeAsteriskToken
-  ): SlimeYieldExpression {
+    yieldToken?: SlimeJavascriptYieldToken,
+    asteriskToken?: SlimeJavascriptAsteriskToken
+  ): SlimeJavascriptYieldExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.YieldExpression,
+      type: SlimeJavascriptAstTypeName.YieldExpression,
       argument: argument,
       delegate: delegate,
       yieldToken: yieldToken,
@@ -533,12 +533,12 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createTaggedTemplateExpression(
-    tag: SlimeExpression,
-    quasi: SlimeTemplateLiteral,
+    tag: SlimeJavascriptExpression,
+    quasi: SlimeJavascriptTemplateLiteral,
     loc?: SubhutiSourceLocation
-  ): SlimeTaggedTemplateExpression {
+  ): SlimeJavascriptTaggedTemplateExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.TaggedTemplateExpression,
+      type: SlimeJavascriptAstTypeName.TaggedTemplateExpression,
       tag: tag,
       quasi: quasi,
       loc: loc
@@ -546,12 +546,12 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createAwaitExpression(
-    argument: SlimeExpression,
+    argument: SlimeJavascriptExpression,
     loc?: SubhutiSourceLocation,
-    awaitToken?: SlimeAwaitToken
-  ): SlimeAwaitExpression {
+    awaitToken?: SlimeJavascriptAwaitToken
+  ): SlimeJavascriptAwaitExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.AwaitExpression,
+      type: SlimeJavascriptAstTypeName.AwaitExpression,
       argument: argument,
       awaitToken: awaitToken,
       loc: loc
@@ -559,12 +559,12 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createMetaProperty(
-    meta: SlimeIdentifier,
-    property: SlimeIdentifier,
+    meta: SlimeJavascriptIdentifier,
+    property: SlimeJavascriptIdentifier,
     loc?: SubhutiSourceLocation
-  ): SlimeMetaProperty {
+  ): SlimeJavascriptMetaProperty {
     return this.commonLocType({
-      type: SlimeAstTypeName.MetaProperty,
+      type: SlimeJavascriptAstTypeName.MetaProperty,
       meta: meta,
       property: property,
       loc: loc
@@ -572,14 +572,14 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createImportExpression(
-    source: SlimeExpression,
+    source: SlimeJavascriptExpression,
     loc?: SubhutiSourceLocation,
-    importToken?: SlimeImportToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken
-  ): SlimeImportExpression {
+    importToken?: SlimeJavascriptImportToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken
+  ): SlimeJavascriptImportExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.ImportExpression,
+      type: SlimeJavascriptAstTypeName.ImportExpression,
       source: source,
       importToken: importToken,
       lParenToken: lParenToken,
@@ -588,16 +588,16 @@ class SlimeJavascriptAstCreateUtils {
     })
   }
 
-  createSuper(loc?: SubhutiSourceLocation): SlimeSuper {
+  createSuper(loc?: SubhutiSourceLocation): SlimeJavascriptSuper {
     return this.commonLocType({
-      type: SlimeAstTypeName.Super,
+      type: SlimeJavascriptAstTypeName.Super,
       loc: loc
     })
   }
 
-  createPrivateIdentifier(name: string, loc?: SubhutiSourceLocation): SlimePrivateIdentifier {
+  createPrivateIdentifier(name: string, loc?: SubhutiSourceLocation): SlimeJavascriptPrivateIdentifier {
     return this.commonLocType({
-      type: SlimeAstTypeName.PrivateIdentifier,
+      type: SlimeJavascriptAstTypeName.PrivateIdentifier,
       name: name,
       loc: loc
     })
@@ -607,9 +607,9 @@ class SlimeJavascriptAstCreateUtils {
   // Statements
   // ============================================
 
-  createBlockStatement(body: SlimeStatement[], loc?: SubhutiSourceLocation, lBraceToken?: SlimeLBraceToken, rBraceToken?: SlimeRBraceToken): SlimeBlockStatement {
+  createBlockStatement(body: SlimeJavascriptStatement[], loc?: SubhutiSourceLocation, lBraceToken?: SlimeJavascriptLBraceToken, rBraceToken?: SlimeJavascriptRBraceToken): SlimeJavascriptBlockStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.BlockStatement,
+      type: SlimeJavascriptAstTypeName.BlockStatement,
       body: body,
       lBraceToken: lBraceToken,
       rBraceToken: rBraceToken,
@@ -617,17 +617,17 @@ class SlimeJavascriptAstCreateUtils {
     })
   }
 
-  createEmptyStatement(loc?: SubhutiSourceLocation, semicolonToken?: SlimeSemicolonToken): SlimeEmptyStatement {
+  createEmptyStatement(loc?: SubhutiSourceLocation, semicolonToken?: SlimeJavascriptSemicolonToken): SlimeJavascriptEmptyStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.EmptyStatement,
+      type: SlimeJavascriptAstTypeName.EmptyStatement,
       semicolonToken: semicolonToken,
       loc: loc
     })
   }
 
-  createExpressionStatement(expression: SlimeExpression, loc?: SubhutiSourceLocation, semicolonToken?: SlimeSemicolonToken): SlimeExpressionStatement {
+  createExpressionStatement(expression: SlimeJavascriptExpression, loc?: SubhutiSourceLocation, semicolonToken?: SlimeJavascriptSemicolonToken): SlimeJavascriptExpressionStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.ExpressionStatement,
+      type: SlimeJavascriptAstTypeName.ExpressionStatement,
       expression: expression,
       semicolonToken: semicolonToken,
       loc: loc
@@ -635,17 +635,17 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createIfStatement(
-    test: SlimeExpression,
-    consequent: SlimeStatement,
-    alternate?: SlimeStatement | null,
+    test: SlimeJavascriptExpression,
+    consequent: SlimeJavascriptStatement,
+    alternate?: SlimeJavascriptStatement | null,
     loc?: SubhutiSourceLocation,
-    ifToken?: SlimeIfToken,
-    elseToken?: SlimeElseToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken
-  ): SlimeIfStatement {
+    ifToken?: SlimeJavascriptIfToken,
+    elseToken?: SlimeJavascriptElseToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken
+  ): SlimeJavascriptIfStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.IfStatement,
+      type: SlimeJavascriptAstTypeName.IfStatement,
       test: test,
       consequent: consequent,
       alternate: alternate,
@@ -657,18 +657,18 @@ class SlimeJavascriptAstCreateUtils {
     })
   }
 
-  createLabeledStatement(label: SlimeIdentifier, body: SlimeStatement, loc?: SubhutiSourceLocation): SlimeLabeledStatement {
+  createLabeledStatement(label: SlimeJavascriptIdentifier, body: SlimeJavascriptStatement, loc?: SubhutiSourceLocation): SlimeJavascriptLabeledStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.LabeledStatement,
+      type: SlimeJavascriptAstTypeName.LabeledStatement,
       label: label,
       body: body,
       loc: loc
     })
   }
 
-  createBreakStatement(label?: SlimeIdentifier | null, loc?: SubhutiSourceLocation, breakToken?: SlimeBreakToken, semicolonToken?: SlimeSemicolonToken): SlimeBreakStatement {
+  createBreakStatement(label?: SlimeJavascriptIdentifier | null, loc?: SubhutiSourceLocation, breakToken?: SlimeJavascriptBreakToken, semicolonToken?: SlimeJavascriptSemicolonToken): SlimeJavascriptBreakStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.BreakStatement,
+      type: SlimeJavascriptAstTypeName.BreakStatement,
       label: label,
       breakToken: breakToken,
       semicolonToken: semicolonToken,
@@ -676,9 +676,9 @@ class SlimeJavascriptAstCreateUtils {
     })
   }
 
-  createContinueStatement(label?: SlimeIdentifier | null, loc?: SubhutiSourceLocation, continueToken?: SlimeContinueToken, semicolonToken?: SlimeSemicolonToken): SlimeContinueStatement {
+  createContinueStatement(label?: SlimeJavascriptIdentifier | null, loc?: SubhutiSourceLocation, continueToken?: SlimeJavascriptContinueToken, semicolonToken?: SlimeJavascriptSemicolonToken): SlimeJavascriptContinueStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.ContinueStatement,
+      type: SlimeJavascriptAstTypeName.ContinueStatement,
       label: label,
       continueToken: continueToken,
       semicolonToken: semicolonToken,
@@ -687,15 +687,15 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createWithStatement(
-    object: SlimeExpression,
-    body: SlimeStatement,
+    object: SlimeJavascriptExpression,
+    body: SlimeJavascriptStatement,
     loc?: SubhutiSourceLocation,
-    withToken?: SlimeWithToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken
-  ): SlimeWithStatement {
+    withToken?: SlimeJavascriptWithToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken
+  ): SlimeJavascriptWithStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.WithStatement,
+      type: SlimeJavascriptAstTypeName.WithStatement,
       object: object,
       body: body,
       withToken: withToken,
@@ -706,17 +706,17 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createSwitchStatement(
-    discriminant: SlimeExpression,
-    cases: SlimeSwitchCase[],
+    discriminant: SlimeJavascriptExpression,
+    cases: SlimeJavascriptSwitchCase[],
     loc?: SubhutiSourceLocation,
-    switchToken?: SlimeSwitchToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken,
-    lBraceToken?: SlimeLBraceToken,
-    rBraceToken?: SlimeRBraceToken
-  ): SlimeSwitchStatement {
+    switchToken?: SlimeJavascriptSwitchToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken,
+    lBraceToken?: SlimeJavascriptLBraceToken,
+    rBraceToken?: SlimeJavascriptRBraceToken
+  ): SlimeJavascriptSwitchStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.SwitchStatement,
+      type: SlimeJavascriptAstTypeName.SwitchStatement,
       discriminant: discriminant,
       cases: cases,
       switchToken: switchToken,
@@ -728,9 +728,9 @@ class SlimeJavascriptAstCreateUtils {
     })
   }
 
-  createReturnStatement(argument: SlimeExpression | null | undefined, loc?: SubhutiSourceLocation, returnToken?: SlimeReturnToken, semicolonToken?: SlimeSemicolonToken): SlimeReturnStatement {
+  createReturnStatement(argument: SlimeJavascriptExpression | null | undefined, loc?: SubhutiSourceLocation, returnToken?: SlimeJavascriptReturnToken, semicolonToken?: SlimeJavascriptSemicolonToken): SlimeJavascriptReturnStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.ReturnStatement,
+      type: SlimeJavascriptAstTypeName.ReturnStatement,
       argument: argument,
       returnToken: returnToken,
       semicolonToken: semicolonToken,
@@ -738,9 +738,9 @@ class SlimeJavascriptAstCreateUtils {
     })
   }
 
-  createThrowStatement(argument: SlimeExpression, loc?: SubhutiSourceLocation, throwToken?: SlimeThrowToken, semicolonToken?: SlimeSemicolonToken): SlimeThrowStatement {
+  createThrowStatement(argument: SlimeJavascriptExpression, loc?: SubhutiSourceLocation, throwToken?: SlimeJavascriptThrowToken, semicolonToken?: SlimeJavascriptSemicolonToken): SlimeJavascriptThrowStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.ThrowStatement,
+      type: SlimeJavascriptAstTypeName.ThrowStatement,
       argument: argument,
       throwToken: throwToken,
       semicolonToken: semicolonToken,
@@ -749,15 +749,15 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createTryStatement(
-    block: SlimeBlockStatement,
-    handler?: SlimeCatchClause | null,
-    finalizer?: SlimeBlockStatement | null,
+    block: SlimeJavascriptBlockStatement,
+    handler?: SlimeJavascriptCatchClause | null,
+    finalizer?: SlimeJavascriptBlockStatement | null,
     loc?: SubhutiSourceLocation,
-    tryToken?: SlimeTryToken,
-    finallyToken?: SlimeFinallyToken
-  ): SlimeTryStatement {
+    tryToken?: SlimeJavascriptTryToken,
+    finallyToken?: SlimeJavascriptFinallyToken
+  ): SlimeJavascriptTryStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.TryStatement,
+      type: SlimeJavascriptAstTypeName.TryStatement,
       block: block,
       handler: handler,
       finalizer: finalizer,
@@ -768,15 +768,15 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createWhileStatement(
-    test: SlimeExpression,
-    body: SlimeStatement,
+    test: SlimeJavascriptExpression,
+    body: SlimeJavascriptStatement,
     loc?: SubhutiSourceLocation,
-    whileToken?: SlimeWhileToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken
-  ): SlimeWhileStatement {
+    whileToken?: SlimeJavascriptWhileToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken
+  ): SlimeJavascriptWhileStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.WhileStatement,
+      type: SlimeJavascriptAstTypeName.WhileStatement,
       test: test,
       body: body,
       whileToken: whileToken,
@@ -787,17 +787,17 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createDoWhileStatement(
-    body: SlimeStatement,
-    test: SlimeExpression,
+    body: SlimeJavascriptStatement,
+    test: SlimeJavascriptExpression,
     loc?: SubhutiSourceLocation,
-    doToken?: SlimeDoToken,
-    whileToken?: SlimeWhileToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken,
-    semicolonToken?: SlimeSemicolonToken
-  ): SlimeDoWhileStatement {
+    doToken?: SlimeJavascriptDoToken,
+    whileToken?: SlimeJavascriptWhileToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken,
+    semicolonToken?: SlimeJavascriptSemicolonToken
+  ): SlimeJavascriptDoWhileStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.DoWhileStatement,
+      type: SlimeJavascriptAstTypeName.DoWhileStatement,
       body: body,
       test: test,
       doToken: doToken,
@@ -810,19 +810,19 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createForStatement(
-    body: SlimeStatement,
-    init?: SlimeVariableDeclaration | SlimeExpression | null,
-    test?: SlimeExpression | null,
-    update?: SlimeExpression | null,
+    body: SlimeJavascriptStatement,
+    init?: SlimeJavascriptVariableDeclaration | SlimeJavascriptExpression | null,
+    test?: SlimeJavascriptExpression | null,
+    update?: SlimeJavascriptExpression | null,
     loc?: SubhutiSourceLocation,
-    forToken?: SlimeForToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken,
-    semicolon1Token?: SlimeSemicolonToken,
-    semicolon2Token?: SlimeSemicolonToken
-  ): SlimeForStatement {
+    forToken?: SlimeJavascriptForToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken,
+    semicolon1Token?: SlimeJavascriptSemicolonToken,
+    semicolon2Token?: SlimeJavascriptSemicolonToken
+  ): SlimeJavascriptForStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.ForStatement,
+      type: SlimeJavascriptAstTypeName.ForStatement,
       init: init,
       test: test,
       update: update,
@@ -837,17 +837,17 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createForInStatement(
-    left: SlimeVariableDeclaration | SlimePattern,
-    right: SlimeExpression,
-    body: SlimeStatement,
+    left: SlimeJavascriptVariableDeclaration | SlimeJavascriptPattern,
+    right: SlimeJavascriptExpression,
+    body: SlimeJavascriptStatement,
     loc?: SubhutiSourceLocation,
-    forToken?: SlimeForToken,
-    inToken?: SlimeInToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken
-  ): SlimeForInStatement {
+    forToken?: SlimeJavascriptForToken,
+    inToken?: SlimeJavascriptInToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken
+  ): SlimeJavascriptForInStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.ForInStatement,
+      type: SlimeJavascriptAstTypeName.ForInStatement,
       left: left,
       right: right,
       body: body,
@@ -860,19 +860,19 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createForOfStatement(
-    left: SlimeVariableDeclaration | SlimePattern,
-    right: SlimeExpression,
-    body: SlimeStatement,
+    left: SlimeJavascriptVariableDeclaration | SlimeJavascriptPattern,
+    right: SlimeJavascriptExpression,
+    body: SlimeJavascriptStatement,
     isAwait: boolean = false,
     loc?: SubhutiSourceLocation,
-    forToken?: SlimeForToken,
-    ofToken?: SlimeOfToken,
-    awaitToken?: SlimeAwaitToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken
-  ): SlimeForOfStatement {
+    forToken?: SlimeJavascriptForToken,
+    ofToken?: SlimeJavascriptOfToken,
+    awaitToken?: SlimeJavascriptAwaitToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken
+  ): SlimeJavascriptForOfStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.ForOfStatement,
+      type: SlimeJavascriptAstTypeName.ForOfStatement,
       left: left,
       right: right,
       body: body,
@@ -886,9 +886,9 @@ class SlimeJavascriptAstCreateUtils {
     })
   }
 
-  createDebuggerStatement(loc?: SubhutiSourceLocation, debuggerToken?: SlimeDebuggerToken, semicolonToken?: SlimeSemicolonToken): SlimeDebuggerStatement {
+  createDebuggerStatement(loc?: SubhutiSourceLocation, debuggerToken?: SlimeJavascriptDebuggerToken, semicolonToken?: SlimeJavascriptSemicolonToken): SlimeJavascriptDebuggerStatement {
     return this.commonLocType({
-      type: SlimeAstTypeName.DebuggerStatement,
+      type: SlimeJavascriptAstTypeName.DebuggerStatement,
       debuggerToken: debuggerToken,
       semicolonToken: semicolonToken,
       loc: loc
@@ -896,15 +896,15 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createSwitchCase(
-    consequent: SlimeStatement[],
-    test?: SlimeExpression | null,
+    consequent: SlimeJavascriptStatement[],
+    test?: SlimeJavascriptExpression | null,
     loc?: SubhutiSourceLocation,
-    caseToken?: SlimeCaseToken,
-    defaultToken?: SlimeDefaultToken,
-    colonToken?: SlimeColonToken
-  ): SlimeSwitchCase {
+    caseToken?: SlimeJavascriptCaseToken,
+    defaultToken?: SlimeJavascriptDefaultToken,
+    colonToken?: SlimeJavascriptColonToken
+  ): SlimeJavascriptSwitchCase {
     return this.commonLocType({
-      type: SlimeAstTypeName.SwitchCase,
+      type: SlimeJavascriptAstTypeName.SwitchCase,
       test: test,
       consequent: consequent,
       caseToken: caseToken,
@@ -915,15 +915,15 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createCatchClause(
-    body: SlimeBlockStatement,
-    param?: SlimePattern | null,
+    body: SlimeJavascriptBlockStatement,
+    param?: SlimeJavascriptPattern | null,
     loc?: SubhutiSourceLocation,
-    catchToken?: SlimeCatchToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken
-  ): SlimeCatchClause {
+    catchToken?: SlimeJavascriptCatchToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken
+  ): SlimeJavascriptCatchClause {
     return this.commonLocType({
-      type: SlimeAstTypeName.CatchClause,
+      type: SlimeJavascriptAstTypeName.CatchClause,
       param: param,
       body: body,
       catchToken: catchToken,
@@ -933,9 +933,9 @@ class SlimeJavascriptAstCreateUtils {
     })
   }
 
-  createStaticBlock(body: SlimeStatement[], loc?: SubhutiSourceLocation, lBraceToken?: SlimeLBraceToken, rBraceToken?: SlimeRBraceToken): SlimeStaticBlock {
+  createStaticBlock(body: SlimeJavascriptStatement[], loc?: SubhutiSourceLocation, lBraceToken?: SlimeJavascriptLBraceToken, rBraceToken?: SlimeJavascriptRBraceToken): SlimeJavascriptStaticBlock {
     return this.commonLocType({
-      type: SlimeAstTypeName.StaticBlock,
+      type: SlimeJavascriptAstTypeName.StaticBlock,
       body: body,
       lBraceToken: lBraceToken,
       rBraceToken: rBraceToken,
@@ -948,22 +948,22 @@ class SlimeJavascriptAstCreateUtils {
   // ============================================
 
   createFunctionExpression(
-    body: SlimeBlockStatement,
-    id?: SlimeIdentifier | null,
-    params?: SlimeFunctionParam[],
+    body: SlimeJavascriptBlockStatement,
+    id?: SlimeJavascriptIdentifier | null,
+    params?: SlimeJavascriptFunctionParam[],
     generator?: boolean,
     async?: boolean,
     loc?: SubhutiSourceLocation,
-    functionToken?: SlimeFunctionToken,
-    asyncToken?: SlimeAsyncToken,
-    asteriskToken?: SlimeAsteriskToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken,
-    lBraceToken?: SlimeLBraceToken,
-    rBraceToken?: SlimeRBraceToken
-  ): SlimeFunctionExpression {
+    functionToken?: SlimeJavascriptFunctionToken,
+    asyncToken?: SlimeJavascriptAsyncToken,
+    asteriskToken?: SlimeJavascriptAsteriskToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken,
+    lBraceToken?: SlimeJavascriptLBraceToken,
+    rBraceToken?: SlimeJavascriptRBraceToken
+  ): SlimeJavascriptFunctionExpression {
     return this.commonLocType({
-      type: SlimeAstTypeName.FunctionExpression,
+      type: SlimeJavascriptAstTypeName.FunctionExpression,
       params: params || [],
       id: id,
       body: body,
@@ -984,18 +984,18 @@ class SlimeJavascriptAstCreateUtils {
   // Declarations
   // ============================================
 
-  createVariableDeclaration(kind: SlimeVariableDeclarationKindToken, declarations: SlimeVariableDeclarator[], loc?: SubhutiSourceLocation): SlimeVariableDeclaration {
+  createVariableDeclaration(kind: SlimeJavascriptVariableDeclarationKindToken, declarations: SlimeJavascriptVariableDeclarator[], loc?: SubhutiSourceLocation): SlimeJavascriptVariableDeclaration {
     return this.commonLocType({
-      type: SlimeAstTypeName.VariableDeclaration,
+      type: SlimeJavascriptAstTypeName.VariableDeclaration,
       declarations: declarations,
       kind: kind,
       loc: loc
     })
   }
 
-  createVariableDeclarator(id: SlimePattern, assignToken?: SlimeAssignToken, init?: SlimeExpression | null, loc?: SubhutiSourceLocation): SlimeVariableDeclarator {
+  createVariableDeclarator(id: SlimeJavascriptPattern, assignToken?: SlimeJavascriptAssignToken, init?: SlimeJavascriptExpression | null, loc?: SubhutiSourceLocation): SlimeJavascriptVariableDeclarator {
     return this.commonLocType({
-      type: SlimeAstTypeName.VariableDeclarator,
+      type: SlimeJavascriptAstTypeName.VariableDeclarator,
       id: id,
       assignToken: assignToken,
       init: init,
@@ -1008,12 +1008,12 @@ class SlimeJavascriptAstCreateUtils {
   // ============================================
 
   createRestElement(
-    argument: SlimePattern,
+    argument: SlimeJavascriptPattern,
     loc?: SubhutiSourceLocation,
-    ellipsisToken?: SlimeEllipsisToken
-  ): SlimeRestElement {
+    ellipsisToken?: SlimeJavascriptEllipsisToken
+  ): SlimeJavascriptRestElement {
     return this.commonLocType({
-      type: SlimeAstTypeName.RestElement,
+      type: SlimeJavascriptAstTypeName.RestElement,
       argument: argument,
       ellipsisToken: ellipsisToken,
       loc: loc
@@ -1021,12 +1021,12 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createSpreadElement(
-    argument: SlimeExpression,
+    argument: SlimeJavascriptExpression,
     loc?: SubhutiSourceLocation,
-    ellipsisToken?: SlimeEllipsisToken
-  ): SlimeSpreadElement {
+    ellipsisToken?: SlimeJavascriptEllipsisToken
+  ): SlimeJavascriptSpreadElement {
     return this.commonLocType({
-      type: SlimeAstTypeName.SpreadElement,
+      type: SlimeJavascriptAstTypeName.SpreadElement,
       argument: argument,
       ellipsisToken: ellipsisToken,
       loc: loc
@@ -1034,13 +1034,13 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createObjectPattern(
-    properties: Array<SlimeObjectPatternProperty>,
+    properties: Array<SlimeJavascriptObjectPatternProperty>,
     loc?: SubhutiSourceLocation,
-    lBraceToken?: SlimeLBraceToken,
-    rBraceToken?: SlimeRBraceToken
-  ): SlimeObjectPattern {
+    lBraceToken?: SlimeJavascriptLBraceToken,
+    rBraceToken?: SlimeJavascriptRBraceToken
+  ): SlimeJavascriptObjectPattern {
     return this.commonLocType({
-      type: SlimeAstTypeName.ObjectPattern,
+      type: SlimeJavascriptAstTypeName.ObjectPattern,
       properties: properties,
       lBraceToken: lBraceToken,
       rBraceToken: rBraceToken,
@@ -1050,20 +1050,20 @@ class SlimeJavascriptAstCreateUtils {
 
   /** 创建解构对象属性包装 */
   createObjectPatternProperty(
-    property: SlimeAssignmentProperty | SlimeRestElement,
-    commaToken?: SlimeCommaToken
-  ): SlimeObjectPatternProperty {
+    property: SlimeJavascriptAssignmentProperty | SlimeJavascriptRestElement,
+    commaToken?: SlimeJavascriptCommaToken
+  ): SlimeJavascriptObjectPatternProperty {
     return { property, commaToken }
   }
 
   createArrayPattern(
-    elements: Array<SlimeArrayPatternElement>,
+    elements: Array<SlimeJavascriptArrayPatternElement>,
     loc?: SubhutiSourceLocation,
-    lBracketToken?: SlimeLBracketToken,
-    rBracketToken?: SlimeRBracketToken
-  ): SlimeArrayPattern {
+    lBracketToken?: SlimeJavascriptLBracketToken,
+    rBracketToken?: SlimeJavascriptRBracketToken
+  ): SlimeJavascriptArrayPattern {
     return this.commonLocType({
-      type: SlimeAstTypeName.ArrayPattern,
+      type: SlimeJavascriptAstTypeName.ArrayPattern,
       elements: elements,
       lBracketToken: lBracketToken,
       rBracketToken: rBracketToken,
@@ -1073,19 +1073,19 @@ class SlimeJavascriptAstCreateUtils {
 
   /** 创建解构数组元素包装 */
   createArrayPatternElement(
-    element: SlimePattern | null,
-    commaToken?: SlimeCommaToken
-  ): SlimeArrayPatternElement {
+    element: SlimeJavascriptPattern | null,
+    commaToken?: SlimeJavascriptCommaToken
+  ): SlimeJavascriptArrayPatternElement {
     return { element, commaToken }
   }
 
   createAssignmentPattern(
-    left: SlimePattern,
-    right: SlimeExpression,
+    left: SlimeJavascriptPattern,
+    right: SlimeJavascriptExpression,
     loc?: SubhutiSourceLocation
-  ): SlimeAssignmentPattern {
+  ): SlimeJavascriptAssignmentPattern {
     return this.commonLocType({
-      type: SlimeAstTypeName.AssignmentPattern,
+      type: SlimeJavascriptAstTypeName.AssignmentPattern,
       left: left,
       right: right,
       loc: loc
@@ -1093,17 +1093,17 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createAssignmentProperty(
-    key: SlimeExpression | SlimePrivateIdentifier,
-    value: SlimePattern,
+    key: SlimeJavascriptExpression | SlimeJavascriptPrivateIdentifier,
+    value: SlimeJavascriptPattern,
     shorthand: boolean = false,
     computed: boolean = false,
     loc?: SubhutiSourceLocation,
-    colonToken?: SlimeColonToken,
-    lBracketToken?: SlimeLBracketToken,
-    rBracketToken?: SlimeRBracketToken
-  ): SlimeAssignmentProperty {
+    colonToken?: SlimeJavascriptColonToken,
+    lBracketToken?: SlimeJavascriptLBracketToken,
+    rBracketToken?: SlimeJavascriptRBracketToken
+  ): SlimeJavascriptAssignmentProperty {
     return this.commonLocType({
-      type: SlimeAstTypeName.Property,
+      type: SlimeJavascriptAstTypeName.Property,
       key: key,
       value: value,
       kind: "init",
@@ -1122,19 +1122,19 @@ class SlimeJavascriptAstCreateUtils {
   // ============================================
 
   createImportDeclaration(
-    specifiers: Array<SlimeImportSpecifierItem>,
-    source: SlimeStringLiteral,
+    specifiers: Array<SlimeJavascriptImportSpecifierItem>,
+    source: SlimeJavascriptStringLiteral,
     loc?: SubhutiSourceLocation,
-    importToken?: SlimeImportToken,
-    fromToken?: SlimeFromToken,
-    lBraceToken?: SlimeLBraceToken,
-    rBraceToken?: SlimeRBraceToken,
-    semicolonToken?: SlimeSemicolonToken,
+    importToken?: SlimeJavascriptImportToken,
+    fromToken?: SlimeJavascriptFromToken,
+    lBraceToken?: SlimeJavascriptLBraceToken,
+    rBraceToken?: SlimeJavascriptRBraceToken,
+    semicolonToken?: SlimeJavascriptSemicolonToken,
     attributes?: any[],  // ES2025 Import Attributes
     withToken?: any
-  ): SlimeImportDeclaration {
+  ): SlimeJavascriptImportDeclaration {
     const decl: any = {
-      type: SlimeAstTypeName.ImportDeclaration,
+      type: SlimeJavascriptAstTypeName.ImportDeclaration,
       source: source,
       specifiers: specifiers,
       importToken: importToken,
@@ -1154,20 +1154,20 @@ class SlimeJavascriptAstCreateUtils {
 
   /** 创建 import specifier 包装 */
   createImportSpecifierItem(
-    specifier: SlimeImportSpecifier | SlimeImportDefaultSpecifier | SlimeImportNamespaceSpecifier,
-    commaToken?: SlimeCommaToken
-  ): SlimeImportSpecifierItem {
+    specifier: SlimeJavascriptImportSpecifier | SlimeJavascriptImportDefaultSpecifier | SlimeJavascriptImportNamespaceSpecifier,
+    commaToken?: SlimeJavascriptCommaToken
+  ): SlimeJavascriptImportSpecifierItem {
     return { specifier, commaToken }
   }
 
   createImportSpecifier(
-    local: SlimeIdentifier,
-    imported: SlimeIdentifier | SlimeLiteral,
+    local: SlimeJavascriptIdentifier,
+    imported: SlimeJavascriptIdentifier | SlimeJavascriptLiteral,
     loc?: SubhutiSourceLocation,
-    asToken?: SlimeAsToken
-  ): SlimeImportSpecifier {
+    asToken?: SlimeJavascriptAsToken
+  ): SlimeJavascriptImportSpecifier {
     return this.commonLocType({
-      type: SlimeAstTypeName.ImportSpecifier,
+      type: SlimeJavascriptAstTypeName.ImportSpecifier,
       local: local,
       imported: imported,
       asToken: asToken,
@@ -1175,22 +1175,22 @@ class SlimeJavascriptAstCreateUtils {
     })
   }
 
-  createImportDefaultSpecifier(local: SlimeIdentifier, loc?: SubhutiSourceLocation): SlimeImportDefaultSpecifier {
+  createImportDefaultSpecifier(local: SlimeJavascriptIdentifier, loc?: SubhutiSourceLocation): SlimeJavascriptImportDefaultSpecifier {
     return this.commonLocType({
-      type: SlimeAstTypeName.ImportDefaultSpecifier,
+      type: SlimeJavascriptAstTypeName.ImportDefaultSpecifier,
       local: local,
       loc: loc
     })
   }
 
   createImportNamespaceSpecifier(
-    local: SlimeIdentifier,
+    local: SlimeJavascriptIdentifier,
     loc?: SubhutiSourceLocation,
-    asteriskToken?: SlimeAsteriskToken,
-    asToken?: SlimeAsToken
-  ): SlimeImportNamespaceSpecifier {
+    asteriskToken?: SlimeJavascriptAsteriskToken,
+    asToken?: SlimeJavascriptAsToken
+  ): SlimeJavascriptImportNamespaceSpecifier {
     return this.commonLocType({
-      type: SlimeAstTypeName.ImportNamespaceSpecifier,
+      type: SlimeJavascriptAstTypeName.ImportNamespaceSpecifier,
       local: local,
       asteriskToken: asteriskToken,
       asToken: asToken,
@@ -1199,13 +1199,13 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createExportDefaultDeclaration(
-    declaration: SlimeMaybeNamedFunctionDeclaration | SlimeMaybeNamedClassDeclaration | SlimeExpression,
+    declaration: SlimeJavascriptMaybeNamedFunctionDeclaration | SlimeJavascriptMaybeNamedClassDeclaration | SlimeJavascriptExpression,
     loc?: SubhutiSourceLocation,
-    exportToken?: SlimeExportToken,
-    defaultToken?: SlimeDefaultToken
-  ): SlimeExportDefaultDeclaration {
+    exportToken?: SlimeJavascriptExportToken,
+    defaultToken?: SlimeJavascriptDefaultToken
+  ): SlimeJavascriptExportDefaultDeclaration {
     return this.commonLocType({
-      type: SlimeAstTypeName.ExportDefaultDeclaration,
+      type: SlimeJavascriptAstTypeName.ExportDefaultDeclaration,
       declaration: declaration,
       exportToken: exportToken,
       defaultToken: defaultToken,
@@ -1214,18 +1214,18 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createExportNamedDeclaration(
-    declaration: SlimeDeclaration | null,
-    specifiers: SlimeExportSpecifierItem[],
-    source?: SlimeLiteral | null,
+    declaration: SlimeJavascriptDeclaration | null,
+    specifiers: SlimeJavascriptExportSpecifierItem[],
+    source?: SlimeJavascriptLiteral | null,
     loc?: SubhutiSourceLocation,
-    exportToken?: SlimeExportToken,
-    fromToken?: SlimeFromToken,
-    lBraceToken?: SlimeLBraceToken,
-    rBraceToken?: SlimeRBraceToken,
-    semicolonToken?: SlimeSemicolonToken
-  ): SlimeExportNamedDeclaration {
+    exportToken?: SlimeJavascriptExportToken,
+    fromToken?: SlimeJavascriptFromToken,
+    lBraceToken?: SlimeJavascriptLBraceToken,
+    rBraceToken?: SlimeJavascriptRBraceToken,
+    semicolonToken?: SlimeJavascriptSemicolonToken
+  ): SlimeJavascriptExportNamedDeclaration {
     return this.commonLocType({
-      type: SlimeAstTypeName.ExportNamedDeclaration,
+      type: SlimeJavascriptAstTypeName.ExportNamedDeclaration,
       declaration: declaration,
       specifiers: specifiers,
       source: source,
@@ -1240,20 +1240,20 @@ class SlimeJavascriptAstCreateUtils {
 
   /** 创建 export specifier 包装 */
   createExportSpecifierItem(
-    specifier: SlimeExportSpecifier,
-    commaToken?: SlimeCommaToken
-  ): SlimeExportSpecifierItem {
+    specifier: SlimeJavascriptExportSpecifier,
+    commaToken?: SlimeJavascriptCommaToken
+  ): SlimeJavascriptExportSpecifierItem {
     return { specifier, commaToken }
   }
 
   createExportSpecifier(
-    local: SlimeIdentifier | SlimeLiteral,
-    exported: SlimeIdentifier | SlimeLiteral,
+    local: SlimeJavascriptIdentifier | SlimeJavascriptLiteral,
+    exported: SlimeJavascriptIdentifier | SlimeJavascriptLiteral,
     loc?: SubhutiSourceLocation,
-    asToken?: SlimeAsToken
-  ): SlimeExportSpecifier {
+    asToken?: SlimeJavascriptAsToken
+  ): SlimeJavascriptExportSpecifier {
     return this.commonLocType({
-      type: SlimeAstTypeName.ExportSpecifier,
+      type: SlimeJavascriptAstTypeName.ExportSpecifier,
       local: local,
       exported: exported,
       asToken: asToken,
@@ -1262,17 +1262,17 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createExportAllDeclaration(
-    source: SlimeLiteral,
-    exported?: SlimeIdentifier | SlimeLiteral | null,
+    source: SlimeJavascriptLiteral,
+    exported?: SlimeJavascriptIdentifier | SlimeJavascriptLiteral | null,
     loc?: SubhutiSourceLocation,
-    exportToken?: SlimeExportToken,
-    asteriskToken?: SlimeAsteriskToken,
-    asToken?: SlimeAsToken,
-    fromToken?: SlimeFromToken,
-    semicolonToken?: SlimeSemicolonToken
-  ): SlimeExportAllDeclaration {
+    exportToken?: SlimeJavascriptExportToken,
+    asteriskToken?: SlimeJavascriptAsteriskToken,
+    asToken?: SlimeJavascriptAsToken,
+    fromToken?: SlimeJavascriptFromToken,
+    semicolonToken?: SlimeJavascriptSemicolonToken
+  ): SlimeJavascriptExportAllDeclaration {
     return this.commonLocType({
-      type: SlimeAstTypeName.ExportAllDeclaration,
+      type: SlimeJavascriptAstTypeName.ExportAllDeclaration,
       source: source,
       exported: exported,
       exportToken: exportToken,
@@ -1285,12 +1285,12 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createDirective(
-    expression: SlimeLiteral,
+    expression: SlimeJavascriptLiteral,
     directive: string,
     loc?: SubhutiSourceLocation
-  ): SlimeDirective {
+  ): SlimeJavascriptDirective {
     return this.commonLocType({
-      type: SlimeAstTypeName.ExpressionStatement,
+      type: SlimeJavascriptAstTypeName.ExpressionStatement,
       expression: expression,
       directive: directive,
       loc: loc
@@ -1302,15 +1302,15 @@ class SlimeJavascriptAstCreateUtils {
   // ============================================
 
   createClassDeclaration(
-    id: SlimeIdentifier | null,
-    body: SlimeClassBody,
-    superClass?: SlimeExpression | null,
+    id: SlimeJavascriptIdentifier | null,
+    body: SlimeJavascriptClassBody,
+    superClass?: SlimeJavascriptExpression | null,
     loc?: SubhutiSourceLocation,
-    classToken?: SlimeClassToken,
-    extendsToken?: SlimeExtendsToken
-  ): SlimeClassDeclaration {
+    classToken?: SlimeJavascriptClassToken,
+    extendsToken?: SlimeJavascriptExtendsToken
+  ): SlimeJavascriptClassDeclaration {
     return this.commonLocType({
-      type: SlimeAstTypeName.ClassDeclaration,
+      type: SlimeJavascriptAstTypeName.ClassDeclaration,
       id: id,
       body: body,
       superClass: superClass,
@@ -1321,13 +1321,13 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createClassBody(
-    body: Array<SlimeMethodDefinition | SlimePropertyDefinition | SlimeStaticBlock>,
+    body: Array<SlimeJavascriptMethodDefinition | SlimeJavascriptPropertyDefinition | SlimeJavascriptStaticBlock>,
     loc?: SubhutiSourceLocation,
-    lBraceToken?: SlimeLBraceToken,
-    rBraceToken?: SlimeRBraceToken
-  ): SlimeClassBody {
+    lBraceToken?: SlimeJavascriptLBraceToken,
+    rBraceToken?: SlimeJavascriptRBraceToken
+  ): SlimeJavascriptClassBody {
     return this.commonLocType({
-      type: SlimeAstTypeName.ClassBody,
+      type: SlimeJavascriptAstTypeName.ClassBody,
       body: body,
       lBraceToken: lBraceToken,
       rBraceToken: rBraceToken,
@@ -1336,22 +1336,22 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createFunctionDeclaration(
-    id: SlimeIdentifier | null,
-    params: SlimeFunctionParam[],
-    body: SlimeBlockStatement,
+    id: SlimeJavascriptIdentifier | null,
+    params: SlimeJavascriptFunctionParam[],
+    body: SlimeJavascriptBlockStatement,
     generator: boolean = false,
     async: boolean = false,
     loc?: SubhutiSourceLocation,
-    functionToken?: SlimeFunctionToken,
-    asyncToken?: SlimeAsyncToken,
-    asteriskToken?: SlimeAsteriskToken,
-    lParenToken?: SlimeLParenToken,
-    rParenToken?: SlimeRParenToken,
-    lBraceToken?: SlimeLBraceToken,
-    rBraceToken?: SlimeRBraceToken
-  ): SlimeFunctionDeclaration {
+    functionToken?: SlimeJavascriptFunctionToken,
+    asyncToken?: SlimeJavascriptAsyncToken,
+    asteriskToken?: SlimeJavascriptAsteriskToken,
+    lParenToken?: SlimeJavascriptLParenToken,
+    rParenToken?: SlimeJavascriptRParenToken,
+    lBraceToken?: SlimeJavascriptLBraceToken,
+    rBraceToken?: SlimeJavascriptRBraceToken
+  ): SlimeJavascriptFunctionDeclaration {
     return this.commonLocType({
-      type: SlimeAstTypeName.FunctionDeclaration,
+      type: SlimeJavascriptAstTypeName.FunctionDeclaration,
       id: id,
       params: params,
       body: body,
@@ -1368,16 +1368,16 @@ class SlimeJavascriptAstCreateUtils {
     })
   }
 
-  createIdentifier(name: string, loc?: SubhutiSourceLocation): SlimeIdentifier {
+  createIdentifier(name: string, loc?: SubhutiSourceLocation): SlimeJavascriptIdentifier {
     return this.commonLocType({
-      type: SlimeAstTypeName.Identifier,
+      type: SlimeJavascriptAstTypeName.Identifier,
       name: name,
       loc: loc
     })
   }
 
-  createLiteral(value?: number | string): SlimeLiteral {
-    let ast: SlimeLiteral
+  createLiteral(value?: number | string): SlimeJavascriptLiteral {
+    let ast: SlimeJavascriptLiteral
     if (value === undefined) {
       // ast = this.createNullLiteralToken()
     } else if (typeof value === "string") {
@@ -1389,37 +1389,37 @@ class SlimeJavascriptAstCreateUtils {
   }
 
 
-  createNullLiteralToken(): SlimeNullLiteral {
+  createNullLiteralToken(): SlimeJavascriptNullLiteral {
     return this.commonLocType({
-      type: SlimeAstTypeName.Literal,
+      type: SlimeJavascriptAstTypeName.Literal,
       value: null
     })
   }
 
 
-  createStringLiteral(value: string, loc?: SubhutiSourceLocation, raw?: string): SlimeStringLiteral {
+  createStringLiteral(value: string, loc?: SubhutiSourceLocation, raw?: string): SlimeJavascriptStringLiteral {
     // 检查 value 是否已经有引号
     const hasQuotes = /^['"].*['"]$/.test(value)
     const cleanValue = value.replace(/^['"]|['"]$/g, '')
     return this.commonLocType({
-      type: SlimeAstTypeName.Literal,
+      type: SlimeJavascriptAstTypeName.Literal,
       value: cleanValue,
       raw: raw || (hasQuotes ? value : `'${value}'`),  // 如果已有引号就保留，否则自动加引号
       loc: loc
     })
   }
 
-  createNumericLiteral(value: number, raw?: string): SlimeNumericLiteral {
+  createNumericLiteral(value: number, raw?: string): SlimeJavascriptNumericLiteral {
     return this.commonLocType({
-      type: SlimeAstTypeName.Literal,
+      type: SlimeJavascriptAstTypeName.Literal,
       value: value,
       raw: raw || String(value)  // 保存原始值（保留格式如 0xFF）
     })
   }
 
-  createBooleanLiteral(value: boolean, loc?: SubhutiSourceLocation): SlimeBooleanLiteral {
+  createBooleanLiteral(value: boolean, loc?: SubhutiSourceLocation): SlimeJavascriptBooleanLiteral {
     return this.commonLocType({
-      type: SlimeAstTypeName.Literal,
+      type: SlimeJavascriptAstTypeName.Literal,
       value: value,
       loc: loc
     })
@@ -1430,9 +1430,9 @@ class SlimeJavascriptAstCreateUtils {
     flags: string,
     raw?: string,
     loc?: SubhutiSourceLocation
-  ): SlimeRegExpLiteral {
+  ): SlimeJavascriptRegExpLiteral {
     return this.commonLocType({
-      type: SlimeAstTypeName.Literal,
+      type: SlimeJavascriptAstTypeName.Literal,
       regex: {
         pattern: pattern,
         flags: flags
@@ -1446,18 +1446,18 @@ class SlimeJavascriptAstCreateUtils {
     bigint: string,
     raw?: string,
     loc?: SubhutiSourceLocation
-  ): SlimeBigIntLiteral {
+  ): SlimeJavascriptBigIntLiteral {
     return this.commonLocType({
-      type: SlimeAstTypeName.Literal,
+      type: SlimeJavascriptAstTypeName.Literal,
       bigint: bigint,
       raw: raw || `${bigint}n`,
       loc: loc
     })
   }
 
-  createTemplateLiteral(quasis: SlimeTemplateElement[], expressions: SlimeExpression[], loc?: SubhutiSourceLocation): SlimeTemplateLiteral {
+  createTemplateLiteral(quasis: SlimeJavascriptTemplateElement[], expressions: SlimeJavascriptExpression[], loc?: SubhutiSourceLocation): SlimeJavascriptTemplateLiteral {
     return this.commonLocType({
-      type: SlimeAstTypeName.TemplateLiteral,
+      type: SlimeJavascriptAstTypeName.TemplateLiteral,
       quasis: quasis,
       expressions: expressions,
       loc: loc
@@ -1466,7 +1466,7 @@ class SlimeJavascriptAstCreateUtils {
 
   createTemplateElement(tail: boolean, raw: string, cooked?: string | null, loc?: SubhutiSourceLocation): any {
     return this.commonLocType({
-      type: SlimeAstTypeName.TemplateElement,
+      type: SlimeJavascriptAstTypeName.TemplateElement,
       tail: tail,
       value: {
         raw: raw,
@@ -1477,20 +1477,20 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createMethodDefinition(
-    key: SlimeExpression | SlimePrivateIdentifier,
-    value: SlimeFunctionExpression,
+    key: SlimeJavascriptExpression | SlimeJavascriptPrivateIdentifier,
+    value: SlimeJavascriptFunctionExpression,
     kind: "constructor" | "method" | "get" | "set" = "method",
     computed: boolean = false,
     isStatic: boolean = false,
     loc?: SubhutiSourceLocation,
-    staticToken?: SlimeStaticToken,
-    getToken?: SlimeGetToken,
-    setToken?: SlimeSetToken,
-    asyncToken?: SlimeAsyncToken,
-    asteriskToken?: SlimeAsteriskToken
-  ): SlimeMethodDefinition {
+    staticToken?: SlimeJavascriptStaticToken,
+    getToken?: SlimeJavascriptGetToken,
+    setToken?: SlimeJavascriptSetToken,
+    asyncToken?: SlimeJavascriptAsyncToken,
+    asteriskToken?: SlimeJavascriptAsteriskToken
+  ): SlimeJavascriptMethodDefinition {
     return this.commonLocType({
-      type: SlimeAstTypeName.MethodDefinition,
+      type: SlimeJavascriptAstTypeName.MethodDefinition,
       key: key,
       value: value,
       kind: kind,
@@ -1506,14 +1506,14 @@ class SlimeJavascriptAstCreateUtils {
   }
 
   createPropertyDefinition(
-    key: SlimeExpression | SlimePrivateIdentifier,
-    value?: SlimeExpression | null,
+    key: SlimeJavascriptExpression | SlimeJavascriptPrivateIdentifier,
+    value?: SlimeJavascriptExpression | null,
     computed: boolean = false,
     isStatic: boolean = false,
     loc?: SubhutiSourceLocation
-  ): SlimePropertyDefinition {
+  ): SlimeJavascriptPropertyDefinition {
     return this.commonLocType({
-      type: SlimeAstTypeName.PropertyDefinition,
+      type: SlimeJavascriptAstTypeName.PropertyDefinition,
       key: key,
       value: value ?? null,
       computed: computed,
