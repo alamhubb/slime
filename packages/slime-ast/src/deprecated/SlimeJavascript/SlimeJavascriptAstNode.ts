@@ -745,7 +745,7 @@ export interface SlimeJavascriptVariableDeclarator extends SlimeJavascriptBaseNo
     id: SlimeJavascriptPattern;
     init?: SlimeJavascriptExpression | null | undefined;
     /** 赋值符号 Token，包含位置信息 */
-    assignToken?: SlimeJavascriptAssignToken;
+    eqToken?: SlimeJavascriptAssignToken;
 }
 
 export interface SlimeJavascriptExpressionMap {

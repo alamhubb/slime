@@ -997,7 +997,7 @@ class SlimeJavascriptAstCreateUtils {
     return this.commonLocType({
       type: SlimeJavascriptAstTypeName.VariableDeclarator,
       id: id,
-      assignToken: assignToken,
+      eqToken: assignToken,
       init: init,
       loc: loc
     })

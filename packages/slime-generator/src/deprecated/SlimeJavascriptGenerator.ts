@@ -1564,8 +1564,8 @@ export default class SlimeJavascriptGenerator {
         if (node.init) {
             this.addSpacing()
             // 优先使用 node.equal，如果没有则使用默认的等号 token
-            if (node.equal) {
-                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Eq, node.equal.loc)
+            if (node.eqToken) {
+                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Eq, node.eqToken.loc)
             } else {
                 this.addCode(SlimeJavascriptGeneratorTokensObj.Eq)
             }
