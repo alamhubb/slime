@@ -364,17 +364,6 @@ export class SlimeCstToAst {
 
         throw new Error(`No conversion method found for CST node: ${name}`)
     }
-
-
-    /*createImportClauseAst(cst: SubhutiCst.ts):Array<SlimeImportSpecifier | SlimeImportDefaultSpecifier | SlimeImportNamespaceSpecifier>{
-    let astName = SlimeAstUtils.checkCstName(cst, Es2025Parser.prototype.ImportClause?.name);
-
-
-  }*/
-
-
-
-
 }
 
 const SlimeCstToAstUtil = new SlimeCstToAst()
