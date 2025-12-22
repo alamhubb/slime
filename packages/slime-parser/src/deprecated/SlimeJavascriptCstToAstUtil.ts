@@ -65,8 +65,6 @@ import {
     type SlimeJavascriptExportSpecifier,
 } from "slime-ast";
 import {SubhutiCst, type SubhutiSourceLocation} from "subhuti";
-import SlimeJavascriptParser from "./SlimeJavascriptParser.ts";
-import {SlimeJavascriptAstUtil, SlimeJavascriptTokenCreate, SlimeJavascriptAstTypeName} from "slime-ast";
 import {
     ArrowFunctionCstToAst,
     AssignmentPatternCstToAst,
@@ -93,7 +91,7 @@ import {
     PrimaryExpressionCstToAst,
     UnaryExpressionCstToAst,
     VariableCstToAst, ClassDeclarationCstToAst,
-} from "./cstToAst";
+} from "./slimeJavascriptCstToAst";
 
 
 // ============================================
