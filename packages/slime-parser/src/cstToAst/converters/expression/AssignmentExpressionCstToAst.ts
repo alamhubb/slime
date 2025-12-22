@@ -10,8 +10,9 @@ import {
 } from "slime-ast";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
-export default class AssignmentExpressionCstToAst {
+export class AssignmentExpressionCstToAst {
 
     /**
      * ExpressionBody CST �?AST

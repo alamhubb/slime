@@ -11,7 +11,7 @@ import {
 import SlimeParser from "../../../SlimeParser.ts";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 
-export default class FunctionParameterCstToAst {
+export class FunctionParameterCstToAst {
 
     static createBindingRestElementAst(cst: SubhutiCst): SlimeRestElement {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BindingRestElement?.name);

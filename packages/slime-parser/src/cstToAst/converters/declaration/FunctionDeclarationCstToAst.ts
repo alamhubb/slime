@@ -9,7 +9,7 @@ import {
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
-export default class FunctionDeclarationCstToAst {
+export class FunctionDeclarationCstToAst {
 
 
     /**
