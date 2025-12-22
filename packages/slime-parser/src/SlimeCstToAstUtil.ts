@@ -65,8 +65,8 @@ import {
     type SlimeExportSpecifier,
 } from "slime-ast";
 import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
-import SlimeParser from "./SlimeParser";
-import SlimeTokenConsumer from "./SlimeTokenConsumer";
+import SlimeParser from "./SlimeParser.ts";
+import SlimeTokenConsumer from "./SlimeTokenConsumer.ts";
 import { SlimeAstUtil, SlimeTokenCreate, SlimeNodeType } from "slime-ast";
 
 // ============================================
