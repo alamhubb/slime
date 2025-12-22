@@ -173,7 +173,7 @@ export class SlimeCstToAst {
         if (cst.name !== cstName) {
             throw new Error(cst.name)
         }
-        return Name
+        return cstName
     }
 
     readonly expressionAstCache = new WeakMap<SubhutiCst, SlimeExpression>()
@@ -235,11 +235,11 @@ export class SlimeCstToAst {
     }
 
     processTemplateMiddleList(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[]): void {
-        LiteralCstToAst.processTemplateMiddleList(cst, quasis, expressions)
+        return SlimeLiteralCstToAst.processTemplateMiddleList(cst, quasis, expressions)
     }
 
     processTemplateSpans(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[]): void {
-        LiteralCstToAst.processTemplateSpans(cst, quasis, expressions)
+        return SlimeLiteralCstToAst.processTemplateSpans(cst, quasis, expressions)
     }
 
     createTemplateLiteralAst(cst: SubhutiCst): SlimeExpression {

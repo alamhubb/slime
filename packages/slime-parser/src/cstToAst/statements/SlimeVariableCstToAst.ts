@@ -14,10 +14,13 @@ import {
     SlimeAstUtil, type SlimePattern, type SlimeExpression
 } from "slime-ast";
 import {SlimeClassDeclarationCstToAstSingle} from "../class/SlimeClassDeclarationCstToAst.ts";
-import {SlimeJavascriptOtherStatementCstToAstSingle} from "../../deprecated/slimeJavascriptCstToAst";
+import {
+    SlimeJavascriptOtherStatementCstToAstSingle,
+    SlimeJavascriptVariableCstToAstSingle
+} from "../../deprecated/slimeJavascriptCstToAst";
 
 
-export class SlimeVariableCstToAstSingle extends SlimeJavascriptOtherStatementCstToAstSingle {
+export class SlimeVariableCstToAstSingle extends SlimeJavascriptVariableCstToAstSingle {
 
 }
 

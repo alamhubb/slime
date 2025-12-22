@@ -13,9 +13,12 @@ import {
 } from "slime-ast";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import {SlimeVariableCstToAstSingle} from "./SlimeVariableCstToAst.ts";
-import {SlimeJavascriptBlockCstToAstSingle} from "../../deprecated/slimeJavascriptCstToAst";
+import {
+    SlimeJavascriptBlockCstToAstSingle,
+    SlimeJavascriptControlFlowCstToAstSingle
+} from "../../deprecated/slimeJavascriptCstToAst";
 
-export class SlimeControlFlowCstToAstSingle extends SlimeJavascriptBlockCstToAstSingle {
+export class SlimeControlFlowCstToAstSingle extends SlimeJavascriptControlFlowCstToAstSingle {
 
 }
 

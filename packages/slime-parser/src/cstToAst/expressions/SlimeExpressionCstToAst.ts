@@ -8,9 +8,12 @@ import {SlimeAstUtil, SlimeExpression, SlimeAstTypeName, SlimeTokenCreate} from 
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import {SlimeVariableCstToAstSingle} from "../statements/SlimeVariableCstToAst.ts";
-import {SlimeJavascriptBinaryExpressionCstToAstSingle} from "../../deprecated/slimeJavascriptCstToAst";
+import {
+    SlimeJavascriptBinaryExpressionCstToAstSingle,
+    SlimeJavascriptExpressionCstToAstSingle
+} from "../../deprecated/slimeJavascriptCstToAst";
 
-export class SlimeExpressionCstToAstSingle extends SlimeJavascriptBinaryExpressionCstToAstSingle{
+export class SlimeExpressionCstToAstSingle extends SlimeJavascriptExpressionCstToAstSingle{
 
 }
 
