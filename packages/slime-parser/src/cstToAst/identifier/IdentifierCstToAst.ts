@@ -24,7 +24,7 @@ export class IdentifierCstToAst {
 
         // 如果直接�?value，使用它
         if (cst.value !== undefined) {
-            const decodedName = SlimeAstUtils.decodeUnicodeEscapes(cst.value as string)
+            const decodedName = SlimeCstToAstUtil.decodeUnicodeEscapes(cst.value as string)
             return SlimeAstUtil.createIdentifier(decodedName, cst.loc)
         }
 
@@ -35,7 +35,7 @@ export class IdentifierCstToAst {
         }
 
         if (current.value !== undefined) {
-            const decodedName = SlimeAstUtils.decodeUnicodeEscapes(current.value as string)
+            const decodedName = SlimeCstToAstUtil.decodeUnicodeEscapes(current.value as string)
             return SlimeAstUtil.createIdentifier(decodedName, current.loc || cst.loc)
         }
 
@@ -82,7 +82,7 @@ export class IdentifierCstToAst {
         // 例如：{ name: 'PrivateIdentifier', value: '#count' } �?value: '#\u{61}'
         if (cst.value) {
             const rawName = cst.value as string
-            const decodedName = SlimeAstUtils.decodeUnicodeEscapes(rawName)
+            const decodedName = SlimeCstToAstUtil.decodeUnicodeEscapes(rawName)
             // 保存原始值和解码后的�?
             const name = decodedName.startsWith('#') ? decodedName : '#' + decodedName
             const raw = rawName.startsWith('#') ? rawName : '#' + rawName
@@ -99,7 +99,7 @@ export class IdentifierCstToAst {
             const identifierNameCst = cst.children[1]
             const identifierCst = identifierNameCst.children[0]
             const rawName = identifierCst.value as string
-            const decodedName = SlimeAstUtils.decodeUnicodeEscapes(rawName)
+            const decodedName = SlimeCstToAstUtil.decodeUnicodeEscapes(rawName)
             const identifier = SlimeAstUtil.createIdentifier('#' + decodedName)
             // 保存原始�?
             if (rawName !== decodedName) {
@@ -113,7 +113,7 @@ export class IdentifierCstToAst {
             const child = cst.children[0]
             if (child.value) {
                 const rawName = child.value as string
-                const decodedName = SlimeAstUtils.decodeUnicodeEscapes(rawName)
+                const decodedName = SlimeCstToAstUtil.decodeUnicodeEscapes(rawName)
                 const identifier = SlimeAstUtil.createIdentifier('#' + decodedName)
                 if (rawName !== decodedName) {
                     (identifier as any).raw = '#' + rawName
@@ -227,7 +227,7 @@ export class IdentifierCstToAst {
         }
 
         // 解码 Unicode 转义序列（如 \u0061 -> a�?
-        const decodedName = SlimeAstUtils.decodeUnicodeEscapes(value)
+        const decodedName = SlimeCstToAstUtil.decodeUnicodeEscapes(value)
         // 使用 token �?loc（包含原始值），而不是规则的 loc
         const identifier = SlimeAstUtil.createIdentifier(decodedName, tokenLoc || cst.loc)
         return identifier

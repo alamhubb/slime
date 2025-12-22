@@ -64,9 +64,9 @@ import {
     type SlimeExportAllDeclaration,
     type SlimeExportSpecifier,
 } from "slime-ast";
-import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
+import {SubhutiCst, type SubhutiSourceLocation} from "subhuti";
 import SlimeParser from "./SlimeParser.ts";
-import { SlimeAstUtil, SlimeTokenCreate, SlimeNodeType } from "slime-ast";
+import {SlimeAstUtil, SlimeTokenCreate, SlimeNodeType} from "slime-ast";
 import {
     ArrowFunctionCstToAst,
     AssignmentPatternCstToAst,
@@ -94,6 +94,7 @@ import {
     UnaryExpressionCstToAst,
     VariableCstToAst, ClassDeclarationCstToAst,
 } from "./cstToAst";
+import {SlimeAstUtils} from "./cstToAst/SlimeAstUtils.ts";
 
 // ============================================
 // Unicode 转义序列解码
@@ -143,6 +144,45 @@ import {
  * - toProgram: Program 入口处理
  */
 export class SlimeCstToAst {
+
+    /**
+     * 将 Unicode 转义序列解码为实际字符
+     * 支持 \uXXXX 和 \u{XXXXX} 格式
+     *
+     * @param str 可能包含 Unicode 转义的字符串
+     * @returns 解码后的字符串
+     */
+    decodeUnicodeEscapes(str: string | undefined): string {
+        // 如果为空或不包含转义序列，直接返回（性能优化�?
+        if (!str || !str.includes('\\u')) {
+            return str || ''
+        }
+
+        return str.replace(/\\u\{([0-9a-fA-F]+)\}|\\u([0-9a-fA-F]{4})/g,
+            (match, braceCode, fourDigitCode) => {
+                const codePoint = parseInt(braceCode || fourDigitCode, 16)
+                return String.fromCodePoint(codePoint)
+            }
+        )
+    }
+
+    /**
+     * 检查 CST 节点名称是否匹配
+     */
+    checkCstName(cst: SubhutiCst, cstName: string) {
+        if (cst.name !== cstName) {
+            SlimeAstUtils.throwNewError(cst.name)
+        }
+        return cstName
+    }
+
+    /**
+     * 抛出错误
+     */
+    throwNewError(errorMsg: string = 'syntax error') {
+        throw new Error(errorMsg)
+    }
+
     readonly expressionAstCache = new WeakMap<SubhutiCst, SlimeExpression>()
 
     // === identifier / IdentifierCstToAst ===
@@ -1202,6 +1242,7 @@ export class SlimeCstToAst {
     createModuleItemListAst(cst: SubhutiCst): Array<SlimeStatement | SlimeModuleDeclaration> {
         return ModuleCstToAst.createModuleItemListAst(cst)
     }
+
     // === class / ClassDeclarationCstToAst ===
 }
 
