@@ -3,21 +3,21 @@
  */
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeAstUtil, type SlimeBlockStatement,
-    SlimeExpression,
-    type SlimeFunctionExpression,
-    type SlimeFunctionParam,
-    type SlimeIdentifier, SlimeAstTypeName, SlimeTokenCreate
+    SlimeJavascriptAstUtil, type SlimeJavascriptBlockStatement,
+    SlimeJavascriptExpression,
+    type SlimeJavascriptFunctionExpression,
+    type SlimeJavascriptFunctionParam,
+    type SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, SlimeJavascriptTokenCreate
 } from "slime-ast";
 
-import SlimeParser from "../../SlimeParser.ts";
-import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
-import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
+import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 
 export class UnaryExpressionCstToAst {
 
-    static createUnaryExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.UnaryExpression?.name);
+    static createUnaryExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.UnaryExpression?.name);
 
         // 防御性检查：如果没有children，抛出更详细的错�?
         if (!cst.children || cst.children.length === 0) {
@@ -40,7 +40,7 @@ export class UnaryExpressionCstToAst {
             }
 
             // 是表达式节点，递归处理
-            return SlimeCstToAstUtil.createExpressionAst(child)
+            return SlimeJavascriptCstToAstUtil.createExpressionAst(child)
         }
 
         // 如果有两个子节点，是一元运算符表达�?
@@ -65,11 +65,11 @@ export class UnaryExpressionCstToAst {
         const operator = operatorMap[operatorToken.name] || operatorToken.value
 
         // 递归处理操作�?
-        const argument = SlimeCstToAstUtil.createExpressionAst(argumentCst)
+        const argument = SlimeJavascriptCstToAstUtil.createExpressionAst(argumentCst)
 
         // 创建 UnaryExpression AST
         return {
-            type: SlimeAstTypeName.UnaryExpression,
+            type: SlimeJavascriptAstTypeName.UnaryExpression,
             operator: operator,
             prefix: true,  // 前缀运算�?
             argument: argument,
@@ -78,7 +78,7 @@ export class UnaryExpressionCstToAst {
     }
 
     // Renamed from createPostfixExpressionAst - ES2025 uses UpdateExpression
-    static createUpdateExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createUpdateExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         // Support both PostfixExpression (old) and UpdateExpression (new)
         if (cst.children.length > 1) {
             // UpdateExpression: argument ++ | argument -- | ++argument | --argument
@@ -90,9 +90,9 @@ export class UnaryExpressionCstToAst {
             if (isPrefix) {
                 // Prefix: ++argument or --argument
                 const operator = first.value || first.loc?.value
-                const argument = SlimeCstToAstUtil.createExpressionAst(cst.children[1])
+                const argument = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[1])
                 return {
-                    type: SlimeAstTypeName.UpdateExpression,
+                    type: SlimeJavascriptAstTypeName.UpdateExpression,
                     operator: operator,
                     argument: argument,
                     prefix: true,
@@ -100,7 +100,7 @@ export class UnaryExpressionCstToAst {
                 } as any
             } else {
                 // Postfix: argument++ or argument--
-                const argument = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
+                const argument = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
                 let operator: string | undefined
                 for (let i = 1; i < cst.children.length; i++) {
                     const child = cst.children[i]
@@ -112,7 +112,7 @@ export class UnaryExpressionCstToAst {
                 }
                 if (operator) {
                     return {
-                        type: SlimeAstTypeName.UpdateExpression,
+                        type: SlimeJavascriptAstTypeName.UpdateExpression,
                         operator: operator,
                         argument: argument,
                         prefix: false,
@@ -121,7 +121,7 @@ export class UnaryExpressionCstToAst {
                 }
             }
         }
-        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
+        return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
     static createYieldExpressionAst(cst: SubhutiCst): any {
@@ -133,37 +133,37 @@ export class UnaryExpressionCstToAst {
 
         // 提取 yield token
         if (cst.children[0] && (cst.children[0].name === 'Yield' || cst.children[0].value === 'yield')) {
-            yieldToken = SlimeTokenCreate.createYieldToken(cst.children[0].loc)
+            yieldToken = SlimeJavascriptTokenCreate.createYieldToken(cst.children[0].loc)
         }
 
-        if (cst.children[1] && cst.children[1].name === SlimeTokenConsumer.prototype.Asterisk?.name) {
-            asteriskToken = SlimeTokenCreate.createAsteriskToken(cst.children[1].loc)
+        if (cst.children[1] && cst.children[1].name === SlimeJavascriptTokenConsumer.prototype.Asterisk?.name) {
+            asteriskToken = SlimeJavascriptTokenCreate.createAsteriskToken(cst.children[1].loc)
             delegate = true
             startIndex = 2
         }
         let argument: any = null
         if (cst.children[startIndex]) {
-            argument = SlimeCstToAstUtil.createAssignmentExpressionAst(cst.children[startIndex])
+            argument = SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(cst.children[startIndex])
         }
 
-        return SlimeAstUtil.createYieldExpression(argument, delegate, cst.loc, yieldToken, asteriskToken)
+        return SlimeJavascriptAstUtil.createYieldExpression(argument, delegate, cst.loc, yieldToken, asteriskToken)
     }
 
     static createAwaitExpressionAst(cst: SubhutiCst): any {
         // await UnaryExpression
-        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.AwaitExpression?.name);
+        SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.AwaitExpression?.name);
 
         let awaitToken: any = undefined
 
         // 提取 await token
         if (cst.children[0] && (cst.children[0].name === 'Await' || cst.children[0].value === 'await')) {
-            awaitToken = SlimeTokenCreate.createAwaitToken(cst.children[0].loc)
+            awaitToken = SlimeJavascriptTokenCreate.createAwaitToken(cst.children[0].loc)
         }
 
         const argumentCst = cst.children[1]
-        const argument = SlimeCstToAstUtil.createExpressionAst(argumentCst)
+        const argument = SlimeJavascriptCstToAstUtil.createExpressionAst(argumentCst)
 
-        return SlimeAstUtil.createAwaitExpression(argument, cst.loc, awaitToken)
+        return SlimeJavascriptAstUtil.createAwaitExpression(argument, cst.loc, awaitToken)
     }
 
 

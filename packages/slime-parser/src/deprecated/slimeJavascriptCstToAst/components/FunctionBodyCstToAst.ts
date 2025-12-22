@@ -1,12 +1,12 @@
 import {SubhutiCst} from "subhuti";
-import {SlimeAstUtil, SlimeBlockStatement, SlimeExpression, SlimeMethodDefinition, SlimeStatement} from "slime-ast";
+import {SlimeJavascriptAstUtil, SlimeJavascriptBlockStatement, SlimeJavascriptExpression, SlimeJavascriptMethodDefinition, SlimeJavascriptStatement} from "slime-ast";
 
-import SlimeParser from "../../SlimeParser.ts";
-import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
+import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
 
 export class FunctionBodyCstToAst {
 
-    static createFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
+    static createFunctionBodyAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
         // FunctionBody: FunctionStatementList | StatementList
         // GeneratorBody, AsyncFunctionBody, AsyncGeneratorBody 都包�?FunctionBody
         const children = cst.children || []
@@ -23,52 +23,52 @@ export class FunctionBodyCstToAst {
         const name = first.name
 
         // Handle nested FunctionBody (from GeneratorBody, AsyncFunctionBody, AsyncGeneratorBody)
-        if (name === 'FunctionBody' || name === SlimeParser.prototype.FunctionBody?.name) {
-            return SlimeCstToAstUtil.createFunctionBodyAst(first)
+        if (name === 'FunctionBody' || name === SlimeJavascriptParser.prototype.FunctionBody?.name) {
+            return SlimeJavascriptCstToAstUtil.createFunctionBodyAst(first)
         }
 
         // Handle FunctionStatementList (ES2025)
-        if (name === 'FunctionStatementList' || name === SlimeParser.prototype.FunctionStatementList?.name) {
-            return SlimeCstToAstUtil.createFunctionStatementListAst(first)
+        if (name === 'FunctionStatementList' || name === SlimeJavascriptParser.prototype.FunctionStatementList?.name) {
+            return SlimeJavascriptCstToAstUtil.createFunctionStatementListAst(first)
         }
 
         // Handle StatementList (legacy)
-        if (name === 'StatementList' || name === SlimeParser.prototype.StatementList?.name) {
-            return SlimeCstToAstUtil.createStatementListAst(first)
+        if (name === 'StatementList' || name === SlimeJavascriptParser.prototype.StatementList?.name) {
+            return SlimeJavascriptCstToAstUtil.createStatementListAst(first)
         }
 
         // If the first child is a statement directly, process it
-        return SlimeCstToAstUtil.createStatementListAst(first)
+        return SlimeJavascriptCstToAstUtil.createStatementListAst(first)
     }
 
     /**
      * GeneratorBody CST �?AST（透传�?FunctionBody�?
      */
-    static createGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
-        return SlimeCstToAstUtil.createFunctionBodyAst(cst)
+    static createGeneratorBodyAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
+        return SlimeJavascriptCstToAstUtil.createFunctionBodyAst(cst)
     }
 
 
     /**
      * AsyncFunctionBody CST �?AST（透传�?FunctionBody�?
      */
-    static createAsyncFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
-        return SlimeCstToAstUtil.createFunctionBodyAst(cst)
+    static createAsyncFunctionBodyAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
+        return SlimeJavascriptCstToAstUtil.createFunctionBodyAst(cst)
     }
 
 
     /**
      * AsyncGeneratorBody CST �?AST（透传�?FunctionBody�?
      */
-    static createAsyncGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
-        return SlimeCstToAstUtil.createFunctionBodyAst(cst)
+    static createAsyncGeneratorBodyAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
+        return SlimeJavascriptCstToAstUtil.createFunctionBodyAst(cst)
     }
 
 
     /**
      * 创建箭头函数�?AST
      */
-    static createConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
+    static createConciseBodyAst(cst: SubhutiCst): SlimeJavascriptBlockStatement | SlimeJavascriptExpression {
         // 防御性检�?
         if (!cst) {
             throw new Error('createConciseBodyAst: cst is null or undefined')
@@ -76,7 +76,7 @@ export class FunctionBodyCstToAst {
 
         // 支持 ConciseBody �?AsyncConciseBody
         const validNames = [
-            SlimeParser.prototype.ConciseBody?.name,
+            SlimeJavascriptParser.prototype.ConciseBody?.name,
             'ConciseBody',
             'AsyncConciseBody'
         ]
@@ -91,20 +91,20 @@ export class FunctionBodyCstToAst {
         if (first.name === 'LBrace') {
             // 找到 FunctionBody �?AsyncFunctionBody
             const functionBodyCst = cst.children.find(child =>
-                child.name === 'FunctionBody' || child.name === SlimeParser.prototype.FunctionBody?.name ||
-                child.name === 'AsyncFunctionBody' || child.name === SlimeParser.prototype.AsyncFunctionBody?.name
+                child.name === 'FunctionBody' || child.name === SlimeJavascriptParser.prototype.FunctionBody?.name ||
+                child.name === 'AsyncFunctionBody' || child.name === SlimeJavascriptParser.prototype.AsyncFunctionBody?.name
             )
             if (functionBodyCst) {
-                const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(functionBodyCst)
-                return SlimeAstUtil.createBlockStatement(bodyStatements, cst.loc)
+                const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(functionBodyCst)
+                return SlimeJavascriptAstUtil.createBlockStatement(bodyStatements, cst.loc)
             }
             // 空函数体
-            return SlimeAstUtil.createBlockStatement([], cst.loc)
+            return SlimeJavascriptAstUtil.createBlockStatement([], cst.loc)
         }
 
         // 否则是表达式，解析为表达�?
-        if (first.name === SlimeParser.prototype.AssignmentExpression?.name || first.name === 'AssignmentExpression') {
-            return SlimeCstToAstUtil.createAssignmentExpressionAst(first)
+        if (first.name === SlimeJavascriptParser.prototype.AssignmentExpression?.name || first.name === 'AssignmentExpression') {
+            return SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(first)
         }
 
         // Es2025Parser: ExpressionBody 类型
@@ -112,25 +112,25 @@ export class FunctionBodyCstToAst {
             // ExpressionBody 内部包含 AssignmentExpression
             const innerExpr = first.children[0]
             if (innerExpr) {
-                if (innerExpr.name === 'AssignmentExpression' || innerExpr.name === SlimeParser.prototype.AssignmentExpression?.name) {
-                    return SlimeCstToAstUtil.createAssignmentExpressionAst(innerExpr)
+                if (innerExpr.name === 'AssignmentExpression' || innerExpr.name === SlimeJavascriptParser.prototype.AssignmentExpression?.name) {
+                    return SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(innerExpr)
                 }
-                return SlimeCstToAstUtil.createExpressionAst(innerExpr)
+                return SlimeJavascriptCstToAstUtil.createExpressionAst(innerExpr)
             }
         }
 
-        return SlimeCstToAstUtil.createExpressionAst(first)
+        return SlimeJavascriptCstToAstUtil.createExpressionAst(first)
     }
 
 
     /**
      * AsyncConciseBody CST �?AST
      */
-    static createAsyncConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
-        return SlimeCstToAstUtil.createConciseBodyAst(cst)
+    static createAsyncConciseBodyAst(cst: SubhutiCst): SlimeJavascriptBlockStatement | SlimeJavascriptExpression {
+        return SlimeJavascriptCstToAstUtil.createConciseBodyAst(cst)
     }
 
-    static createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
+    static createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
         // FunctionStatementList: StatementList?
         const children = cst.children || []
 
@@ -144,11 +144,11 @@ export class FunctionBodyCstToAst {
         }
 
         // If child is StatementList, process it
-        if (first.name === 'StatementList' || first.name === SlimeParser.prototype.StatementList?.name) {
-            return SlimeCstToAstUtil.createStatementListAst(first)
+        if (first.name === 'StatementList' || first.name === SlimeJavascriptParser.prototype.StatementList?.name) {
+            return SlimeJavascriptCstToAstUtil.createStatementListAst(first)
         }
 
         // If child is a statement directly
-        return SlimeCstToAstUtil.createStatementListItemAst(first)
+        return SlimeJavascriptCstToAstUtil.createStatementListItemAst(first)
     }
 }

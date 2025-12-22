@@ -1,14 +1,14 @@
 import {
-    SlimeAstUtil,
-    SlimeExpression,
-    type SlimeFunctionExpression,
-    type SlimeIdentifier,
-    SlimeAstTypeName
+    SlimeJavascriptAstUtil,
+    SlimeJavascriptExpression,
+    type SlimeJavascriptFunctionExpression,
+    type SlimeJavascriptIdentifier,
+    SlimeJavascriptAstTypeName
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 
-import SlimeParser from "../../SlimeParser.ts";
-import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
+import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
 
 export class OptionalExpressionCstToAst {
 
@@ -19,7 +19,7 @@ export class OptionalExpressionCstToAst {
      * 注意：只有紧跟在 ?. 后面的操作是 optional: true
      * 链式的后续操作（�?foo?.().bar() 中的 .bar()）是 optional: false
      */
-    static createOptionalChainAst(object: SlimeExpression, chainCst: SubhutiCst): SlimeExpression {
+    static createOptionalChainAst(object: SlimeJavascriptExpression, chainCst: SubhutiCst): SlimeJavascriptExpression {
         let result = object
         // 追踪是否刚遇�??. token，下一个操作是 optional
         let nextIsOptional = false
@@ -33,9 +33,9 @@ export class OptionalExpressionCstToAst {
                 continue
             } else if (name === 'Arguments') {
                 // ()调用 - 可能是可选调用或普通调�?
-                const args = SlimeCstToAstUtil.createArgumentsAst(child)
+                const args = SlimeJavascriptCstToAstUtil.createArgumentsAst(child)
                 result = {
-                    type: SlimeAstTypeName.OptionalCallExpression,
+                    type: SlimeJavascriptAstTypeName.OptionalCallExpression,
                     callee: result,
                     arguments: args,
                     optional: nextIsOptional,
@@ -47,9 +47,9 @@ export class OptionalExpressionCstToAst {
                 // 下一个子节点是表达式，跳�?]
                 const exprIndex = chainCst.children.indexOf(child) + 1
                 if (exprIndex < chainCst.children.length) {
-                    const property = SlimeCstToAstUtil.createExpressionAst(chainCst.children[exprIndex])
+                    const property = SlimeJavascriptCstToAstUtil.createExpressionAst(chainCst.children[exprIndex])
                     result = {
-                        type: SlimeAstTypeName.OptionalMemberExpression,
+                        type: SlimeJavascriptAstTypeName.OptionalMemberExpression,
                         object: result,
                         property: property,
                         computed: true,
@@ -60,12 +60,12 @@ export class OptionalExpressionCstToAst {
                 }
             } else if (name === 'IdentifierName') {
                 // .prop 属性访�?- 可能是可选或普�?
-                let property: SlimeIdentifier
+                let property: SlimeJavascriptIdentifier
                 // IdentifierName 内部包含一�?Identifier 或关键字 token
                 const tokenCst = child.children[0]
-                property = SlimeAstUtil.createIdentifier(tokenCst.value, tokenCst.loc)
+                property = SlimeJavascriptAstUtil.createIdentifier(tokenCst.value, tokenCst.loc)
                 result = {
-                    type: SlimeAstTypeName.OptionalMemberExpression,
+                    type: SlimeJavascriptAstTypeName.OptionalMemberExpression,
                     object: result,
                     property: property,
                     computed: false,
@@ -81,9 +81,9 @@ export class OptionalExpressionCstToAst {
                 continue
             } else if (name === 'PrivateIdentifier') {
                 // #prop - 私有属性访�?
-                const property = SlimeCstToAstUtil.createPrivateIdentifierAst(child)
+                const property = SlimeJavascriptCstToAstUtil.createPrivateIdentifierAst(child)
                 result = {
-                    type: SlimeAstTypeName.OptionalMemberExpression,
+                    type: SlimeJavascriptAstTypeName.OptionalMemberExpression,
                     object: result,
                     property: property,
                     computed: false,
@@ -110,7 +110,7 @@ export class OptionalExpressionCstToAst {
      *   CallExpression OptionalChain
      *   OptionalExpression OptionalChain
      */
-    static createOptionalExpressionAst(cst: SubhutiCst): SlimeExpression {
+    static createOptionalExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         // OptionalExpression 结构�?
         // children[0] = MemberExpression | CallExpression
         // children[1...n] = OptionalChain
@@ -120,13 +120,13 @@ export class OptionalExpressionCstToAst {
         }
 
         // 首先处理基础表达式（MemberExpression �?CallExpression�?
-        let result = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
+        let result = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
 
         // 处理 OptionalChain（可能有多个链式调用�?
         for (let i = 1; i < cst.children.length; i++) {
             const chainCst = cst.children[i]
             if (chainCst.name === 'OptionalChain') {
-                result = SlimeCstToAstUtil.createOptionalChainAst(result, chainCst)
+                result = SlimeJavascriptCstToAstUtil.createOptionalChainAst(result, chainCst)
             }
         }
 

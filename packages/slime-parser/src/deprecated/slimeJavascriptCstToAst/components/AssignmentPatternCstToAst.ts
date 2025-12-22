@@ -1,15 +1,15 @@
 import { SubhutiCst } from "subhuti";
 import {
-    SlimeArrayPattern,
-    SlimeBlockStatement,
-    SlimeFunctionExpression,
-    SlimeFunctionParam,
-    SlimeIdentifier, SlimeObjectPattern,
-    SlimeTokenCreate
+    SlimeJavascriptArrayPattern,
+    SlimeJavascriptBlockStatement,
+    SlimeJavascriptFunctionExpression,
+    SlimeJavascriptFunctionParam,
+    SlimeJavascriptIdentifier, SlimeJavascriptObjectPattern,
+    SlimeJavascriptTokenCreate
 } from "slime-ast";
 
-import SlimeParser from "../../SlimeParser.ts";
-import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
+import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
 
 export class AssignmentPatternCstToAst {
     // ==================== 解构相关转换方法 ====================
@@ -22,12 +22,12 @@ export class AssignmentPatternCstToAst {
         const firstChild = cst.children?.[0]
         if (!firstChild) throw new Error('AssignmentPattern has no children')
 
-        if (firstChild.name === SlimeParser.prototype.ObjectAssignmentPattern?.name ||
+        if (firstChild.name === SlimeJavascriptParser.prototype.ObjectAssignmentPattern?.name ||
             firstChild.name === 'ObjectAssignmentPattern') {
-            return SlimeCstToAstUtil.createObjectAssignmentPatternAst(firstChild) as any
-        } else if (firstChild.name === SlimeParser.prototype.ArrayAssignmentPattern?.name ||
+            return SlimeJavascriptCstToAstUtil.createObjectAssignmentPatternAst(firstChild) as any
+        } else if (firstChild.name === SlimeJavascriptParser.prototype.ArrayAssignmentPattern?.name ||
             firstChild.name === 'ArrayAssignmentPattern') {
-            return SlimeCstToAstUtil.createArrayAssignmentPatternAst(firstChild) as any
+            return SlimeJavascriptCstToAstUtil.createArrayAssignmentPatternAst(firstChild) as any
         }
 
         throw new Error(`Unknown AssignmentPattern type: ${firstChild.name}`)
@@ -36,15 +36,15 @@ export class AssignmentPatternCstToAst {
     /**
      * ObjectAssignmentPattern CST �?AST
      */
-    static createObjectAssignmentPatternAst(cst: SubhutiCst): SlimeObjectPattern {
-        return SlimeCstToAstUtil.createObjectBindingPatternAst(cst)
+    static createObjectAssignmentPatternAst(cst: SubhutiCst): SlimeJavascriptObjectPattern {
+        return SlimeJavascriptCstToAstUtil.createObjectBindingPatternAst(cst)
     }
 
     /**
      * ArrayAssignmentPattern CST �?AST
      */
-    static createArrayAssignmentPatternAst(cst: SubhutiCst): SlimeArrayPattern {
-        return SlimeCstToAstUtil.createArrayBindingPatternAst(cst)
+    static createArrayAssignmentPatternAst(cst: SubhutiCst): SlimeJavascriptArrayPattern {
+        return SlimeJavascriptCstToAstUtil.createArrayBindingPatternAst(cst)
     }
 
 
@@ -54,9 +54,9 @@ export class AssignmentPatternCstToAst {
     static createAssignmentPropertyListAst(cst: SubhutiCst): any[] {
         const properties: any[] = []
         for (const child of cst.children || []) {
-            if (child.name === SlimeParser.prototype.AssignmentProperty?.name ||
+            if (child.name === SlimeJavascriptParser.prototype.AssignmentProperty?.name ||
                 child.name === 'AssignmentProperty') {
-                properties.push(SlimeCstToAstUtil.createAssignmentPropertyAst(child))
+                properties.push(SlimeJavascriptCstToAstUtil.createAssignmentPropertyAst(child))
             }
         }
         return properties
@@ -66,41 +66,41 @@ export class AssignmentPatternCstToAst {
      * AssignmentProperty CST �?AST
      */
     static createAssignmentPropertyAst(cst: SubhutiCst): any {
-        return SlimeCstToAstUtil.createBindingPropertyAst(cst)
+        return SlimeJavascriptCstToAstUtil.createBindingPropertyAst(cst)
     }
 
     /**
      * AssignmentElementList CST �?AST
      */
     static createAssignmentElementListAst(cst: SubhutiCst): any[] {
-        return SlimeCstToAstUtil.createBindingElementListAst(cst)
+        return SlimeJavascriptCstToAstUtil.createBindingElementListAst(cst)
     }
 
     /**
      * AssignmentElement CST �?AST
      */
     static createAssignmentElementAst(cst: SubhutiCst): any {
-        return SlimeCstToAstUtil.createBindingElementAst(cst)
+        return SlimeJavascriptCstToAstUtil.createBindingElementAst(cst)
     }
 
     /**
      * AssignmentElisionElement CST �?AST
      */
     static createAssignmentElisionElementAst(cst: SubhutiCst): any {
-        return SlimeCstToAstUtil.createBindingElisionElementAst(cst)
+        return SlimeJavascriptCstToAstUtil.createBindingElisionElementAst(cst)
     }
 
     /**
      * AssignmentRestElement CST �?AST
      */
     static createAssignmentRestElementAst(cst: SubhutiCst): any {
-        return SlimeCstToAstUtil.createBindingRestElementAst(cst)
+        return SlimeJavascriptCstToAstUtil.createBindingRestElementAst(cst)
     }
 
     /**
      * AssignmentRestProperty CST �?AST
      */
     static createAssignmentRestPropertyAst(cst: SubhutiCst): any {
-        return SlimeCstToAstUtil.createBindingRestPropertyAst(cst)
+        return SlimeJavascriptCstToAstUtil.createBindingRestPropertyAst(cst)
     }
 }
