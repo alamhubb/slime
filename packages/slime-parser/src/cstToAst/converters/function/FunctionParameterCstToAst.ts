@@ -3,8 +3,8 @@ import {
     SlimeAstUtil,
     type SlimeBlockStatement,
     SlimeFunctionExpression, type SlimeFunctionParam,
-    SlimeIdentifier, type SlimeMethodDefinition,
-    SlimePattern, type SlimeReturnStatement,
+    SlimeIdentifier, type SlimeMethodDefinition, SlimeNodeType,
+    SlimePattern, SlimeRestElement, type SlimeReturnStatement,
     SlimeStatement, SlimeTokenCreate,
     SlimeVariableDeclarator
 } from "slime-ast";
@@ -349,5 +349,35 @@ export default class FunctionParameterCstToAst{
         }
 
         return params
+    }
+
+    /**
+     * 处理 UniqueFormalParameters CST 节点
+     */
+    createUniqueFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
+        // UniqueFormalParameters: FormalParameters
+        if (!cst.children || cst.children.length === 0) {
+            return []
+        }
+        const first = cst.children[0]
+        if (first.name === 'FormalParameters' || first.name === SlimeParser.prototype.FormalParameters?.name) {
+            return this.createFormalParametersAst(first)
+        }
+        // 可能直接�?FormalParameterList
+        return this.createFormalParametersAst(cst)
+    }
+
+    /** 返回包装类型的版�?*/
+    createUniqueFormalParametersAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+        // UniqueFormalParameters: FormalParameters
+        if (!cst.children || cst.children.length === 0) {
+            return []
+        }
+        const first = cst.children[0]
+        if (first.name === 'FormalParameters' || first.name === SlimeParser.prototype.FormalParameters?.name) {
+            return this.createFormalParametersAstWrapped(first)
+        }
+        // 可能直接�?FormalParameterList
+        return this.createFormalParametersAstWrapped(cst)
     }
 }

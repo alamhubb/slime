@@ -24,7 +24,14 @@ export class BinaryExpressionCstToAst {
         return token?.value || '*'
     }
 
-
+    /**
+     * AssignmentOperator CST �?AST
+     * AssignmentOperator -> *= | /= | %= | += | -= | <<= | >>= | >>>= | &= | ^= | |= | **= | &&= | ||= | ??=
+     */
+    createAssignmentOperatorAst(cst: SubhutiCst): string {
+        const token = cst.children?.[0]
+        return token?.value || '='
+    }
 
     /**
      * 创建 ExponentiationExpression AST（ES2016�?

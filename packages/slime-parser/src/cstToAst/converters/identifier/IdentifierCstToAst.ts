@@ -2,10 +2,11 @@
  * IdentifierCstToAst - 标识符相关转换
  */
 import {SubhutiCst, type SubhutiSourceLocation} from "subhuti";
-import type {
-    SlimeClassBody,
+import {
+    SlimeAstUtil,
+    SlimeClassBody, SlimeFunctionParam,
     SlimeIdentifier,
-    SlimeMethodDefinition,
+    SlimeMethodDefinition, SlimePattern,
     SlimePropertyDefinition,
     SlimeStatement
 } from "slime-ast";
@@ -146,4 +147,88 @@ export class IdentifierCstToAst {
         return this.createIdentifierAst(child)
     }
 
+
+    /**
+     * 创建 IdentifierReference �?AST
+     *
+     * 语法：IdentifierReference -> Identifier | yield | await
+     *
+     * IdentifierReference 是对 Identifier 的引用包装，
+     * �?ES 规范中用于区分标识符的不同使用场景�?
+     */
+    createIdentifierReferenceAst(cst: SubhutiCst): SlimeIdentifier {
+        const expectedName = SlimeParser.prototype.IdentifierReference?.name || 'IdentifierReference'
+        if (cst.name !== expectedName && cst.name !== 'IdentifierReference') {
+            throw new Error(`Expected IdentifierReference, got ${cst.name}`)
+        }
+
+        // IdentifierReference -> Identifier | yield | await
+        const child = cst.children?.[0]
+        if (!child) {
+            throw new Error('IdentifierReference has no children')
+        }
+
+        return this.createIdentifierAst(child)
+    }
+
+
+    createIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
+        // Support Identifier, IdentifierName, and contextual keywords (yield, await) used as identifiers
+        const expectedName = SlimeParser.prototype.Identifier?.name || 'Identifier'
+        const isIdentifier = cst.name === expectedName || cst.name === 'Identifier'
+        const isIdentifierName = cst.name === 'IdentifierName' || cst.name === SlimeParser.prototype.IdentifierName?.name
+        const isYield = cst.name === 'Yield'
+        const isAwait = cst.name === 'Await'
+
+        // ES2025 Parser: Identifier 规则内部调用 IdentifierNameTok()
+        // 所�?CST 结构是：Identifier -> IdentifierNameTok (token with value)
+        let value: string
+        let tokenLoc: SubhutiSourceLocation | undefined = undefined
+
+        // 处理 yield/await 作为标识符的情况
+        if (isYield || isAwait) {
+            // 这是一�?token，直接使用其�?
+            value = cst.value as string || cst.name.toLowerCase()
+            tokenLoc = cst.loc
+        } else if (isIdentifierName) {
+            // IdentifierName 结构：IdentifierName -> token (with value)
+            if (cst.value !== undefined && cst.value !== null) {
+                value = cst.value as string
+                tokenLoc = cst.loc
+            } else if (cst.children && cst.children.length > 0) {
+                const tokenCst = cst.children[0]
+                if (tokenCst.value !== undefined) {
+                    value = tokenCst.value as string
+                    tokenLoc = tokenCst.loc || cst.loc
+                } else {
+                    throw new Error(`createIdentifierAst: Cannot extract value from IdentifierName CST`)
+                }
+            } else {
+                throw new Error(`createIdentifierAst: Invalid IdentifierName CST structure`)
+            }
+        } else if (!isIdentifier) {
+            throw new Error(`Expected Identifier, got ${cst.name}`)
+        } else if (cst.value !== undefined && cst.value !== null) {
+            // 直接�?token（旧版兼容）
+            value = cst.value as string
+            tokenLoc = cst.loc
+        } else if (cst.children && cst.children.length > 0) {
+            // ES2025: Identifier 规则，子节点�?IdentifierNameTok
+            const tokenCst = cst.children[0]
+            if (tokenCst.value !== undefined) {
+                value = tokenCst.value as string
+                tokenLoc = tokenCst.loc || cst.loc
+            } else {
+                throw new Error(`createIdentifierAst: Cannot extract value from Identifier CST`)
+            }
+        } else {
+            throw new Error(`createIdentifierAst: Invalid Identifier CST structure`)
+        }
+
+        // 解码 Unicode 转义序列（如 \u0061 -> a�?
+        const decodedName = SlimeAstUtils.decodeUnicodeEscapes(value)
+        // 使用 token �?loc（包含原始值），而不是规则的 loc
+        const identifier = SlimeAstUtil.createIdentifier(decodedName, tokenLoc || cst.loc)
+        return identifier
+    }
 }
