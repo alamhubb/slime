@@ -4,7 +4,7 @@ import {
     SlimeClassExpression, type SlimeExpression,
     type SlimeFunctionDeclaration,
     type SlimeFunctionParam,
-    SlimeIdentifier, SlimeMethodDefinition, SlimeNodeType, SlimeStatement, SlimeTokenCreate
+    SlimeIdentifier, SlimeMethodDefinition, SlimeAstTypeName, SlimeStatement, SlimeTokenCreate
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
@@ -149,7 +149,7 @@ export class FunctionDeclarationCstToAst {
         }
 
         return {
-            type: SlimeNodeType.FunctionDeclaration,
+            type: SlimeAstTypeName.FunctionDeclaration,
             id: id,
             params: params,
             body: body,
@@ -242,7 +242,7 @@ export class FunctionDeclarationCstToAst {
         }
 
         return {
-            type: SlimeNodeType.FunctionDeclaration,
+            type: SlimeAstTypeName.FunctionDeclaration,
             id: id,
             params: params,
             body: body,

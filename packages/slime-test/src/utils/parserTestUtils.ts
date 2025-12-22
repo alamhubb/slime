@@ -1,4 +1,4 @@
-import { SlimeNodeType } from "slime-ast";
+import { SlimeAstTypeName } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 
 /**

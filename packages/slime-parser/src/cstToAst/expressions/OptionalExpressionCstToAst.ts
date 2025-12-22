@@ -3,7 +3,7 @@ import {
     SlimeExpression,
     type SlimeFunctionExpression,
     type SlimeIdentifier,
-    SlimeNodeType
+    SlimeAstTypeName
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 
@@ -35,7 +35,7 @@ export class OptionalExpressionCstToAst {
                 // ()调用 - 可能是可选调用或普通调�?
                 const args = SlimeCstToAstUtil.createArgumentsAst(child)
                 result = {
-                    type: SlimeNodeType.OptionalCallExpression,
+                    type: SlimeAstTypeName.OptionalCallExpression,
                     callee: result,
                     arguments: args,
                     optional: nextIsOptional,
@@ -49,7 +49,7 @@ export class OptionalExpressionCstToAst {
                 if (exprIndex < chainCst.children.length) {
                     const property = SlimeCstToAstUtil.createExpressionAst(chainCst.children[exprIndex])
                     result = {
-                        type: SlimeNodeType.OptionalMemberExpression,
+                        type: SlimeAstTypeName.OptionalMemberExpression,
                         object: result,
                         property: property,
                         computed: true,
@@ -65,7 +65,7 @@ export class OptionalExpressionCstToAst {
                 const tokenCst = child.children[0]
                 property = SlimeAstUtil.createIdentifier(tokenCst.value, tokenCst.loc)
                 result = {
-                    type: SlimeNodeType.OptionalMemberExpression,
+                    type: SlimeAstTypeName.OptionalMemberExpression,
                     object: result,
                     property: property,
                     computed: false,
@@ -83,7 +83,7 @@ export class OptionalExpressionCstToAst {
                 // #prop - 私有属性访�?
                 const property = SlimeCstToAstUtil.createPrivateIdentifierAst(child)
                 result = {
-                    type: SlimeNodeType.OptionalMemberExpression,
+                    type: SlimeAstTypeName.OptionalMemberExpression,
                     object: result,
                     property: property,
                     computed: false,

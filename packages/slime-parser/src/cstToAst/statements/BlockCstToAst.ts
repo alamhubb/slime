@@ -5,7 +5,7 @@ import {
     SlimeAstUtil, SlimeBlockStatement, type SlimeExportAllDeclaration,
     type SlimeExportDefaultDeclaration,
     type SlimeExportNamedDeclaration, SlimeExpressionStatement,
-    SlimeFunctionDeclaration, SlimeFunctionExpression, SlimeNodeType, SlimeStatement,
+    SlimeFunctionDeclaration, SlimeFunctionExpression, SlimeAstTypeName, SlimeStatement,
     SlimeTokenCreate
 } from "slime-ast";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
@@ -119,15 +119,15 @@ export class BlockCstToAst {
 
             // 检查是否是命名�?FunctionExpression �?ClassExpression（应该转�?Declaration�?
             return result.map(stmt => {
-                if (stmt.type === SlimeNodeType.ExpressionStatement) {
+                if (stmt.type === SlimeAstTypeName.ExpressionStatement) {
                     const expr = (stmt as SlimeExpressionStatement).expression
 
                     // 命名�?FunctionExpression �?FunctionDeclaration
-                    if (expr.type === SlimeNodeType.FunctionExpression) {
+                    if (expr.type === SlimeAstTypeName.FunctionExpression) {
                         const funcExpr = expr as SlimeFunctionExpression
                         if (funcExpr.id) {
                             return {
-                                type: SlimeNodeType.FunctionDeclaration,
+                                type: SlimeAstTypeName.FunctionDeclaration,
                                 id: funcExpr.id,
                                 params: funcExpr.params,
                                 body: funcExpr.body,
@@ -139,11 +139,11 @@ export class BlockCstToAst {
                     }
 
                     // ClassExpression �?ClassDeclaration
-                    if (expr.type === SlimeNodeType.ClassExpression) {
+                    if (expr.type === SlimeAstTypeName.ClassExpression) {
                         const classExpr = expr as any
                         if (classExpr.id) {
                             return {
-                                type: SlimeNodeType.ClassDeclaration,
+                                type: SlimeAstTypeName.ClassDeclaration,
                                 id: classExpr.id,
                                 superClass: classExpr.superClass,
                                 body: classExpr.body,

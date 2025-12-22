@@ -11,7 +11,7 @@ import {
     type SlimeExpression, type SlimeFunctionParam,
     SlimeIdentifier,
     SlimeLiteral,
-    type SlimeMethodDefinition, SlimeNodeType,
+    type SlimeMethodDefinition, SlimeAstTypeName,
     type SlimeObjectExpression,
     type SlimeObjectPropertyItem, SlimeProperty,
     type SlimePropertyDefinition,
@@ -181,7 +181,7 @@ export class CompoundLiteralCstToAst {
 
             // 返回SpreadElement（作为Property的一种特殊形式）
             return {
-                type: SlimeNodeType.SpreadElement,
+                type: SlimeAstTypeName.SpreadElement,
                 argument: argument,
                 loc: cst.loc
             } as any
@@ -242,7 +242,7 @@ export class CompoundLiteralCstToAst {
 
             // 创建 AssignmentPattern 作为 value
             const assignmentPattern = {
-                type: SlimeNodeType.AssignmentPattern,
+                type: SlimeAstTypeName.AssignmentPattern,
                 left: identifier,
                 right: defaultValue,
                 loc: first.loc
@@ -422,7 +422,7 @@ export class CompoundLiteralCstToAst {
         const initValue = init ? SlimeCstToAstUtil.createInitializerAst(init) : null
 
         return {
-            type: SlimeNodeType.AssignmentPattern,
+            type: SlimeAstTypeName.AssignmentPattern,
             left: id,
             right: initValue,
             loc: cst.loc

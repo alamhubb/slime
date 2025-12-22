@@ -7,7 +7,7 @@ import {
     SlimeAstUtil,
     SlimeClassBody, SlimeClassDeclaration, SlimeClassExpression,
     SlimeExpression, SlimeIdentifier, SlimeLiteral,
-    SlimeMethodDefinition, SlimeNodeType,
+    SlimeMethodDefinition, SlimeAstTypeName,
     SlimePropertyDefinition, SlimeStatement,
     SlimeTokenCreate
 } from "slime-ast";
@@ -302,7 +302,7 @@ export class ClassDeclarationCstToAst {
     } {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassTail?.name);
         let superClass: SlimeExpression | null = null // 超类默认�?null
-        let body: SlimeClassBody = {type: SlimeNodeType.ClassBody as any, body: [], loc: cst.loc} // 默认空类�?
+        let body: SlimeClassBody = {type: SlimeAstTypeName.ClassBody as any, body: [], loc: cst.loc} // 默认空类�?
         let extendsToken: any = undefined
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined

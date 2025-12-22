@@ -7,7 +7,7 @@ import {
     type SlimeBlockStatement, SlimeExpression,
     type SlimeFunctionExpression,
     SlimeFunctionParam,
-    type SlimeIdentifier, SlimeLiteral, SlimeMethodDefinition, SlimeNodeType, SlimePattern, SlimeTokenCreate
+    type SlimeIdentifier, SlimeLiteral, SlimeMethodDefinition, SlimeAstTypeName, SlimePattern, SlimeTokenCreate
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 
@@ -99,7 +99,7 @@ export class MethodDefinitionCstToAst {
         const body = SlimeAstUtil.createBlockStatement(bodyStatements, bodyNode?.loc)
 
         const value: SlimeFunctionExpression = {
-            type: SlimeNodeType.FunctionExpression,
+            type: SlimeAstTypeName.FunctionExpression,
             id: null,
             params: params as any,
             body: body,

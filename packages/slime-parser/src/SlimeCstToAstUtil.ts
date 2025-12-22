@@ -66,7 +66,7 @@ import {
 } from "slime-ast";
 import {SubhutiCst, type SubhutiSourceLocation} from "subhuti";
 import SlimeParser from "./SlimeParser.ts";
-import {SlimeAstUtil, SlimeTokenCreate, SlimeNodeType} from "slime-ast";
+import {SlimeAstUtil, SlimeTokenCreate, SlimeAstTypeName} from "slime-ast";
 import {
     ArrowFunctionCstToAst,
     AssignmentPatternCstToAst,
@@ -107,7 +107,7 @@ import {
  *
  * ## 两层架构设计
  *
- * ### 第一层：AST 工厂类 (SlimeNodeCreate.ts / SlimeAstUtil)
+ * ### 第一层：AST 工厂类 (SlimeAstCreateUtils.ts / SlimeAstUtil)
  * - 与 ESTree AST 节点类型一一对应的纯粹创建方法
  * - 不依赖 CST 结构，只接收参数创建节点
  * - 示例：createIdentifier(name, loc) -> SlimeIdentifier

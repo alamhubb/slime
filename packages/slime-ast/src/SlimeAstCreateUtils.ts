@@ -1,9 +1,9 @@
 /**
- * SlimeNodeCreate.ts - AST 节点创建工厂
+ * SlimeAstCreateUtils.ts - AST 节点创建工厂
  *
  * 为每个 AST 节点类型提供创建方法
- * Token 创建方法请使用 SlimeTokenCreate.ts
- * 与 SlimeESTree.ts 中的 AST 类型一一对应
+ * Token 创建方法请使用 SlimeTokenCreateUtils.ts
+ * 与 SlimeAstNode.ts 中的 AST 类型一一对应
  */
 
 import {
@@ -187,12 +187,12 @@ import {
   type SlimeLogicalOperatorToken,
   type SlimeAssignmentOperatorToken,
   type SlimeUpdateOperatorToken,
-} from "./SlimeESTree.ts";
+} from "./SlimeAstNode.ts";
 
-import {SlimeNodeType} from "./SlimeNodeType.ts";
+import {SlimeAstTypeName} from "./SlimeAstTypeName.ts";
 import type { SubhutiSourceLocation } from "subhuti";
 
-class SlimeNodeCreate {
+class SlimeAstCreateUtils {
   // ============================================
   // 通用辅助方法
   // ============================================
@@ -223,7 +223,7 @@ class SlimeNodeCreate {
 
   createProgram(body: Array<SlimeDirective | SlimeStatement | SlimeModuleDeclaration>, sourceType: SlimeProgramSourceType = SlimeProgramSourceType.Script): SlimeProgram {
     return this.commonLocType({
-      type: SlimeNodeType.Program,
+      type: SlimeAstTypeName.Program,
       sourceType: sourceType,
       body: body
     })
@@ -235,7 +235,7 @@ class SlimeNodeCreate {
 
   createMemberExpression(object: SlimeExpression | SlimeSuper, dot: SlimeDotToken, property?: SlimeExpression | SlimePrivateIdentifier): SlimeMemberExpression {
     return this.commonLocType({
-      type: SlimeNodeType.MemberExpression,
+      type: SlimeAstTypeName.MemberExpression,
       object: object,
       dot: dot,
       property: property,
@@ -252,7 +252,7 @@ class SlimeNodeCreate {
     rBracketToken?: SlimeRBracketToken
   ): SlimeArrayExpression {
     return this.commonLocType({
-      type: SlimeNodeType.ArrayExpression,
+      type: SlimeAstTypeName.ArrayExpression,
       elements: elements || [],
       lBracketToken: lBracketToken,
       rBracketToken: rBracketToken,
@@ -270,7 +270,7 @@ class SlimeNodeCreate {
 
   createPropertyAst(key: SlimeExpression | SlimePrivateIdentifier, value: SlimeExpression | SlimePattern): SlimeProperty {
     return this.commonLocType({
-      type: SlimeNodeType.Property,
+      type: SlimeAstTypeName.Property,
       key: key,
       value: value,
       kind: "init",
@@ -287,7 +287,7 @@ class SlimeNodeCreate {
     rBraceToken?: SlimeRBraceToken
   ): SlimeObjectExpression {
     return this.commonLocType({
-      type: SlimeNodeType.ObjectExpression,
+      type: SlimeAstTypeName.ObjectExpression,
       properties: properties,
       lBraceToken: lBraceToken,
       rBraceToken: rBraceToken,
@@ -305,7 +305,7 @@ class SlimeNodeCreate {
 
   createParenthesizedExpression(expression: SlimeExpression, loc?: SubhutiSourceLocation): any {
     return this.commonLocType({
-      type: SlimeNodeType.ParenthesizedExpression,
+      type: SlimeAstTypeName.ParenthesizedExpression,
       expression: expression,
       loc: loc
     })
@@ -313,7 +313,7 @@ class SlimeNodeCreate {
 
   createClassExpression(id?: SlimeIdentifier | null, superClass?: SlimeExpression | null, body?: SlimeClassBody, loc?: SubhutiSourceLocation): SlimeClassExpression {
     return this.commonLocType({
-      type: SlimeNodeType.ClassExpression,  // 节点类型
+      type: SlimeAstTypeName.ClassExpression,  // 节点类型
       id: id,                               // 类名（可选，匿名类为 null）
       body: body,                           // 类体（包含方法和属性）
       superClass: superClass,               // 父类表达式（可选，没有 extends 时为 null 或 undefined）
@@ -329,7 +329,7 @@ class SlimeNodeCreate {
     rParenToken?: SlimeRParenToken
   ): SlimeSimpleCallExpression {
     return this.commonLocType({
-      type: SlimeNodeType.CallExpression,
+      type: SlimeAstTypeName.CallExpression,
       callee: callee,
       arguments: args,
       optional: false,
@@ -357,14 +357,14 @@ class SlimeNodeCreate {
 
   createThisExpression(loc?: SubhutiSourceLocation): SlimeThisExpression {
     return this.commonLocType({
-      type: SlimeNodeType.ThisExpression,
+      type: SlimeAstTypeName.ThisExpression,
       loc: loc
     })
   }
 
   createChainExpression(expression: SlimeChainElement, loc?: SubhutiSourceLocation): SlimeChainExpression {
     return this.commonLocType({
-      type: SlimeNodeType.ChainExpression,
+      type: SlimeAstTypeName.ChainExpression,
       expression: expression,
       loc: loc
     })
@@ -372,7 +372,7 @@ class SlimeNodeCreate {
 
   createSequenceExpression(expressions: SlimeExpression[], loc?: SubhutiSourceLocation): SlimeSequenceExpression {
     return this.commonLocType({
-      type: SlimeNodeType.SequenceExpression,
+      type: SlimeAstTypeName.SequenceExpression,
       expressions: expressions,
       loc: loc
     })
@@ -384,7 +384,7 @@ class SlimeNodeCreate {
     loc?: SubhutiSourceLocation
   ): SlimeUnaryExpression {
     return this.commonLocType({
-      type: SlimeNodeType.UnaryExpression,
+      type: SlimeAstTypeName.UnaryExpression,
       operator: operator,
       prefix: true,
       argument: argument,
@@ -399,7 +399,7 @@ class SlimeNodeCreate {
     loc?: SubhutiSourceLocation
   ): SlimeBinaryExpression {
     return this.commonLocType({
-      type: SlimeNodeType.BinaryExpression,
+      type: SlimeAstTypeName.BinaryExpression,
       operator: operator,
       left: left,
       right: right,
@@ -414,7 +414,7 @@ class SlimeNodeCreate {
     loc?: SubhutiSourceLocation
   ): SlimeAssignmentExpression {
     return this.commonLocType({
-      type: SlimeNodeType.AssignmentExpression,
+      type: SlimeAstTypeName.AssignmentExpression,
       operator: operator,
       left: left,
       right: right,
@@ -429,7 +429,7 @@ class SlimeNodeCreate {
     loc?: SubhutiSourceLocation
   ): SlimeUpdateExpression {
     return this.commonLocType({
-      type: SlimeNodeType.UpdateExpression,
+      type: SlimeAstTypeName.UpdateExpression,
       operator: operator,
       argument: argument,
       prefix: prefix,
@@ -444,7 +444,7 @@ class SlimeNodeCreate {
     loc?: SubhutiSourceLocation
   ): SlimeLogicalExpression {
     return this.commonLocType({
-      type: SlimeNodeType.LogicalExpression,
+      type: SlimeAstTypeName.LogicalExpression,
       operator: operator,
       left: left,
       right: right,
@@ -461,7 +461,7 @@ class SlimeNodeCreate {
     colonToken?: SlimeColonToken
   ): SlimeConditionalExpression {
     return this.commonLocType({
-      type: SlimeNodeType.ConditionalExpression,
+      type: SlimeAstTypeName.ConditionalExpression,
       test: test,
       consequent: consequent,
       alternate: alternate,
@@ -480,7 +480,7 @@ class SlimeNodeCreate {
     rParenToken?: SlimeRParenToken
   ): SlimeNewExpression {
     return this.commonLocType({
-      type: SlimeNodeType.NewExpression,
+      type: SlimeAstTypeName.NewExpression,
       callee: callee,
       arguments: args,
       newToken: newToken,
@@ -502,7 +502,7 @@ class SlimeNodeCreate {
     rParenToken?: SlimeRParenToken
   ): SlimeArrowFunctionExpression {
     return this.commonLocType({
-      type: SlimeNodeType.ArrowFunctionExpression,
+      type: SlimeAstTypeName.ArrowFunctionExpression,
       body: body,
       params: params,
       expression: expression,
@@ -523,7 +523,7 @@ class SlimeNodeCreate {
     asteriskToken?: SlimeAsteriskToken
   ): SlimeYieldExpression {
     return this.commonLocType({
-      type: SlimeNodeType.YieldExpression,
+      type: SlimeAstTypeName.YieldExpression,
       argument: argument,
       delegate: delegate,
       yieldToken: yieldToken,
@@ -538,7 +538,7 @@ class SlimeNodeCreate {
     loc?: SubhutiSourceLocation
   ): SlimeTaggedTemplateExpression {
     return this.commonLocType({
-      type: SlimeNodeType.TaggedTemplateExpression,
+      type: SlimeAstTypeName.TaggedTemplateExpression,
       tag: tag,
       quasi: quasi,
       loc: loc
@@ -551,7 +551,7 @@ class SlimeNodeCreate {
     awaitToken?: SlimeAwaitToken
   ): SlimeAwaitExpression {
     return this.commonLocType({
-      type: SlimeNodeType.AwaitExpression,
+      type: SlimeAstTypeName.AwaitExpression,
       argument: argument,
       awaitToken: awaitToken,
       loc: loc
@@ -564,7 +564,7 @@ class SlimeNodeCreate {
     loc?: SubhutiSourceLocation
   ): SlimeMetaProperty {
     return this.commonLocType({
-      type: SlimeNodeType.MetaProperty,
+      type: SlimeAstTypeName.MetaProperty,
       meta: meta,
       property: property,
       loc: loc
@@ -579,7 +579,7 @@ class SlimeNodeCreate {
     rParenToken?: SlimeRParenToken
   ): SlimeImportExpression {
     return this.commonLocType({
-      type: SlimeNodeType.ImportExpression,
+      type: SlimeAstTypeName.ImportExpression,
       source: source,
       importToken: importToken,
       lParenToken: lParenToken,
@@ -590,14 +590,14 @@ class SlimeNodeCreate {
 
   createSuper(loc?: SubhutiSourceLocation): SlimeSuper {
     return this.commonLocType({
-      type: SlimeNodeType.Super,
+      type: SlimeAstTypeName.Super,
       loc: loc
     })
   }
 
   createPrivateIdentifier(name: string, loc?: SubhutiSourceLocation): SlimePrivateIdentifier {
     return this.commonLocType({
-      type: SlimeNodeType.PrivateIdentifier,
+      type: SlimeAstTypeName.PrivateIdentifier,
       name: name,
       loc: loc
     })
@@ -609,7 +609,7 @@ class SlimeNodeCreate {
 
   createBlockStatement(body: SlimeStatement[], loc?: SubhutiSourceLocation, lBraceToken?: SlimeLBraceToken, rBraceToken?: SlimeRBraceToken): SlimeBlockStatement {
     return this.commonLocType({
-      type: SlimeNodeType.BlockStatement,
+      type: SlimeAstTypeName.BlockStatement,
       body: body,
       lBraceToken: lBraceToken,
       rBraceToken: rBraceToken,
@@ -619,7 +619,7 @@ class SlimeNodeCreate {
 
   createEmptyStatement(loc?: SubhutiSourceLocation, semicolonToken?: SlimeSemicolonToken): SlimeEmptyStatement {
     return this.commonLocType({
-      type: SlimeNodeType.EmptyStatement,
+      type: SlimeAstTypeName.EmptyStatement,
       semicolonToken: semicolonToken,
       loc: loc
     })
@@ -627,7 +627,7 @@ class SlimeNodeCreate {
 
   createExpressionStatement(expression: SlimeExpression, loc?: SubhutiSourceLocation, semicolonToken?: SlimeSemicolonToken): SlimeExpressionStatement {
     return this.commonLocType({
-      type: SlimeNodeType.ExpressionStatement,
+      type: SlimeAstTypeName.ExpressionStatement,
       expression: expression,
       semicolonToken: semicolonToken,
       loc: loc
@@ -645,7 +645,7 @@ class SlimeNodeCreate {
     rParenToken?: SlimeRParenToken
   ): SlimeIfStatement {
     return this.commonLocType({
-      type: SlimeNodeType.IfStatement,
+      type: SlimeAstTypeName.IfStatement,
       test: test,
       consequent: consequent,
       alternate: alternate,
@@ -659,7 +659,7 @@ class SlimeNodeCreate {
 
   createLabeledStatement(label: SlimeIdentifier, body: SlimeStatement, loc?: SubhutiSourceLocation): SlimeLabeledStatement {
     return this.commonLocType({
-      type: SlimeNodeType.LabeledStatement,
+      type: SlimeAstTypeName.LabeledStatement,
       label: label,
       body: body,
       loc: loc
@@ -668,7 +668,7 @@ class SlimeNodeCreate {
 
   createBreakStatement(label?: SlimeIdentifier | null, loc?: SubhutiSourceLocation, breakToken?: SlimeBreakToken, semicolonToken?: SlimeSemicolonToken): SlimeBreakStatement {
     return this.commonLocType({
-      type: SlimeNodeType.BreakStatement,
+      type: SlimeAstTypeName.BreakStatement,
       label: label,
       breakToken: breakToken,
       semicolonToken: semicolonToken,
@@ -678,7 +678,7 @@ class SlimeNodeCreate {
 
   createContinueStatement(label?: SlimeIdentifier | null, loc?: SubhutiSourceLocation, continueToken?: SlimeContinueToken, semicolonToken?: SlimeSemicolonToken): SlimeContinueStatement {
     return this.commonLocType({
-      type: SlimeNodeType.ContinueStatement,
+      type: SlimeAstTypeName.ContinueStatement,
       label: label,
       continueToken: continueToken,
       semicolonToken: semicolonToken,
@@ -695,7 +695,7 @@ class SlimeNodeCreate {
     rParenToken?: SlimeRParenToken
   ): SlimeWithStatement {
     return this.commonLocType({
-      type: SlimeNodeType.WithStatement,
+      type: SlimeAstTypeName.WithStatement,
       object: object,
       body: body,
       withToken: withToken,
@@ -716,7 +716,7 @@ class SlimeNodeCreate {
     rBraceToken?: SlimeRBraceToken
   ): SlimeSwitchStatement {
     return this.commonLocType({
-      type: SlimeNodeType.SwitchStatement,
+      type: SlimeAstTypeName.SwitchStatement,
       discriminant: discriminant,
       cases: cases,
       switchToken: switchToken,
@@ -730,7 +730,7 @@ class SlimeNodeCreate {
 
   createReturnStatement(argument: SlimeExpression | null | undefined, loc?: SubhutiSourceLocation, returnToken?: SlimeReturnToken, semicolonToken?: SlimeSemicolonToken): SlimeReturnStatement {
     return this.commonLocType({
-      type: SlimeNodeType.ReturnStatement,
+      type: SlimeAstTypeName.ReturnStatement,
       argument: argument,
       returnToken: returnToken,
       semicolonToken: semicolonToken,
@@ -740,7 +740,7 @@ class SlimeNodeCreate {
 
   createThrowStatement(argument: SlimeExpression, loc?: SubhutiSourceLocation, throwToken?: SlimeThrowToken, semicolonToken?: SlimeSemicolonToken): SlimeThrowStatement {
     return this.commonLocType({
-      type: SlimeNodeType.ThrowStatement,
+      type: SlimeAstTypeName.ThrowStatement,
       argument: argument,
       throwToken: throwToken,
       semicolonToken: semicolonToken,
@@ -757,7 +757,7 @@ class SlimeNodeCreate {
     finallyToken?: SlimeFinallyToken
   ): SlimeTryStatement {
     return this.commonLocType({
-      type: SlimeNodeType.TryStatement,
+      type: SlimeAstTypeName.TryStatement,
       block: block,
       handler: handler,
       finalizer: finalizer,
@@ -776,7 +776,7 @@ class SlimeNodeCreate {
     rParenToken?: SlimeRParenToken
   ): SlimeWhileStatement {
     return this.commonLocType({
-      type: SlimeNodeType.WhileStatement,
+      type: SlimeAstTypeName.WhileStatement,
       test: test,
       body: body,
       whileToken: whileToken,
@@ -797,7 +797,7 @@ class SlimeNodeCreate {
     semicolonToken?: SlimeSemicolonToken
   ): SlimeDoWhileStatement {
     return this.commonLocType({
-      type: SlimeNodeType.DoWhileStatement,
+      type: SlimeAstTypeName.DoWhileStatement,
       body: body,
       test: test,
       doToken: doToken,
@@ -822,7 +822,7 @@ class SlimeNodeCreate {
     semicolon2Token?: SlimeSemicolonToken
   ): SlimeForStatement {
     return this.commonLocType({
-      type: SlimeNodeType.ForStatement,
+      type: SlimeAstTypeName.ForStatement,
       init: init,
       test: test,
       update: update,
@@ -847,7 +847,7 @@ class SlimeNodeCreate {
     rParenToken?: SlimeRParenToken
   ): SlimeForInStatement {
     return this.commonLocType({
-      type: SlimeNodeType.ForInStatement,
+      type: SlimeAstTypeName.ForInStatement,
       left: left,
       right: right,
       body: body,
@@ -872,7 +872,7 @@ class SlimeNodeCreate {
     rParenToken?: SlimeRParenToken
   ): SlimeForOfStatement {
     return this.commonLocType({
-      type: SlimeNodeType.ForOfStatement,
+      type: SlimeAstTypeName.ForOfStatement,
       left: left,
       right: right,
       body: body,
@@ -888,7 +888,7 @@ class SlimeNodeCreate {
 
   createDebuggerStatement(loc?: SubhutiSourceLocation, debuggerToken?: SlimeDebuggerToken, semicolonToken?: SlimeSemicolonToken): SlimeDebuggerStatement {
     return this.commonLocType({
-      type: SlimeNodeType.DebuggerStatement,
+      type: SlimeAstTypeName.DebuggerStatement,
       debuggerToken: debuggerToken,
       semicolonToken: semicolonToken,
       loc: loc
@@ -904,7 +904,7 @@ class SlimeNodeCreate {
     colonToken?: SlimeColonToken
   ): SlimeSwitchCase {
     return this.commonLocType({
-      type: SlimeNodeType.SwitchCase,
+      type: SlimeAstTypeName.SwitchCase,
       test: test,
       consequent: consequent,
       caseToken: caseToken,
@@ -923,7 +923,7 @@ class SlimeNodeCreate {
     rParenToken?: SlimeRParenToken
   ): SlimeCatchClause {
     return this.commonLocType({
-      type: SlimeNodeType.CatchClause,
+      type: SlimeAstTypeName.CatchClause,
       param: param,
       body: body,
       catchToken: catchToken,
@@ -935,7 +935,7 @@ class SlimeNodeCreate {
 
   createStaticBlock(body: SlimeStatement[], loc?: SubhutiSourceLocation, lBraceToken?: SlimeLBraceToken, rBraceToken?: SlimeRBraceToken): SlimeStaticBlock {
     return this.commonLocType({
-      type: SlimeNodeType.StaticBlock,
+      type: SlimeAstTypeName.StaticBlock,
       body: body,
       lBraceToken: lBraceToken,
       rBraceToken: rBraceToken,
@@ -963,7 +963,7 @@ class SlimeNodeCreate {
     rBraceToken?: SlimeRBraceToken
   ): SlimeFunctionExpression {
     return this.commonLocType({
-      type: SlimeNodeType.FunctionExpression,
+      type: SlimeAstTypeName.FunctionExpression,
       params: params || [],
       id: id,
       body: body,
@@ -986,7 +986,7 @@ class SlimeNodeCreate {
 
   createVariableDeclaration(kind: SlimeVariableDeclarationKindToken, declarations: SlimeVariableDeclarator[], loc?: SubhutiSourceLocation): SlimeVariableDeclaration {
     return this.commonLocType({
-      type: SlimeNodeType.VariableDeclaration,
+      type: SlimeAstTypeName.VariableDeclaration,
       declarations: declarations,
       kind: kind,
       loc: loc
@@ -995,7 +995,7 @@ class SlimeNodeCreate {
 
   createVariableDeclarator(id: SlimePattern, assignToken?: SlimeAssignToken, init?: SlimeExpression | null, loc?: SubhutiSourceLocation): SlimeVariableDeclarator {
     return this.commonLocType({
-      type: SlimeNodeType.VariableDeclarator,
+      type: SlimeAstTypeName.VariableDeclarator,
       id: id,
       assignToken: assignToken,
       init: init,
@@ -1013,7 +1013,7 @@ class SlimeNodeCreate {
     ellipsisToken?: SlimeEllipsisToken
   ): SlimeRestElement {
     return this.commonLocType({
-      type: SlimeNodeType.RestElement,
+      type: SlimeAstTypeName.RestElement,
       argument: argument,
       ellipsisToken: ellipsisToken,
       loc: loc
@@ -1026,7 +1026,7 @@ class SlimeNodeCreate {
     ellipsisToken?: SlimeEllipsisToken
   ): SlimeSpreadElement {
     return this.commonLocType({
-      type: SlimeNodeType.SpreadElement,
+      type: SlimeAstTypeName.SpreadElement,
       argument: argument,
       ellipsisToken: ellipsisToken,
       loc: loc
@@ -1040,7 +1040,7 @@ class SlimeNodeCreate {
     rBraceToken?: SlimeRBraceToken
   ): SlimeObjectPattern {
     return this.commonLocType({
-      type: SlimeNodeType.ObjectPattern,
+      type: SlimeAstTypeName.ObjectPattern,
       properties: properties,
       lBraceToken: lBraceToken,
       rBraceToken: rBraceToken,
@@ -1063,7 +1063,7 @@ class SlimeNodeCreate {
     rBracketToken?: SlimeRBracketToken
   ): SlimeArrayPattern {
     return this.commonLocType({
-      type: SlimeNodeType.ArrayPattern,
+      type: SlimeAstTypeName.ArrayPattern,
       elements: elements,
       lBracketToken: lBracketToken,
       rBracketToken: rBracketToken,
@@ -1085,7 +1085,7 @@ class SlimeNodeCreate {
     loc?: SubhutiSourceLocation
   ): SlimeAssignmentPattern {
     return this.commonLocType({
-      type: SlimeNodeType.AssignmentPattern,
+      type: SlimeAstTypeName.AssignmentPattern,
       left: left,
       right: right,
       loc: loc
@@ -1103,7 +1103,7 @@ class SlimeNodeCreate {
     rBracketToken?: SlimeRBracketToken
   ): SlimeAssignmentProperty {
     return this.commonLocType({
-      type: SlimeNodeType.Property,
+      type: SlimeAstTypeName.Property,
       key: key,
       value: value,
       kind: "init",
@@ -1134,7 +1134,7 @@ class SlimeNodeCreate {
     withToken?: any
   ): SlimeImportDeclaration {
     const decl: any = {
-      type: SlimeNodeType.ImportDeclaration,
+      type: SlimeAstTypeName.ImportDeclaration,
       source: source,
       specifiers: specifiers,
       importToken: importToken,
@@ -1167,7 +1167,7 @@ class SlimeNodeCreate {
     asToken?: SlimeAsToken
   ): SlimeImportSpecifier {
     return this.commonLocType({
-      type: SlimeNodeType.ImportSpecifier,
+      type: SlimeAstTypeName.ImportSpecifier,
       local: local,
       imported: imported,
       asToken: asToken,
@@ -1177,7 +1177,7 @@ class SlimeNodeCreate {
 
   createImportDefaultSpecifier(local: SlimeIdentifier, loc?: SubhutiSourceLocation): SlimeImportDefaultSpecifier {
     return this.commonLocType({
-      type: SlimeNodeType.ImportDefaultSpecifier,
+      type: SlimeAstTypeName.ImportDefaultSpecifier,
       local: local,
       loc: loc
     })
@@ -1190,7 +1190,7 @@ class SlimeNodeCreate {
     asToken?: SlimeAsToken
   ): SlimeImportNamespaceSpecifier {
     return this.commonLocType({
-      type: SlimeNodeType.ImportNamespaceSpecifier,
+      type: SlimeAstTypeName.ImportNamespaceSpecifier,
       local: local,
       asteriskToken: asteriskToken,
       asToken: asToken,
@@ -1205,7 +1205,7 @@ class SlimeNodeCreate {
     defaultToken?: SlimeDefaultToken
   ): SlimeExportDefaultDeclaration {
     return this.commonLocType({
-      type: SlimeNodeType.ExportDefaultDeclaration,
+      type: SlimeAstTypeName.ExportDefaultDeclaration,
       declaration: declaration,
       exportToken: exportToken,
       defaultToken: defaultToken,
@@ -1225,7 +1225,7 @@ class SlimeNodeCreate {
     semicolonToken?: SlimeSemicolonToken
   ): SlimeExportNamedDeclaration {
     return this.commonLocType({
-      type: SlimeNodeType.ExportNamedDeclaration,
+      type: SlimeAstTypeName.ExportNamedDeclaration,
       declaration: declaration,
       specifiers: specifiers,
       source: source,
@@ -1253,7 +1253,7 @@ class SlimeNodeCreate {
     asToken?: SlimeAsToken
   ): SlimeExportSpecifier {
     return this.commonLocType({
-      type: SlimeNodeType.ExportSpecifier,
+      type: SlimeAstTypeName.ExportSpecifier,
       local: local,
       exported: exported,
       asToken: asToken,
@@ -1272,7 +1272,7 @@ class SlimeNodeCreate {
     semicolonToken?: SlimeSemicolonToken
   ): SlimeExportAllDeclaration {
     return this.commonLocType({
-      type: SlimeNodeType.ExportAllDeclaration,
+      type: SlimeAstTypeName.ExportAllDeclaration,
       source: source,
       exported: exported,
       exportToken: exportToken,
@@ -1290,7 +1290,7 @@ class SlimeNodeCreate {
     loc?: SubhutiSourceLocation
   ): SlimeDirective {
     return this.commonLocType({
-      type: SlimeNodeType.ExpressionStatement,
+      type: SlimeAstTypeName.ExpressionStatement,
       expression: expression,
       directive: directive,
       loc: loc
@@ -1310,7 +1310,7 @@ class SlimeNodeCreate {
     extendsToken?: SlimeExtendsToken
   ): SlimeClassDeclaration {
     return this.commonLocType({
-      type: SlimeNodeType.ClassDeclaration,
+      type: SlimeAstTypeName.ClassDeclaration,
       id: id,
       body: body,
       superClass: superClass,
@@ -1327,7 +1327,7 @@ class SlimeNodeCreate {
     rBraceToken?: SlimeRBraceToken
   ): SlimeClassBody {
     return this.commonLocType({
-      type: SlimeNodeType.ClassBody,
+      type: SlimeAstTypeName.ClassBody,
       body: body,
       lBraceToken: lBraceToken,
       rBraceToken: rBraceToken,
@@ -1351,7 +1351,7 @@ class SlimeNodeCreate {
     rBraceToken?: SlimeRBraceToken
   ): SlimeFunctionDeclaration {
     return this.commonLocType({
-      type: SlimeNodeType.FunctionDeclaration,
+      type: SlimeAstTypeName.FunctionDeclaration,
       id: id,
       params: params,
       body: body,
@@ -1370,7 +1370,7 @@ class SlimeNodeCreate {
 
   createIdentifier(name: string, loc?: SubhutiSourceLocation): SlimeIdentifier {
     return this.commonLocType({
-      type: SlimeNodeType.Identifier,
+      type: SlimeAstTypeName.Identifier,
       name: name,
       loc: loc
     })
@@ -1391,7 +1391,7 @@ class SlimeNodeCreate {
 
   createNullLiteralToken(): SlimeNullLiteral {
     return this.commonLocType({
-      type: SlimeNodeType.Literal,
+      type: SlimeAstTypeName.Literal,
       value: null
     })
   }
@@ -1402,7 +1402,7 @@ class SlimeNodeCreate {
     const hasQuotes = /^['"].*['"]$/.test(value)
     const cleanValue = value.replace(/^['"]|['"]$/g, '')
     return this.commonLocType({
-      type: SlimeNodeType.Literal,
+      type: SlimeAstTypeName.Literal,
       value: cleanValue,
       raw: raw || (hasQuotes ? value : `'${value}'`),  // 如果已有引号就保留，否则自动加引号
       loc: loc
@@ -1411,7 +1411,7 @@ class SlimeNodeCreate {
 
   createNumericLiteral(value: number, raw?: string): SlimeNumericLiteral {
     return this.commonLocType({
-      type: SlimeNodeType.Literal,
+      type: SlimeAstTypeName.Literal,
       value: value,
       raw: raw || String(value)  // 保存原始值（保留格式如 0xFF）
     })
@@ -1419,7 +1419,7 @@ class SlimeNodeCreate {
 
   createBooleanLiteral(value: boolean, loc?: SubhutiSourceLocation): SlimeBooleanLiteral {
     return this.commonLocType({
-      type: SlimeNodeType.Literal,
+      type: SlimeAstTypeName.Literal,
       value: value,
       loc: loc
     })
@@ -1432,7 +1432,7 @@ class SlimeNodeCreate {
     loc?: SubhutiSourceLocation
   ): SlimeRegExpLiteral {
     return this.commonLocType({
-      type: SlimeNodeType.Literal,
+      type: SlimeAstTypeName.Literal,
       regex: {
         pattern: pattern,
         flags: flags
@@ -1448,7 +1448,7 @@ class SlimeNodeCreate {
     loc?: SubhutiSourceLocation
   ): SlimeBigIntLiteral {
     return this.commonLocType({
-      type: SlimeNodeType.Literal,
+      type: SlimeAstTypeName.Literal,
       bigint: bigint,
       raw: raw || `${bigint}n`,
       loc: loc
@@ -1457,7 +1457,7 @@ class SlimeNodeCreate {
 
   createTemplateLiteral(quasis: SlimeTemplateElement[], expressions: SlimeExpression[], loc?: SubhutiSourceLocation): SlimeTemplateLiteral {
     return this.commonLocType({
-      type: SlimeNodeType.TemplateLiteral,
+      type: SlimeAstTypeName.TemplateLiteral,
       quasis: quasis,
       expressions: expressions,
       loc: loc
@@ -1466,7 +1466,7 @@ class SlimeNodeCreate {
 
   createTemplateElement(tail: boolean, raw: string, cooked?: string | null, loc?: SubhutiSourceLocation): any {
     return this.commonLocType({
-      type: SlimeNodeType.TemplateElement,
+      type: SlimeAstTypeName.TemplateElement,
       tail: tail,
       value: {
         raw: raw,
@@ -1490,7 +1490,7 @@ class SlimeNodeCreate {
     asteriskToken?: SlimeAsteriskToken
   ): SlimeMethodDefinition {
     return this.commonLocType({
-      type: SlimeNodeType.MethodDefinition,
+      type: SlimeAstTypeName.MethodDefinition,
       key: key,
       value: value,
       kind: kind,
@@ -1513,7 +1513,7 @@ class SlimeNodeCreate {
     loc?: SubhutiSourceLocation
   ): SlimePropertyDefinition {
     return this.commonLocType({
-      type: SlimeNodeType.PropertyDefinition,
+      type: SlimeAstTypeName.PropertyDefinition,
       key: key,
       value: value ?? null,
       computed: computed,
@@ -1523,6 +1523,6 @@ class SlimeNodeCreate {
   }
 }
 
-const SlimeAstCreateUtil = new SlimeNodeCreate()
+const SlimeAstCreateUtil = new SlimeAstCreateUtils()
 export default SlimeAstCreateUtil
 

@@ -8,7 +8,7 @@ import {
     SlimeExpression,
     SlimeFunctionExpression,
     SlimeFunctionParam,
-    SlimeIdentifier, SlimeNodeType, SlimePattern, SlimeRestElement
+    SlimeIdentifier, SlimeAstTypeName, SlimePattern, SlimeRestElement
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
@@ -83,7 +83,7 @@ export class PrimaryExpressionCstToAst {
             // If it's FormalParameterList, convert to expression
             if (middleCst.name === SlimeParser.prototype.FormalParameterList?.name || middleCst.name === 'FormalParameterList') {
                 const params = SlimeCstToAstUtil.createFormalParameterListAst(middleCst)
-                if (params.length === 1 && params[0].type === SlimeNodeType.Identifier) {
+                if (params.length === 1 && params[0].type === SlimeAstTypeName.Identifier) {
                     return SlimeAstUtil.createParenthesizedExpression(params[0] as any, first.loc)
                 }
                 if (params.length > 1) {

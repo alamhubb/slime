@@ -9,7 +9,7 @@ import {
     SlimeIdentifier, type SlimeObjectPattern,
     SlimePattern,
     SlimeRestElement, type SlimeReturnStatement,
-    type SlimeStatement, SlimeTokenCreate, SlimeNodeType,
+    type SlimeStatement, SlimeTokenCreate, SlimeAstTypeName,
     type SlimeArrayPatternElement, type SlimeLBracketToken, type SlimeRBracketToken,
     type SlimeCommaToken, type SlimeLBraceToken, type SlimeRBraceToken,
     type SlimeObjectPatternProperty, type SlimeAssignmentProperty
@@ -45,7 +45,7 @@ export class BindingPatternCstToAst {
                 // 有默认值，创建 AssignmentPattern
                 const init = SlimeCstToAstUtil.createInitializerAst(initializer)
                 return {
-                    type: SlimeNodeType.AssignmentPattern,
+                    type: SlimeAstTypeName.AssignmentPattern,
                     left: pattern,
                     right: init,
                     loc: cst.loc
@@ -68,7 +68,7 @@ export class BindingPatternCstToAst {
             // 有默认值，创建AssignmentPattern
             const init = SlimeCstToAstUtil.createInitializerAst(initializer)
             return {
-                type: SlimeNodeType.AssignmentPattern,
+                type: SlimeAstTypeName.AssignmentPattern,
                 left: id,
                 right: init,
                 loc: cst.loc
@@ -122,7 +122,7 @@ export class BindingPatternCstToAst {
         const value = bindingElement ? SlimeCstToAstUtil.createBindingElementAst(bindingElement) : null
 
         return {
-            type: SlimeNodeType.Property,
+            type: SlimeAstTypeName.Property,
             key: key,
             value: value,
             kind: 'init',
@@ -309,7 +309,7 @@ export class BindingPatternCstToAst {
         }
 
         return {
-            type: SlimeNodeType.ArrayPattern,
+            type: SlimeAstTypeName.ArrayPattern,
             elements,
             lBracketToken,
             rBracketToken,
@@ -359,7 +359,7 @@ export class BindingPatternCstToAst {
 
                         properties.push({
                             property: {
-                                type: SlimeNodeType.Property,
+                                type: SlimeAstTypeName.Property,
                                 key: key,
                                 value: value,
                                 kind: 'init',
@@ -382,7 +382,7 @@ export class BindingPatternCstToAst {
 
                             properties.push({
                                 property: {
-                                    type: SlimeNodeType.Property,
+                                    type: SlimeAstTypeName.Property,
                                     key: key,
                                     value: value,
                                     kind: 'init',
@@ -427,7 +427,7 @@ export class BindingPatternCstToAst {
                 const ellipsisCst = restElement.children.find((ch: any) => ch.value === '...')
                 const ellipsisToken = ellipsisCst ? SlimeTokenCreate.createEllipsisToken(ellipsisCst.loc) : undefined
                 const restNode: SlimeRestElement = {
-                    type: SlimeNodeType.RestElement,
+                    type: SlimeAstTypeName.RestElement,
                     argument: restId,
                     ellipsisToken,
                     loc: restElement.loc
@@ -437,7 +437,7 @@ export class BindingPatternCstToAst {
         }
 
         return {
-            type: SlimeNodeType.ObjectPattern,
+            type: SlimeAstTypeName.ObjectPattern,
             properties,
             lBraceToken,
             rBraceToken,

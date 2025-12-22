@@ -6,7 +6,7 @@ import {
     SlimeAstUtil, SlimeCallArgument, SlimeExpression,
     SlimeIdentifier, type SlimeImportDeclaration, SlimeImportDefaultSpecifier, SlimeImportNamespaceSpecifier,
     SlimeImportSpecifier, SlimeImportSpecifierItem, SlimeLiteral,
-    type SlimeModuleDeclaration, SlimeNodeType, SlimePattern, type SlimeStatement,
+    type SlimeModuleDeclaration, SlimeAstTypeName, SlimePattern, type SlimeStatement,
     SlimeStringLiteral, SlimeTokenCreate, SlimeVariableDeclarator
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
@@ -147,7 +147,7 @@ export class ImportCstToAst {
                     const imported = SlimeCstToAstUtil.createIdentifierNameAst(identifierName)
                     const local = SlimeCstToAstUtil.createImportedBindingAst(binding)
                     specifiers.push({
-                        type: SlimeNodeType.ImportSpecifier,
+                        type: SlimeAstTypeName.ImportSpecifier,
                         imported: imported,
                         local: local,
                         loc: child.loc
@@ -156,7 +156,7 @@ export class ImportCstToAst {
                     // import {name} - 简写形式
                     const id = SlimeCstToAstUtil.createImportedBindingAst(binding)
                     specifiers.push({
-                        type: SlimeNodeType.ImportSpecifier,
+                        type: SlimeAstTypeName.ImportSpecifier,
                         imported: id,
                         local: id,
                         loc: child.loc
@@ -216,7 +216,7 @@ export class ImportCstToAst {
                     const imported = SlimeCstToAstUtil.createModuleExportNameAst(moduleExportName)
                     const local = SlimeCstToAstUtil.createImportedBindingAst(binding)
                     currentSpec = {
-                        type: SlimeNodeType.ImportSpecifier,
+                        type: SlimeAstTypeName.ImportSpecifier,
                         imported: imported,
                         local: local,
                         loc: child.loc
@@ -225,7 +225,7 @@ export class ImportCstToAst {
                     // 简写形�? import { foo }
                     const id = SlimeCstToAstUtil.createImportedBindingAst(binding)
                     currentSpec = {
-                        type: SlimeNodeType.ImportSpecifier,
+                        type: SlimeAstTypeName.ImportSpecifier,
                         imported: id,
                         local: id,
                         loc: child.loc
@@ -424,7 +424,7 @@ export class ImportCstToAst {
                             if (keyChild.name === 'IdentifierName' || keyChild.name === SlimeParser.prototype.IdentifierName?.name) {
                                 const nameToken = keyChild.children?.[0]
                                 currentKey = {
-                                    type: SlimeNodeType.Identifier,
+                                    type: SlimeAstTypeName.Identifier,
                                     name: nameToken?.value || keyChild.value,
                                     loc: keyChild.loc
                                 }

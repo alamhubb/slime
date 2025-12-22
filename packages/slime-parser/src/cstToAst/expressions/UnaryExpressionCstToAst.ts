@@ -7,7 +7,7 @@ import {
     SlimeExpression,
     type SlimeFunctionExpression,
     type SlimeFunctionParam,
-    type SlimeIdentifier, SlimeNodeType, SlimeTokenCreate
+    type SlimeIdentifier, SlimeAstTypeName, SlimeTokenCreate
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
@@ -69,7 +69,7 @@ export class UnaryExpressionCstToAst {
 
         // 创建 UnaryExpression AST
         return {
-            type: SlimeNodeType.UnaryExpression,
+            type: SlimeAstTypeName.UnaryExpression,
             operator: operator,
             prefix: true,  // 前缀运算�?
             argument: argument,
@@ -92,7 +92,7 @@ export class UnaryExpressionCstToAst {
                 const operator = first.value || first.loc?.value
                 const argument = SlimeCstToAstUtil.createExpressionAst(cst.children[1])
                 return {
-                    type: SlimeNodeType.UpdateExpression,
+                    type: SlimeAstTypeName.UpdateExpression,
                     operator: operator,
                     argument: argument,
                     prefix: true,
@@ -112,7 +112,7 @@ export class UnaryExpressionCstToAst {
                 }
                 if (operator) {
                     return {
-                        type: SlimeNodeType.UpdateExpression,
+                        type: SlimeAstTypeName.UpdateExpression,
                         operator: operator,
                         argument: argument,
                         prefix: false,

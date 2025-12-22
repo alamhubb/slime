@@ -6,7 +6,7 @@ import { SubhutiCst } from "subhuti";
 import SlimeParser from "../../SlimeParser.ts";
 import {
     SlimeAstUtil,
-    SlimeNodeType,
+    SlimeAstTypeName,
     SlimeTokenCreate,
     type SlimeVariableDeclaration,
     type SlimeVariableDeclarator
@@ -324,9 +324,9 @@ export class ControlFlowCstToAst {
             const kind = letOrConstCst.children[0].value  // 'let' or 'const'
 
             left = {
-                type: SlimeNodeType.VariableDeclaration,
+                type: SlimeAstTypeName.VariableDeclaration,
                 declarations: [{
-                    type: SlimeNodeType.VariableDeclarator,
+                    type: SlimeAstTypeName.VariableDeclarator,
                     id: id,
                     init: null,
                     loc: forBindingCst.loc
@@ -343,9 +343,9 @@ export class ControlFlowCstToAst {
             const id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingIdCst)
             const init = SlimeCstToAstUtil.createInitializerAst(initializerCst)
             left = {
-                type: SlimeNodeType.VariableDeclaration,
+                type: SlimeAstTypeName.VariableDeclaration,
                 declarations: [{
-                    type: SlimeNodeType.VariableDeclarator,
+                    type: SlimeAstTypeName.VariableDeclarator,
                     id: id,
                     init: init,
                     loc: {
@@ -375,9 +375,9 @@ export class ControlFlowCstToAst {
                 id = SlimeCstToAstUtil.createBindingIdentifierAst(actualBinding);
             }
             left = {
-                type: SlimeNodeType.VariableDeclaration,
+                type: SlimeAstTypeName.VariableDeclaration,
                 declarations: [{
-                    type: SlimeNodeType.VariableDeclarator,
+                    type: SlimeAstTypeName.VariableDeclarator,
                     id: id,
                     init: null,
                     loc: varBindingCst.loc
@@ -420,7 +420,7 @@ export class ControlFlowCstToAst {
         }
 
         const result: any = {
-            type: isForOf ? SlimeNodeType.ForOfStatement : SlimeNodeType.ForInStatement,
+            type: isForOf ? SlimeAstTypeName.ForOfStatement : SlimeAstTypeName.ForInStatement,
             left: left,
             right: right,
             body: body,

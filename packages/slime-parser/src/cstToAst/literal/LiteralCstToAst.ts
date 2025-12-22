@@ -7,7 +7,7 @@ import {
     type SlimeArrayExpression, type SlimeArrowFunctionExpression, type SlimeAssignmentExpression,
     SlimeAstUtil, type SlimeClassExpression,
     type SlimeExpression, type SlimeFunctionParam, type SlimeIdentifier, SlimeLiteral,
-    SlimeNodeType, SlimeNumericLiteral, type SlimeSpreadElement,
+    SlimeAstTypeName, SlimeNumericLiteral, type SlimeSpreadElement,
     SlimeStringLiteral, SlimeTokenCreate
 } from "slime-ast";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
@@ -97,7 +97,7 @@ export class LiteralCstToAst {
             const pattern = match[1]
             const flags = match[2]
             return {
-                type: SlimeNodeType.Literal,
+                type: SlimeAstTypeName.Literal,
                 value: new RegExp(pattern, flags),
                 raw: rawValue,
                 regex: {
@@ -109,7 +109,7 @@ export class LiteralCstToAst {
         }
         // 如果无法解析，返回原始�?
         return {
-            type: SlimeNodeType.Literal,
+            type: SlimeAstTypeName.Literal,
             value: rawValue,
             raw: rawValue,
             loc: cst.loc

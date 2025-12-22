@@ -3,7 +3,7 @@ import {
     SlimeAstUtil,
     type SlimeBlockStatement,
     SlimeFunctionExpression, type SlimeFunctionParam,
-    SlimeIdentifier, type SlimeMethodDefinition, SlimeNodeType,
+    SlimeIdentifier, type SlimeMethodDefinition, SlimeAstTypeName,
     SlimePattern, SlimeRestElement, type SlimeReturnStatement,
     SlimeStatement, SlimeTokenCreate,
     SlimeVariableDeclarator
@@ -328,7 +328,7 @@ export class FunctionParameterCstToAst {
         }
 
         return {
-            type: SlimeNodeType.RestElement,
+            type: SlimeAstTypeName.RestElement,
             argument: argument,
             loc: cst.loc
         } as any
@@ -380,11 +380,11 @@ export class FunctionParameterCstToAst {
         if (expressionCst.name === SlimeParser.prototype.AssignmentExpression?.name) {
             const assignmentAst = SlimeCstToAstUtil.createAssignmentExpressionAst(expressionCst)
             // 如果是简单的identifier，返回它
-            if (assignmentAst.type === SlimeNodeType.Identifier) {
+            if (assignmentAst.type === SlimeAstTypeName.Identifier) {
                 return [assignmentAst as any]
             }
             // 如果是赋值（默认参数），返回AssignmentPattern
-            if (assignmentAst.type === SlimeNodeType.AssignmentExpression) {
+            if (assignmentAst.type === SlimeAstTypeName.AssignmentExpression) {
                 return [{
                     type: 'AssignmentPattern',
                     left: assignmentAst.left,
@@ -403,20 +403,20 @@ export class FunctionParameterCstToAst {
                 if (child.name === SlimeParser.prototype.AssignmentExpression?.name) {
                     const assignmentAst = SlimeCstToAstUtil.createAssignmentExpressionAst(child)
                     // 转换为参�?
-                    if (assignmentAst.type === SlimeNodeType.Identifier) {
+                    if (assignmentAst.type === SlimeAstTypeName.Identifier) {
                         params.push(assignmentAst as any)
-                    } else if (assignmentAst.type === SlimeNodeType.AssignmentExpression) {
+                    } else if (assignmentAst.type === SlimeAstTypeName.AssignmentExpression) {
                         // 默认参数
                         params.push({
                             type: 'AssignmentPattern',
                             left: assignmentAst.left,
                             right: assignmentAst.right
                         } as any)
-                    } else if (assignmentAst.type === SlimeNodeType.ObjectExpression) {
+                    } else if (assignmentAst.type === SlimeAstTypeName.ObjectExpression) {
                         // 对象解构参数�?{ a, b }) => ...
                         // 需要将 ObjectExpression 转换�?ObjectPattern
                         params.push(SlimeCstToAstUtil.convertExpressionToPattern(assignmentAst) as any)
-                    } else if (assignmentAst.type === SlimeNodeType.ArrayExpression) {
+                    } else if (assignmentAst.type === SlimeAstTypeName.ArrayExpression) {
                         // 数组解构参数�?[a, b]) => ...
                         // 需要将 ArrayExpression 转换�?ArrayPattern
                         params.push(SlimeCstToAstUtil.convertExpressionToPattern(assignmentAst) as any)

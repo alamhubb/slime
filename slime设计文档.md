@@ -46,7 +46,7 @@ Slime 采用两层架构将 CST (具体语法树) 转换为 AST (抽象语法树
 ```
 ┌────────────────────────────────────────────────────────────┐
 │                    第一层：AST 工厂层                        │
-│                   (SlimeNodeCreate.ts)                      │
+│                   (SlimeAstCreateUtils.ts)                      │
 ├────────────────────────────────────────────────────────────┤
 │  - 方法名与 ESTree AST 类型名一致                            │
 │  - 纯粹的节点创建，不依赖 CST 结构                            │
@@ -139,8 +139,8 @@ slime/
 ├── packages/
 │   ├── slime-ast/
 │   │   └── src/
-│   │       ├── SlimeAstType.ts      # AST 类型定义
-│   │       ├── SlimeNodeCreate.ts   # AST 工厂方法 (第一层)
+│   │       ├── SlimeAstTypeName.ts      # AST 类型定义
+│   │       ├── SlimeAstCreateUtils.ts   # AST 工厂方法 (第一层)
 │   │       └── SlimeAstUtil.ts      # AST 工具方法
 │   │
 │   ├── slime-parser/
@@ -156,7 +156,7 @@ slime/
 │   │
 │   ├── slime-token/
 │   │   └── src/
-│   │       └── SlimeTokenCreate.ts  # Token 创建工具
+│   │       └── SlimeTokenCreateUtils.ts  # Token 创建工具
 │   │
 │   └── slime-syntax/
 │       └── src/
@@ -240,7 +240,7 @@ const ast = cstToAst.toProgram(cst)  // Slime 能处理
 
 1. 在 `SlimeCstToAstUtil.ts` 中添加 `createXxxAst` 方法（Xxx = CST 规则名）
 2. 在 `createAstFromCst` 中添加对应的 if 分发
-3. 如果需要新的 AST 类型，在 `SlimeNodeCreate.ts` 中添加工厂方法
+3. 如果需要新的 AST 类型，在 `SlimeAstCreateUtils.ts` 中添加工厂方法
 
 ### 运行测试
 

@@ -29,7 +29,7 @@ const ast = SlimeCstToAstUtil.toProgram(cst)
 ┌─────────────────────────────────────────────────────────────────┐
 │                        slime-ast                                 │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  │
-│  │ SlimeESTree.ts  │  │SlimeNodeCreate.ts│  │SlimeTokenCreate │  │
+│  │ SlimeAstNode.ts  │  │SlimeAstCreateUtils.ts│  │SlimeTokenCreateUtils │  │
 │  │ (类型定义)       │  │ (AST工厂方法)    │  │ (Token工厂)     │  │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘  │
 │                                                                  │
@@ -56,7 +56,7 @@ const ast = SlimeCstToAstUtil.toProgram(cst)
 
 | 层级 | 位置 | 方法示例 | 职责 |
 |------|------|----------|------|
-| **第一层：AST 工厂** | slime-ast/SlimeNodeCreate.ts | `createIdentifier(name, loc)` | 纯粹创建单个 AST 节点，不理解 CST |
+| **第一层：AST 工厂** | slime-ast/SlimeAstCreateUtils.ts | `createIdentifier(name, loc)` | 纯粹创建单个 AST 节点，不理解 CST |
 | **第二层：CST 转换** | slime-parser/cstToAst/*.ts | `createIdentifierAst(cst)` | 解析 CST 结构，调用第一层工厂 |
 
 **调用关系示例：**

@@ -5,7 +5,7 @@ import { SubhutiCst } from "subhuti";
 import {
     SlimeAstUtil, type SlimeCallArgument,
     SlimeExpression,
-    type SlimeIdentifier, SlimeNodeType, type SlimePattern, SlimeSpreadElement, type SlimeSuper,
+    type SlimeIdentifier, SlimeAstTypeName, type SlimePattern, SlimeSpreadElement, type SlimeSuper,
     SlimeTokenCreate,
     type SlimeVariableDeclarator
 } from "slime-ast";
@@ -154,7 +154,7 @@ export class MemberCallCstToAst {
                 // [expression] - computed property access (旧版兼容)
                 const propertyExpression = SlimeCstToAstUtil.createExpressionAst(child.children[1])
                 current = {
-                    type: SlimeNodeType.MemberExpression,
+                    type: SlimeAstTypeName.MemberExpression,
                     object: current,
                     property: propertyExpression,
                     computed: true,
@@ -169,7 +169,7 @@ export class MemberCallCstToAst {
                 if (expressionChild) {
                     const propertyExpression = SlimeCstToAstUtil.createExpressionAst(expressionChild)
                     current = {
-                        type: SlimeNodeType.MemberExpression,
+                        type: SlimeAstTypeName.MemberExpression,
                         object: current,
                         property: propertyExpression,
                         computed: true,
@@ -360,7 +360,7 @@ export class MemberCallCstToAst {
                 // [expr] - computed property (旧版兼容)
                 const propertyExpression = SlimeCstToAstUtil.createExpressionAst(child.children[1])
                 current = {
-                    type: SlimeNodeType.MemberExpression,
+                    type: SlimeAstTypeName.MemberExpression,
                     object: current,
                     property: propertyExpression,
                     computed: true,
@@ -374,7 +374,7 @@ export class MemberCallCstToAst {
                 if (expressionChild && expressionChild.name !== 'RBracket') {
                     const propertyExpression = SlimeCstToAstUtil.createExpressionAst(expressionChild)
                     current = {
-                        type: SlimeNodeType.MemberExpression,
+                        type: SlimeAstTypeName.MemberExpression,
                         object: current,
                         property: propertyExpression,
                         computed: true,
@@ -511,7 +511,7 @@ export class MemberCallCstToAst {
             // super[expression] - 旧版兼容
             const propertyExpression = SlimeCstToAstUtil.createExpressionAst(second.children[1])
             return {
-                type: SlimeNodeType.MemberExpression,
+                type: SlimeAstTypeName.MemberExpression,
                 object: superNode,
                 property: propertyExpression,
                 computed: true,
@@ -524,7 +524,7 @@ export class MemberCallCstToAst {
             const expressionCst = cst.children[2]
             const propertyExpression = SlimeCstToAstUtil.createExpressionAst(expressionCst)
             return {
-                type: SlimeNodeType.MemberExpression,
+                type: SlimeAstTypeName.MemberExpression,
                 object: superNode,
                 property: propertyExpression,
                 computed: true,
@@ -545,7 +545,7 @@ export class MemberCallCstToAst {
             }
 
             return {
-                type: SlimeNodeType.MemberExpression,
+                type: SlimeAstTypeName.MemberExpression,
                 object: superNode,
                 property: property,
                 computed: false,
@@ -559,7 +559,7 @@ export class MemberCallCstToAst {
             const property = SlimeAstUtil.createIdentifier(propToken.value, propToken.loc)
 
             return {
-                type: SlimeNodeType.MemberExpression,
+                type: SlimeAstTypeName.MemberExpression,
                 object: superNode,
                 property: property,
                 computed: false,

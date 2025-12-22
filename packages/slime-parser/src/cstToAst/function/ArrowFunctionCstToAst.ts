@@ -10,7 +10,7 @@ import {
     SlimeMethodDefinition,
     SlimePattern,
     SlimeTokenCreate,
-    SlimeNodeType, SlimeArrowFunctionExpression, SlimeIdentifier
+    SlimeAstTypeName, SlimeArrowFunctionExpression, SlimeIdentifier
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
@@ -115,7 +115,7 @@ export class ArrowFunctionCstToAst {
         // 注意：createArrowFunctionExpression 参数顺序�?(body, params, expression, async, loc, arrowToken, asyncToken, lParenToken, rParenToken)
         // commaTokens 目前函数签名不支持，暂时忽略
         return SlimeAstUtil.createArrowFunctionExpression(
-            body, params, body.type !== SlimeNodeType.BlockStatement, isAsync, cst.loc,
+            body, params, body.type !== SlimeAstTypeName.BlockStatement, isAsync, cst.loc,
             arrowToken, asyncToken, lParenToken, rParenToken
         )
     }
@@ -163,7 +163,7 @@ export class ArrowFunctionCstToAst {
             }
             // 返回不完整的箭头函数（没�?body�?
             return {
-                type: SlimeNodeType.ArrowFunctionExpression,
+                type: SlimeAstTypeName.ArrowFunctionExpression,
                 id: null,
                 params: params,
                 body: SlimeAstUtil.createBlockStatement([]),
@@ -233,13 +233,13 @@ export class ArrowFunctionCstToAst {
         }
 
         return {
-            type: SlimeNodeType.ArrowFunctionExpression,
+            type: SlimeAstTypeName.ArrowFunctionExpression,
             id: null,
             params: params,
             body: body,
             generator: false,
             async: true,
-            expression: body.type !== SlimeNodeType.BlockStatement,
+            expression: body.type !== SlimeAstTypeName.BlockStatement,
             arrowToken: arrowToken,
             asyncToken: asyncToken,
             lParenToken: lParenToken,

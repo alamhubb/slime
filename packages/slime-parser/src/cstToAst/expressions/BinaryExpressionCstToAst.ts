@@ -7,7 +7,7 @@ import {
     SlimeExpression,
     type SlimeFunctionExpression, type SlimeFunctionParam,
     type SlimeIdentifier,
-    SlimeNodeType
+    SlimeAstTypeName
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
@@ -28,7 +28,7 @@ export class BinaryExpressionCstToAst {
                 const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
-                    type: SlimeNodeType.LogicalExpression,
+                    type: SlimeAstTypeName.LogicalExpression,
                     operator: operator,
                     left: left,
                     right: right,
@@ -53,7 +53,7 @@ export class BinaryExpressionCstToAst {
                 const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
-                    type: SlimeNodeType.LogicalExpression,
+                    type: SlimeAstTypeName.LogicalExpression,
                     operator: operator,
                     left: left,
                     right: right,
@@ -77,7 +77,7 @@ export class BinaryExpressionCstToAst {
                 const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
-                    type: SlimeNodeType.BinaryExpression,
+                    type: SlimeAstTypeName.BinaryExpression,
                     operator: operator,
                     left: left,
                     right: right,
@@ -101,7 +101,7 @@ export class BinaryExpressionCstToAst {
                 const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
-                    type: SlimeNodeType.BinaryExpression,
+                    type: SlimeAstTypeName.BinaryExpression,
                     operator: operator,
                     left: left,
                     right: right,
@@ -125,7 +125,7 @@ export class BinaryExpressionCstToAst {
                 const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
-                    type: SlimeNodeType.BinaryExpression,
+                    type: SlimeAstTypeName.BinaryExpression,
                     operator: operator,
                     left: left,
                     right: right,
@@ -147,7 +147,7 @@ export class BinaryExpressionCstToAst {
             const right = SlimeCstToAstUtil.createExpressionAst(cst.children[2])
 
             return {
-                type: SlimeNodeType.BinaryExpression,
+                type: SlimeAstTypeName.BinaryExpression,
                 operator: operator,
                 left: left,
                 right: right,
@@ -172,7 +172,7 @@ export class BinaryExpressionCstToAst {
                 const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
-                    type: SlimeNodeType.BinaryExpression,
+                    type: SlimeAstTypeName.BinaryExpression,
                     operator: operator,
                     left: left,
                     right: right,
@@ -199,7 +199,7 @@ export class BinaryExpressionCstToAst {
                 const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
-                    type: SlimeNodeType.BinaryExpression,
+                    type: SlimeAstTypeName.BinaryExpression,
                     operator: operator,
                     left: left,
                     right: right,
@@ -229,7 +229,7 @@ export class BinaryExpressionCstToAst {
                 const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
-                    type: SlimeNodeType.BinaryExpression,
+                    type: SlimeAstTypeName.BinaryExpression,
                     operator: operator,
                     left: left,
                     right: right,
@@ -258,7 +258,7 @@ export class BinaryExpressionCstToAst {
                 const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
-                    type: SlimeNodeType.BinaryExpression,
+                    type: SlimeAstTypeName.BinaryExpression,
                     operator: operator,
                     left: left,
                     right: right,
@@ -296,7 +296,7 @@ export class BinaryExpressionCstToAst {
         const operator = cst.children[1]  // ** token
         const right = SlimeCstToAstUtil.createExponentiationExpressionAst(cst.children[2])  // 递归处理右侧
         return {
-            type: SlimeNodeType.BinaryExpression,
+            type: SlimeAstTypeName.BinaryExpression,
             operator: '**',
             left: left,
             right: right

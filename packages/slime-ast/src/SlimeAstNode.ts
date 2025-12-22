@@ -1,7 +1,7 @@
 import type * as ESTree from "estree";
 import {
-    SlimeNodeType
-} from "./SlimeNodeType.ts";
+    SlimeAstTypeName
+} from "./SlimeAstTypeName.ts";
 
 import {
     SlimeTokenType,
@@ -517,14 +517,14 @@ export const SlimeProgramSourceType = {
 export type SlimeProgramSourceType = typeof SlimeProgramSourceType[keyof typeof SlimeProgramSourceType];
 
 export interface SlimeProgram extends SlimeBaseNode, Omit<SlimeExtends<ESTree.Program>, 'body'> {
-    type: typeof SlimeNodeType.Program;
+    type: typeof SlimeAstTypeName.Program;
     sourceType: SlimeProgramSourceType;
     body: Array<SlimeDirective | SlimeStatement | SlimeModuleDeclaration>;
     comments?: SlimeComment[] | undefined;
 }
 
 export interface SlimeDirective extends SlimeBaseNode, Omit<SlimeExtends<ESTree.Directive>, 'expression'> {
-    type: typeof SlimeNodeType.ExpressionStatement;
+    type: typeof SlimeAstTypeName.ExpressionStatement;
     expression: SlimeLiteral;
     directive: string;
 }
@@ -574,27 +574,27 @@ export interface SlimeBaseStatement extends SlimeBaseNode, SlimeExtends<ESTree.B
 }
 
 export interface SlimeEmptyStatement extends SlimeBaseStatement, SlimeExtends<ESTree.EmptyStatement>, SlimeSemicolonTokens {
-    type: typeof SlimeNodeType.EmptyStatement;
+    type: typeof SlimeAstTypeName.EmptyStatement;
 }
 
 export interface SlimeBlockStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.BlockStatement>, 'body'>, SlimeBraceTokens {
-    type: typeof SlimeNodeType.BlockStatement;
+    type: typeof SlimeAstTypeName.BlockStatement;
     body: SlimeStatement[];
     innerComments?: SlimeComment[] | undefined;
 }
 
 export interface SlimeStaticBlock extends Omit<SlimeExtends<ESTree.StaticBlock, 'innerComments'>, 'body'>, Omit<SlimeBlockStatement, 'type' | 'body'> {
-    type: typeof SlimeNodeType.StaticBlock;
+    type: typeof SlimeAstTypeName.StaticBlock;
     body: SlimeStatement[];
 }
 
 export interface SlimeExpressionStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.ExpressionStatement>, 'expression'>, SlimeSemicolonTokens {
-    type: typeof SlimeNodeType.ExpressionStatement;
+    type: typeof SlimeAstTypeName.ExpressionStatement;
     expression: SlimeExpression;
 }
 
 export interface SlimeIfStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.IfStatement>, 'test' | 'consequent' | 'alternate'>, SlimeParenTokens {
-    type: typeof SlimeNodeType.IfStatement;
+    type: typeof SlimeAstTypeName.IfStatement;
     test: SlimeExpression;
     consequent: SlimeStatement;
     alternate?: SlimeStatement | null | undefined;
@@ -605,27 +605,27 @@ export interface SlimeIfStatement extends SlimeBaseStatement, Omit<SlimeExtends<
 }
 
 export interface SlimeLabeledStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.LabeledStatement>, 'label' | 'body'> {
-    type: typeof SlimeNodeType.LabeledStatement;
+    type: typeof SlimeAstTypeName.LabeledStatement;
     label: SlimeIdentifier;
     body: SlimeStatement;
 }
 
 export interface SlimeBreakStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.BreakStatement>, 'label'>, SlimeSemicolonTokens {
-    type: typeof SlimeNodeType.BreakStatement;
+    type: typeof SlimeAstTypeName.BreakStatement;
     label?: SlimeIdentifier | null | undefined;
     /** break 关键字 Token */
     breakToken?: SlimeBreakToken;
 }
 
 export interface SlimeContinueStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.ContinueStatement>, 'label'>, SlimeSemicolonTokens {
-    type: typeof SlimeNodeType.ContinueStatement;
+    type: typeof SlimeAstTypeName.ContinueStatement;
     label?: SlimeIdentifier | null | undefined;
     /** continue 关键字 Token */
     continueToken?: SlimeContinueToken;
 }
 
 export interface SlimeWithStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.WithStatement>, 'object' | 'body'>, SlimeParenTokens {
-    type: typeof SlimeNodeType.WithStatement;
+    type: typeof SlimeAstTypeName.WithStatement;
     object: SlimeExpression;
     body: SlimeStatement;
     /** with 关键字 Token */
@@ -633,7 +633,7 @@ export interface SlimeWithStatement extends SlimeBaseStatement, Omit<SlimeExtend
 }
 
 export interface SlimeSwitchStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.SwitchStatement>, 'discriminant' | 'cases'>, SlimeParenTokens, SlimeBraceTokens {
-    type: typeof SlimeNodeType.SwitchStatement;
+    type: typeof SlimeAstTypeName.SwitchStatement;
     discriminant: SlimeExpression;
     cases: SlimeSwitchCase[];
     /** switch 关键字 Token */
@@ -641,21 +641,21 @@ export interface SlimeSwitchStatement extends SlimeBaseStatement, Omit<SlimeExte
 }
 
 export interface SlimeReturnStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.ReturnStatement>, 'argument'>, SlimeSemicolonTokens {
-    type: typeof SlimeNodeType.ReturnStatement;
+    type: typeof SlimeAstTypeName.ReturnStatement;
     argument?: SlimeExpression | null | undefined;
     /** return 关键字 Token */
     returnToken?: SlimeReturnToken;
 }
 
 export interface SlimeThrowStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.ThrowStatement>, 'argument'>, SlimeSemicolonTokens {
-    type: typeof SlimeNodeType.ThrowStatement;
+    type: typeof SlimeAstTypeName.ThrowStatement;
     argument: SlimeExpression;
     /** throw 关键字 Token */
     throwToken?: SlimeThrowToken;
 }
 
 export interface SlimeTryStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.TryStatement>, 'block' | 'handler' | 'finalizer'> {
-    type: typeof SlimeNodeType.TryStatement;
+    type: typeof SlimeAstTypeName.TryStatement;
     block: SlimeBlockStatement;
     handler?: SlimeCatchClause | null | undefined;
     finalizer?: SlimeBlockStatement | null | undefined;
@@ -666,7 +666,7 @@ export interface SlimeTryStatement extends SlimeBaseStatement, Omit<SlimeExtends
 }
 
 export interface SlimeWhileStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.WhileStatement>, 'test' | 'body'>, SlimeParenTokens {
-    type: typeof SlimeNodeType.WhileStatement;
+    type: typeof SlimeAstTypeName.WhileStatement;
     test: SlimeExpression;
     body: SlimeStatement;
     /** while 关键字 Token */
@@ -674,7 +674,7 @@ export interface SlimeWhileStatement extends SlimeBaseStatement, Omit<SlimeExten
 }
 
 export interface SlimeDoWhileStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.DoWhileStatement>, 'body' | 'test'>, SlimeParenTokens, SlimeSemicolonTokens {
-    type: typeof SlimeNodeType.DoWhileStatement;
+    type: typeof SlimeAstTypeName.DoWhileStatement;
     body: SlimeStatement;
     test: SlimeExpression;
     /** do 关键字 Token */
@@ -684,7 +684,7 @@ export interface SlimeDoWhileStatement extends SlimeBaseStatement, Omit<SlimeExt
 }
 
 export interface SlimeForStatement extends SlimeBaseStatement, Omit<SlimeExtends<ESTree.ForStatement>, 'init' | 'test' | 'update' | 'body'>, SlimeParenTokens {
-    type: typeof SlimeNodeType.ForStatement;
+    type: typeof SlimeAstTypeName.ForStatement;
     init?: SlimeVariableDeclaration | SlimeExpression | null | undefined;
     test?: SlimeExpression | null | undefined;
     update?: SlimeExpression | null | undefined;
@@ -706,13 +706,13 @@ export interface SlimeBaseForXStatement extends SlimeBaseStatement, Omit<SlimeEx
 }
 
 export interface SlimeForInStatement extends SlimeBaseForXStatement, Omit<SlimeExtends<ESTree.ForInStatement>, 'body' | 'left' | 'right'> {
-    type: typeof SlimeNodeType.ForInStatement;
+    type: typeof SlimeAstTypeName.ForInStatement;
     /** in 关键字 Token */
     inToken?: SlimeInToken;
 }
 
 export interface SlimeDebuggerStatement extends SlimeBaseStatement, SlimeExtends<ESTree.DebuggerStatement>, SlimeSemicolonTokens {
-    type: typeof SlimeNodeType.DebuggerStatement;
+    type: typeof SlimeAstTypeName.DebuggerStatement;
     /** debugger 关键字 Token */
     debuggerToken?: SlimeDebuggerToken;
 }
@@ -723,7 +723,7 @@ export interface SlimeBaseDeclaration extends SlimeBaseStatement, SlimeExtends<E
 }
 
 export interface SlimeMaybeNamedFunctionDeclaration extends SlimeBaseFunction, SlimeBaseDeclaration, Omit<SlimeExtends<ESTree.MaybeNamedFunctionDeclaration>, 'params' | 'body' | 'id'> {
-    type: typeof SlimeNodeType.FunctionDeclaration;
+    type: typeof SlimeAstTypeName.FunctionDeclaration;
     /** It is null when a function declaration is a part of the `export default function` statement */
     id: SlimeIdentifier | null;
     body: SlimeBlockStatement;
@@ -734,14 +734,14 @@ export interface SlimeFunctionDeclaration extends SlimeMaybeNamedFunctionDeclara
 }
 
 export interface SlimeVariableDeclaration extends SlimeBaseDeclaration, Omit<SlimeExtends<ESTree.VariableDeclaration>, 'kind' | 'declarations'>, SlimeSemicolonTokens {
-    type: typeof SlimeNodeType.VariableDeclaration;
+    type: typeof SlimeAstTypeName.VariableDeclaration;
     declarations: SlimeVariableDeclarator[];
     /** 变量声明关键字 Token (var/let/const) */
     kind: SlimeVariableDeclarationKindToken;
 }
 
 export interface SlimeVariableDeclarator extends SlimeBaseNode, Omit<SlimeExtends<ESTree.VariableDeclarator>, 'id' | 'init'> {
-    type: typeof SlimeNodeType.VariableDeclarator;
+    type: typeof SlimeAstTypeName.VariableDeclarator;
     id: SlimePattern;
     init?: SlimeExpression | null | undefined;
     /** 赋值符号 Token，包含位置信息 */
@@ -784,33 +784,33 @@ export interface SlimeBaseExpression extends SlimeBaseNode, SlimeExtends<ESTree.
 export type SlimeChainElement = SlimeSimpleCallExpression | SlimeMemberExpression;
 
 export interface SlimeChainExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.ChainExpression>, 'expression'> {
-    type: typeof SlimeNodeType.ChainExpression;
+    type: typeof SlimeAstTypeName.ChainExpression;
     expression: SlimeChainElement;
 }
 
 export interface SlimeThisExpression extends SlimeBaseExpression, SlimeExtends<ESTree.ThisExpression> {
-    type: typeof SlimeNodeType.ThisExpression;
+    type: typeof SlimeAstTypeName.ThisExpression;
 }
 
 export interface SlimeArrayExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.ArrayExpression>, 'elements'>, SlimeBracketTokens {
-    type: typeof SlimeNodeType.ArrayExpression;
+    type: typeof SlimeAstTypeName.ArrayExpression;
     /** 数组元素列表（包装类型，每个元素可关联其后的逗号） */
     elements: Array<SlimeArrayElement>;
 }
 
 export interface SlimeObjectExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.ObjectExpression>, 'properties'>, SlimeBraceTokens {
-    type: typeof SlimeNodeType.ObjectExpression;
+    type: typeof SlimeAstTypeName.ObjectExpression;
     /** 对象属性列表（包装类型，每个属性可关联其后的逗号） */
     properties: Array<SlimeObjectPropertyItem>;
 }
 
 export interface SlimePrivateIdentifier extends SlimeBaseNode, SlimeExtends<ESTree.PrivateIdentifier> {
-    type: typeof SlimeNodeType.PrivateIdentifier;
+    type: typeof SlimeAstTypeName.PrivateIdentifier;
     name: string;
 }
 
 export interface SlimeProperty extends SlimeBaseNode, Omit<SlimeExtends<ESTree.Property>, 'key' | 'value'>, SlimeColonTokens, SlimeBracketTokens {
-    type: typeof SlimeNodeType.Property;
+    type: typeof SlimeAstTypeName.Property;
     key: SlimeExpression | SlimePrivateIdentifier;
     value: SlimeExpression | SlimePattern; // Could be an AssignmentProperty
     kind: "init" | "get" | "set";
@@ -828,7 +828,7 @@ export interface SlimeProperty extends SlimeBaseNode, Omit<SlimeExtends<ESTree.P
 }
 
 export interface SlimePropertyDefinition extends SlimeBaseNode, Omit<SlimeExtends<ESTree.PropertyDefinition>, 'key' | 'value'> {
-    type: typeof SlimeNodeType.PropertyDefinition;
+    type: typeof SlimeAstTypeName.PropertyDefinition;
     key: SlimeExpression | SlimePrivateIdentifier;
     value?: SlimeExpression | null | undefined;
     computed: boolean;
@@ -837,17 +837,17 @@ export interface SlimePropertyDefinition extends SlimeBaseNode, Omit<SlimeExtend
 
 export interface SlimeFunctionExpression extends SlimeBaseFunction, SlimeBaseExpression, Omit<SlimeExtends<ESTree.FunctionExpression>, 'params' | 'body' | 'id'> {
     id?: SlimeIdentifier | null | undefined;
-    type: typeof SlimeNodeType.FunctionExpression;
+    type: typeof SlimeAstTypeName.FunctionExpression;
     body: SlimeBlockStatement;
 }
 
 export interface SlimeSequenceExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.SequenceExpression>, 'expressions'> {
-    type: typeof SlimeNodeType.SequenceExpression;
+    type: typeof SlimeAstTypeName.SequenceExpression;
     expressions: SlimeExpression[];
 }
 
 export interface SlimeUnaryExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.UnaryExpression>, 'operator' | 'argument'> {
-    type: typeof SlimeNodeType.UnaryExpression;
+    type: typeof SlimeAstTypeName.UnaryExpression;
     /** 运算符 Token */
     operator: SlimeUnaryOperatorToken;
     prefix: true;
@@ -855,7 +855,7 @@ export interface SlimeUnaryExpression extends SlimeBaseExpression, Omit<SlimeExt
 }
 
 export interface SlimeBinaryExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.BinaryExpression>, 'operator' | 'left' | 'right'> {
-    type: typeof SlimeNodeType.BinaryExpression;
+    type: typeof SlimeAstTypeName.BinaryExpression;
     /** 运算符 Token */
     operator: SlimeBinaryOperatorToken;
     left: SlimeExpression | SlimePrivateIdentifier;
@@ -863,7 +863,7 @@ export interface SlimeBinaryExpression extends SlimeBaseExpression, Omit<SlimeEx
 }
 
 export interface SlimeAssignmentExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.AssignmentExpression>, 'operator' | 'left' | 'right'> {
-    type: typeof SlimeNodeType.AssignmentExpression;
+    type: typeof SlimeAstTypeName.AssignmentExpression;
     /** 运算符 Token */
     operator: SlimeAssignmentOperatorToken;
     left: SlimePattern | SlimeMemberExpression;
@@ -871,7 +871,7 @@ export interface SlimeAssignmentExpression extends SlimeBaseExpression, Omit<Sli
 }
 
 export interface SlimeUpdateExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.UpdateExpression>, 'operator' | 'argument'> {
-    type: typeof SlimeNodeType.UpdateExpression;
+    type: typeof SlimeAstTypeName.UpdateExpression;
     /** 运算符 Token */
     operator: SlimeUpdateOperatorToken;
     argument: SlimeExpression;
@@ -879,7 +879,7 @@ export interface SlimeUpdateExpression extends SlimeBaseExpression, Omit<SlimeEx
 }
 
 export interface SlimeLogicalExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.LogicalExpression>, 'operator' | 'left' | 'right'> {
-    type: typeof SlimeNodeType.LogicalExpression;
+    type: typeof SlimeAstTypeName.LogicalExpression;
     /** 运算符 Token */
     operator: SlimeLogicalOperatorToken;
     left: SlimeExpression;
@@ -887,7 +887,7 @@ export interface SlimeLogicalExpression extends SlimeBaseExpression, Omit<SlimeE
 }
 
 export interface SlimeConditionalExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.ConditionalExpression>, 'test' | 'alternate' | 'consequent'>, SlimeColonTokens {
-    type: typeof SlimeNodeType.ConditionalExpression;
+    type: typeof SlimeAstTypeName.ConditionalExpression;
     test: SlimeExpression;
     alternate: SlimeExpression;
     consequent: SlimeExpression;
@@ -904,18 +904,18 @@ export interface SlimeBaseCallExpression extends SlimeBaseExpression, Omit<Slime
 export type SlimeCallExpression = SlimeSimpleCallExpression | SlimeNewExpression;
 
 export interface SlimeSimpleCallExpression extends SlimeBaseCallExpression, Omit<SlimeExtends<ESTree.SimpleCallExpression>, 'arguments' | 'callee'> {
-    type: typeof SlimeNodeType.CallExpression;
+    type: typeof SlimeAstTypeName.CallExpression;
     optional: boolean;
 }
 
 export interface SlimeNewExpression extends SlimeBaseCallExpression, Omit<SlimeExtends<ESTree.NewExpression>, 'arguments' | 'callee'> {
-    type: typeof SlimeNodeType.NewExpression;
+    type: typeof SlimeAstTypeName.NewExpression;
     /** new 关键字 Token */
     newToken?: SlimeNewToken;
 }
 
 export interface SlimeMemberExpression extends SlimeBaseExpression, SlimeBasePattern, Omit<SlimeExtends<ESTree.MemberExpression>, 'object' | 'property'>, SlimeBracketTokens {
-    type: typeof SlimeNodeType.MemberExpression;
+    type: typeof SlimeAstTypeName.MemberExpression;
     object: SlimeExpression | SlimeSuper;
     property: SlimeExpression | SlimePrivateIdentifier;
     computed: boolean;
@@ -938,7 +938,7 @@ export interface SlimeBasePattern extends SlimeBaseNode, SlimeExtends<ESTree.Bas
 }
 
 export interface SlimeSwitchCase extends SlimeBaseNode, Omit<SlimeExtends<ESTree.SwitchCase>, 'test' | 'consequent'>, SlimeColonTokens {
-    type: typeof SlimeNodeType.SwitchCase;
+    type: typeof SlimeAstTypeName.SwitchCase;
     test?: SlimeExpression | null | undefined;
     consequent: SlimeStatement[];
     /** case 关键字 Token (如果是 case) */
@@ -948,7 +948,7 @@ export interface SlimeSwitchCase extends SlimeBaseNode, Omit<SlimeExtends<ESTree
 }
 
 export interface SlimeCatchClause extends SlimeBaseNode, Omit<SlimeExtends<ESTree.CatchClause>, 'param' | 'body'>, SlimeParenTokens {
-    type: typeof SlimeNodeType.CatchClause;
+    type: typeof SlimeAstTypeName.CatchClause;
     param: SlimePattern | null;
     body: SlimeBlockStatement;
     /** catch 关键字 Token */
@@ -956,20 +956,20 @@ export interface SlimeCatchClause extends SlimeBaseNode, Omit<SlimeExtends<ESTre
 }
 
 export interface SlimeIdentifier extends SlimeBaseNode, SlimeBaseExpression, SlimeBasePattern, SlimeExtends<ESTree.Identifier> {
-    type: typeof SlimeNodeType.Identifier;
+    type: typeof SlimeAstTypeName.Identifier;
     name: string;
 }
 
 export type SlimeLiteral = SlimeSimpleLiteral | SlimeRegExpLiteral | SlimeBigIntLiteral;
 
 export interface SlimeSimpleLiteral extends SlimeBaseNode, SlimeBaseExpression, SlimeExtends<ESTree.SimpleLiteral> {
-    type: typeof SlimeNodeType.Literal;
+    type: typeof SlimeAstTypeName.Literal;
     value: string | boolean | number | null;
     raw?: string | undefined;
 }
 
 export interface SlimeRegExpLiteral extends SlimeBaseNode, SlimeBaseExpression, SlimeExtends<ESTree.RegExpLiteral> {
-    type: typeof SlimeNodeType.Literal;
+    type: typeof SlimeAstTypeName.Literal;
     value?: RegExp | null | undefined;
     regex: {
         pattern: string;
@@ -979,7 +979,7 @@ export interface SlimeRegExpLiteral extends SlimeBaseNode, SlimeBaseExpression, 
 }
 
 export interface SlimeBigIntLiteral extends SlimeBaseNode, SlimeBaseExpression, SlimeExtends<ESTree.BigIntLiteral> {
-    type: typeof SlimeNodeType.Literal;
+    type: typeof SlimeAstTypeName.Literal;
     value?: bigint | null | undefined;
     bigint: string;
     raw?: string | undefined;
@@ -1054,7 +1054,7 @@ export type SlimeAssignmentOperator =
 export type SlimeUpdateOperator = "++" | "--";
 
 export interface SlimeForOfStatement extends SlimeBaseForXStatement, Omit<SlimeExtends<ESTree.ForOfStatement>, 'body' | 'left' | 'right'> {
-    type: typeof SlimeNodeType.ForOfStatement;
+    type: typeof SlimeAstTypeName.ForOfStatement;
     await: boolean;
     /** of 关键字 Token */
     ofToken?: SlimeOfToken;
@@ -1063,18 +1063,18 @@ export interface SlimeForOfStatement extends SlimeBaseForXStatement, Omit<SlimeE
 }
 
 export interface SlimeSuper extends SlimeBaseNode, SlimeExtends<ESTree.Super> {
-    type: typeof SlimeNodeType.Super;
+    type: typeof SlimeAstTypeName.Super;
 }
 
 export interface SlimeSpreadElement extends SlimeBaseNode, Omit<SlimeExtends<ESTree.SpreadElement>, 'argument'> {
-    type: typeof SlimeNodeType.SpreadElement;
+    type: typeof SlimeAstTypeName.SpreadElement;
     argument: SlimeExpression;
     /** ... 展开运算符 Token */
     ellipsisToken?: SlimeEllipsisToken;
 }
 
 export interface SlimeArrowFunctionExpression extends SlimeBaseExpression, SlimeBaseFunction, Omit<SlimeExtends<ESTree.ArrowFunctionExpression>, 'params' | 'body'> {
-    type: typeof SlimeNodeType.ArrowFunctionExpression;
+    type: typeof SlimeAstTypeName.ArrowFunctionExpression;
     expression: boolean;
     body: SlimeBlockStatement | SlimeExpression;
     /** 箭头 Token => */
@@ -1082,7 +1082,7 @@ export interface SlimeArrowFunctionExpression extends SlimeBaseExpression, Slime
 }
 
 export interface SlimeYieldExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.YieldExpression>, 'argument'> {
-    type: typeof SlimeNodeType.YieldExpression;
+    type: typeof SlimeAstTypeName.YieldExpression;
     argument?: SlimeExpression | null | undefined;
     delegate: boolean;
     /** yield 关键字 Token */
@@ -1092,19 +1092,19 @@ export interface SlimeYieldExpression extends SlimeBaseExpression, Omit<SlimeExt
 }
 
 export interface SlimeTemplateLiteral extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.TemplateLiteral>, 'quasis' | 'expressions'> {
-    type: typeof SlimeNodeType.TemplateLiteral;
+    type: typeof SlimeAstTypeName.TemplateLiteral;
     quasis: SlimeTemplateElement[];
     expressions: SlimeExpression[];
 }
 
 export interface SlimeTaggedTemplateExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.TaggedTemplateExpression>, 'tag' | 'quasi'> {
-    type: typeof SlimeNodeType.TaggedTemplateExpression;
+    type: typeof SlimeAstTypeName.TaggedTemplateExpression;
     tag: SlimeExpression;
     quasi: SlimeTemplateLiteral;
 }
 
 export interface SlimeTemplateElement extends SlimeBaseNode, SlimeExtends<ESTree.TemplateElement> {
-    type: typeof SlimeNodeType.TemplateElement;
+    type: typeof SlimeAstTypeName.TemplateElement;
     tail: boolean;
     value: {
         /** It is null when the template literal is tagged and the text has an invalid escape (e.g. - tag`\unicode and \u{55}`) */
@@ -1120,26 +1120,26 @@ export interface SlimeAssignmentProperty extends SlimeProperty, Omit<SlimeExtend
 }
 
 export interface SlimeObjectPattern extends SlimeBasePattern, Omit<SlimeExtends<ESTree.ObjectPattern>, 'properties'>, SlimeBraceTokens {
-    type: typeof SlimeNodeType.ObjectPattern;
+    type: typeof SlimeAstTypeName.ObjectPattern;
     /** 解构属性列表（包装类型，每个属性可关联其后的逗号） */
     properties: Array<SlimeObjectPatternProperty>;
 }
 
 export interface SlimeArrayPattern extends SlimeBasePattern, Omit<SlimeExtends<ESTree.ArrayPattern>, 'elements'>, SlimeBracketTokens {
-    type: typeof SlimeNodeType.ArrayPattern;
+    type: typeof SlimeAstTypeName.ArrayPattern;
     /** 解构元素列表（包装类型，每个元素可关联其后的逗号） */
     elements: Array<SlimeArrayPatternElement>;
 }
 
 export interface SlimeRestElement extends SlimeBasePattern, Omit<SlimeExtends<ESTree.RestElement>, 'argument'> {
-    type: typeof SlimeNodeType.RestElement;
+    type: typeof SlimeAstTypeName.RestElement;
     argument: SlimePattern;
     /** ... 展开运算符 Token */
     ellipsisToken?: SlimeEllipsisToken;
 }
 
 export interface SlimeAssignmentPattern extends SlimeBasePattern, Omit<SlimeExtends<ESTree.AssignmentPattern>, 'left' | 'right'> {
-    type: typeof SlimeNodeType.AssignmentPattern;
+    type: typeof SlimeAstTypeName.AssignmentPattern;
     left: SlimePattern;
     right: SlimeExpression;
 }
@@ -1156,12 +1156,12 @@ export interface SlimeBaseClass extends SlimeBaseNode, Omit<SlimeExtends<ESTree.
 }
 
 export interface SlimeClassBody extends SlimeBaseNode, Omit<SlimeExtends<ESTree.ClassBody>, 'body'>, SlimeBraceTokens {
-    type: typeof SlimeNodeType.ClassBody;
+    type: typeof SlimeAstTypeName.ClassBody;
     body: Array<SlimeMethodDefinition | SlimePropertyDefinition | SlimeStaticBlock>;
 }
 
 export interface SlimeMethodDefinition extends SlimeBaseNode, Omit<SlimeExtends<ESTree.MethodDefinition>, 'value' | 'key'> {
-    type: typeof SlimeNodeType.MethodDefinition;
+    type: typeof SlimeAstTypeName.MethodDefinition;
     key: SlimeExpression | SlimePrivateIdentifier;
     value: SlimeFunctionExpression;
     kind: "constructor" | "method" | "get" | "set";
@@ -1180,7 +1180,7 @@ export interface SlimeMethodDefinition extends SlimeBaseNode, Omit<SlimeExtends<
 }
 
 export interface SlimeMaybeNamedClassDeclaration extends SlimeBaseClass, SlimeBaseDeclaration, Omit<SlimeExtends<ESTree.MaybeNamedClassDeclaration>, 'body' | 'superClass'> {
-    type: typeof SlimeNodeType.ClassDeclaration;
+    type: typeof SlimeAstTypeName.ClassDeclaration;
     /** It is null when a class declaration is a part of the `export default class` statement */
     id: SlimeIdentifier | null;
 }
@@ -1190,12 +1190,12 @@ export interface SlimeClassDeclaration extends SlimeMaybeNamedClassDeclaration, 
 }
 
 export interface SlimeClassExpression extends SlimeBaseClass, SlimeBaseExpression, Omit<SlimeExtends<ESTree.ClassExpression>, 'body' | 'superClass'> {
-    type: typeof SlimeNodeType.ClassExpression;
+    type: typeof SlimeAstTypeName.ClassExpression;
     id?: SlimeIdentifier | null | undefined;
 }
 
 export interface SlimeMetaProperty extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.MetaProperty>, 'meta' | 'property'> {
-    type: typeof SlimeNodeType.MetaProperty;
+    type: typeof SlimeAstTypeName.MetaProperty;
     meta: SlimeIdentifier;
     property: SlimeIdentifier;
 }
@@ -1220,7 +1220,7 @@ export interface SlimeBaseModuleSpecifier extends SlimeBaseNode, SlimeExtends<ES
 }
 
 export interface SlimeImportDeclaration extends SlimeBaseModuleDeclaration, Omit<SlimeExtends<ESTree.ImportDeclaration>, 'specifiers' | 'source'>, SlimeBraceTokens, SlimeSemicolonTokens {
-    type: typeof SlimeNodeType.ImportDeclaration;
+    type: typeof SlimeAstTypeName.ImportDeclaration;
     /** import specifiers 列表（包装类型，每个 specifier 可关联其后的逗号） */
     specifiers: Array<SlimeImportSpecifierItem>;
     source: SlimeLiteral;
@@ -1231,25 +1231,25 @@ export interface SlimeImportDeclaration extends SlimeBaseModuleDeclaration, Omit
 }
 
 export interface SlimeImportSpecifier extends SlimeBaseModuleSpecifier, SlimeExtends<ESTree.ImportSpecifier, 'local'> {
-    type: typeof SlimeNodeType.ImportSpecifier;
+    type: typeof SlimeAstTypeName.ImportSpecifier;
     imported: SlimeIdentifier | SlimeLiteral;
     /** as 关键字 Token */
     asToken?: SlimeAsToken;
 }
 
 export interface SlimeImportExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.ImportExpression>, 'source'>, SlimeParenTokens {
-    type: typeof SlimeNodeType.ImportExpression;
+    type: typeof SlimeAstTypeName.ImportExpression;
     source: SlimeExpression;
     /** import 关键字 Token */
     importToken?: SlimeImportToken;
 }
 
 export interface SlimeImportDefaultSpecifier extends SlimeBaseModuleSpecifier, SlimeExtends<ESTree.ImportDefaultSpecifier, 'local'> {
-    type: typeof SlimeNodeType.ImportDefaultSpecifier;
+    type: typeof SlimeAstTypeName.ImportDefaultSpecifier;
 }
 
 export interface SlimeImportNamespaceSpecifier extends SlimeBaseModuleSpecifier, SlimeExtends<ESTree.ImportNamespaceSpecifier, 'local'> {
-    type: typeof SlimeNodeType.ImportNamespaceSpecifier;
+    type: typeof SlimeAstTypeName.ImportNamespaceSpecifier;
     /** * Token */
     asteriskToken?: SlimeAsteriskToken;
     /** as 关键字 Token */
@@ -1257,7 +1257,7 @@ export interface SlimeImportNamespaceSpecifier extends SlimeBaseModuleSpecifier,
 }
 
 export interface SlimeExportNamedDeclaration extends SlimeBaseModuleDeclaration, Omit<SlimeExtends<ESTree.ExportNamedDeclaration>, 'declaration' | 'specifiers'>, SlimeBraceTokens, SlimeSemicolonTokens {
-    type: typeof SlimeNodeType.ExportNamedDeclaration;
+    type: typeof SlimeAstTypeName.ExportNamedDeclaration;
     declaration?: SlimeDeclaration | null | undefined;
     /** export specifiers 列表（包装类型，每个 specifier 可关联其后的逗号） */
     specifiers: SlimeExportSpecifierItem[];
@@ -1269,7 +1269,7 @@ export interface SlimeExportNamedDeclaration extends SlimeBaseModuleDeclaration,
 }
 
 export interface SlimeExportSpecifier extends Omit<SlimeExtends<ESTree.ExportSpecifier>, 'local' | 'exported'>, Omit<SlimeBaseModuleSpecifier, 'local'> {
-    type: typeof SlimeNodeType.ExportSpecifier;
+    type: typeof SlimeAstTypeName.ExportSpecifier;
     local: SlimeIdentifier | SlimeLiteral;
     exported: SlimeIdentifier | SlimeLiteral;
     /** as 关键字 Token */
@@ -1277,7 +1277,7 @@ export interface SlimeExportSpecifier extends Omit<SlimeExtends<ESTree.ExportSpe
 }
 
 export interface SlimeExportDefaultDeclaration extends SlimeBaseModuleDeclaration, Omit<SlimeExtends<ESTree.ExportDefaultDeclaration>, 'declaration'> {
-    type: typeof SlimeNodeType.ExportDefaultDeclaration;
+    type: typeof SlimeAstTypeName.ExportDefaultDeclaration;
     declaration: SlimeMaybeNamedFunctionDeclaration | SlimeMaybeNamedClassDeclaration | SlimeExpression;
     /** export 关键字 Token */
     exportToken?: SlimeExportToken;
@@ -1286,7 +1286,7 @@ export interface SlimeExportDefaultDeclaration extends SlimeBaseModuleDeclaratio
 }
 
 export interface SlimeExportAllDeclaration extends SlimeBaseModuleDeclaration, Omit<SlimeExtends<ESTree.ExportAllDeclaration>, 'exported' | 'source'>, SlimeSemicolonTokens {
-    type: typeof SlimeNodeType.ExportAllDeclaration;
+    type: typeof SlimeAstTypeName.ExportAllDeclaration;
     exported: SlimeIdentifier | SlimeLiteral | null;
     source: SlimeLiteral;
     /** export 关键字 Token */
@@ -1300,7 +1300,7 @@ export interface SlimeExportAllDeclaration extends SlimeBaseModuleDeclaration, O
 }
 
 export interface SlimeAwaitExpression extends SlimeBaseExpression, Omit<SlimeExtends<ESTree.AwaitExpression>, 'argument'> {
-    type: typeof SlimeNodeType.AwaitExpression;
+    type: typeof SlimeAstTypeName.AwaitExpression;
     argument: SlimeExpression;
     /** await 关键字 Token */
     awaitToken?: SlimeAwaitToken;

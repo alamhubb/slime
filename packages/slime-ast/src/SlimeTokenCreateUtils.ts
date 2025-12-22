@@ -1,8 +1,8 @@
 /**
- * SlimeTokenCreate.ts - Token 节点创建工厂
+ * SlimeTokenCreateUtils.ts - Token 节点创建工厂
  *
  * 为每个 Token 类型提供创建方法
- * 与 SlimeESTree.ts 中的 Token 类型一一对应
+ * 与 SlimeAstNode.ts 中的 Token 类型一一对应
  */
 
 import type { SubhutiSourceLocation } from "subhuti";
@@ -82,7 +82,7 @@ import type {
     SlimeLogicalOperator,
     SlimeAssignmentOperator,
     SlimeUpdateOperator,
-} from "./SlimeESTree.ts";
+} from "./SlimeAstNode.ts";
 import {
     SlimeTokenType,
     SlimeBinaryOperatorTokenTypes,
@@ -454,6 +454,6 @@ class SlimeTokenFactory {
     }
 }
 
-const SlimeTokenCreate = new SlimeTokenFactory();
-export default SlimeTokenCreate;
+const SlimeTokenCreateUtils = new SlimeTokenFactory();
+export default SlimeTokenCreateUtils;
 

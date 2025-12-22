@@ -4,7 +4,7 @@
 import {SubhutiCst} from "subhuti";
 
 import SlimeParser from "../../SlimeParser.ts";
-import {SlimeAstUtil, SlimeExpression, SlimeNodeType, SlimeTokenCreate} from "slime-ast";
+import {SlimeAstUtil, SlimeExpression, SlimeAstTypeName, SlimeTokenCreate} from "slime-ast";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 
@@ -239,7 +239,7 @@ export class ExpressionCstToAst {
             const operator = cst.children[i]  // ?? token
             const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
             left = {
-                type: SlimeNodeType.LogicalExpression,
+                type: SlimeAstTypeName.LogicalExpression,
                 operator: '??',
                 left: left,
                 right: right
@@ -304,7 +304,7 @@ export class ExpressionCstToAst {
                 const right = SlimeCstToAstUtil.createExpressionAst(rightCst)
 
                 result = {
-                    type: SlimeNodeType.LogicalExpression,
+                    type: SlimeAstTypeName.LogicalExpression,
                     operator: operator,
                     left: result,
                     right: right,
@@ -330,7 +330,7 @@ export class ExpressionCstToAst {
                 const right = SlimeCstToAstUtil.createExpressionAst(rightCst)
 
                 result = {
-                    type: SlimeNodeType.LogicalExpression,
+                    type: SlimeAstTypeName.LogicalExpression,
                     operator: operator,
                     left: result,
                     right: right,

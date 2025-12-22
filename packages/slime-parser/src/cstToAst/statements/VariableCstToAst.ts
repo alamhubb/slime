@@ -9,7 +9,7 @@ import {
     type SlimeBlockStatement, type SlimeClassDeclaration, type SlimeDeclaration,
     type SlimeFunctionDeclaration, type SlimeFunctionExpression,
     type SlimeFunctionParam,
-    type SlimeIdentifier, SlimeNodeType, type SlimePropertyDefinition,
+    type SlimeIdentifier, SlimeAstTypeName, type SlimePropertyDefinition,
     SlimeTokenCreate, type SlimeVariableDeclaration, type SlimeVariableDeclarator,
     SlimeAstUtil, type SlimePattern, type SlimeExpression
 } from "slime-ast";
@@ -41,7 +41,7 @@ export class VariableCstToAst {
         }
 
         return {
-            type: SlimeNodeType.VariableDeclaration,
+            type: SlimeAstTypeName.VariableDeclaration,
             kind: 'var' as any,
             declarations: declarations,
             loc: cst.loc
@@ -156,7 +156,7 @@ export class VariableCstToAst {
         }
 
         return {
-            type: SlimeNodeType.VariableDeclarator,
+            type: SlimeAstTypeName.VariableDeclarator,
             id: id,
             init: init,
             loc: cst.loc
@@ -185,7 +185,7 @@ export class VariableCstToAst {
         }
 
         return {
-            type: SlimeNodeType.VariableDeclaration,
+            type: SlimeAstTypeName.VariableDeclaration,
             kind: kind as any,
             declarations: declarations,
             loc: cst.loc
@@ -250,7 +250,7 @@ export class VariableCstToAst {
         }
 
         return {
-            type: SlimeNodeType.VariableDeclaration,
+            type: SlimeAstTypeName.VariableDeclaration,
             kind: kind as any,
             declarations: declarations,
             loc: cst.loc
@@ -368,9 +368,9 @@ export class VariableCstToAst {
         const id = forBinding ? SlimeCstToAstUtil.createForBindingAst(forBinding) : null
 
         return {
-            type: SlimeNodeType.VariableDeclaration,
+            type: SlimeAstTypeName.VariableDeclaration,
             declarations: [{
-                type: SlimeNodeType.VariableDeclarator,
+                type: SlimeAstTypeName.VariableDeclarator,
                 id: id,
                 init: null,
                 loc: forBinding?.loc
