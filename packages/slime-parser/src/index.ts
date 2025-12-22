@@ -4,4 +4,5 @@ export * from './SlimeParser.ts'
 export { default as SlimeTokenConsumer } from './SlimeTokenConsumer.ts'
 export * from './SlimeTokenConsumer.ts'
 export * from './SlimeTokens.ts'
+export {default as slimeTokens} from './SlimeTokens.ts'
 
