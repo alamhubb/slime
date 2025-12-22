@@ -462,8 +462,28 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     @SubhutiRule
     IdentifierName() {
         this.Or([
-            // 普通标识符（复用 Identifier 的 Unicode 转义验证逻辑）
-            { alt: () => this.Identifier() },
+            // 普通标识符（验证 Unicode 转义有效性，但不检查保留字）
+            // 注意：不能直接调用 Identifier()，因为 Identifier 会拒绝 Unicode 转义的保留字
+            // 而 IdentifierName 应该允许（如 obj.br\u{65}ak 是合法的属性名）
+            {
+                alt: () => {
+                    // 前瞻检查是否是 IdentifierName token
+                    if (!this.match(SlimeJavascriptTokenType.IdentifierName)) {
+                        this.setParseFail()
+                    }
+                    const value = this.curToken!.tokenValue!
+
+                    // 验证 Unicode 转义有效性（但不检查保留字）
+                    if (value.includes('\\u')) {
+                        if (!isValidIdentifierWithEscapes(value)) {
+                            this.setParseFail()
+                        }
+                    }
+
+                    // 验证通过，消费 token
+                    this.tokenConsumer.IdentifierName()
+                }
+            },
             // 所有 ReservedWord 都可以作为 IdentifierName
             { alt: () => this.tokenConsumer.Await() },
             { alt: () => this.tokenConsumer.Break() },
