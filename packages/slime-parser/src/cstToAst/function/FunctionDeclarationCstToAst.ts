@@ -1,4 +1,4 @@
-import { SubhutiCst } from "subhuti";
+import {SubhutiCst} from "subhuti";
 import {
     SlimeAstUtil, type SlimeBlockStatement, type SlimeClassBody, type SlimeClassDeclaration,
     SlimeClassExpression, type SlimeExpression,
@@ -6,7 +6,7 @@ import {
     type SlimeFunctionParam,
     SlimeIdentifier, SlimeNodeType, SlimeTokenCreate
 } from "slime-ast";
-import { SlimeAstUtils } from "../SlimeAstUtils.ts";
+import {SlimeAstUtils} from "../SlimeAstUtils.ts";
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
