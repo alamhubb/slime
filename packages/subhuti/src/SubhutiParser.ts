@@ -1,0 +1,1578 @@
+/**
+ * Subhuti Parser - 高性能 PEG Parser 框架
+ *
+ * 核心特性：
+ * - Packrat Parsing（线性时间复杂度，LRU 缓存）
+ * - 返回值语义（成功返回 CST，失败返回 undefined）
+ *
+ * 架构设计：
+ * - 继承 SubhutiTokenLookahead（前瞻能力）
+ * - 实现 ITokenConsumerContext（提供消费接口）
+ * - 支持泛型扩展 SubhutiTokenConsumer
+ *
+ * @version 5.0.0
+ */
+
+import SubhutiTokenLookahead from "./SubhutiTokenLookahead.ts"
+import SubhutiCst from "./struct/SubhutiCst.ts";
+import type SubhutiMatchToken from "./struct/SubhutiMatchToken.ts";
+import {SubhutiErrorHandler, ParsingError} from "./SubhutiError.ts";
+import {SubhutiTraceDebugger} from "./SubhutiDebug.ts";
+import {SubhutiPackratCache, type SubhutiPackratCacheResult} from "./SubhutiPackratCache.ts";
+import SubhutiTokenConsumer from "./SubhutiTokenConsumer.ts";
+import {SubhutiDebugRuleTracePrint, setShowRulePath} from "./SubhutiDebugRuleTracePrint.ts";
+import SubhutiLexer, {LexicalGoal, TokenCacheEntry} from "./SubhutiLexer.ts";
+import {SubhutiCreateToken} from "./struct/SubhutiCreateToken.ts";
+
+// Grammar Validation
+import {SubhutiGrammarValidator} from "./validation/SubhutiGrammarValidator.ts";
+
+// ============================================
+// 类型定义
+// ============================================
+
+export type RuleFunction = () => void
+
+export interface SubhutiParserOr {
+    alt: RuleFunction
+}
+
+export interface SubhutiBackData {
+    /** 源码位置 */
+    codeIndex: number
+    /** 行号 */
+    codeLine: number
+    /** 列号 */
+    codeColumn: number
+    /** 上一个 token 名称 */
+    lastTokenName: string | null
+    /** CST children 长度 */
+    curCstChildrenLength: number
+    /** 已解析 token 数量（用于恢复 parsedTokens） */
+    parsedTokensLength: number
+}
+
+/**
+ * 部分匹配记录（用于容错模式）
+ * 在回溯时记录已消费 token 的 CST 结构
+ */
+export interface PartialMatchRecord {
+    children: SubhutiCst[]    // 部分匹配的 children（引用）
+    parentCst: SubhutiCst     // 父节点（恢复时把 children 放到这里）
+    endTokenIndex: number     // 消耗到的 token 索引
+    startTokenIndex: number   // 起始 token 索引
+}
+
+/**
+ * 解析记录树节点（用于容错模式）
+ * 只增不删，记录所有解析尝试路径
+ */
+export interface ParseRecordNode {
+    name: string                  // 规则名或 token 名
+    children: ParseRecordNode[]   // 子节点（只增不删）
+    startTokenIndex: number       // 该节点开始的 token 索引
+    endTokenIndex: number         // 该节点消耗到的 token 索引
+    token?: SubhutiMatchToken     // 如果是 token 叶子节点
+    value?: string                // token 值
+}
+
+// ============================================
+// 装饰器系统（兼容旧版 experimentalDecorators 和 Stage 3）
+// ============================================
+
+export function Subhuti<T extends new (...args: any[]) => SubhutiParser>(
+    target: T,
+    context?: ClassDecoratorContext
+): T {
+    return target
+}
+
+function wrapRuleMethod(originalMethod: Function, ruleName: string): Function {
+    const wrappedFunction = function (this: SubhutiParser, ...args: any[]): SubhutiCst | undefined {
+        return this.executeRuleWrapper(originalMethod, ruleName, this.constructor.name, ...args)
+    }
+    Object.defineProperty(wrappedFunction, 'name', {value: ruleName})
+    Object.defineProperty(wrappedFunction, '__originalFunction__', {
+        value: originalMethod, writable: false, enumerable: false, configurable: false
+    })
+    Object.defineProperty(wrappedFunction, '__isSubhutiRule__', {
+        value: true, writable: false, enumerable: false, configurable: false
+    })
+    return wrappedFunction
+}
+
+export function SubhutiRule(
+    targetOrMethod: any,
+    propertyKeyOrContext: string | ClassMethodDecoratorContext,
+    descriptor?: PropertyDescriptor
+): any {
+    const isLegacy = typeof propertyKeyOrContext === 'string'
+    if (isLegacy) {
+        descriptor!.value = wrapRuleMethod(descriptor!.value, propertyKeyOrContext as string)
+        return descriptor
+    } else {
+        return wrapRuleMethod(targetOrMethod, targetOrMethod.name)
+    }
+}
+
+export type SubhutiTokenConsumerConstructor<T extends SubhutiTokenConsumer> =
+    new (parser: SubhutiParser) => T
+
+/**
+ * Parser 构造选项
+ */
+export interface SubhutiParserOptions<T extends SubhutiTokenConsumer = SubhutiTokenConsumer> {
+    /** TokenConsumer 类（可选） */
+    tokenConsumer?: SubhutiTokenConsumerConstructor<T>
+    /** Token 定义（用于按需词法分析模式） */
+    tokenDefinitions?: SubhutiCreateToken[]
+}
+
+// ============================================
+// SubhutiParser 核心类
+// ============================================
+
+export default class SubhutiParser<T extends SubhutiTokenConsumer = SubhutiTokenConsumer>
+    extends SubhutiTokenLookahead {
+    // 核心字段
+    readonly tokenConsumer: T
+
+    private readonly cstStack: SubhutiCst[] = []
+    private readonly className: string
+
+    // ============================================
+    // 按需词法分析相关字段（新架构）
+    // ============================================
+
+    /** 词法分析器 */
+    protected _lexer: SubhutiLexer | null = null
+
+    /** 源代码 */
+    protected _sourceCode: string = ''
+
+    /** 当前源码位置 */
+    protected _codeIndex: number = 0
+
+    /** 当前行号 */
+    protected _codeLine: number = 1
+
+    /** 当前列号 */
+    protected _codeColumn: number = 1
+
+    /** 上一个 token 名称（用于上下文约束） */
+    protected _lastTokenName: string | null = null
+
+    /** 模板字符串深度 */
+    protected _templateDepth: number = 0
+
+    /** 默认词法目标 */
+    protected _defaultGoal: LexicalGoal = LexicalGoal.InputElementDiv
+
+    /** Token 缓存：位置 → 模式 → 缓存条目 */
+    protected _tokenCache: Map<number, Map<LexicalGoal, TokenCacheEntry>> = new Map()
+
+    /** 已解析的 token 列表（用于输出给使用者） */
+    protected _parsedTokens: SubhutiMatchToken[] = []
+
+    /**
+     * 分析模式标志
+     * - true: 分析模式（用于语法验证，不抛异常）
+     * - false: 正常模式（用于解析，抛异常）
+     */
+    private _analysisMode: boolean = false
+
+    /**
+     * 容错模式标志
+     * - true: 启用容错（解析失败时跳过 token 继续解析）
+     * - false: 不启用容错（解析失败时停止）
+     */
+    private _errorRecoveryMode: boolean = false
+
+    /**
+     * 同步点 Token 名称集合
+     * 这些 token 通常是语句的开始，用于容错模式下的恢复点
+     */
+    protected _syncTokens: Set<string> = new Set([
+        'LetTok', 'ConstTok', 'VarTok',
+        'FunctionTok', 'ClassTok', 'AsyncTok',
+        'IfTok', 'ForTok', 'WhileTok', 'DoTok', 'SwitchTok',
+        'TryTok', 'ThrowTok', 'ReturnTok', 'BreakTok', 'ContinueTok',
+        'ImportTok', 'ExportTok',
+        'DebuggerTok',
+        'Semicolon',
+    ])
+
+    /**
+     * 设置同步点 Token
+     */
+    setSyncTokens(tokens: string[]): this {
+        this._syncTokens = new Set(tokens)
+        return this
+    }
+
+    /**
+     * 添加同步点 Token
+     */
+    addSyncTokens(tokens: string[]): this {
+        for (const token of tokens) {
+            this._syncTokens.add(token)
+        }
+        return this
+    }
+
+    /**
+     * 启用容错模式
+     */
+    enableErrorRecovery(): this {
+        this._errorRecoveryMode = true
+        return this
+    }
+
+    /**
+     * 获取容错模式状态
+     */
+    get errorRecoveryMode(): boolean {
+        return this._errorRecoveryMode
+    }
+
+    getRuleStack() {
+        return this.cstStack.map(item => item.name)
+    }
+
+    // 调试和错误处理
+    private _debugger?: SubhutiTraceDebugger
+    private readonly _errorHandler = new SubhutiErrorHandler()
+
+    // 无限循环检测（调用栈状态检测）
+    /**
+     * 循环检测集合：O(1) 检测 (rule, position) 是否重复
+     * 格式: "ruleName:position"
+     */
+    private readonly loopDetectionSet: Set<string> = new Set()
+
+    // Packrat Parsing（默认 LRU 缓存）
+    enableMemoization: boolean = true
+    private readonly _cache: SubhutiPackratCache
+
+    /**
+     * 部分匹配候选列表（容错模式专用）
+     * 记录在回溯时被删除但消费了 token 的 CST 片段
+     */
+    private _partialMatchCandidates: PartialMatchRecord[] = []
+
+    /**
+     * 未被解析的 tokens 列表（容错模式专用）
+     * 用于最终判断解析是否完全成功
+     */
+    private _unparsedTokens: SubhutiMatchToken[] = []
+
+    // ============================================
+    // 解析记录树相关（容错模式专用）
+    // ============================================
+
+    /** 解析记录树根节点 */
+    private _parseRecordRoot: ParseRecordNode | null = null
+
+    /** 解析记录树节点栈（跟踪当前路径） */
+    private _parseRecordStack: ParseRecordNode[] = []
+
+    /**
+     * 获取未被解析的 tokens 列表
+     */
+    get unparsedTokens(): SubhutiMatchToken[] {
+        return this._unparsedTokens
+    }
+
+    /**
+     * 是否有未被解析的 tokens
+     */
+    get hasUnparsedTokens(): boolean {
+        return this._unparsedTokens.length > 0
+    }
+
+    /**
+     * 构造函数 - 按需词法分析模式
+     *
+     * @param sourceCode 源代码
+     * @param options 配置选项
+     */
+    constructor(
+        sourceCode: string = '',
+        options?: SubhutiParserOptions<T>,
+    ) {
+        super()
+        this.className = this.constructor.name
+        this._cache = new SubhutiPackratCache()
+
+        // 初始化源代码和位置
+        this._sourceCode = sourceCode
+        this._codeIndex = 0
+        this._codeLine = 1
+        this._codeColumn = 1
+        this._lastTokenName = null
+        this._templateDepth = 0
+        this._tokenCache = new Map()
+        this._parsedTokens = []
+
+        // 初始化词法分析器
+        if (options?.tokenDefinitions) {
+            this._lexer = new SubhutiLexer(options.tokenDefinitions)
+        }
+
+        // 初始化 TokenConsumer
+        if (options?.tokenConsumer) {
+            this.tokenConsumer = new options.tokenConsumer(this)
+        } else {
+            this.tokenConsumer = new SubhutiTokenConsumer(this) as T
+        }
+    }
+
+    /**
+     * 获取已解析的 token 列表
+     */
+    get parsedTokens(): SubhutiMatchToken[] {
+        return this._parsedTokens
+    }
+
+    /**
+     * 获取最后解析的 token 索引
+     * @returns token 索引，如果没有已解析的 token 则返回 -1
+     */
+    get lastTokenIndex(): number {
+        return this._parsedTokens.length - 1
+    }
+
+    /**
+     * 获取当前正在处理的 token 索引（下一个将被 consume 的 token）
+     * @returns 当前 token 索引
+     */
+    get currentTokenIndex(): number {
+        return this._parsedTokens.length
+    }
+
+    // ============================================
+    // 按需词法分析
+    // ============================================
+
+    /**
+     * 获取或解析指定位置和模式的 token
+     *
+     * @param codeIndex 源码位置
+     * @param line 行号
+     * @param column 列号
+     * @param goal 词法目标
+     * @returns TokenCacheEntry 或 null（EOF）
+     */
+    protected _getOrParseToken(
+        codeIndex: number,
+        line: number,
+        column: number,
+        goal: LexicalGoal
+    ): TokenCacheEntry | null {
+        if (!this._lexer) return null
+
+        // 1. 查缓存
+        const positionCache = this._tokenCache.get(codeIndex)
+        if (positionCache?.has(goal)) {
+            return positionCache.get(goal)!
+        }
+
+        // 2. 解析新 token
+        const entry = this._lexer.readTokenAt(
+            this._sourceCode,
+            codeIndex,
+            line,
+            column,
+            goal,
+            this._lastTokenName,
+            this._templateDepth
+        )
+
+        if (!entry) return null  // EOF
+
+        // 3. 存入缓存
+        if (!positionCache) {
+            this._tokenCache.set(codeIndex, new Map())
+        }
+        this._tokenCache.get(codeIndex)!.set(goal, entry)
+
+        return entry
+    }
+
+    /**
+     * LA (LookAhead) - 前瞻获取 token（支持模式数组）
+     *
+     * @param offset 偏移量（1 = 当前 token，2 = 下一个...）
+     * @param goals 每个位置的词法目标（可选，不传用默认值）
+     * @returns token 或 undefined（EOF）
+     */
+    protected override LA(offset: number = 1, goals?: LexicalGoal[]): SubhutiMatchToken | undefined {
+        let currentIndex = this._codeIndex
+        let currentLine = this._codeLine
+        let currentColumn = this._codeColumn
+
+        for (let i = 0; i < offset; i++) {
+            // 确定当前 token 的词法目标
+            const goal = goals?.[i] ?? this._defaultGoal
+
+            // 从缓存获取或解析
+            const entry = this._getOrParseToken(currentIndex, currentLine, currentColumn, goal)
+
+            if (!entry) return undefined  // EOF
+
+            // 如果是最后一个，返回 token
+            if (i === offset - 1) {
+                return entry.token
+            }
+
+            // 否则，移动到下一个位置
+            currentIndex = entry.nextCodeIndex
+            currentLine = entry.nextLine
+            currentColumn = entry.nextColumn
+        }
+
+        return undefined
+    }
+
+    /**
+     * peek - 前瞻获取 token（支持模式数组）
+     */
+    protected override peek(offset: number = 1, goals?: LexicalGoal[]): SubhutiMatchToken | undefined {
+        return this.LA(offset, goals)
+    }
+
+    /**
+     * 获取当前 token（使用默认词法目标）
+     */
+    override get curToken(): SubhutiMatchToken | undefined {
+        return this.LA(1)
+    }
+
+    // ============================================
+    // 公开给 TokenConsumer 使用的方法
+    // ============================================
+
+    /**
+     * 供 TokenConsumer 使用的 consume 方法
+     * @param tokenName token 名称
+     * @param goal 可选的词法目标（用于模板尾部等场景）
+     */
+    _consumeToken(tokenName: string, goal?: LexicalGoal): SubhutiCst | undefined {
+        return this.consume(tokenName, goal)
+    }
+
+    /**
+     * 供 TokenConsumer 使用的标记解析失败方法
+     * 用于软关键字检查失败时标记解析失败
+     */
+    _markParseFail(): void {
+        this._parseSuccess = false
+    }
+
+    // ============================================
+    // Parser 内部 Getter
+    // ============================================
+
+    get curCst(): SubhutiCst | undefined {
+        return this.cstStack[this.cstStack.length - 1]
+    }
+
+    // 功能开关（链式调用）
+    cache(enable: boolean = true): this {
+        this.enableMemoization = enable
+        return this
+    }
+
+    /**
+     * 启用调试模式
+     * @param showRulePath - 是否显示规则执行路径（默认 true）
+     *                       传入 false 时只显示性能统计和 CST 验证报告
+     */
+    debug(showRulePath: boolean = true): this {
+        setShowRulePath(showRulePath)
+        this._debugger = new SubhutiTraceDebugger(this._parsedTokens)
+        return this
+    }
+
+    errorHandler(enable: boolean = true): this {
+        this._errorHandler.setDetailed(enable)
+        return this
+    }
+
+    /**
+     * 启用分析模式（用于语法验证，不抛异常）
+     *
+     * 在分析模式下：
+     * - 不抛出左递归异常
+     * - 不抛出无限循环异常
+     * - 不抛出 Token 消费失败异常
+     * - 不抛出 EOF 检测异常
+     *
+     * @internal 仅供 SubhutiRuleCollector 使用
+     */
+    enableAnalysisMode(): void {
+        this._analysisMode = true
+    }
+
+    /**
+     * 禁用分析模式（恢复正常模式）
+     *
+     * @internal 仅供 SubhutiRuleCollector 使用
+     */
+    disableAnalysisMode(): void {
+        this._analysisMode = false
+    }
+
+    /**
+     * 启用语法验证（链式调用），验证语法（检测 Or 规则冲突）
+     *
+     * 用法：
+     * ```typescript
+     * const parser = new Es2025Parser(tokens).validate()
+     * const cst = parser.Script()
+     * ```
+     *
+     * @returns this - 支持链式调用
+     * @throws SubhutiGrammarValidationError - 语法有冲突时抛出
+     */
+    validate(): this {
+        SubhutiGrammarValidator.validate(this)
+        return this
+    }
+
+    /**
+     * 检测是否是直接或间接左递归
+     *
+     * ✅ 这个方法可以准确判断左递归
+     * ❌ 不能判断是否是 Or 分支遮蔽（返回 false 只表示不是左递归）
+     *
+     * @param ruleName 当前规则名称
+     * @param ruleStack 规则调用栈
+     * @returns true: 确定是左递归, false: 不是左递归（但不能确定是什么问题）
+     */
+    private isDirectLeftRecursion(ruleName: string, ruleStack: string[]): boolean {
+        // 检查规则栈中是否有任何规则出现了 >= 2 次
+        // 这可以检测直接左递归和间接左递归
+
+        const ruleCounts = new Map<string, number>()
+
+        for (const rule of ruleStack) {
+            ruleCounts.set(rule, (ruleCounts.get(rule) || 0) + 1)
+        }
+
+        // 如果任何规则出现 >= 2 次，说明有递归
+        for (const count of ruleCounts.values()) {
+            if (count >= 2) {
+                return true  // ✅ 确定是左递归（直接或间接）
+            }
+        }
+
+        // 否则，不是左递归
+        // 但可能是其他问题：Or 分支遮蔽、规则实现错误、语法错误等
+        return false  // ❌ 不是左递归（但不确定具体是什么问题）
+    }
+
+    /**
+     * 抛出循环错误信息
+     *
+     * @param ruleName 当前规则名称
+     */
+    private throwLoopError(ruleName: string): never {
+        // 🔍 分析模式：不抛异常，直接返回
+        if (this._analysisMode) {
+            // 标记解析失败，让 RuleCollector 知道这个规则有问题
+            this._parseSuccess = false
+            return undefined as never
+        }
+
+        // 获取当前 token 信息
+        const currentToken = this.curToken
+
+        // 从 parsedTokens 获取上下文（最近 2 个 token）
+        const tokenContext = this.getTokenContext(2)
+
+        // 获取缓存统计
+        const cacheStatsReport = this._cache.getStatsReport()
+
+        // 🔍 分析循环类型：真正的左递归 vs Or 分支遮蔽
+        const ruleStack = this.getRuleStack()
+        const isDirectLeftRecursion = this.isDirectLeftRecursion(ruleName, ruleStack)
+        const errorType = isDirectLeftRecursion ? 'left-recursion' : 'or-branch-shadowing'
+
+        // 创建循环错误（平铺结构）
+        throw this._errorHandler.createError({
+            type: errorType,
+            expected: '',
+            found: currentToken,
+            position: {
+                tokenIndex: this.currentTokenIndex,
+                codeIndex: this._codeIndex,
+                line: currentToken?.rowNum || this._codeLine,
+                column: currentToken?.columnStartNum || this._codeColumn
+            },
+            ruleStack: [...ruleStack],
+            loopRuleName: ruleName,
+            loopDetectionSet: Array.from(this.loopDetectionSet),
+            loopCstDepth: this.cstStack.length,
+            loopCacheStats: {
+                hits: cacheStatsReport.hits,
+                misses: cacheStatsReport.misses,
+                hitRate: cacheStatsReport.hitRate,
+                currentSize: cacheStatsReport.currentSize
+            },
+            loopTokenContext: tokenContext,
+            hint: '检查规则定义，确保在递归前消费了 token'
+        })
+    }
+
+    /**
+     * 规则执行入口（由 @SubhutiRule 装饰器调用）
+     * 职责：前置检查 → 循环检测 → Packrat 缓存 → 核心执行 → 后置处理
+     */
+    executeRuleWrapper(targetFun: Function, ruleName: string, className: string, ...args: any[]): SubhutiCst | undefined {
+        if (this.checkRuleIsThisClass(ruleName, className)) {
+            return
+        }
+        const isTopLevel = this.cstStack.length === 0
+
+        if (isTopLevel) {
+            this.initTopLevelData()
+        }
+
+        if (this.parserFail) {
+            return
+        }
+
+        const tokenIndex = this.currentTokenIndex
+        const key = `${ruleName}:${tokenIndex}`
+
+        // O(1) 快速检测是否重复（循环检测）
+        if (this.loopDetectionSet.has(key)) {
+            this.throwLoopError(ruleName)
+        }
+
+        // 入栈
+        this.loopDetectionSet.add(key)
+
+        try {
+            const startTime = this._debugger?.onRuleEnter(ruleName, tokenIndex)
+
+            // Packrat Parsing 缓存查询
+            if (this.enableMemoization) {
+                const cached = this._cache.get(ruleName, tokenIndex)
+                if (cached !== undefined) {
+                    this._debugger?.onRuleExit(ruleName, true, startTime)
+
+                    // 解析记录模式：缓存命中时也要记录节点，并更新整个祖先链的 endTokenIndex
+                    if (this.errorRecoveryMode && cached.endTokenIndex > tokenIndex) {
+                        // 创建记录节点，复制缓存中的 children
+                        const recordNode: ParseRecordNode = {
+                            name: ruleName,
+                            startTokenIndex: tokenIndex,
+                            endTokenIndex: cached.endTokenIndex,
+                            children: cached.recordNode?.children ? [...cached.recordNode.children] : []
+                        }
+                        const recordParent = this._parseRecordStack[this._parseRecordStack.length - 1]
+                        if (recordParent) {
+                            recordParent.children.push(recordNode)
+                        }
+                        // 更新整个祖先链的 endTokenIndex
+                        for (let i = this._parseRecordStack.length - 1; i >= 0; i--) {
+                            const ancestor = this._parseRecordStack[i]
+                            if (cached.endTokenIndex > ancestor.endTokenIndex) {
+                                ancestor.endTokenIndex = cached.endTokenIndex
+                            }
+                        }
+                    }
+
+                    const cst = this.applyCachedResult(cached)
+                    if (!cst.children?.length) {
+                        cst.children = undefined
+                    }
+                    return cst
+                }
+            }
+
+            // 核心执行
+            const startTokenIndex = tokenIndex
+
+            // 解析记录树：创建节点并入栈（在 executeRuleCore 之前）
+            let recordNode: ParseRecordNode | null = null
+            if (this.errorRecoveryMode) {
+                recordNode = {
+                    name: ruleName,
+                    children: [],
+                    startTokenIndex: tokenIndex,
+                    endTokenIndex: tokenIndex
+                }
+                this._parseRecordStack.push(recordNode)
+            }
+
+            const cst = this.executeRuleCore(ruleName, targetFun, ...args)
+
+            // 解析记录树：出栈，只有消费了 token 才添加到父节点
+            if (this.errorRecoveryMode && recordNode) {
+                this._parseRecordStack.pop()
+                if (recordNode.endTokenIndex > recordNode.startTokenIndex) {
+                    const recordParent = this._parseRecordStack[this._parseRecordStack.length - 1]
+                    if (recordParent) {
+                        recordParent.children.push(recordNode)
+                    }
+                }
+            }
+
+            // 缓存存储
+            if (this.enableMemoization) {
+                const endTokenIndex = this.currentTokenIndex
+                const finalEndIndex = recordNode ? Math.max(recordNode.endTokenIndex, endTokenIndex) : endTokenIndex
+
+                // 提取本次规则消费的 token
+                const consumedTokens = this._parseSuccess
+                    ? this._parsedTokens.slice(startTokenIndex)
+                    : undefined
+
+                this._cache.set(ruleName, startTokenIndex, {
+                    endTokenIndex: finalEndIndex,
+                    cst: cst,
+                    parseSuccess: this._parseSuccess,
+                    recordNode: recordNode,
+                    parsedTokens: consumedTokens
+                })
+            }
+
+            this.onRuleExitDebugHandler(ruleName, cst, isTopLevel, startTime)
+
+            // 顶层规则：检查是否所有源码都被消费
+            if (isTopLevel && this._parseSuccess) {
+                if (!this.isEof) {
+                    const nextToken = this.LA(1)
+                    throw new Error(
+                        `Parser internal error: parsing succeeded but source code remains unconsumed. ` +
+                        `Next token: "${nextToken?.tokenValue}" (${nextToken?.tokenName}) at position ${this._codeIndex}`
+                    )
+                }
+            }
+
+            // 顶层规则失败时的错误处理
+            if (isTopLevel && this.parserFail) {
+                this.handleTopLevelError(ruleName, startTokenIndex)
+            }
+
+            if (!cst.children?.length) {
+                cst.children = undefined
+            }
+            return cst
+        } finally {
+            // 出栈（无论成功、return、异常都会执行）
+            this.loopDetectionSet.delete(key)
+        }
+    }
+
+    private initTopLevelData() {
+        // 【顶层规则开始】重置解析器状态
+        this._parseSuccess = true
+        this.cstStack.length = 0
+        this.loopDetectionSet.clear()
+        this._codeIndex = 0
+        this._codeLine = 1
+        this._codeColumn = 1
+        this._parsedTokens = []
+        this._tokenCache.clear()
+
+        // 重置调试器的缓存和统计
+        this._debugger?.resetForNewParse?.(this._parsedTokens)
+    }
+
+    private checkRuleIsThisClass(ruleName: string, className: string): boolean {
+        if (this.hasOwnProperty(ruleName)) {
+            if (className !== this.className) {
+                return true
+            }
+        }
+    }
+
+    private onRuleExitDebugHandler(
+        ruleName: string,
+        cst: SubhutiCst | undefined,
+        isTopLevel: boolean,
+        startTime?: number
+    ): void {
+        if (cst && !cst.children?.length) {
+            cst.children = undefined
+        }
+
+        if (!isTopLevel) {
+            this._debugger?.onRuleExit(ruleName, false, startTime)
+        } else {
+            // 顶层规则完成，输出调试信息
+            if (this._debugger) {
+                if ('setCst' in this._debugger) {
+                    (this._debugger as any).setCst(cst)
+                }
+                (this._debugger as any)?.autoOutput?.()
+            }
+        }
+    }
+
+    /**
+     * 执行规则函数核心逻辑
+     * 职责：创建 CST → 执行规则 → 成功则添加到父节点
+     */
+    private executeRuleCore(ruleName: string, targetFun: Function, ...args: any[]): SubhutiCst {
+        const cst = new SubhutiCst()
+        cst.name = ruleName
+        cst.children = []
+
+        this.cstStack.push(cst)
+
+        // 执行规则函数
+        targetFun.apply(this, args)
+
+        this.cstStack.pop()
+
+        // 成功时添加到父节点并设置位置
+        if (this._parseSuccess) {
+            const parentCst = this.cstStack[this.cstStack.length - 1]
+            if (parentCst) {
+                parentCst.children.push(cst)
+            }
+            this.setLocation(cst)
+        }
+
+        return cst
+    }
+
+    private setLocation(cst: SubhutiCst): void {
+        if (cst.children && cst.children[0]?.loc) {
+            const lastChild = cst.children[cst.children.length - 1]
+            cst.loc = {
+                type: cst.name,
+                start: cst.children[0].loc.start,
+                end: lastChild?.loc?.end || cst.children[0].loc.end
+            }
+        }
+    }
+
+    /**
+     * Or 规则 - 顺序选择（PEG 风格）
+     *
+     * 核心逻辑：
+     * - 依次尝试每个分支，第一个成功的分支生效
+     * - 所有分支都失败则整体失败
+     *
+     * 优化：只有消费了 token 才需要回溯（没消费 = 状态没变）
+     */
+    Or(alternatives: SubhutiParserOr[]): void {
+        if (this.parserFail) {
+            return
+        }
+
+        const savedState = this.saveState()
+        const startCodeIndex = this._codeIndex
+        const totalCount = alternatives.length
+        const parentRuleName = this.curCst?.name || 'Unknown'
+
+        // 进入 Or（整个 Or 调用开始）
+        this._debugger?.onOrEnter?.(parentRuleName, startCodeIndex)
+
+        for (let i = 0; i < totalCount; i++) {
+            const alt = alternatives[i]
+            const isLast = i === totalCount - 1
+
+            // 进入 Or 分支
+            this._debugger?.onOrBranch?.(i, totalCount, parentRuleName)
+
+            alt.alt()
+
+            // 退出 Or 分支（无论成功还是失败）
+            this._debugger?.onOrBranchExit?.(parentRuleName, i)
+
+            if (this._parseSuccess) {
+                // 退出 Or（整个 Or 调用成功结束）
+                this._debugger?.onOrExit?.(parentRuleName)
+                return
+            }
+
+            // 前 N-1 个分支：失败后回溯并重置状态，继续尝试下一个
+            if (!isLast) {
+                this.recordPartialMatchAndRestore(savedState, startCodeIndex)
+                this._parseSuccess = true
+            }
+            // 最后一个分支：失败后不回溯，保持失败状态
+        }
+
+        // 退出 Or（整个 Or 调用失败结束）
+        this._debugger?.onOrExit?.(parentRuleName)
+    }
+
+    /**
+     * Many 规则 - 0次或多次（EBNF { ... }）
+     *
+     * 循环执行直到失败或没消费 token
+     */
+    Many(fn: RuleFunction): void {
+        while (this.tryAndRestore(fn)) {
+            // 继续循环
+        }
+    }
+
+    /**
+     * 带容错的 Many 规则（使用解析记录树）
+     * - 当全局 errorRecoveryMode 开启时，解析失败会尝试恢复并继续
+     * - 使用解析记录树记录所有解析尝试，只增不删
+     * - 失败时从解析记录树提取最优路径恢复 CST
+     * @param fn 要执行的规则函数
+     */
+    ManyWithRecovery(fn: RuleFunction): void {
+        if (!this.errorRecoveryMode) {
+            throw new Error('非容错模式不应该进入 ManyWithRecovery')
+        }
+
+        // 清理记录
+        this._unparsedTokens.length = 0
+
+        while (!this.parserFailOrIsEof) {
+            const startTokenIndex = this.currentTokenIndex
+
+            // 启用解析记录，为本次迭代创建根节点
+            this._parseRecordRoot = {
+                name: '__ParseRecordRoot__',
+                children: [],
+                startTokenIndex: startTokenIndex,
+                endTokenIndex: startTokenIndex
+            }
+            this._parseRecordStack = [this._parseRecordRoot]
+
+            const success = this.tryAndRestore(fn)
+
+            if (success) {
+                // 成功，清理解析记录树，继续下一个
+                this._parseRecordRoot = null
+                this._parseRecordStack = []
+                continue
+            }
+
+            // 解析失败，尝试从解析记录树恢复
+            const syncIndex = this.findNextSyncPoint(this._codeIndex + 1)
+            const recoveredCST = this.recoverFromParseRecord(this._parseRecordRoot!, syncIndex)
+
+            if (recoveredCST && recoveredCST.children && recoveredCST.children.length > 0) {
+                // 恢复成功，将 CST 添加到当前节点
+                const currentCst = this.curCst
+                if (currentCst) {
+                    currentCst.children.push(...recoveredCST.children)
+                }
+                // 从恢复的位置继续（需要从 parsedTokens 恢复 codeIndex）
+                const maxTokenIndex = this.getParseRecordMaxEndIndex(this._parseRecordRoot!, syncIndex)
+                if (maxTokenIndex > 0 && maxTokenIndex <= this._parsedTokens.length) {
+                    const lastToken = this._parsedTokens[maxTokenIndex - 1]
+                    this._codeIndex = lastToken.index + lastToken.tokenValue.length
+                }
+            } else {
+                // 没有可恢复的内容，跳过一个字符继续
+                this._codeIndex++
+            }
+
+            // 清理解析记录树
+            this._parseRecordRoot = null
+            this._parseRecordStack = []
+            this._parseSuccess = true
+        }
+
+        // 出口：如果有未解析的 tokens，标记解析失败
+        if (this._unparsedTokens.length > 0) {
+            this._parseSuccess = false
+        }
+    }
+
+    /**
+     * 从解析记录树恢复 CST
+     * 找到 endTokenIndex <= maxIndex 的最深路径，转换为 CST
+     */
+    private recoverFromParseRecord(root: ParseRecordNode, maxIndex: number): SubhutiCst | null {
+        if (!root || root.children.length === 0) {
+            return null
+        }
+
+        const cst = new SubhutiCst()
+        cst.name = root.name
+        cst.children = this.parseRecordChildrenToCST(root.children, maxIndex)
+
+        if (!cst.children || cst.children.length === 0) {
+            return null
+        }
+
+        return cst
+    }
+
+    /**
+     * 将解析记录树子节点转换为 CST 子节点
+     *
+     * 选择策略：
+     * 1. 按 startTokenIndex 分组（同一位置开始的是 Or 的不同分支）
+     * 2. 对于每组，选择 endTokenIndex <= maxIndex 且最大的
+     * 3. 如果有多个相同深度的，选择最后一个
+     */
+    private parseRecordChildrenToCST(nodes: ParseRecordNode[], maxIndex: number): SubhutiCst[] {
+        // 按 startTokenIndex 分组
+        const groups = new Map<number, ParseRecordNode[]>()
+        for (const node of nodes) {
+            // 跳过超过同步点的节点
+            if (node.endTokenIndex > maxIndex) {
+                continue
+            }
+            const key = node.startTokenIndex
+            if (!groups.has(key)) {
+                groups.set(key, [])
+            }
+            groups.get(key)!.push(node)
+        }
+
+        // 对每组选择最优节点
+        const selectedNodes: ParseRecordNode[] = []
+        for (const [startIdx, group] of groups) {
+            // 选择 endTokenIndex 最大的，如果相同则选最后一个（兜底分支，更通用）
+            let best: ParseRecordNode | null = null
+            for (const node of group) {
+                if (!best || node.endTokenIndex >= best.endTokenIndex) {
+                    best = node
+                }
+            }
+            if (best) {
+                selectedNodes.push(best)
+            }
+        }
+
+        // 按 startTokenIndex 排序，保证顺序正确
+        selectedNodes.sort((a, b) => a.startTokenIndex - b.startTokenIndex)
+
+        // 转换为 CST
+        return selectedNodes.map(node => this.parseRecordNodeToCST(node, maxIndex))
+    }
+
+    /**
+     * 将单个解析记录节点转换为 CST 节点
+     */
+    private parseRecordNodeToCST(node: ParseRecordNode, maxIndex: number): SubhutiCst {
+        const cst = new SubhutiCst()
+        cst.name = node.name
+
+        // 如果是 token 节点
+        if (node.token) {
+            cst.value = node.value
+            cst.loc = {
+                type: node.token.tokenName,
+                value: node.token.tokenValue,
+                start: {
+                    index: node.token.index || 0,
+                    line: node.token.rowNum || 0,
+                    column: node.token.columnStartNum || 0
+                },
+                end: {
+                    index: (node.token.index || 0) + node.token.tokenValue.length,
+                    line: node.token.rowNum || 0,
+                    column: node.token.columnEndNum || 0
+                }
+            }
+        }
+
+        // 递归转换子节点
+        if (node.children.length > 0) {
+            cst.children = this.parseRecordChildrenToCST(node.children, maxIndex)
+            if (cst.children.length === 0) {
+                cst.children = undefined
+            } else {
+                // 设置位置信息
+                this.setLocation(cst)
+            }
+        }
+
+        return cst
+    }
+
+    /**
+     * 获取解析记录树中 <= maxIndex 的最大 endTokenIndex
+     */
+    private getParseRecordMaxEndIndex(root: ParseRecordNode, maxIndex: number): number {
+        let maxEnd = root.endTokenIndex <= maxIndex ? root.endTokenIndex : 0
+
+        for (const child of root.children) {
+            const childMax = this.getParseRecordMaxEndIndex(child, maxIndex)
+            if (childMax > maxEnd) {
+                maxEnd = childMax
+            }
+        }
+
+        return maxEnd
+    }
+
+    /**
+     * 找到下一个同步点（语句开始 token）
+     * @param fromIndex 从哪个源码位置开始查找
+     * @returns 同步点的源码位置，如果没找到返回源码末尾
+     */
+    protected findNextSyncPoint(fromIndex: number): number {
+        // 从指定位置开始，尝试解析每个位置的 token
+        for (let i = fromIndex; i < this._sourceCode.length; i++) {
+            const entry = this._getOrParseToken(i, this._codeLine, this._codeColumn, this._defaultGoal)
+            if (entry && this._syncTokens.has(entry.token.tokenName)) {
+                return i
+            }
+        }
+        return this._sourceCode.length  // 没找到，返回源码末尾
+    }
+
+    /**
+     * 创建 ErrorNode，包含指定范围内的 token
+     * @param startIndex 起始源码位置（包含）
+     * @param endIndex 结束源码位置（不包含）
+     * @returns ErrorNode CST 节点
+     */
+    protected createErrorNode(startIndex: number, endIndex: number): SubhutiCst {
+        const errorNode = new SubhutiCst()
+        errorNode.name = 'ErrorNode'
+        errorNode.children = []
+
+        // 从 parsedTokens 中找出在范围内的 tokens
+        for (const token of this._parsedTokens) {
+            if (token.index >= startIndex && token.index < endIndex) {
+                const tokenNode = new SubhutiCst()
+                tokenNode.name = token.tokenName
+                tokenNode.value = token.tokenValue
+                tokenNode.loc = {
+                    type: token.tokenName,
+                    value: token.tokenValue,
+                    start: {
+                        index: token.index,
+                        line: token.rowNum,
+                        column: token.columnStartNum
+                    },
+                    end: {
+                        index: token.index + (token.tokenValue?.length || 0),
+                        line: token.rowNum,
+                        column: token.columnEndNum
+                    }
+                }
+                errorNode.children.push(tokenNode)
+            }
+        }
+
+        // 设置 ErrorNode 的位置信息
+        if (errorNode.children.length > 0) {
+            const first = errorNode.children[0]
+            const last = errorNode.children[errorNode.children.length - 1]
+            errorNode.loc = {
+                type: 'ErrorNode',
+                start: first.loc.start,
+                end: last.loc.end
+            }
+        }
+
+        return errorNode
+    }
+
+    /**
+     * Option 规则 - 0次或1次（EBNF [ ... ]）
+     *
+     * 尝试执行一次，失败则回溯，不影响整体解析状态
+     */
+    Option(fn: RuleFunction): void {
+        this.tryAndRestore(fn)
+    }
+
+    /**
+     * AtLeastOne 规则 - 1次或多次
+     *
+     * 第一次必须成功，后续循环执行直到失败
+     */
+    AtLeastOne(fn: RuleFunction): void {
+        if (this.parserFail) {
+            return
+        }
+
+        fn()
+
+        while (this.tryAndRestore(fn)) {
+            // 继续循环
+        }
+    }
+
+    /**
+     * 顶层规则失败时的错误处理
+     *
+     * @param ruleName 规则名
+     * @param startIndex 规则开始时的源码位置
+     */
+    private handleTopLevelError(ruleName: string, startIndex: number): void {
+        // 分析模式：不抛错，用于语法验证
+        if (this._analysisMode) {
+            return
+        }
+
+        // 正常模式：抛出解析错误
+        const noTokenConsumed = this.currentTokenIndex === startIndex
+        const found = this.curToken
+
+        throw this._errorHandler.createError({
+            type: 'parsing',
+            expected: noTokenConsumed ? 'valid syntax' : 'EOF (end of file)',
+            found: found,
+            position: {
+                tokenIndex: this.currentTokenIndex,
+                codeIndex: this._codeIndex,
+                line: found?.rowNum ?? this._codeLine,
+                column: found?.columnStartNum ?? this._codeColumn
+            },
+            ruleStack: this.getRuleStack().length > 0 ? this.getRuleStack() : [ruleName]
+        })
+    }
+
+    get parserFailOrIsEof() {
+        return this.parserFail || this.isEof
+    }
+
+    /**
+     * 消费 token（智能错误管理）
+     * - 失败时返回 undefined，不抛异常
+     * - 支持传入词法目标（可选）
+     */
+    consume(tokenName: string, goal?: LexicalGoal): SubhutiCst | undefined {
+        if (this.parserFail) {
+            return
+        }
+
+        if (this.isEof) {
+            this._parseSuccess = false
+            return
+        }
+
+        // 获取当前 token
+        const actualGoal = goal ?? this._defaultGoal
+        const entry = this._getOrParseToken(
+            this._codeIndex,
+            this._codeLine,
+            this._codeColumn,
+            actualGoal
+        )
+
+        if (!entry) {
+            this._parseSuccess = false
+            return
+        }
+
+        const token = entry.token
+
+        if (token.tokenName !== tokenName) {
+            this._parseSuccess = false
+
+            this._debugger?.onTokenConsume(
+                this._codeIndex,
+                token.tokenValue,
+                token.tokenName,
+                tokenName,
+                false
+            )
+
+            return
+        }
+
+        this._debugger?.onTokenConsume(
+            this._codeIndex,
+            token.tokenValue,
+            token.tokenName,
+            tokenName,
+            true
+        )
+
+        const cst = this.generateCstByToken(token)
+
+        // 更新模板深度
+        if (token.tokenName === 'TemplateHead') {
+            this._templateDepth++
+        } else if (token.tokenName === 'TemplateTail') {
+            this._templateDepth--
+        }
+
+        // 更新位置
+        this._codeIndex = entry.nextCodeIndex
+        this._codeLine = entry.nextLine
+        this._codeColumn = entry.nextColumn
+        this._lastTokenName = entry.lastTokenName
+
+        // 添加到已解析列表
+        this._parsedTokens.push(token)
+
+        return cst
+    }
+
+    private generateCstByToken(token: SubhutiMatchToken): SubhutiCst {
+        const cst = new SubhutiCst()
+        cst.name = token.tokenName
+        cst.value = token.tokenValue
+        cst.loc = {
+            type: token.tokenName,
+            value: token.tokenValue,
+            start: {
+                index: token.index || 0,
+                line: token.rowNum || 0,
+                column: token.columnStartNum || 0
+            },
+            end: {
+                index: (token.index || 0) + token.tokenValue.length,
+                line: token.rowNum || 0,
+                column: token.columnEndNum || 0
+            }
+        }
+
+        // 添加到当前 CST
+        const currentCst = this.curCst
+        if (currentCst) {
+            currentCst.children.push(cst)
+        }
+
+        // 解析记录树：记录 token 并更新祖先的 endTokenIndex
+        if (this.errorRecoveryMode) {
+            const newEndIndex = this.currentTokenIndex  // consume 后会 +1
+            const tokenNode: ParseRecordNode = {
+                name: token.tokenName,
+                children: [],
+                startTokenIndex: this.lastTokenIndex,  // consume 后的索引
+                endTokenIndex: newEndIndex,
+                token: token,
+                value: token.tokenValue
+            }
+            const recordCurrent = this._parseRecordStack[this._parseRecordStack.length - 1]
+            if (recordCurrent) {
+                recordCurrent.children.push(tokenNode)
+            }
+            // 更新所有祖先的 endTokenIndex
+            for (const ancestor of this._parseRecordStack) {
+                ancestor.endTokenIndex = newEndIndex
+            }
+        }
+
+        return cst
+    }
+
+    // 回溯机制
+    private saveState(): SubhutiBackData {
+        const currentCst = this.curCst
+        return {
+            codeIndex: this._codeIndex,
+            codeLine: this._codeLine,
+            codeColumn: this._codeColumn,
+            lastTokenName: this._lastTokenName,
+            curCstChildrenLength: currentCst?.children?.length || 0,
+            parsedTokensLength: this._parsedTokens.length
+        }
+    }
+
+    private restoreState(backData: SubhutiBackData): void {
+        const fromIndex = this._codeIndex
+        const toIndex = backData.codeIndex
+
+        if (fromIndex !== toIndex) {
+            this._debugger?.onBacktrack?.(fromIndex, toIndex)
+        }
+
+        this._codeIndex = backData.codeIndex
+        this._codeLine = backData.codeLine
+        this._codeColumn = backData.codeColumn
+        this._lastTokenName = backData.lastTokenName
+
+        // 恢复 parsedTokens
+        this._parsedTokens.length = backData.parsedTokensLength
+
+        const currentCst = this.curCst
+        if (currentCst) {
+            currentCst.children.length = backData.curCstChildrenLength
+        }
+    }
+
+    /**
+     * 【容错模式】记录部分匹配并回溯
+     * - 解析记录树方案中，部分匹配由 _parseRecordRoot 记录
+     * - 这里只需要回溯 CST（解析记录树是只增不删的）
+     *
+     * @param savedState 保存的状态
+     * @param startCodeIndex 起始源码位置
+     */
+    private recordPartialMatchAndRestore(savedState: SubhutiBackData, startCodeIndex: number): void {
+        this.restoreState(savedState)
+    }
+
+    /**
+     * 检查是否已到达源码末尾
+     */
+    get isEof(): boolean {
+        const entry = this._getOrParseToken(
+            this._codeIndex,
+            this._codeLine,
+            this._codeColumn,
+            this._defaultGoal
+        )
+        return entry === null
+    }
+
+    /**
+     * 尝试执行函数，失败时自动回溯并重置状态
+     *
+     * @param fn 要执行的函数
+     * @returns true: 成功且消费了 token，false: 失败或没消费 token
+     */
+    private tryAndRestore(fn: () => void): boolean {
+        if (this.parserFailOrIsEof) {
+            return false
+        }
+        const savedState = this.saveState()
+        const startIndex = this._codeIndex
+
+        fn()
+
+        if (this.parserFail) {
+            // 记录部分匹配并回溯
+            this.recordPartialMatchAndRestore(savedState, startIndex)
+            this._parseSuccess = true
+            return false
+        }
+
+        // 成功但没消费 token → 返回 false（防止无限循环）
+        return this._codeIndex !== startIndex
+    }
+
+    /**
+     * 应用缓存结果（恢复状态）
+     */
+    private applyCachedResult(cached: SubhutiPackratCacheResult): SubhutiCst {
+        // 恢复消费的 token
+        if (cached.parsedTokens && cached.parsedTokens.length > 0) {
+            this._parsedTokens.push(...cached.parsedTokens)
+
+            // 从最后一个 token 恢复词法分析位置
+            const lastToken = cached.parsedTokens[cached.parsedTokens.length - 1]
+            this._codeIndex = lastToken.index + lastToken.tokenValue.length
+            this._codeLine = lastToken.rowNum
+            this._codeColumn = lastToken.columnEndNum
+            this._lastTokenName = lastToken.tokenName
+        }
+
+        this._parseSuccess = cached.parseSuccess
+
+        // 成功时添加到父节点
+        if (cached.parseSuccess) {
+            const parentCst = this.cstStack[this.cstStack.length - 1]
+            if (parentCst) {
+                parentCst.children.push(cached.cst)
+            }
+        }
+
+        return cached.cst
+    }
+
+    // ============================================
+    // Error Helper Methods
+    // ============================================
+
+    /**
+     * 获取 token 上下文（从 parsedTokens 获取最近的 N 个 token）
+     *
+     * @param contextSize - 上下文大小（默认 2）
+     * @returns token 上下文数组
+     */
+    private getTokenContext(contextSize: number = 2): SubhutiMatchToken[] {
+        const tokens = this._parsedTokens
+        const len = tokens.length
+        const start = Math.max(0, len - contextSize)
+        return tokens.slice(start)
+    }
+
+    /**
+     * 生成当前规则路径的字符串（用于错误信息）
+     *
+     * @returns 格式化后的规则路径字符串数组
+     */
+    private formatCurrentRulePath(): string[] {
+        if (!this._debugger) {
+            // 如果没有调试器，使用简单格式
+            return this.formatSimpleRulePath()
+        }
+
+        // 使用调试器的格式化方法
+        const ruleStack = this._debugger.ruleStack
+        if (!ruleStack || ruleStack.length === 0) {
+            return ['  (empty)']
+        }
+
+        return SubhutiDebugRuleTracePrint.formatPendingOutputs_NonCache_Impl(ruleStack)
+    }
+
+    /**
+     * 简单格式化规则路径（当没有调试器时）
+     */
+    private formatSimpleRulePath(): string[] {
+        const ruleStack = this.getRuleStack()
+        if (ruleStack.length === 0) {
+            return ['  (empty)']
+        }
+
+        const lines: string[] = []
+        for (let i = 0; i < ruleStack.length; i++) {
+            const rule = ruleStack[i]
+            const isLast = i === ruleStack.length - 1
+            const indent = '  '.repeat(i)
+            const connector = i === 0 ? '' : '└─ '
+            const marker = isLast ? ' ← 当前位置' : ''
+
+            lines.push(`  ${indent}${connector}${rule}${marker}`)
+        }
+
+        return lines
+    }
+
+    /**
+     * 创建无限循环错误
+     *
+     * @param ruleName - 规则名称
+     * @param hint - 修复提示
+     * @returns ParsingError 实例（分析模式下返回 null）
+     */
+    private createInfiniteLoopError(ruleName: string, hint: string): ParsingError {
+        // 🔍 分析模式：不创建错误，标记失败并返回 null
+        if (this._analysisMode) {
+            this._parseSuccess = false
+            return null as any  // 分析模式下不会真正使用这个返回值
+        }
+
+        // 生成规则路径
+        const rulePathLines = this.formatCurrentRulePath()
+        const rulePath = rulePathLines.join('\n')
+
+        // 🔍 检测是否是左递归（准确判断）
+        const ruleStack = this.getRuleStack()
+        const isLeftRecursion = this.isDirectLeftRecursion(ruleName, ruleStack)
+
+        // ✅ 只有确定是左递归时才使用 'left-recursion' 类型
+        // ❌ 不确定的情况使用 'infinite-loop'，不断言是 Or 遮蔽
+        const errorType = isLeftRecursion ? 'left-recursion' : 'infinite-loop'
+
+        return this._errorHandler.createError({
+            type: errorType,
+            expected: '',
+            found: this.curToken,
+            position: {
+                tokenIndex: this.currentTokenIndex,
+                codeIndex: this._codeIndex,
+                line: this.curToken?.rowNum || this._codeLine,
+                column: this.curToken?.columnStartNum || this._codeColumn
+            },
+            ruleStack: [...ruleStack],
+            loopRuleName: ruleName,
+            loopDetectionSet: [],
+            loopCstDepth: this.cstStack.length,
+            loopTokenContext: this.getTokenContext(2),
+            hint: hint,
+            rulePath: rulePath
+        })
+    }
+}
+

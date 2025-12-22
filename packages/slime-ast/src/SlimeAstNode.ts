@@ -767,13 +767,477 @@ export interface SlimeTSTypeAnnotation extends SlimeBaseNode {
     typeAnnotation: SlimeTSType;
 }
 
-/** [TypeScript] 类型联合 */
-export type SlimeTSType = SlimeTSNumberKeyword;
+// ============================================
+// TypeScript: 基础类型关键字 (Phase 1)
+// ============================================
 
 /** [TypeScript] number 类型关键字 */
 export interface SlimeTSNumberKeyword extends SlimeBaseNode {
     type: typeof SlimeAstTypeName.TSNumberKeyword;
 }
+
+/** [TypeScript] string 类型关键字 */
+export interface SlimeTSStringKeyword extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSStringKeyword;
+}
+
+/** [TypeScript] boolean 类型关键字 */
+export interface SlimeTSBooleanKeyword extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSBooleanKeyword;
+}
+
+/** [TypeScript] any 类型关键字 */
+export interface SlimeTSAnyKeyword extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSAnyKeyword;
+}
+
+/** [TypeScript] unknown 类型关键字 */
+export interface SlimeTSUnknownKeyword extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSUnknownKeyword;
+}
+
+/** [TypeScript] void 类型关键字 */
+export interface SlimeTSVoidKeyword extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSVoidKeyword;
+}
+
+/** [TypeScript] never 类型关键字 */
+export interface SlimeTSNeverKeyword extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSNeverKeyword;
+}
+
+/** [TypeScript] null 类型关键字 */
+export interface SlimeTSNullKeyword extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSNullKeyword;
+}
+
+/** [TypeScript] undefined 类型关键字 */
+export interface SlimeTSUndefinedKeyword extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSUndefinedKeyword;
+}
+
+/** [TypeScript] object 类型关键字 */
+export interface SlimeTSObjectKeyword extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSObjectKeyword;
+}
+
+/** [TypeScript] symbol 类型关键字 */
+export interface SlimeTSSymbolKeyword extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSSymbolKeyword;
+}
+
+/** [TypeScript] bigint 类型关键字 */
+export interface SlimeTSBigIntKeyword extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSBigIntKeyword;
+}
+
+// ============================================
+// TypeScript: 字面量类型和类型引用 (Phase 1)
+// ============================================
+
+/** [TypeScript] 字面量类型 */
+export interface SlimeTSLiteralType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSLiteralType;
+    literal: SlimeStringLiteral | SlimeNumericLiteral | SlimeBooleanLiteral | SlimeNullLiteral;
+}
+
+/** [TypeScript] 模板字面量类型 */
+export interface SlimeTSTemplateLiteralType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTemplateLiteralType;
+    quasis: SlimeTemplateElement[];
+    types: SlimeTSType[];
+}
+
+/** [TypeScript] 类型引用 */
+export interface SlimeTSTypeReference extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTypeReference;
+    typeName: SlimeIdentifier | SlimeTSQualifiedName;
+    typeParameters?: SlimeTSTypeParameterInstantiation;
+}
+
+/** [TypeScript] 限定名称 (Namespace.Type) */
+export interface SlimeTSQualifiedName extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSQualifiedName;
+    left: SlimeIdentifier | SlimeTSQualifiedName;
+    right: SlimeIdentifier;
+}
+
+// ============================================
+// TypeScript: 复合类型 (Phase 2)
+// ============================================
+
+/** [TypeScript] 联合类型 */
+export interface SlimeTSUnionType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSUnionType;
+    types: SlimeTSType[];
+}
+
+/** [TypeScript] 交叉类型 */
+export interface SlimeTSIntersectionType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSIntersectionType;
+    types: SlimeTSType[];
+}
+
+/** [TypeScript] 数组类型 */
+export interface SlimeTSArrayType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSArrayType;
+    elementType: SlimeTSType;
+}
+
+/** [TypeScript] 元组类型 */
+export interface SlimeTSTupleType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTupleType;
+    elementTypes: (SlimeTSType | SlimeTSNamedTupleMember)[];
+}
+
+/** [TypeScript] 命名元组成员 */
+export interface SlimeTSNamedTupleMember extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSNamedTupleMember;
+    label: SlimeIdentifier;
+    elementType: SlimeTSType;
+    optional?: boolean;
+}
+
+/** [TypeScript] 剩余类型 */
+export interface SlimeTSRestType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSRestType;
+    typeAnnotation: SlimeTSType;
+}
+
+/** [TypeScript] 可选类型 */
+export interface SlimeTSOptionalType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSOptionalType;
+    typeAnnotation: SlimeTSType;
+}
+
+/** [TypeScript] 对象类型字面量 */
+export interface SlimeTSTypeLiteral extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTypeLiteral;
+    members: SlimeTSTypeElement[];
+}
+
+/** [TypeScript] 类型元素联合 */
+export type SlimeTSTypeElement =
+    | SlimeTSPropertySignature
+    | SlimeTSIndexSignature
+    | SlimeTSMethodSignature
+    | SlimeTSCallSignatureDeclaration
+    | SlimeTSConstructSignatureDeclaration;
+
+/** [TypeScript] 属性签名 */
+export interface SlimeTSPropertySignature extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSPropertySignature;
+    key: SlimeIdentifier | SlimeStringLiteral | SlimeNumericLiteral;
+    computed?: boolean;
+    optional?: boolean;
+    readonly?: boolean;
+    typeAnnotation?: SlimeTSTypeAnnotation;
+}
+
+/** [TypeScript] 索引签名 */
+export interface SlimeTSIndexSignature extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSIndexSignature;
+    parameters: SlimeIdentifier[];
+    typeAnnotation?: SlimeTSTypeAnnotation;
+    readonly?: boolean;
+}
+
+/** [TypeScript] 方法签名 */
+export interface SlimeTSMethodSignature extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSMethodSignature;
+    key: SlimeIdentifier | SlimeStringLiteral | SlimeNumericLiteral;
+    computed?: boolean;
+    optional?: boolean;
+    typeParameters?: SlimeTSTypeParameterDeclaration;
+    params: SlimePattern[];
+    returnType?: SlimeTSTypeAnnotation;
+}
+
+/** [TypeScript] 调用签名 */
+export interface SlimeTSCallSignatureDeclaration extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSCallSignatureDeclaration;
+    typeParameters?: SlimeTSTypeParameterDeclaration;
+    params: SlimePattern[];
+    returnType?: SlimeTSTypeAnnotation;
+}
+
+/** [TypeScript] 构造签名 */
+export interface SlimeTSConstructSignatureDeclaration extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSConstructSignatureDeclaration;
+    typeParameters?: SlimeTSTypeParameterDeclaration;
+    params: SlimePattern[];
+    returnType?: SlimeTSTypeAnnotation;
+}
+
+/** [TypeScript] 函数类型 */
+export interface SlimeTSFunctionType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSFunctionType;
+    typeParameters?: SlimeTSTypeParameterDeclaration;
+    params: SlimePattern[];
+    returnType: SlimeTSTypeAnnotation;
+}
+
+/** [TypeScript] 构造函数类型 */
+export interface SlimeTSConstructorType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSConstructorType;
+    typeParameters?: SlimeTSTypeParameterDeclaration;
+    params: SlimePattern[];
+    returnType: SlimeTSTypeAnnotation;
+    abstract?: boolean;
+}
+
+// ============================================
+// TypeScript: 类型声明 (Phase 4)
+// ============================================
+
+/** [TypeScript] 接口声明 */
+export interface SlimeTSInterfaceDeclaration extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSInterfaceDeclaration;
+    id: SlimeIdentifier;
+    typeParameters?: SlimeTSTypeParameterDeclaration;
+    extends?: SlimeTSInterfaceHeritage[];
+    body: SlimeTSInterfaceBody;
+    declare?: boolean;
+}
+
+/** [TypeScript] 接口体 */
+export interface SlimeTSInterfaceBody extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSInterfaceBody;
+    body: SlimeTSTypeElement[];
+}
+
+/** [TypeScript] 接口继承 */
+export interface SlimeTSInterfaceHeritage extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSInterfaceHeritage;
+    expression: SlimeIdentifier | SlimeMemberExpression;
+    typeParameters?: SlimeTSTypeParameterInstantiation;
+}
+
+/** [TypeScript] 类型别名声明 */
+export interface SlimeTSTypeAliasDeclaration extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTypeAliasDeclaration;
+    id: SlimeIdentifier;
+    typeParameters?: SlimeTSTypeParameterDeclaration;
+    typeAnnotation: SlimeTSType;
+    declare?: boolean;
+}
+
+/** [TypeScript] 枚举声明 */
+export interface SlimeTSEnumDeclaration extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSEnumDeclaration;
+    id: SlimeIdentifier;
+    members: SlimeTSEnumMember[];
+    const?: boolean;
+    declare?: boolean;
+}
+
+/** [TypeScript] 枚举成员 */
+export interface SlimeTSEnumMember extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSEnumMember;
+    id: SlimeIdentifier | SlimeStringLiteral;
+    initializer?: SlimeExpression;
+}
+
+// ============================================
+// TypeScript: 泛型 (Phase 5)
+// ============================================
+
+/** [TypeScript] 类型参数声明 */
+export interface SlimeTSTypeParameterDeclaration extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTypeParameterDeclaration;
+    params: SlimeTSTypeParameter[];
+}
+
+/** [TypeScript] 类型参数 */
+export interface SlimeTSTypeParameter extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTypeParameter;
+    name: SlimeIdentifier;
+    constraint?: SlimeTSType;
+    default?: SlimeTSType;
+    in?: boolean;   // 逆变
+    out?: boolean;  // 协变
+}
+
+/** [TypeScript] 类型参数实例化 */
+export interface SlimeTSTypeParameterInstantiation extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTypeParameterInstantiation;
+    params: SlimeTSType[];
+}
+
+// ============================================
+// TypeScript: 类型操作符 (Phase 6)
+// ============================================
+
+/** [TypeScript] 类型查询 (typeof x) */
+export interface SlimeTSTypeQuery extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTypeQuery;
+    exprName: SlimeIdentifier | SlimeTSQualifiedName;
+    typeParameters?: SlimeTSTypeParameterInstantiation;
+}
+
+/** [TypeScript] 类型操作符 (keyof, readonly, unique) */
+export interface SlimeTSTypeOperator extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTypeOperator;
+    operator: 'keyof' | 'readonly' | 'unique';
+    typeAnnotation: SlimeTSType;
+}
+
+/** [TypeScript] 索引访问类型 (T[K]) */
+export interface SlimeTSIndexedAccessType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSIndexedAccessType;
+    objectType: SlimeTSType;
+    indexType: SlimeTSType;
+}
+
+/** [TypeScript] 条件类型 (T extends U ? X : Y) */
+export interface SlimeTSConditionalType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSConditionalType;
+    checkType: SlimeTSType;
+    extendsType: SlimeTSType;
+    trueType: SlimeTSType;
+    falseType: SlimeTSType;
+}
+
+/** [TypeScript] 推断类型 (infer R) */
+export interface SlimeTSInferType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSInferType;
+    typeParameter: SlimeTSTypeParameter;
+}
+
+/** [TypeScript] 映射类型 */
+export interface SlimeTSMappedType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSMappedType;
+    typeParameter: SlimeTSTypeParameter;
+    nameType?: SlimeTSType;
+    typeAnnotation?: SlimeTSType;
+    optional?: '+' | '-' | boolean;
+    readonly?: '+' | '-' | boolean;
+}
+
+// ============================================
+// TypeScript: 模块和命名空间 (Phase 7)
+// ============================================
+
+/** [TypeScript] 导入类型 */
+export interface SlimeTSImportType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSImportType;
+    argument: SlimeStringLiteral;
+    qualifier?: SlimeIdentifier | SlimeTSQualifiedName;
+    typeParameters?: SlimeTSTypeParameterInstantiation;
+}
+
+/** [TypeScript] 模块/命名空间声明 */
+export interface SlimeTSModuleDeclaration extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSModuleDeclaration;
+    id: SlimeIdentifier | SlimeStringLiteral;
+    body?: SlimeTSModuleBlock | SlimeTSModuleDeclaration;
+    declare?: boolean;
+    global?: boolean;
+}
+
+/** [TypeScript] 模块块 */
+export interface SlimeTSModuleBlock extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSModuleBlock;
+    body: SlimeStatement[];
+}
+
+// ============================================
+// TypeScript: 特殊语法 (Phase 8)
+// ============================================
+
+/** [TypeScript] as 表达式 */
+export interface SlimeTSAsExpression extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSAsExpression;
+    expression: SlimeExpression;
+    typeAnnotation: SlimeTSType;
+}
+
+/** [TypeScript] 类型断言 (<T>x) */
+export interface SlimeTSTypeAssertion extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTypeAssertion;
+    typeAnnotation: SlimeTSType;
+    expression: SlimeExpression;
+}
+
+/** [TypeScript] 非空断言 (x!) */
+export interface SlimeTSNonNullExpression extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSNonNullExpression;
+    expression: SlimeExpression;
+}
+
+/** [TypeScript] satisfies 表达式 */
+export interface SlimeTSSatisfiesExpression extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSSatisfiesExpression;
+    expression: SlimeExpression;
+    typeAnnotation: SlimeTSType;
+}
+
+// ============================================
+// TypeScript: 其他
+// ============================================
+
+/** [TypeScript] this 类型 */
+export interface SlimeTSThisType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSThisType;
+}
+
+/** [TypeScript] 类型谓词 (x is T) */
+export interface SlimeTSTypePredicate extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTypePredicate;
+    parameterName: SlimeIdentifier | SlimeTSThisType;
+    typeAnnotation?: SlimeTSTypeAnnotation;
+    asserts?: boolean;
+}
+
+/** [TypeScript] 括号类型 */
+export interface SlimeTSParenthesizedType extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSParenthesizedType;
+    typeAnnotation: SlimeTSType;
+}
+
+// ============================================
+// TypeScript: 类型联合
+// ============================================
+
+/** [TypeScript] 所有类型的联合 */
+export type SlimeTSType =
+    // 基础类型关键字
+    | SlimeTSNumberKeyword
+    | SlimeTSStringKeyword
+    | SlimeTSBooleanKeyword
+    | SlimeTSAnyKeyword
+    | SlimeTSUnknownKeyword
+    | SlimeTSVoidKeyword
+    | SlimeTSNeverKeyword
+    | SlimeTSNullKeyword
+    | SlimeTSUndefinedKeyword
+    | SlimeTSObjectKeyword
+    | SlimeTSSymbolKeyword
+    | SlimeTSBigIntKeyword
+    // 字面量和引用
+    | SlimeTSLiteralType
+    | SlimeTSTemplateLiteralType
+    | SlimeTSTypeReference
+    // 复合类型
+    | SlimeTSUnionType
+    | SlimeTSIntersectionType
+    | SlimeTSArrayType
+    | SlimeTSTupleType
+    | SlimeTSTypeLiteral
+    | SlimeTSFunctionType
+    | SlimeTSConstructorType
+    // 类型操作符
+    | SlimeTSTypeQuery
+    | SlimeTSTypeOperator
+    | SlimeTSIndexedAccessType
+    | SlimeTSConditionalType
+    | SlimeTSMappedType
+    | SlimeTSInferType
+    // 其他
+    | SlimeTSImportType
+    | SlimeTSThisType
+    | SlimeTSTypePredicate
+    | SlimeTSParenthesizedType;
 
 export type SlimeLiteral = SlimeSimpleLiteral | SlimeRegExpLiteral | SlimeBigIntLiteral;
 

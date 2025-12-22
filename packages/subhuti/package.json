@@ -1,0 +1,78 @@
+{
+  "name": "subhuti",
+  "version": "0.2.7",
+  "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "publishConfig": {
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.mts",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.mts",
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs",
+        "default": "./dist/index.mjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "test": "tsx test/HelloWorldGrammarParser.ts",
+    "test:validation": "tsx tests/validation/grammar-validation.test.ts",
+    "build": "tsdown",
+    "prepublishOnly": "npm run build",
+    "clean": "rimraf dist"
+  },
+  "homepage": "https://github.com/alamhubb/subhuti",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alamhubb/subhuti.git"
+  },
+  "contributors": [
+    {
+      "name": "alamhubb",
+      "githubUsername": "alamhubb",
+      "url": "https://github.com/alamhubb"
+    }
+  ],
+  "keywords": [
+    "subhuti",
+    "parser",
+    "auto-parser",
+    "generator",
+    "auto-generator",
+    "transformer",
+    "auto-transfomer"
+  ],
+  "author": "alamhubb",
+  "description": "Automatic conversion between two different programming languages through two grammar files that define the same grammar structure and grammar name",
+  "dependencies": {
+    "@dagrejs/dagre": "^2.0.0",
+    "@dagrejs/graphlib": "^2.2.4",
+    "@dagrejs/graphlib-dot": "^1.0.2",
+    "d3": "^7.9.0",
+    "dagre-d3": "^0.6.4",
+    "fast-cartesian": "^9.0.1",
+    "lru-cache": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/estree": "1.0.6",
+    "@types/node": "^24.10.1",
+    "tsdown": "0.17.0-beta.6",
+    "typescript": "^5.9.3"
+  },
+  "gitHead": "cc2464a4d35f474bbc6305d6418a18293e9d5b52"
+}

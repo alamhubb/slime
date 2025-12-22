@@ -336,68 +336,6 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     // 解决 `/` 在词法阶段的歧义问题
     // ============================================
 
-    /**
-     * 将当前 Slash 或 DivideAssign token 重新扫描为 RegularExpressionLiteral
-     *
-     * 当词法分析阶段将正则表达式误判为除法时调用。
-     * 例如:
-     *   `if(1)/  foo/` 中的 `/  foo/` 被误判为 Slash, foo, Slash
-     *   `} /42/i` 中的 `/42/i` 被误判为 Slash, 42, Slash, i
-     *   `x = /=foo/g` 中的 `/=foo/g` 被误判为 DivideAssign, foo, Slash, g
-     *
-     * 工作原理：
-     * 1. 从原始源码的当前 token 位置开始，直接匹配正则表达式
-     * 2. 如果匹配成功，计算覆盖了多少个原始 tokens
-     * 3. 替换这些 tokens 为一个 RegularExpressionLiteral
-     *
-     * @returns 是否成功重新扫描
-     */
-    private rescanSlashAsRegExp(): boolean {
-        const curToken = this.curToken
-        if (!curToken || (curToken.tokenName !== SlimeJavascriptTokenType.Slash && curToken.tokenName !== SlimeJavascriptTokenType.DivideAssign)) {
-            return false
-        }
-
-        // 1. 从源码位置直接匹配正则表达式
-        const sourceFromSlash = this._sourceCode.slice(curToken.index)
-        const regexpMatch = matchRegExpLiteral(sourceFromSlash)
-        if (!regexpMatch) {
-            return false
-        }
-
-        // 2. 计算正则表达式结束位置（在源码中的绝对位置）
-        const regexpEndIndex = curToken.index + regexpMatch.length
-
-        // 3. 计算需要替换多少个 tokens（覆盖到 regexpEndIndex 之前的所有 tokens）
-        const startTokenIndex = this.tokenIndex
-        let tokensToReplace = 1
-        for (let i = startTokenIndex + 1; i < this._tokens.length; i++) {
-            const token = this._tokens[i]
-            // 如果 token 的起始位置在正则表达式范围内，需要替换
-            if (token.index < regexpEndIndex) {
-                tokensToReplace++
-            } else {
-                break
-            }
-        }
-
-        // 4. 创建新的 RegularExpressionLiteral token
-        const newToken: SubhutiMatchToken = {
-            tokenName: SlimeJavascriptTokenType.RegularExpressionLiteral,
-            tokenValue: regexpMatch,
-            index: curToken.index,
-            rowNum: curToken.rowNum,
-            columnStartNum: curToken.columnStartNum,
-            columnEndNum: curToken.columnStartNum + regexpMatch.length - 1,
-            hasLineBreakBefore: curToken.hasLineBreakBefore
-        }
-
-        // 5. 替换 tokens 数组
-        this._tokens.splice(startTokenIndex, tokensToReplace, newToken)
-
-        return true
-    }
-
     // ============================================
     // A.2 Expressions
     // ============================================
@@ -413,10 +351,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [~Await] await
      */
     @SubhutiRule
-    IdentifierReference(params: ExpressionParams = {}): SubhutiCst | undefined {
+    IdentifierReference(params: ExpressionParams = {}) {
         const {Yield = false, Await = false} = params
 
-        return this.Or([
+        this.Or([
             // Identifier (排除保留字)
             {alt: () => this.Identifier()},
             // [~Yield] yield - 条件展开
@@ -437,8 +375,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * yield/await 在特定上下文中是否合法，由静态语义（Static Semantics）检查决定。
      */
     @SubhutiRule
-    BindingIdentifier(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    BindingIdentifier(params: ExpressionParams = {}) {
+        this.Or([
             {alt: () => this.Identifier()},
             {alt: () => this.tokenConsumer.Yield()},
             {alt: () => this.tokenConsumer.Await()}
@@ -452,10 +390,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [~Await] await
      */
     @SubhutiRule
-    LabelIdentifier(params: ExpressionParams = {}): SubhutiCst | undefined {
+    LabelIdentifier(params: ExpressionParams = {}) {
         const {Yield = false, Await = false} = params
 
-        return this.Or([
+        this.Or([
             {alt: () => this.Identifier()},
             // [~Yield] yield - 条件展开
             ...(!Yield ? [{alt: () => this.tokenConsumer.Yield()}] : []),
@@ -472,12 +410,20 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 解码后的字符必须满足 ID_Start（第一个字符）或 ID_Continue（后续字符）属性。
      * 参考 Acorn 实现。
      */
+    /**
+     * Identifier :
+     *     IdentifierName but not ReservedWord
+     *
+     * 词法器已将硬关键字识别为独立 token，所以这里只需处理 Unicode 转义的情况。
+     * 例如 `bre\u0061k` 解码后是 `break`，应该被拒绝。
+     */
     @SubhutiRule
     Identifier(): SubhutiCst | undefined {
-        const cst = this.tokenConsumer.IdentifierName()
-        if (!cst) return undefined
-
-        const value = cst.value!
+        // 前瞻检查是否是 IdentifierName
+        if (!this.match(SlimeJavascriptTokenType.IdentifierName)) {
+            return this.setParseFail()
+        }
+        const value = this.curToken!.tokenValue!
 
         // 防御性检查：如果词法器正确实现，保留字应该被识别为独立 token，不会到达这里
         // 如果触发此条件，说明词法器存在 bug
@@ -485,20 +431,20 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             throw new Error(`[Lexer Bug] 保留字 "${value}" 被错误识别为 IdentifierName，应该是独立的关键字 token`)
         }
 
-        // 如果包含 Unicode 转义
+        // 处理 Unicode 转义
         if (value.includes('\\u')) {
-            // 验证解码后的字符是否有效
             if (!isValidIdentifierWithEscapes(value)) {
                 return this.setParseFail()
             }
-            // 解码后检查是否是保留字（如 bre\u0061k -> break）
             const decoded = decodeIdentifier(value)
             if (decoded !== null && ReservedWords.has(decoded)) {
-                return this.setParseFail()
+                throw new Error(`[Lexer Bug] 保留字 "${value}" 被错误识别为 IdentifierName，应该是独立的关键字 token`)
+                // return this.setParseFail()
             }
         }
 
-        return cst
+        // 消费 token
+        this.tokenConsumer.IdentifierName()
     }
 
     /**
@@ -513,18 +459,19 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 同样需要验证 Unicode 转义的有效性
      */
     @SubhutiRule
-    IdentifierName(): SubhutiCst | undefined {
-        return this.Or([
+    IdentifierName() {
+        this.Or([
             // 普通标识符（需要验证 Unicode 转义）
             {
                 alt: () => {
-                    const cst = this.tokenConsumer.IdentifierName()
-                    if (!cst) return undefined
+                    this.tokenConsumer.IdentifierName()
+                    const cst = this.curCst
+                    if (!cst) return
                     const value = cst.value!
                     // 如果包含 Unicode 转义，验证解码后的字符是否有效
                     if (value.includes('\\u')) {
                         if (!isValidIdentifierWithEscapes(value)) {
-                            return this.setParseFail()
+                            this.setParseFail()
                         }
                     }
                     return cst
@@ -602,12 +549,12 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     CoverParenthesizedExpressionAndArrowParameterList[?Yield, ?Await]
      */
     @SubhutiRule
-    PrimaryExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    PrimaryExpression(params: ExpressionParams = {}) {
         // 新架构：在 PrimaryExpression 中，使用 InputElementRegExp 模式前瞻
         // 这样词法分析器遇到 `/` 时会尝试匹配正则表达式而不是除法
         // 通过 LA(1, [InputElementRegExp]) 实现
 
-        return this.Or([
+        this.Or([
             // === 1. 硬关键字表达式（不会被标识符遮蔽）===
             {alt: () => this.tokenConsumer.This()},
 
@@ -643,8 +590,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 消费正则表达式字面量（使用 InputElementRegExp 模式）
      * 使用 protected 以便子类重写 PrimaryExpression 时可以调用
      */
-    protected consumeRegularExpressionLiteral(): SubhutiCst | undefined {
-        return this.consume(SlimeJavascriptTokenType.RegularExpressionLiteral, LexicalGoal.InputElementRegExp)
+    protected consumeRegularExpressionLiteral() {
+        this.consume(SlimeJavascriptTokenType.RegularExpressionLiteral, LexicalGoal.InputElementRegExp)
     }
 
     /**
@@ -658,8 +605,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ( Expression[+In, ?Yield, ?Await] , ... BindingPattern[?Yield, ?Await] )
      */
     @SubhutiRule
-    CoverParenthesizedExpressionAndArrowParameterList(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    CoverParenthesizedExpressionAndArrowParameterList(params: ExpressionParams = {}) {
+        this.Or([
             // ( Expression[+In, ?Yield, ?Await] )
             {
                 alt: () => {
@@ -738,10 +685,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 注意：此方法是 Cover Grammar 的精化版本，与规范完全对应。
      */
     @SubhutiRule
-    ParenthesizedExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ParenthesizedExpression(params: ExpressionParams = {}) {
         this.tokenConsumer.LParen()
         this.Expression({...params, In: true})
-        return this.tokenConsumer.RParen()
+        this.tokenConsumer.RParen()
     }
 
     // ----------------------------------------
@@ -759,8 +706,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 直接使用 tokenConsumer 消费 token
      */
     @SubhutiRule
-    Literal(): SubhutiCst | undefined {
-        return this.Or([
+    Literal() {
+        this.Or([
             // NullLiteral 是词法规则（A.1 Lexical Grammar），直接消费 token
             {alt: () => this.tokenConsumer.NullLiteral()},
             {alt: () => this.BooleanLiteral()},
@@ -777,8 +724,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     false
      */
     @SubhutiRule
-    BooleanLiteral(): SubhutiCst | undefined {
-        return this.Or([
+    BooleanLiteral() {
+        this.Or([
             {alt: () => this.tokenConsumer.True()},
             {alt: () => this.tokenConsumer.False()}
         ])
@@ -791,8 +738,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [ ElementList[?Yield, ?Await] , Elision_opt ]
      */
     @SubhutiRule
-    ArrayLiteral(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ArrayLiteral(params: ExpressionParams = {}) {
+        this.Or([
             // [ Elision_opt ]
             {
                 alt: () => {
@@ -830,7 +777,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ElementList[?Yield, ?Await] , Elision_opt SpreadElement[?Yield, ?Await]
      */
     @SubhutiRule
-    ElementList(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ElementList(params: ExpressionParams = {}) {
         // 第一个元素
         this.Option(() => this.Elision())
         this.Or([
@@ -848,7 +795,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             ])
         })
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -857,10 +804,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     Elision ,
      */
     @SubhutiRule
-    Elision(): SubhutiCst | undefined {
+    Elision() {
         this.tokenConsumer.Comma()
         this.Many(() => this.tokenConsumer.Comma())
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -868,9 +815,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ... AssignmentExpression[+In, ?Yield, ?Await]
      */
     @SubhutiRule
-    SpreadElement(params: ExpressionParams = {}): SubhutiCst | undefined {
+    SpreadElement(params: ExpressionParams = {}) {
         this.tokenConsumer.Ellipsis()
-        return this.AssignmentExpression({...params, In: true})
+        this.AssignmentExpression({...params, In: true})
     }
 
     /**
@@ -880,8 +827,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     { PropertyDefinitionList[?Yield, ?Await] , }
      */
     @SubhutiRule
-    ObjectLiteral(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ObjectLiteral(params: ExpressionParams = {}) {
+        this.Or([
             // { }
             {
                 alt: () => {
@@ -915,13 +862,13 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     PropertyDefinitionList[?Yield, ?Await] , PropertyDefinition[?Yield, ?Await]
      */
     @SubhutiRule
-    PropertyDefinitionList(params: ExpressionParams = {}): SubhutiCst | undefined {
+    PropertyDefinitionList(params: ExpressionParams = {}) {
         this.PropertyDefinition(params)
         this.Many(() => {
             this.tokenConsumer.Comma()
             this.PropertyDefinition(params)
         })
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -941,8 +888,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 5. IdentifierReference - 简写属性，最宽松，放最后
      */
     @SubhutiRule
-    PropertyDefinition(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    PropertyDefinition(params: ExpressionParams = {}) {
+        this.Or([
             // 1. ... AssignmentExpression - 扩展属性（最明确）
             {
                 alt: () => {
@@ -973,8 +920,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ComputedPropertyName[?Yield, ?Await]
      */
     @SubhutiRule
-    PropertyName(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    PropertyName(params: ExpressionParams = {}) {
+        this.Or([
             {alt: () => this.LiteralPropertyName()},
             {alt: () => this.ComputedPropertyName(params)}
         ])
@@ -989,8 +936,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 注意：StringLiteral、NumericLiteral 是词法规则（A.1 Lexical Grammar），直接消费 token
      */
     @SubhutiRule
-    LiteralPropertyName(): SubhutiCst | undefined {
-        return this.Or([
+    LiteralPropertyName() {
+        this.Or([
             {alt: () => this.IdentifierName()},
             // StringLiteral 是词法规则，直接消费 token
             {alt: () => this.tokenConsumer.StringLiteral()},
@@ -1004,10 +951,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [ AssignmentExpression[+In, ?Yield, ?Await] ]
      */
     @SubhutiRule
-    ComputedPropertyName(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ComputedPropertyName(params: ExpressionParams = {}) {
         this.tokenConsumer.LBracket()
         this.AssignmentExpression({...params, In: true})
-        return this.tokenConsumer.RBracket()
+        this.tokenConsumer.RBracket()
     }
 
     /**
@@ -1015,9 +962,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     IdentifierReference[?Yield, ?Await] Initializer[+In, ?Yield, ?Await]
      */
     @SubhutiRule
-    CoverInitializedName(params: ExpressionParams = {}): SubhutiCst | undefined {
+    CoverInitializedName(params: ExpressionParams = {}) {
         this.IdentifierReference(params)
-        return this.Initializer({...params, In: true})
+        this.Initializer({...params, In: true})
     }
 
     /**
@@ -1025,9 +972,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     = AssignmentExpression[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    Initializer(params: ExpressionParams = {}): SubhutiCst | undefined {
+    Initializer(params: ExpressionParams = {}) {
         this.tokenConsumer.Assign()
-        return this.AssignmentExpression(params)
+        this.AssignmentExpression(params)
     }
 
     // ----------------------------------------
@@ -1040,8 +987,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     SubstitutionTemplate[?Yield, ?Await, ?Tagged]
      */
     @SubhutiRule
-    TemplateLiteral(params: TemplateLiteralParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    TemplateLiteral(params: TemplateLiteralParams = {}) {
+        this.Or([
             // NoSubstitutionTemplate 是词法规则，直接消费 token
             {alt: () => this.tokenConsumer.NoSubstitutionTemplate()},
             {alt: () => this.SubstitutionTemplate(params)}
@@ -1059,11 +1006,11 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     TemplateHead Expression[+In, ?Yield, ?Await] TemplateSpans[?Yield, ?Await, ?Tagged]
      */
     @SubhutiRule
-    SubstitutionTemplate(params: TemplateLiteralParams = {}): SubhutiCst | undefined {
+    SubstitutionTemplate(params: TemplateLiteralParams = {}) {
         // TemplateHead 是词法规则，直接消费 token
         this.tokenConsumer.TemplateHead()
         this.Expression({...params, In: true})
-        return this.TemplateSpans(params)
+        this.TemplateSpans(params)
     }
 
     /**
@@ -1072,8 +1019,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     TemplateMiddleList[?Yield, ?Await, ?Tagged] TemplateTail
      */
     @SubhutiRule
-    TemplateSpans(params: TemplateLiteralParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    TemplateSpans(params: TemplateLiteralParams = {}) {
+        this.Or([
             // TemplateTail 是词法规则，直接消费 token
             {alt: () => this.tokenConsumer.TemplateTail()},
             {
@@ -1092,7 +1039,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     TemplateMiddleList[?Yield, ?Await, ?Tagged] TemplateMiddle Expression[+In, ?Yield, ?Await]
      */
     @SubhutiRule
-    TemplateMiddleList(params: TemplateLiteralParams = {}): SubhutiCst | undefined {
+    TemplateMiddleList(params: TemplateLiteralParams = {}) {
         // TemplateMiddle 是词法规则，直接消费 token
         this.tokenConsumer.TemplateMiddle()
         this.Expression({...params, In: true})
@@ -1103,7 +1050,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.Expression({...params, In: true})
         })
 
-        return this.curCst
+        this.curCst
     }
 
     // ----------------------------------------
@@ -1122,7 +1069,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     MemberExpression[?Yield, ?Await] . PrivateIdentifier
      */
     @SubhutiRule
-    MemberExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    MemberExpression(params: ExpressionParams = {}) {
         // 基础表达式
         this.Or([
             {alt: () => this.PrimaryExpression(params)},
@@ -1168,7 +1115,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             }
         ]))
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1177,8 +1124,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     super . IdentifierName
      */
     @SubhutiRule
-    SuperProperty(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    SuperProperty(params: ExpressionParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.tokenConsumer.Super()
@@ -1203,8 +1150,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ImportMeta
      */
     @SubhutiRule
-    MetaProperty(): SubhutiCst | undefined {
-        return this.Or([
+    MetaProperty() {
+        this.Or([
             {alt: () => this.NewTarget()},
             {alt: () => this.ImportMeta()}
         ])
@@ -1215,10 +1162,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     new . target
      */
     @SubhutiRule
-    NewTarget(): SubhutiCst | undefined {
+    NewTarget() {
         this.tokenConsumer.New()
         this.tokenConsumer.Dot()
-        return this.tokenConsumer.Target()
+        this.tokenConsumer.Target()
     }
 
     /**
@@ -1226,10 +1173,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     import . meta
      */
     @SubhutiRule
-    ImportMeta(): SubhutiCst | undefined {
+    ImportMeta() {
         this.tokenConsumer.Import()
         this.tokenConsumer.Dot()
-        return this.tokenConsumer.Meta()
+        this.tokenConsumer.Meta()
     }
 
     /**
@@ -1238,8 +1185,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     new NewExpression[?Yield, ?Await]
      */
     @SubhutiRule
-    NewExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    NewExpression(params: ExpressionParams = {}) {
+        this.Or([
             {alt: () => this.MemberExpression(params)},
             {
                 alt: () => {
@@ -1266,7 +1213,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     CallExpression[?Yield, ?Await] . PrivateIdentifier
      */
     @SubhutiRule
-    CallExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    CallExpression(params: ExpressionParams = {}) {
         // 基础调用表达式
         this.Or([
             {alt: () => this.CoverCallExpressionAndAsyncArrowHead(params)},
@@ -1305,7 +1252,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             }
         ]))
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1317,9 +1264,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 2. Async 箭头函数头：async (args) => {}
      */
     @SubhutiRule
-    CoverCallExpressionAndAsyncArrowHead(params: ExpressionParams = {}): SubhutiCst | undefined {
+    CoverCallExpressionAndAsyncArrowHead(params: ExpressionParams = {}) {
         this.MemberExpression(params)
-        return this.Arguments(params)
+        this.Arguments(params)
     }
 
     /**
@@ -1335,9 +1282,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 规范中 CallMemberExpression 是 Supplemental Syntax，用于语义分析时精化 Cover Grammar。
      */
     @SubhutiRule
-    CallMemberExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    CallMemberExpression(params: ExpressionParams = {}) {
         this.MemberExpression(params)
-        return this.Arguments(params)
+        this.Arguments(params)
     }
 
     /**
@@ -1345,9 +1292,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     super Arguments[?Yield, ?Await]
      */
     @SubhutiRule
-    SuperCall(params: ExpressionParams = {}): SubhutiCst | undefined {
+    SuperCall(params: ExpressionParams = {}) {
         this.tokenConsumer.Super()
-        return this.Arguments(params)
+        this.Arguments(params)
     }
 
     /**
@@ -1356,8 +1303,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     import ( AssignmentExpression[+In, ?Yield, ?Await] , AssignmentExpression[+In, ?Yield, ?Await] ,_opt )
      */
     @SubhutiRule
-    ImportCall(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ImportCall(params: ExpressionParams = {}) {
+        this.Or([
             // import ( AssignmentExpression[+In, ?Yield, ?Await] , AssignmentExpression[+In, ?Yield, ?Await] ,_opt )
             {
                 alt: () => {
@@ -1390,8 +1337,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ( ArgumentList[?Yield, ?Await] , )
      */
     @SubhutiRule
-    Arguments(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    Arguments(params: ExpressionParams = {}) {
+        this.Or([
             // ( )
             {
                 alt: () => {
@@ -1427,7 +1374,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ArgumentList[?Yield, ?Await] , ... AssignmentExpression[+In, ?Yield, ?Await]
      */
     @SubhutiRule
-    ArgumentList(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ArgumentList(params: ExpressionParams = {}) {
         // 第一个参数
         this.Or([
             {alt: () => this.AssignmentExpression({...params, In: true})},
@@ -1453,7 +1400,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             ])
         })
 
-        return this.curCst
+        this.curCst
     }
 
     // ----------------------------------------
@@ -1472,7 +1419,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * - 如果 MemberExpression 在前，它只会匹配 `fn`，导致 `()` 无法消费
      */
     @SubhutiRule
-    OptionalExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    OptionalExpression(params: ExpressionParams = {}) {
         this.Or([
             {alt: () => this.CallExpression(params)},     // CallExpression 在前，包含 Arguments
             {alt: () => this.MemberExpression(params)}    // MemberExpression 在后
@@ -1482,7 +1429,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
 
         this.Many(() => this.OptionalChain(params))
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1499,7 +1446,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     OptionalChain[?Yield, ?Await] . PrivateIdentifier
      */
     @SubhutiRule
-    OptionalChain(params: ExpressionParams = {}): SubhutiCst | undefined {
+    OptionalChain(params: ExpressionParams = {}) {
         // 第一个 ?. 操作
         this.Or([
             {
@@ -1563,7 +1510,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             }
         ]))
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1593,8 +1540,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 这与规范顺序不一致，但在 PEG 中是必要的。
      */
     @SubhutiRule
-    LeftHandSideExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    LeftHandSideExpression(params: ExpressionParams = {}) {
+        this.Or([
             {alt: () => this.OptionalExpression(params)},  // 第1位 - 最长，包含 OptionalChain
             {alt: () => this.CallExpression(params)},      // 第2位 - 包含 Arguments
             {alt: () => this.NewExpression(params)},       // 第3位 - 最短，仅 MemberExpression
@@ -1614,8 +1561,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     -- UnaryExpression[?Yield, ?Await]
      */
     @SubhutiRule
-    UpdateExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    UpdateExpression(params: ExpressionParams = {}) {
+        this.Or([
             // LeftHandSideExpression[?Yield, ?Await] [no LineTerminator here] ++
             {
                 alt: () => {
@@ -1670,10 +1617,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [+Await] AwaitExpression[?Yield]
      */
     @SubhutiRule
-    UnaryExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    UnaryExpression(params: ExpressionParams = {}) {
         const {Await = false} = params
 
-        return this.Or([
+        this.Or([
             {alt: () => this.UpdateExpression(params)},
             {
                 alt: () => {
@@ -1727,9 +1674,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     await UnaryExpression[?Yield, +Await]
      */
     @SubhutiRule
-    AwaitExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    AwaitExpression(params: ExpressionParams = {}) {
         this.tokenConsumer.Await()
-        return this.UnaryExpression({...params, Await: true})
+        this.UnaryExpression({...params, Await: true})
     }
 
     // ----------------------------------------
@@ -1742,8 +1689,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     UpdateExpression[?Yield, ?Await] ** ExponentiationExpression[?Yield, ?Await]
      */
     @SubhutiRule
-    ExponentiationExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ExponentiationExpression(params: ExpressionParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.UpdateExpression(params)
@@ -1761,7 +1708,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     MultiplicativeExpression[?Yield, ?Await] MultiplicativeOperator ExponentiationExpression[?Yield, ?Await]
      */
     @SubhutiRule
-    MultiplicativeExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    MultiplicativeExpression(params: ExpressionParams = {}) {
         this.ExponentiationExpression(params)
 
         this.Many(() => {
@@ -1769,7 +1716,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.ExponentiationExpression(params)
         })
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1777,8 +1724,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     * / %
      */
     @SubhutiRule
-    MultiplicativeOperator(): SubhutiCst | undefined {
-        return this.Or([
+    MultiplicativeOperator() {
+        this.Or([
             {alt: () => this.tokenConsumer.Asterisk()},
             {alt: () => this.tokenConsumer.Slash()},
             {alt: () => this.tokenConsumer.Modulo()}
@@ -1792,7 +1739,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     AdditiveExpression[?Yield, ?Await] - MultiplicativeExpression[?Yield, ?Await]
      */
     @SubhutiRule
-    AdditiveExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    AdditiveExpression(params: ExpressionParams = {}) {
         this.MultiplicativeExpression(params)
 
         this.Many(() => {
@@ -1803,7 +1750,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.MultiplicativeExpression(params)
         })
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1814,7 +1761,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ShiftExpression[?Yield, ?Await] >>> AdditiveExpression[?Yield, ?Await]
      */
     @SubhutiRule
-    ShiftExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ShiftExpression(params: ExpressionParams = {}) {
         this.AdditiveExpression(params)
 
         this.Many(() => {
@@ -1826,7 +1773,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.AdditiveExpression(params)
         })
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1841,7 +1788,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [+In] PrivateIdentifier in ShiftExpression[?Yield, ?Await]
      */
     @SubhutiRule
-    RelationalExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    RelationalExpression(params: ExpressionParams = {}) {
         const {In = false} = params
 
         // 处理 [+In] PrivateIdentifier in ShiftExpression
@@ -1850,7 +1797,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.PrivateIdentifier()
             this.tokenConsumer.In()
             this.ShiftExpression(params)
-            return this.curCst
+            this.curCst
         }
 
         this.ShiftExpression(params)
@@ -1868,7 +1815,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.ShiftExpression(params)
         })
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1880,7 +1827,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     EqualityExpression[?In, ?Yield, ?Await] !== RelationalExpression[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    EqualityExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    EqualityExpression(params: ExpressionParams = {}) {
         this.RelationalExpression(params)
 
         this.Many(() => {
@@ -1893,7 +1840,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.RelationalExpression(params)
         })
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1902,7 +1849,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BitwiseANDExpression[?In, ?Yield, ?Await] & EqualityExpression[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    BitwiseANDExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    BitwiseANDExpression(params: ExpressionParams = {}) {
         this.EqualityExpression(params)
 
         this.Many(() => {
@@ -1910,7 +1857,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.EqualityExpression(params)
         })
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1919,7 +1866,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BitwiseXORExpression[?In, ?Yield, ?Await] ^ BitwiseANDExpression[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    BitwiseXORExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    BitwiseXORExpression(params: ExpressionParams = {}) {
         this.BitwiseANDExpression(params)
 
         this.Many(() => {
@@ -1927,7 +1874,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.BitwiseANDExpression(params)
         })
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1936,7 +1883,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BitwiseORExpression[?In, ?Yield, ?Await] | BitwiseXORExpression[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    BitwiseORExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    BitwiseORExpression(params: ExpressionParams = {}) {
         this.BitwiseXORExpression(params)
 
         this.Many(() => {
@@ -1944,7 +1891,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.BitwiseXORExpression(params)
         })
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1953,7 +1900,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     LogicalANDExpression[?In, ?Yield, ?Await] && BitwiseORExpression[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    LogicalANDExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    LogicalANDExpression(params: ExpressionParams = {}) {
         this.BitwiseORExpression(params)
 
         this.Many(() => {
@@ -1961,7 +1908,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.BitwiseORExpression(params)
         })
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -1982,7 +1929,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 此规则的功能已被 ShortCircuitExpression + LogicalORExpressionTail 吸收。
      */
     @SubhutiRule
-    LogicalORExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    LogicalORExpression(params: ExpressionParams = {}) {
         throw new Error('LogicalORExpression 在 PEG 实现中已被 ShortCircuitExpression 吸收，不应直接调用')
     }
 
@@ -1993,8 +1940,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 注意：基础表达式已在 ShortCircuitExpression 中解析
      */
     @SubhutiRule
-    LogicalORExpressionTail(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.AtLeastOne(() => {
+    LogicalORExpressionTail(params: ExpressionParams = {}) {
+        this.AtLeastOne(() => {
             this.tokenConsumer.LogicalOr()
             this.LogicalANDExpression(params)
         })
@@ -2010,7 +1957,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 参见 LogicalORExpression 的注释。
      */
     @SubhutiRule
-    CoalesceExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    CoalesceExpression(params: ExpressionParams = {}) {
         throw new Error('CoalesceExpression 在 PEG 实现中已被 ShortCircuitExpression 吸收，不应直接调用')
     }
 
@@ -2021,8 +1968,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 注意：基础表达式已在 ShortCircuitExpression 中解析
      */
     @SubhutiRule
-    CoalesceExpressionTail(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.AtLeastOne(() => {
+    CoalesceExpressionTail(params: ExpressionParams = {}) {
+        this.AtLeastOne(() => {
             this.tokenConsumer.NullishCoalescing()
             this.BitwiseORExpression(params)
         })
@@ -2037,7 +1984,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 此规则用于规范中的左递归表达，在 PEG 实现中已被吸收。
      */
     @SubhutiRule
-    CoalesceExpressionHead(params: ExpressionParams = {}): SubhutiCst | undefined {
+    CoalesceExpressionHead(params: ExpressionParams = {}) {
         throw new Error('CoalesceExpressionHead 在 PEG 实现中已被吸收，不应直接调用')
     }
 
@@ -2058,14 +2005,14 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *   CoalesceExpressionTail → ( ?? BitwiseORExpression )+
      */
     @SubhutiRule
-    ShortCircuitExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ShortCircuitExpression(params: ExpressionParams = {}) {
         // 解析公共基础（LogicalANDExpression 包含 BitwiseORExpression）
         this.LogicalANDExpression(params)
 
         // 根据后续 token 决定走哪条路径（可选）
         this.Option(() => this.ShortCircuitExpressionTail(params))
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -2074,8 +2021,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 根据后续 token（|| 或 ??）决定走 LogicalOR 还是 Coalesce 路径
      */
     @SubhutiRule
-    ShortCircuitExpressionTail(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ShortCircuitExpressionTail(params: ExpressionParams = {}) {
+        this.Or([
             // || 链：LogicalORExpressionTail
             {alt: () => this.LogicalORExpressionTail(params)},
             // ?? 链：CoalesceExpressionTail
@@ -2089,8 +2036,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ShortCircuitExpression[?In, ?Yield, ?Await] ? AssignmentExpression[+In, ?Yield, ?Await] : AssignmentExpression[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    ConditionalExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ConditionalExpression(params: ExpressionParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.ShortCircuitExpression(params)
@@ -2121,10 +2068,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     LeftHandSideExpression[?Yield, ?Await] ??= AssignmentExpression[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    AssignmentExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    AssignmentExpression(params: ExpressionParams = {}) {
         const {Yield = false} = params
 
-        return this.Or([
+        this.Or([
             // ⚠️ 箭头函数必须在 ConditionalExpression 之前！
             // 因为 (a, b) 可以同时匹配括号表达式和箭头函数参数，
             // 只有通过后续的 => 才能区分，所以需要先尝试箭头函数
@@ -2178,8 +2125,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     *= /= %= += -= <<= >>= >>>= &= ^= |= **=
      */
     @SubhutiRule
-    AssignmentOperator(): SubhutiCst | undefined {
-        return this.Or([
+    AssignmentOperator() {
+        this.Or([
             {alt: () => this.tokenConsumer.MultiplyAssign()},
             {alt: () => this.tokenConsumer.DivideAssign()},
             {alt: () => this.tokenConsumer.ModuloAssign()},
@@ -2205,7 +2152,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     Expression[?In, ?Yield, ?Await] , AssignmentExpression[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    Expression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    Expression(params: ExpressionParams = {}) {
         this.AssignmentExpression(params)
 
         this.Many(() => {
@@ -2213,7 +2160,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.AssignmentExpression(params)
         })
 
-        return this.curCst
+        this.curCst
     }
 
     // ============================================
@@ -2242,10 +2189,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     DebuggerStatement
      */
     @SubhutiRule
-    Statement(params: StatementParams = {}): SubhutiCst | undefined {
+    Statement(params: StatementParams = {}) {
         const {Return = false} = params
 
-        return this.Or([
+        this.Or([
             {alt: () => this.BlockStatement(params)},
             {alt: () => this.VariableStatement(params)},
             {alt: () => this.EmptyStatement()},
@@ -2271,8 +2218,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     LexicalDeclaration[+In, ?Yield, ?Await]
      */
     @SubhutiRule
-    Declaration(params: DeclarationParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    Declaration(params: DeclarationParams = {}) {
+        this.Or([
             {alt: () => this.HoistableDeclaration({...params, Default: false})},
             {alt: () => this.ClassDeclaration({...params, Default: false})},
             {alt: () => this.LexicalDeclaration({...params, In: true})}
@@ -2287,8 +2234,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     AsyncGeneratorDeclaration[?Yield, ?Await, ?Default]
      */
     @SubhutiRule
-    HoistableDeclaration(params: DeclarationParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    HoistableDeclaration(params: DeclarationParams = {}) {
+        this.Or([
             {alt: () => this.FunctionDeclaration(params)},
             {alt: () => this.GeneratorDeclaration(params)},
             {alt: () => this.AsyncFunctionDeclaration(params)},
@@ -2302,8 +2249,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     SwitchStatement[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    BreakableStatement(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    BreakableStatement(params: StatementParams = {}) {
+        this.Or([
             {alt: () => this.IterationStatement(params)},
             {alt: () => this.SwitchStatement(params)}
         ])
@@ -2318,8 +2265,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     Block[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    BlockStatement(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Block(params)
+    BlockStatement(params: StatementParams = {}) {
+        this.Block(params)
     }
 
     /**
@@ -2327,10 +2274,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     { StatementList[?Yield, ?Await, ?Return]_opt }
      */
     @SubhutiRule
-    Block(params: StatementParams = {}): SubhutiCst | undefined {
+    Block(params: StatementParams = {}) {
         this.tokenConsumer.LBrace()
         this.Option(() => this.StatementList(params))
-        return this.tokenConsumer.RBrace()
+        this.tokenConsumer.RBrace()
     }
 
     /**
@@ -2339,14 +2286,14 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     StatementList[?Yield, ?Await, ?Return] StatementListItem[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    StatementList(params: StatementParams = {}): SubhutiCst | undefined {
+    StatementList(params: StatementParams = {}) {
         // 根据容错模式选择解析方式
         if (this.errorRecoveryMode) {
             this.ManyWithRecovery(() => this.StatementListItem(params))
         } else {
             this.Many(() => this.StatementListItem(params))
         }
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -2359,8 +2306,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 如果先尝试 Statement，`let { a } = 1` 会被错误解析为表达式语句
      */
     @SubhutiRule
-    StatementListItem(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    StatementListItem(params: StatementParams = {}) {
+        this.Or([
             {alt: () => this.Declaration(params)},
             {alt: () => this.Statement(params)}
         ])
@@ -2375,10 +2322,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     LetOrConst BindingList[?In, ?Yield, ?Await] ;
      */
     @SubhutiRule
-    LexicalDeclaration(params: ExpressionParams = {}): SubhutiCst | undefined {
+    LexicalDeclaration(params: ExpressionParams = {}) {
         this.LetOrConst()
         this.BindingList(params)
-        return this.SemicolonASI()
+        this.SemicolonASI()
     }
 
     /**
@@ -2387,8 +2334,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     const
      */
     @SubhutiRule
-    LetOrConst(): SubhutiCst | undefined {
-        return this.Or([
+    LetOrConst() {
+        this.Or([
             {alt: () => this.tokenConsumer.Let()},
             {alt: () => this.tokenConsumer.Const()}
         ])
@@ -2400,13 +2347,13 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingList[?In, ?Yield, ?Await] , LexicalBinding[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    BindingList(params: ExpressionParams = {}): SubhutiCst | undefined {
+    BindingList(params: ExpressionParams = {}) {
         this.LexicalBinding(params)
         this.Many(() => {
             this.tokenConsumer.Comma()
             this.LexicalBinding(params)
         })
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -2415,8 +2362,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingPattern[?Yield, ?Await] Initializer[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    LexicalBinding(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    LexicalBinding(params: ExpressionParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.BindingIdentifier(params)
@@ -2437,10 +2384,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     var VariableDeclarationList[+In, ?Yield, ?Await] ;
      */
     @SubhutiRule
-    VariableStatement(params: ExpressionParams = {}): SubhutiCst | undefined {
+    VariableStatement(params: ExpressionParams = {}) {
         this.tokenConsumer.Var()
         this.VariableDeclarationList({...params, In: true})
-        return this.SemicolonASI()
+        this.SemicolonASI()
     }
 
     /**
@@ -2449,13 +2396,13 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     VariableDeclarationList[?In, ?Yield, ?Await] , VariableDeclaration[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    VariableDeclarationList(params: ExpressionParams = {}): SubhutiCst | undefined {
+    VariableDeclarationList(params: ExpressionParams = {}) {
         this.VariableDeclaration(params)
         this.Many(() => {
             this.tokenConsumer.Comma()
             this.VariableDeclaration(params)
         })
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -2464,8 +2411,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingPattern[?Yield, ?Await] Initializer[?In, ?Yield, ?Await]
      */
     @SubhutiRule
-    VariableDeclaration(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    VariableDeclaration(params: ExpressionParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.BindingIdentifier(params)
@@ -2491,8 +2438,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ArrayBindingPattern[?Yield, ?Await]
      */
     @SubhutiRule
-    BindingPattern(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    BindingPattern(params: ExpressionParams = {}) {
+        this.Or([
             {alt: () => this.ObjectBindingPattern(params)},
             {alt: () => this.ArrayBindingPattern(params)}
         ])
@@ -2506,8 +2453,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     { BindingPropertyList[?Yield, ?Await] , BindingRestProperty[?Yield, ?Await]_opt }
      */
     @SubhutiRule
-    ObjectBindingPattern(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ObjectBindingPattern(params: ExpressionParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.tokenConsumer.LBrace()
@@ -2547,8 +2494,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [ BindingElementList[?Yield, ?Await] , Elision_opt BindingRestElement[?Yield, ?Await]_opt ]
      */
     @SubhutiRule
-    ArrayBindingPattern(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ArrayBindingPattern(params: ExpressionParams = {}) {
+        this.Or([
             // [ Elision_opt BindingRestElement_opt ] - 空数组或只有 rest
             {
                 alt: () => {
@@ -2585,9 +2532,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ... BindingIdentifier[?Yield, ?Await]
      */
     @SubhutiRule
-    BindingRestProperty(params: ExpressionParams = {}): SubhutiCst | undefined {
+    BindingRestProperty(params: ExpressionParams = {}) {
         this.tokenConsumer.Ellipsis()
-        return this.BindingIdentifier(params)
+        this.BindingIdentifier(params)
     }
 
     /**
@@ -2596,13 +2543,13 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingPropertyList[?Yield, ?Await] , BindingProperty[?Yield, ?Await]
      */
     @SubhutiRule
-    BindingPropertyList(params: ExpressionParams = {}): SubhutiCst | undefined {
+    BindingPropertyList(params: ExpressionParams = {}) {
         this.BindingProperty(params)
         this.Many(() => {
             this.tokenConsumer.Comma()
             this.BindingProperty(params)
         })
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -2611,13 +2558,13 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingElementList[?Yield, ?Await] , BindingElisionElement[?Yield, ?Await]
      */
     @SubhutiRule
-    BindingElementList(params: ExpressionParams = {}): SubhutiCst | undefined {
+    BindingElementList(params: ExpressionParams = {}) {
         this.BindingElisionElement(params)
         this.Many(() => {
             this.tokenConsumer.Comma()
             this.BindingElisionElement(params)
         })
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -2625,9 +2572,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     Elision_opt BindingElement[?Yield, ?Await]
      */
     @SubhutiRule
-    BindingElisionElement(params: ExpressionParams = {}): SubhutiCst | undefined {
+    BindingElisionElement(params: ExpressionParams = {}) {
         this.Option(() => this.Elision())
-        return this.BindingElement(params)
+        this.BindingElement(params)
     }
 
     /**
@@ -2636,8 +2583,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     PropertyName[?Yield, ?Await] : BindingElement[?Yield, ?Await]
      */
     @SubhutiRule
-    BindingProperty(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    BindingProperty(params: ExpressionParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.PropertyName(params)
@@ -2655,8 +2602,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingPattern[?Yield, ?Await] Initializer[+In, ?Yield, ?Await]_opt
      */
     @SubhutiRule
-    BindingElement(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    BindingElement(params: ExpressionParams = {}) {
+        this.Or([
             {alt: () => this.SingleNameBinding(params)},
             {
                 alt: () => {
@@ -2672,10 +2619,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingIdentifier[?Yield, ?Await] Initializer[+In, ?Yield, ?Await]_opt
      */
     @SubhutiRule
-    SingleNameBinding(params: ExpressionParams = {}): SubhutiCst | undefined {
+    SingleNameBinding(params: ExpressionParams = {}) {
         this.BindingIdentifier(params)
         this.Option(() => this.Initializer({...params, In: true}))
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -2684,8 +2631,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ... BindingPattern[?Yield, ?Await]
      */
     @SubhutiRule
-    BindingRestElement(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    BindingRestElement(params: ExpressionParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.tokenConsumer.Ellipsis()
@@ -2721,11 +2668,11 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * - 如果不满足 ASI 条件，则失败
      */
     @SubhutiRule
-    SemicolonASI(): SubhutiCst | undefined {
+    SemicolonASI() {
         // 检查当前 token 是否是分号
         if (this.match(SlimeJavascriptTokenType.Semicolon)) {
             this.tokenConsumer.Semicolon()
-            return this.curCst
+            this.curCst
         }
 
         // 没有显式分号，检查是否满足 ASI 条件
@@ -2733,11 +2680,11 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
 
         if (!canInsertSemicolon) {
             // 不满足 ASI 条件，标记失败
-            return this.setParseFail()
+            this.setParseFail()
         }
 
         // 满足 ASI 条件，返回成功
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -2776,8 +2723,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ;
      */
     @SubhutiRule
-    EmptyStatement(): SubhutiCst | undefined {
-        return this.tokenConsumer.Semicolon()
+    EmptyStatement() {
+        this.tokenConsumer.Semicolon()
     }
 
     /**
@@ -2786,14 +2733,14 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     Expression[+In, ?Yield, ?Await] ;
      */
     @SubhutiRule
-    ExpressionStatement(params: StatementParams = {}): SubhutiCst | undefined {
+    ExpressionStatement(params: StatementParams = {}) {
         // [lookahead ∉ {{, function, async [no LineTerminator here] function, class, let [}]
         this.assertLookaheadNotIn([SlimeJavascriptTokenType.LBrace, SlimeJavascriptTokenType.Function, SlimeJavascriptTokenType.Class])
         this.assertNotContextualSequenceNoLT(SlimeJavascriptContextualKeywordTokenTypes.Async, SlimeJavascriptTokenType.Function)
         this.assertNotContextualSequence(SlimeJavascriptContextualKeywordTokenTypes.Let, SlimeJavascriptTokenType.LBracket)
 
         this.Expression({...params, In: true})
-        return this.SemicolonASI()
+        this.SemicolonASI()
     }
 
     // ----------------------------------------
@@ -2812,8 +2759,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     if ( Expression ) FunctionDeclaration [lookahead ≠ else]
      */
     @SubhutiRule
-    IfStatement(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    IfStatement(params: StatementParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.tokenConsumer.If()
@@ -2857,8 +2804,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 参考：ECMAScript 2025 Annex B.3.4 FunctionDeclarations in IfStatement Statement Clauses
      */
     @SubhutiRule
-    IfStatementBody(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    IfStatementBody(params: StatementParams = {}) {
+        this.Or([
             {alt: () => this.Statement(params)},
             // Annex B.3.4: 非严格模式下允许 FunctionDeclaration
             {alt: () => this.FunctionDeclaration({...params, Default: false})}
@@ -2877,8 +2824,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ForInOfStatement[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    IterationStatement(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    IterationStatement(params: StatementParams = {}) {
+        this.Or([
             {alt: () => this.DoWhileStatement(params)},
             {alt: () => this.WhileStatement(params)},
             {alt: () => this.ForStatement(params)},
@@ -2896,7 +2843,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 因此 do-while 语句末尾的分号支持 ASI，即使下一个 token 不满足通常的 ASI 条件
      */
     @SubhutiRule
-    DoWhileStatement(params: StatementParams = {}): SubhutiCst | undefined {
+    DoWhileStatement(params: StatementParams = {}) {
         this.tokenConsumer.Do()
         this.Statement(params)
         this.tokenConsumer.While()
@@ -2906,7 +2853,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         // do-while 语句的分号是特殊的 ASI 场景：总是可以省略
         // 如果有分号则消费，否则直接继续
         this.Option(() => this.tokenConsumer.Semicolon())
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -2914,12 +2861,12 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     while ( Expression[+In, ?Yield, ?Await] ) Statement[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    WhileStatement(params: StatementParams = {}): SubhutiCst | undefined {
+    WhileStatement(params: StatementParams = {}) {
         this.tokenConsumer.While()
         this.tokenConsumer.LParen()
         this.Expression({...params, In: true})
         this.tokenConsumer.RParen()
-        return this.Statement(params)
+        this.Statement(params)
     }
 
     /**
@@ -2929,8 +2876,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     for ( LexicalDeclaration[~In, ?Yield, ?Await] Expression[+In, ?Yield, ?Await]_opt ; Expression[+In, ?Yield, ?Await]_opt ) Statement[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    ForStatement(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ForStatement(params: StatementParams = {}) {
+        this.Or([
             // for ( var VariableDeclarationList[~In, ?Yield, ?Await] ; Expression[+In, ?Yield, ?Await]_opt ; Expression[+In, ?Yield, ?Await]_opt ) Statement[?Yield, ?Await, ?Return]
             {
                 alt: () => {
@@ -2994,10 +2941,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     for ( var BindingIdentifier[?Yield, ?Await] Initializer[~In, ?Yield, ?Await] in Expression[+In, ?Yield, ?Await] ) Statement[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    ForInOfStatement(params: StatementParams = {}): SubhutiCst | undefined {
+    ForInOfStatement(params: StatementParams = {}) {
         const {Await = false} = params
 
-        return this.Or([
+        this.Or([
             // B.3.5: for ( var BindingIdentifier Initializer in Expression ) Statement
             // ⚠️ Annex B 扩展：仅非严格模式，允许 for-in 变量声明中包含初始化器
             // 例如：for (var a = 1 in obj) { ... }
@@ -3143,9 +3090,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     LetOrConst ForBinding[?Yield, ?Await]
      */
     @SubhutiRule
-    ForDeclaration(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ForDeclaration(params: ExpressionParams = {}) {
         this.LetOrConst()
-        return this.ForBinding(params)
+        this.ForBinding(params)
     }
 
     /**
@@ -3154,8 +3101,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingPattern[?Yield, ?Await]
      */
     @SubhutiRule
-    ForBinding(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ForBinding(params: ExpressionParams = {}) {
+        this.Or([
             {alt: () => this.BindingIdentifier(params)},
             {alt: () => this.BindingPattern(params)}
         ])
@@ -3171,8 +3118,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     continue [no LineTerminator here] LabelIdentifier[?Yield, ?Await] ;
      */
     @SubhutiRule
-    ContinueStatement(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ContinueStatement(params: StatementParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.tokenConsumer.Continue()
@@ -3196,8 +3143,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     break [no LineTerminator here] LabelIdentifier[?Yield, ?Await] ;
      */
     @SubhutiRule
-    BreakStatement(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    BreakStatement(params: StatementParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.tokenConsumer.Break()
@@ -3221,8 +3168,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     return [no LineTerminator here] Expression[+In, ?Yield, ?Await] ;
      */
     @SubhutiRule
-    ReturnStatement(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ReturnStatement(params: StatementParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.tokenConsumer.Return()
@@ -3249,12 +3196,12 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     with ( Expression[+In, ?Yield, ?Await] ) Statement[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    WithStatement(params: StatementParams = {}): SubhutiCst | undefined {
+    WithStatement(params: StatementParams = {}) {
         this.tokenConsumer.With()
         this.tokenConsumer.LParen()
         this.Expression({...params, In: true})
         this.tokenConsumer.RParen()
-        return this.Statement(params)
+        this.Statement(params)
     }
 
     // ----------------------------------------
@@ -3266,12 +3213,12 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     switch ( Expression[+In, ?Yield, ?Await] ) CaseBlock[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    SwitchStatement(params: StatementParams = {}): SubhutiCst | undefined {
+    SwitchStatement(params: StatementParams = {}) {
         this.tokenConsumer.Switch()
         this.tokenConsumer.LParen()
         this.Expression({...params, In: true})
         this.tokenConsumer.RParen()
-        return this.CaseBlock(params)
+        this.CaseBlock(params)
     }
 
     /**
@@ -3280,8 +3227,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     { CaseClauses[?Yield, ?Await, ?Return]_opt DefaultClause[?Yield, ?Await, ?Return] CaseClauses[?Yield, ?Await, ?Return]_opt }
      */
     @SubhutiRule
-    CaseBlock(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    CaseBlock(params: StatementParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.tokenConsumer.LBrace()
@@ -3307,9 +3254,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     CaseClauses[?Yield, ?Await, ?Return] CaseClause[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    CaseClauses(params: StatementParams = {}): SubhutiCst | undefined {
+    CaseClauses(params: StatementParams = {}) {
         this.AtLeastOne(() => this.CaseClause(params))
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -3317,12 +3264,12 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     case Expression[+In, ?Yield, ?Await] : StatementList[?Yield, ?Await, ?Return]_opt
      */
     @SubhutiRule
-    CaseClause(params: StatementParams = {}): SubhutiCst | undefined {
+    CaseClause(params: StatementParams = {}) {
         this.tokenConsumer.Case()
         this.Expression({...params, In: true})
         this.tokenConsumer.Colon()
         this.Option(() => this.StatementList(params))
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -3330,11 +3277,11 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     default : StatementList[?Yield, ?Await, ?Return]_opt
      */
     @SubhutiRule
-    DefaultClause(params: StatementParams = {}): SubhutiCst | undefined {
+    DefaultClause(params: StatementParams = {}) {
         this.tokenConsumer.Default()
         this.tokenConsumer.Colon()
         this.Option(() => this.StatementList(params))
-        return this.curCst
+        this.curCst
     }
 
     // ----------------------------------------
@@ -3346,10 +3293,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     LabelIdentifier[?Yield, ?Await] : LabelledItem[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    LabelledStatement(params: StatementParams = {}): SubhutiCst | undefined {
+    LabelledStatement(params: StatementParams = {}) {
         this.LabelIdentifier(params)
         this.tokenConsumer.Colon()
-        return this.LabelledItem(params)
+        this.LabelledItem(params)
     }
 
     /**
@@ -3358,8 +3305,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     FunctionDeclaration[?Yield, ?Await, ~Default]
      */
     @SubhutiRule
-    LabelledItem(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    LabelledItem(params: StatementParams = {}) {
+        this.Or([
             {alt: () => this.Statement(params)},
             {alt: () => this.FunctionDeclaration({...params, Default: false})}
         ])
@@ -3374,11 +3321,11 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     throw [no LineTerminator here] Expression[+In, ?Yield, ?Await] ;
      */
     @SubhutiRule
-    ThrowStatement(params: StatementParams = {}): SubhutiCst | undefined {
+    ThrowStatement(params: StatementParams = {}) {
         this.tokenConsumer.Throw()
         this.assertNoLineBreak()  // [no LineTerminator here]
         this.Expression({...params, In: true})
-        return this.SemicolonASI()
+        this.SemicolonASI()
     }
 
     // ----------------------------------------
@@ -3392,8 +3339,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     try Block[?Yield, ?Await, ?Return] Catch[?Yield, ?Await, ?Return] Finally[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    TryStatement(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    TryStatement(params: StatementParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.tokenConsumer.Try()
@@ -3425,8 +3372,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     catch Block[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    Catch(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    Catch(params: StatementParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.tokenConsumer.Catch()
@@ -3450,9 +3397,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     finally Block[?Yield, ?Await, ?Return]
      */
     @SubhutiRule
-    Finally(params: StatementParams = {}): SubhutiCst | undefined {
+    Finally(params: StatementParams = {}) {
         this.tokenConsumer.Finally()
-        return this.Block(params)
+        this.Block(params)
     }
 
     /**
@@ -3461,8 +3408,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingPattern[?Yield, ?Await]
      */
     @SubhutiRule
-    CatchParameter(params: StatementParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    CatchParameter(params: StatementParams = {}) {
+        this.Or([
             {alt: () => this.BindingIdentifier(params)},
             {alt: () => this.BindingPattern(params)}
         ])
@@ -3477,9 +3424,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     debugger ;
      */
     @SubhutiRule
-    DebuggerStatement(): SubhutiCst | undefined {
+    DebuggerStatement() {
         this.tokenConsumer.Debugger()
-        return this.SemicolonASI()
+        this.SemicolonASI()
     }
 
     // ============================================
@@ -3493,8 +3440,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     yield [no LineTerminator here] * AssignmentExpression[?In, +Yield, ?Await]
      */
     @SubhutiRule
-    YieldExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    YieldExpression(params: ExpressionParams = {}) {
+        this.Or([
             // yield [no LineTerminator here] * AssignmentExpression[?In, +Yield, ?Await]
             {
                 alt: () => {
@@ -3522,12 +3469,12 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ArrowParameters[?Yield, ?Await] [no LineTerminator here] => ConciseBody[?In]
      */
     @SubhutiRule
-    ArrowFunction(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ArrowFunction(params: ExpressionParams = {}) {
         this.ArrowParameters(params)
         this.assertNoLineBreak()  // [no LineTerminator here]
         this.tokenConsumer.Arrow()
         this.ConciseBody(params)
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -3536,8 +3483,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     CoverParenthesizedExpressionAndArrowParameterList[?Yield, ?Await]
      */
     @SubhutiRule
-    ArrowParameters(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ArrowParameters(params: ExpressionParams = {}) {
+        this.Or([
             {alt: () => this.BindingIdentifier(params)},
             {alt: () => this.CoverParenthesizedExpressionAndArrowParameterList(params)}
         ])
@@ -3554,10 +3501,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 注意：此方法是 Cover Grammar 的精化版本，与规范完全对应。
      */
     @SubhutiRule
-    ArrowFormalParameters(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ArrowFormalParameters(params: ExpressionParams = {}) {
         this.tokenConsumer.LParen()
         this.UniqueFormalParameters(params)
-        return this.tokenConsumer.RParen()
+        this.tokenConsumer.RParen()
     }
 
     /**
@@ -3566,8 +3513,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     { FunctionBody[~Yield, ~Await] }
      */
     @SubhutiRule
-    ConciseBody(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ConciseBody(params: ExpressionParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.tokenConsumer.LBrace()
@@ -3590,8 +3537,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     AssignmentExpression[?In, ~Yield, ?Await]
      */
     @SubhutiRule
-    ExpressionBody(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.AssignmentExpression({...params, Yield: false})
+    ExpressionBody(params: ExpressionParams = {}) {
+        this.AssignmentExpression({...params, Yield: false})
     }
 
     /**
@@ -3600,8 +3547,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     CoverCallExpressionAndAsyncArrowHead[?Yield, ?Await] [no LineTerminator here] => AsyncConciseBody[?In]
      */
     @SubhutiRule
-    AsyncArrowFunction(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    AsyncArrowFunction(params: ExpressionParams = {}) {
+        this.Or([
             // async [no LineTerminator here] AsyncArrowBindingIdentifier[?Yield] [no LineTerminator here] => AsyncConciseBody[?In]
             {
                 alt: () => {
@@ -3630,8 +3577,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingIdentifier[?Yield, +Await]
      */
     @SubhutiRule
-    AsyncArrowBindingIdentifier(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.BindingIdentifier({...params, Await: true})
+    AsyncArrowBindingIdentifier(params: ExpressionParams = {}) {
+        this.BindingIdentifier({...params, Await: true})
     }
 
     /**
@@ -3640,8 +3587,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     { AsyncFunctionBody }
      */
     @SubhutiRule
-    AsyncConciseBody(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    AsyncConciseBody(params: ExpressionParams = {}) {
+        this.Or([
             {
                 alt: () => {
                     this.tokenConsumer.LBrace()
@@ -3670,11 +3617,11 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 注意：此方法是 Cover Grammar 的精化版本，与规范完全对应。
      */
     @SubhutiRule
-    AsyncArrowHead(): SubhutiCst | undefined {
+    AsyncArrowHead() {
         this.tokenConsumer.Async()
         this.assertNoLineBreak()  // [no LineTerminator here]
         this.ArrowFormalParameters({Yield: false, Await: true})
-        return this.curCst
+        this.curCst
     }
 
     // ============================================
@@ -3686,8 +3633,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     FormalParameters[?Yield, ?Await]
      */
     @SubhutiRule
-    UniqueFormalParameters(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.FormalParameters(params)
+    UniqueFormalParameters(params: ExpressionParams = {}) {
+        this.FormalParameters(params)
     }
 
     /**
@@ -3699,8 +3646,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     FormalParameterList[?Yield, ?Await] , FunctionRestParameter[?Yield, ?Await]
      */
     @SubhutiRule
-    FormalParameters(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    FormalParameters(params: ExpressionParams = {}) {
+        this.Or([
             // FormalParameterList[?Yield, ?Await] , FunctionRestParameter[?Yield, ?Await]
             {
                 alt: () => {
@@ -3731,13 +3678,13 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     FormalParameterList[?Yield, ?Await] , FormalParameter[?Yield, ?Await]
      */
     @SubhutiRule
-    FormalParameterList(params: ExpressionParams = {}): SubhutiCst | undefined {
+    FormalParameterList(params: ExpressionParams = {}) {
         this.FormalParameter(params)
         this.Many(() => {
             this.tokenConsumer.Comma()
             this.FormalParameter(params)
         })
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -3745,8 +3692,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingRestElement[?Yield, ?Await]
      */
     @SubhutiRule
-    FunctionRestParameter(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.BindingRestElement(params)
+    FunctionRestParameter(params: ExpressionParams = {}) {
+        this.BindingRestElement(params)
     }
 
     /**
@@ -3754,8 +3701,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingElement[?Yield, ?Await]
      */
     @SubhutiRule
-    FormalParameter(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.BindingElement(params)
+    FormalParameter(params: ExpressionParams = {}) {
+        this.BindingElement(params)
     }
 
     // ============================================
@@ -3767,8 +3714,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     FunctionStatementList[?Yield, ?Await]
      */
     @SubhutiRule
-    FunctionBody(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.FunctionStatementList(params)
+    FunctionBody(params: ExpressionParams = {}) {
+        this.FunctionStatementList(params)
     }
 
     /**
@@ -3776,7 +3723,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     StatementList[?Yield, ?Await, +Return]_opt
      */
     @SubhutiRule
-    FunctionStatementList(params: ExpressionParams = {}): SubhutiCst | undefined {
+    FunctionStatementList(params: ExpressionParams = {}) {
         // 注意：必须显式构造参数对象，确保 Return: true 被正确传递
         const statementParams: StatementParams = {
             Yield: params.Yield,
@@ -3784,7 +3731,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             Return: true  // FunctionStatementList 总是设置 Return: true
         }
         this.Option(() => this.StatementList(statementParams))
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -3792,7 +3739,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     function BindingIdentifier[~Yield, ~Await]_opt ( FormalParameters[~Yield, ~Await] ) { FunctionBody[~Yield, ~Await] }
      */
     @SubhutiRule
-    FunctionExpression(): SubhutiCst | undefined {
+    FunctionExpression() {
         this.tokenConsumer.Function()
         this.Option(() => this.BindingIdentifier({Yield: false, Await: false}))
         this.tokenConsumer.LParen()
@@ -3800,7 +3747,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.RParen()
         this.tokenConsumer.LBrace()
         this.FunctionBody({Yield: false, Await: false})
-        return this.tokenConsumer.RBrace()
+        this.tokenConsumer.RBrace()
     }
 
     /**
@@ -3809,10 +3756,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [+Default] function ( FormalParameters[~Yield, ~Await] ) { FunctionBody[~Yield, ~Await] }
      */
     @SubhutiRule
-    FunctionDeclaration(params: DeclarationParams = {}): SubhutiCst | undefined {
+    FunctionDeclaration(params: DeclarationParams = {}) {
         const {Default = false} = params
 
-        return this.Or([
+        this.Or([
             // function BindingIdentifier[?Yield, ?Await] ( FormalParameters[~Yield, ~Await] ) { FunctionBody[~Yield, ~Await] }
             {
                 alt: () => {
@@ -3851,10 +3798,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [+Default] function * ( FormalParameters[+Yield, ~Await] ) { GeneratorBody }
      */
     @SubhutiRule
-    GeneratorDeclaration(params: DeclarationParams = {}): SubhutiCst | undefined {
+    GeneratorDeclaration(params: DeclarationParams = {}) {
         const {Default = false} = params
 
-        return this.Or([
+        this.Or([
             // function * BindingIdentifier[?Yield, ?Await] ( FormalParameters[+Yield, ~Await] ) { GeneratorBody }
             {
                 alt: () => {
@@ -3890,7 +3837,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     function * BindingIdentifier[+Yield, ~Await]_opt ( FormalParameters[+Yield, ~Await] ) { GeneratorBody }
      */
     @SubhutiRule
-    GeneratorExpression(): SubhutiCst | undefined {
+    GeneratorExpression() {
         this.tokenConsumer.Function()
         this.tokenConsumer.Asterisk()
         this.Option(() => this.BindingIdentifier({Yield: true, Await: false}))
@@ -3899,7 +3846,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.RParen()
         this.tokenConsumer.LBrace()
         this.GeneratorBody()
-        return this.tokenConsumer.RBrace()
+        this.tokenConsumer.RBrace()
     }
 
     /**
@@ -3907,7 +3854,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     * ClassElementName[?Yield, ?Await] ( UniqueFormalParameters[+Yield, ~Await] ) { GeneratorBody }
      */
     @SubhutiRule
-    GeneratorMethod(params: ExpressionParams = {}): SubhutiCst | undefined {
+    GeneratorMethod(params: ExpressionParams = {}) {
         this.tokenConsumer.Asterisk()
         this.ClassElementName(params)
         this.tokenConsumer.LParen()
@@ -3915,7 +3862,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.RParen()
         this.tokenConsumer.LBrace()
         this.GeneratorBody()
-        return this.tokenConsumer.RBrace()
+        this.tokenConsumer.RBrace()
     }
 
     /**
@@ -3923,8 +3870,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     FunctionBody[+Yield, ~Await]
      */
     @SubhutiRule
-    GeneratorBody(): SubhutiCst | undefined {
-        return this.FunctionBody({Yield: true, Await: false})
+    GeneratorBody() {
+        this.FunctionBody({Yield: true, Await: false})
     }
 
     // ============================================
@@ -3937,10 +3884,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [+Default] async [no LineTerminator here] function ( FormalParameters[~Yield, +Await] ) { AsyncFunctionBody }
      */
     @SubhutiRule
-    AsyncFunctionDeclaration(params: DeclarationParams = {}): SubhutiCst | undefined {
+    AsyncFunctionDeclaration(params: DeclarationParams = {}) {
         const {Default = false} = params
 
-        return this.Or([
+        this.Or([
             // async [no LineTerminator here] function BindingIdentifier[?Yield, ?Await] ( FormalParameters[~Yield, +Await] ) { AsyncFunctionBody }
             {
                 alt: () => {
@@ -3978,7 +3925,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     async [no LineTerminator here] function BindingIdentifier[~Yield, +Await]_opt ( FormalParameters[~Yield, +Await] ) { AsyncFunctionBody }
      */
     @SubhutiRule
-    AsyncFunctionExpression(): SubhutiCst | undefined {
+    AsyncFunctionExpression() {
         this.tokenConsumer.Async()
         this.assertNoLineBreak()  // [no LineTerminator here]
         this.tokenConsumer.Function()
@@ -3989,7 +3936,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.LBrace()
         this.AsyncFunctionBody()
         this.tokenConsumer.RBrace()
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -3997,7 +3944,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     async [no LineTerminator here] ClassElementName[?Yield, ?Await] ( UniqueFormalParameters[~Yield, +Await] ) { AsyncFunctionBody }
      */
     @SubhutiRule
-    AsyncMethod(params: ExpressionParams = {}): SubhutiCst | undefined {
+    AsyncMethod(params: ExpressionParams = {}) {
         this.tokenConsumer.Async()
         this.assertNoLineBreak()  // [no LineTerminator here]
         this.ClassElementName(params)
@@ -4007,7 +3954,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.LBrace()
         this.AsyncFunctionBody()
         this.tokenConsumer.RBrace()
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -4015,8 +3962,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     FunctionBody[~Yield, +Await]
      */
     @SubhutiRule
-    AsyncFunctionBody(): SubhutiCst | undefined {
-        return this.FunctionBody({Yield: false, Await: true})
+    AsyncFunctionBody() {
+        this.FunctionBody({Yield: false, Await: true})
     }
 
     // ============================================
@@ -4029,10 +3976,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [+Default] async [no LineTerminator here] function * ( FormalParameters[+Yield, +Await] ) { AsyncGeneratorBody }
      */
     @SubhutiRule
-    AsyncGeneratorDeclaration(params: DeclarationParams = {}): SubhutiCst | undefined {
+    AsyncGeneratorDeclaration(params: DeclarationParams = {}) {
         const {Default = false} = params
 
-        return this.Or([
+        this.Or([
             // async [no LineTerminator here] function * BindingIdentifier[?Yield, ?Await] ( FormalParameters[+Yield, +Await] ) { AsyncGeneratorBody }
             {
                 alt: () => {
@@ -4072,7 +4019,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     async [no LineTerminator here] function * BindingIdentifier[+Yield, +Await]_opt ( FormalParameters[+Yield, +Await] ) { AsyncGeneratorBody }
      */
     @SubhutiRule
-    AsyncGeneratorExpression(): SubhutiCst | undefined {
+    AsyncGeneratorExpression() {
         this.tokenConsumer.Async()
         this.assertNoLineBreak()  // [no LineTerminator here]
         this.tokenConsumer.Function()
@@ -4084,7 +4031,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.LBrace()
         this.AsyncGeneratorBody()
         this.tokenConsumer.RBrace()
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -4092,7 +4039,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     async [no LineTerminator here] * ClassElementName[?Yield, ?Await] ( UniqueFormalParameters[+Yield, +Await] ) { AsyncGeneratorBody }
      */
     @SubhutiRule
-    AsyncGeneratorMethod(params: ExpressionParams = {}): SubhutiCst | undefined {
+    AsyncGeneratorMethod(params: ExpressionParams = {}) {
         this.tokenConsumer.Async()
         this.assertNoLineBreak()  // [no LineTerminator here]
         this.tokenConsumer.Asterisk()
@@ -4103,7 +4050,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.LBrace()
         this.AsyncGeneratorBody()
         this.tokenConsumer.RBrace()
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -4111,8 +4058,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     FunctionBody[+Yield, +Await]
      */
     @SubhutiRule
-    AsyncGeneratorBody(): SubhutiCst | undefined {
-        return this.FunctionBody({Yield: true, Await: true})
+    AsyncGeneratorBody() {
+        this.FunctionBody({Yield: true, Await: true})
     }
 
     // ============================================
@@ -4129,8 +4076,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     set ClassElementName[?Yield, ?Await] ( PropertySetParameterList ) { FunctionBody[~Yield, ~Await] }
      */
     @SubhutiRule
-    MethodDefinition(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    MethodDefinition(params: ExpressionParams = {}) {
+        this.Or([
             // GeneratorMethod[?Yield, ?Await]
             {alt: () => this.GeneratorMethod(params)},
             // AsyncGeneratorMethod[?Yield, ?Await]
@@ -4188,10 +4135,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 例如：set foo(a,) {} 是被接受的。
      */
     @SubhutiRule
-    PropertySetParameterList(): SubhutiCst | undefined {
+    PropertySetParameterList() {
         this.FormalParameter({Yield: false, Await: false})
         this.Option(() => this.tokenConsumer.Comma())  // 可选尾随逗号（引擎扩展）
-        return this.curCst
+        this.curCst
     }
 
     // ============================================
@@ -4204,10 +4151,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [+Default] class ClassTail[?Yield, ?Await]
      */
     @SubhutiRule
-    ClassDeclaration(params: DeclarationParams = {}): SubhutiCst | undefined {
+    ClassDeclaration(params: DeclarationParams = {}) {
         const {Default = false} = params
 
-        return this.Or([
+        this.Or([
             // class BindingIdentifier[?Yield, ?Await] ClassTail[?Yield, ?Await]
             {
                 alt: () => {
@@ -4231,10 +4178,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     class BindingIdentifier[?Yield, ?Await]_opt ClassTail[?Yield, ?Await]
      */
     @SubhutiRule
-    ClassExpression(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ClassExpression(params: ExpressionParams = {}) {
         this.tokenConsumer.Class()
         this.Option(() => this.BindingIdentifier(params))
-        return this.ClassTail(params)
+        this.ClassTail(params)
     }
 
     /**
@@ -4242,11 +4189,11 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ClassHeritage[?Yield, ?Await]_opt { ClassBody[?Yield, ?Await]_opt }
      */
     @SubhutiRule
-    ClassTail(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ClassTail(params: ExpressionParams = {}) {
         this.Option(() => this.ClassHeritage(params))
         this.tokenConsumer.LBrace()
         this.Option(() => this.ClassBody(params))
-        return this.tokenConsumer.RBrace()
+        this.tokenConsumer.RBrace()
     }
 
     /**
@@ -4254,9 +4201,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     extends LeftHandSideExpression[?Yield, ?Await]
      */
     @SubhutiRule
-    ClassHeritage(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ClassHeritage(params: ExpressionParams = {}) {
         this.tokenConsumer.Extends()
-        return this.LeftHandSideExpression(params)
+        this.LeftHandSideExpression(params)
     }
 
     /**
@@ -4264,8 +4211,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ClassElementList[?Yield, ?Await]
      */
     @SubhutiRule
-    ClassBody(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.ClassElementList(params)
+    ClassBody(params: ExpressionParams = {}) {
+        this.ClassElementList(params)
     }
 
     /**
@@ -4274,9 +4221,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ClassElementList[?Yield, ?Await] ClassElement[?Yield, ?Await]
      */
     @SubhutiRule
-    ClassElementList(params: ExpressionParams = {}): SubhutiCst | undefined {
+    ClassElementList(params: ExpressionParams = {}) {
         this.AtLeastOne(() => this.ClassElement(params))
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -4293,8 +4240,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 会把 get/set 匹配为字段名，导致 "get\na" 被解析为两个字段而不是一个 getter。
      */
     @SubhutiRule
-    ClassElement(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ClassElement(params: ExpressionParams = {}) {
+        this.Or([
             // MethodDefinition[?Yield, ?Await]
             {alt: () => this.MethodDefinition(params)},
             // static MethodDefinition[?Yield, ?Await]
@@ -4340,11 +4287,11 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 因为计算属性名在类声明时求值，此时外部的 await 上下文是有效的。
      */
     @SubhutiRule
-    FieldDefinition(params: ExpressionParams = {}): SubhutiCst | undefined {
+    FieldDefinition(params: ExpressionParams = {}) {
         this.ClassElementName(params)
         // Initializer 中的 await/yield 不能作为表达式使用，只能作为标识符
         this.Option(() => this.Initializer({...params, In: true, Yield: false, Await: false}))
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -4355,8 +4302,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 注意：PrivateIdentifier 是词法规则（A.1 Lexical Grammar），直接消费 token
      */
     @SubhutiRule
-    ClassElementName(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ClassElementName(params: ExpressionParams = {}) {
+        this.Or([
             {alt: () => this.PropertyName(params)},
             // PrivateIdentifier 是词法规则，直接消费 token
             {alt: () => this.tokenConsumer.PrivateIdentifier()}
@@ -4368,11 +4315,11 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     static { ClassStaticBlockBody }
      */
     @SubhutiRule
-    ClassStaticBlock(): SubhutiCst | undefined {
+    ClassStaticBlock() {
         this.tokenConsumer.Static()
         this.tokenConsumer.LBrace()
         this.ClassStaticBlockBody()
-        return this.tokenConsumer.RBrace()
+        this.tokenConsumer.RBrace()
     }
 
     /**
@@ -4380,8 +4327,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ClassStaticBlockStatementList
      */
     @SubhutiRule
-    ClassStaticBlockBody(): SubhutiCst | undefined {
-        return this.ClassStaticBlockStatementList()
+    ClassStaticBlockBody() {
+        this.ClassStaticBlockStatementList()
     }
 
     /**
@@ -4389,9 +4336,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     StatementList[~Yield, +Await, ~Return]_opt
      */
     @SubhutiRule
-    ClassStaticBlockStatementList(): SubhutiCst | undefined {
+    ClassStaticBlockStatementList() {
         this.Option(() => this.StatementList({Yield: false, Await: true, Return: false}))
-        return this.curCst
+        this.curCst
     }
 
     // ============================================
@@ -4426,12 +4373,12 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ScriptBody_opt
      */
     @SubhutiRule
-    Script(): SubhutiCst | undefined {
+    Script() {
         // Hashbang 注释只能出现在文件开头
         this.Option(() => this.tokenConsumer.HashbangComment())
         // ScriptBody_opt
         this.Option(() => this.ScriptBody())
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -4439,8 +4386,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     StatementList[~Yield, ~Await, ~Return]
      */
     @SubhutiRule
-    ScriptBody(): SubhutiCst | undefined {
-        return this.StatementList({Yield: false, Await: false, Return: false})
+    ScriptBody() {
+        this.StatementList({Yield: false, Await: false, Return: false})
     }
 
     /**
@@ -4448,12 +4395,12 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ModuleBody_opt
      */
     @SubhutiRule
-    Module(): SubhutiCst | undefined {
+    Module() {
         // Hashbang 注释只能出现在文件开头
         this.Option(() => this.tokenConsumer.HashbangComment())
         // ModuleBody_opt
         this.Option(() => this.ModuleBody())
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -4461,8 +4408,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ModuleItemList
      */
     @SubhutiRule
-    ModuleBody(): SubhutiCst | undefined {
-        return this.ModuleItemList()
+    ModuleBody() {
+        this.ModuleItemList()
     }
 
     /**
@@ -4471,14 +4418,14 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ModuleItemList ModuleItem
      */
     @SubhutiRule
-    ModuleItemList(): SubhutiCst | undefined {
+    ModuleItemList() {
         // 根据容错模式选择解析方式
         if (this.errorRecoveryMode) {
             this.ManyWithRecovery(() => this.ModuleItem())
         } else {
             this.Many(() => this.ModuleItem())
         }
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -4488,8 +4435,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     StatementListItem[~Yield, +Await, ~Return]
      */
     @SubhutiRule
-    ModuleItem(): SubhutiCst | undefined {
-        return this.Or([
+    ModuleItem() {
+        this.Or([
             {alt: () => this.ImportDeclaration()},
             {alt: () => this.ExportDeclaration()},
             {alt: () => this.StatementListItem({Yield: false, Await: true, Return: false})}
@@ -4506,8 +4453,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     import ModuleSpecifier WithClause_opt ;
      */
     @SubhutiRule
-    ImportDeclaration(): SubhutiCst | undefined {
-        return this.Or([
+    ImportDeclaration() {
+        this.Or([
             // import ImportClause FromClause WithClause_opt ;
             {
                 alt: () => {
@@ -4539,8 +4486,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ImportedDefaultBinding , NamedImports
      */
     @SubhutiRule
-    ImportClause(): SubhutiCst | undefined {
-        return this.Or([
+    ImportClause() {
+        this.Or([
             // ImportedDefaultBinding , NameSpaceImport
             {
                 alt: () => {
@@ -4571,8 +4518,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ImportedBinding
      */
     @SubhutiRule
-    ImportedDefaultBinding(): SubhutiCst | undefined {
-        return this.ImportedBinding()
+    ImportedDefaultBinding() {
+        this.ImportedBinding()
     }
 
     /**
@@ -4580,10 +4527,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     * as ImportedBinding
      */
     @SubhutiRule
-    NameSpaceImport(): SubhutiCst | undefined {
+    NameSpaceImport() {
         this.tokenConsumer.Asterisk()
         this.tokenConsumer.As()
-        return this.ImportedBinding()
+        this.ImportedBinding()
     }
 
     /**
@@ -4593,8 +4540,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     { ImportsList , }
      */
     @SubhutiRule
-    NamedImports(): SubhutiCst | undefined {
-        return this.Or([
+    NamedImports() {
+        this.Or([
             // { }
             {
                 alt: () => {
@@ -4627,9 +4574,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     from ModuleSpecifier
      */
     @SubhutiRule
-    FromClause(): SubhutiCst | undefined {
+    FromClause() {
         this.tokenConsumer.From()
-        return this.ModuleSpecifier()
+        this.ModuleSpecifier()
     }
 
     /**
@@ -4638,13 +4585,13 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ImportsList , ImportSpecifier
      */
     @SubhutiRule
-    ImportsList(): SubhutiCst | undefined {
+    ImportsList() {
         this.ImportSpecifier()
         this.Many(() => {
             this.tokenConsumer.Comma()
             this.ImportSpecifier()
         })
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -4653,8 +4600,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ModuleExportName as ImportedBinding
      */
     @SubhutiRule
-    ImportSpecifier(): SubhutiCst | undefined {
-        return this.Or([
+    ImportSpecifier() {
+        this.Or([
             // ModuleExportName as ImportedBinding
             {
                 alt: () => {
@@ -4675,8 +4622,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 注意：StringLiteral 是词法规则（A.1 Lexical Grammar），直接消费 token
      */
     @SubhutiRule
-    ModuleSpecifier(): SubhutiCst | undefined {
-        return this.tokenConsumer.StringLiteral()
+    ModuleSpecifier() {
+        this.tokenConsumer.StringLiteral()
     }
 
     /**
@@ -4684,8 +4631,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     BindingIdentifier[~Yield, +Await]
      */
     @SubhutiRule
-    ImportedBinding(): SubhutiCst | undefined {
-        return this.BindingIdentifier({Yield: false, Await: true})
+    ImportedBinding() {
+        this.BindingIdentifier({Yield: false, Await: true})
     }
 
     /**
@@ -4694,8 +4641,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     with { WithEntries ,_opt }
      */
     @SubhutiRule
-    WithClause(): SubhutiCst | undefined {
-        return this.Or([
+    WithClause() {
+        this.Or([
             // with { }
             {
                 alt: () => {
@@ -4725,7 +4672,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 注意：StringLiteral 是词法规则（A.1 Lexical Grammar），直接消费 token
      */
     @SubhutiRule
-    WithEntries(): SubhutiCst | undefined {
+    WithEntries() {
         this.AttributeKey()
         this.tokenConsumer.Colon()
         // StringLiteral 是词法规则，直接消费 token
@@ -4739,7 +4686,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.StringLiteral()
         })
 
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -4750,8 +4697,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 注意：StringLiteral 是词法规则（A.1 Lexical Grammar），直接消费 token
      */
     @SubhutiRule
-    AttributeKey(): SubhutiCst | undefined {
-        return this.Or([
+    AttributeKey() {
+        this.Or([
             {alt: () => this.IdentifierName()},
             // StringLiteral 是词法规则，直接消费 token
             {alt: () => this.tokenConsumer.StringLiteral()}
@@ -4773,8 +4720,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     export default [lookahead ∉ {function, async [no LineTerminator here] function, class}] AssignmentExpression[+In, ~Yield, +Await] ;
      */
     @SubhutiRule
-    ExportDeclaration(): SubhutiCst | undefined {
-        return this.Or([
+    ExportDeclaration() {
+        this.Or([
             // export ExportFromClause FromClause WithClause_opt ;
             {
                 alt: () => {
@@ -4845,8 +4792,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     NamedExports
      */
     @SubhutiRule
-    ExportFromClause(): SubhutiCst | undefined {
-        return this.Or([
+    ExportFromClause() {
+        this.Or([
             // * as ModuleExportName
             {
                 alt: () => {
@@ -4869,8 +4816,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     { ExportsList , }
      */
     @SubhutiRule
-    NamedExports(): SubhutiCst | undefined {
-        return this.Or([
+    NamedExports() {
+        this.Or([
             // { }
             {
                 alt: () => {
@@ -4904,13 +4851,13 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ExportsList , ExportSpecifier
      */
     @SubhutiRule
-    ExportsList(): SubhutiCst | undefined {
+    ExportsList() {
         this.ExportSpecifier()
         this.Many(() => {
             this.tokenConsumer.Comma()
             this.ExportSpecifier()
         })
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -4919,8 +4866,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ModuleExportName as ModuleExportName
      */
     @SubhutiRule
-    ExportSpecifier(): SubhutiCst | undefined {
-        return this.Or([
+    ExportSpecifier() {
+        this.Or([
             // ModuleExportName as ModuleExportName
             {
                 alt: () => {
@@ -4942,8 +4889,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 注意：StringLiteral 是词法规则（A.1 Lexical Grammar），直接消费 token
      */
     @SubhutiRule
-    ModuleExportName(): SubhutiCst | undefined {
-        return this.Or([
+    ModuleExportName() {
+        this.Or([
             {alt: () => this.IdentifierName()},
             // StringLiteral 是词法规则，直接消费 token
             {alt: () => this.tokenConsumer.StringLiteral()}
@@ -4960,8 +4907,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ArrayAssignmentPattern[?Yield, ?Await]
      */
     @SubhutiRule
-    AssignmentPattern(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    AssignmentPattern(params: ExpressionParams = {}) {
+        this.Or([
             {alt: () => this.ObjectAssignmentPattern(params)},
             {alt: () => this.ArrayAssignmentPattern(params)}
         ])
@@ -4975,8 +4922,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     { AssignmentPropertyList[?Yield, ?Await] , AssignmentRestProperty[?Yield, ?Await]_opt }
      */
     @SubhutiRule
-    ObjectAssignmentPattern(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ObjectAssignmentPattern(params: ExpressionParams = {}) {
+        this.Or([
             // { }
             {
                 alt: () => {
@@ -5020,8 +4967,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     [ AssignmentElementList[?Yield, ?Await] , Elision_opt AssignmentRestElement[?Yield, ?Await]_opt ]
      */
     @SubhutiRule
-    ArrayAssignmentPattern(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    ArrayAssignmentPattern(params: ExpressionParams = {}) {
+        this.Or([
             // [ Elision_opt AssignmentRestElement[?Yield, ?Await]_opt ]
             {
                 alt: () => {
@@ -5058,9 +5005,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ... DestructuringAssignmentTarget[?Yield, ?Await]
      */
     @SubhutiRule
-    AssignmentRestProperty(params: ExpressionParams = {}): SubhutiCst | undefined {
+    AssignmentRestProperty(params: ExpressionParams = {}) {
         this.tokenConsumer.Ellipsis()
-        return this.DestructuringAssignmentTarget(params)
+        this.DestructuringAssignmentTarget(params)
     }
 
     /**
@@ -5069,13 +5016,13 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     AssignmentPropertyList[?Yield, ?Await] , AssignmentProperty[?Yield, ?Await]
      */
     @SubhutiRule
-    AssignmentPropertyList(params: ExpressionParams = {}): SubhutiCst | undefined {
+    AssignmentPropertyList(params: ExpressionParams = {}) {
         this.AssignmentProperty(params)
         this.Many(() => {
             this.tokenConsumer.Comma()
             this.AssignmentProperty(params)
         })
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -5084,13 +5031,13 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     AssignmentElementList[?Yield, ?Await] , AssignmentElisionElement[?Yield, ?Await]
      */
     @SubhutiRule
-    AssignmentElementList(params: ExpressionParams = {}): SubhutiCst | undefined {
+    AssignmentElementList(params: ExpressionParams = {}) {
         this.AssignmentElisionElement(params)
         this.Many(() => {
             this.tokenConsumer.Comma()
             this.AssignmentElisionElement(params)
         })
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -5098,9 +5045,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     Elision_opt AssignmentElement[?Yield, ?Await]
      */
     @SubhutiRule
-    AssignmentElisionElement(params: ExpressionParams = {}): SubhutiCst | undefined {
+    AssignmentElisionElement(params: ExpressionParams = {}) {
         this.Option(() => this.Elision())
-        return this.AssignmentElement(params)
+        this.AssignmentElement(params)
     }
 
     /**
@@ -5109,8 +5056,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     PropertyName[?Yield, ?Await] : AssignmentElement[?Yield, ?Await]
      */
     @SubhutiRule
-    AssignmentProperty(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.Or([
+    AssignmentProperty(params: ExpressionParams = {}) {
+        this.Or([
             // PropertyName[?Yield, ?Await] : AssignmentElement[?Yield, ?Await]
             {
                 alt: () => {
@@ -5134,10 +5081,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     DestructuringAssignmentTarget[?Yield, ?Await] Initializer[+In, ?Yield, ?Await]_opt
      */
     @SubhutiRule
-    AssignmentElement(params: ExpressionParams = {}): SubhutiCst | undefined {
+    AssignmentElement(params: ExpressionParams = {}) {
         this.DestructuringAssignmentTarget(params)
         this.Option(() => this.Initializer({...params, In: true}))
-        return this.curCst
+        this.curCst
     }
 
     /**
@@ -5145,9 +5092,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     ... DestructuringAssignmentTarget[?Yield, ?Await]
      */
     @SubhutiRule
-    AssignmentRestElement(params: ExpressionParams = {}): SubhutiCst | undefined {
+    AssignmentRestElement(params: ExpressionParams = {}) {
         this.tokenConsumer.Ellipsis()
-        return this.DestructuringAssignmentTarget(params)
+        this.DestructuringAssignmentTarget(params)
     }
 
     /**
@@ -5155,8 +5102,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      *     LeftHandSideExpression[?Yield, ?Await]
      */
     @SubhutiRule
-    DestructuringAssignmentTarget(params: ExpressionParams = {}): SubhutiCst | undefined {
-        return this.LeftHandSideExpression(params)
+    DestructuringAssignmentTarget(params: ExpressionParams = {}) {
+        this.LeftHandSideExpression(params)
     }
 }
 

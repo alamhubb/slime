@@ -1,0 +1,501 @@
+/**
+ * SubhutiDebugRuleTracePrint - 规则路径输出工具类
+ *
+ * 职责：
+ * - 负责规则执行路径的格式化输出
+ * - 处理规则链的折叠显示
+ * - 计算缩进和显示深度
+ * - 生成 Or 分支标记
+ *
+ * 设计：
+ * - 纯静态方法，无实例状态
+ * - 直接基于 RuleStackItem[] 进行输出
+ * - 可以修改传入的状态对象（副作用）
+ * - 直接输出到控制台
+ *
+ * 配置：
+ * - showRulePath: 控制是否输出规则执行路径（默认 true）
+ */
+
+// 全局配置：是否显示规则执行路径
+let _showRulePath = true
+
+/**
+ * 设置是否显示规则执行路径
+ * @param show - true 显示，false 不显示
+ */
+export function setShowRulePath(show: boolean): void {
+    _showRulePath = show
+}
+
+/**
+ * 获取当前是否显示规则执行路径
+ */
+export function getShowRulePath(): boolean {
+    return _showRulePath
+}
+
+// ============================================
+// TreeFormatHelper - 树形输出格式化辅助
+// ============================================
+
+import {LogUtil} from "./logutil.ts";
+
+/**
+ * 树形输出格式化辅助类
+ *
+ * 提供统一的格式化工具方法供调试工具使用
+ *
+ * 核心功能：
+ * 1. formatLine - 统一的行输出格式化（自动处理缩进、拼接、过滤空值）
+ * 2. formatTokenValue - Token 值转义和截断
+ * 3. formatLocation - 位置信息格式化
+ * 4. formatRuleChain - 规则链拼接
+ */
+export class TreeFormatHelper {
+    /**
+     * 格式化一行输出
+     *
+     * @param parts - 内容数组（null/undefined/'' 会被自动过滤）
+     * @param options - 配置选项
+     */
+    static formatLine(
+        content: string,
+        options: {
+            depth?: number
+            prefix?: string
+        }
+    ): string {
+        const indent = options.prefix ?? '  '.repeat(options.depth ?? 0)
+        return indent + content
+    }
+
+    static contentJoin(parts: string[]) {
+        const content = parts
+            .filter(p => p !== null && p !== undefined && p !== '')
+        return content
+    }
+
+    /**
+     * 格式化 Token 值（处理特殊字符和长度限制）
+     *
+     * @param value - 原始值
+     * @param maxLength - 最大长度（超过则截断）
+     */
+    static formatTokenValue(value: string, maxLength: number = 40): string {
+        // 转义特殊字符
+        let escaped = value
+            .replace(/\\/g, '\\\\')
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r')
+            .replace(/\t/g, '\\t')
+
+        // 限制长度
+        if (escaped.length > maxLength) {
+            escaped = escaped.slice(0, maxLength) + '...'
+        }
+
+        return escaped
+    }
+
+    /**
+     * 格式化位置信息
+     *
+     * @param loc - 位置对象 {start: {line, column}, end: {line, column}}
+     */
+    static formatLocation(loc: any): string {
+        if (!loc?.start || !loc?.end) {
+            return ''
+        }
+
+        const startLine = loc.start.line
+        const startCol = loc.start.column
+        const endLine = loc.end.line
+        const endCol = loc.end.column
+
+        if (startLine === endLine) {
+            return `[${startLine}:${startCol}-${endCol}]`
+        } else {
+            return `[${startLine}:${startCol}-${endLine}:${endCol}]`
+        }
+    }
+
+    /**
+     * 格式化规则链（用于折叠显示）
+     *
+     * @param rules - 规则名数组
+     * @param separator - 分隔符（默认 " > "）
+     */
+    static formatRuleChain(rules: string[], separator: string = ' > '): string {
+        return rules.join(separator)
+    }
+}
+
+// ============================================
+// 类型定义
+// ============================================
+
+/**
+ * 规则栈项
+ */
+export interface RuleStackItem {
+    ruleName?: string
+    tokenValue?: string
+    tokenSuccess?: boolean
+    tokenExpectName?: string
+    tokenName?: string
+    startTime: number
+    outputted: boolean          // 是否已输出
+    tokenIndex: number          // 规则进入时的 token 索引（用于缓存键）
+
+    //用来判断是否为来自缓存的数据
+    isManuallyAdded?: boolean   // 是否应该在这里换行（单独一行）
+    shouldBreakLine?: boolean   // 是否应该在这里换行（单独一行）
+    displayDepth?: number       // 显示深度（flush 时计算）
+    childs?: string[]           // 子节点的 key（可以是规则 key 或 Token key）
+
+    // 【防御性编程】两种方式计算的相对深度，用于交叉验证
+    // relativeDepthByStack?: number    // 基于栈计算的相对深度（非缓存时记录）
+    // relativeDepthByChilds?: number   // 基于 childs 计算的相对深度（缓存恢复时计算）
+
+    orBranchInfo?: {
+        orIndex?: number           // 同一规则内 Or 的序号（0, 1, 2...，用于区分多个 Or）
+        branchIndex?: number       // Or 分支索引（1, 2, 3...）
+        isOrEntry: boolean         // 是否是 Or 包裹节点（onOrEnter 创建）
+        isOrBranch: boolean        // 是否是 Or 分支节点（onOrBranch 创建）
+        totalBranches?: number     // Or 分支信息（如 "#1/3" 或 "3" 表示总分支数）
+    }
+}
+
+/**
+ * Or 分支信息
+ */
+export interface OrBranchInfo {
+    totalBranches: number
+    currentBranch: number
+    targetDepth: number
+    savedPendingLength: number
+    parentRuleName: string  // 父规则名（调用 Or 的规则）
+}
+
+// ============================================
+// SubhutiDebugRuleTracePrint - 规则路径输出工具类
+// ============================================
+
+export class SubhutiDebugRuleTracePrint {
+    /**
+     * 统一的 Or 标记格式化方法
+     * 所有字符串拼接都在这里处理
+     *
+     * @param item - 规则栈项
+     * @returns 显示后缀（如 "" / " [Or]" / " [Or #1/3]"）
+     */
+    static formatOrSuffix(item: RuleStackItem): string {
+        // 优先使用 orBranchInfo 对象（新设计）
+        if (item.orBranchInfo) {
+            const info = item.orBranchInfo
+
+            if (info.isOrEntry) {
+                // Or 包裹节点：显示 [Or]
+                return ' [Or]'
+            } else if (info.isOrBranch) {
+                return ` [Or #${info.branchIndex + 1}/${info.totalBranches}]`
+            } else {
+                return `错误`
+            }
+        }
+        // 普通规则，无后缀
+        return ''
+    }
+
+    /**
+     * 判断是否是 Or 相关节点
+     */
+    static isOrEntry(item: RuleStackItem): boolean {
+        // 新设计：检查 orBranchInfo 对象
+        return item.orBranchInfo?.isOrEntry
+    }
+
+
+    public static getPrintToken(tokenItem: RuleStackItem, location?: string): string {
+
+        // 格式化 token 值（转义特殊字符、截断长字符串）
+        const value = TreeFormatHelper.formatTokenValue(tokenItem.tokenValue || '', 20)
+
+        if (tokenItem.tokenSuccess) {
+            return ['✅', 'Consume', `token[${tokenItem.tokenIndex}]`, value, '-', `<${tokenItem.tokenName}>`, (location || '[]')].join(' ')
+        } else {
+            return ['❌', `token[${tokenItem.tokenIndex}]`, 'Expect:', tokenItem.tokenExpectName, '-', 'Get:', value, '-', `<${tokenItem.tokenName}>`].join(' ')
+        }
+
+    }
+
+    /**
+     * 格式化一行（返回字符串）
+     */
+    public static formatLine(str: string, depth: number, symbol: string = '└─'): string {
+        return TreeFormatHelper.formatLine(
+            str,
+            // 前缀：根据深度生成缩进，└─ 表示是叶子节点
+            {prefix: '│  '.repeat(depth) + symbol}
+        )
+    }
+
+
+
+    public static consoleLog(...strs) {
+        if (!_showRulePath) return  // 如果关闭了规则路径输出，直接返回
+        console.log(...strs)  // 恢复实时输出
+        // LogUtil.log(strs[0])  // 可选：同时写入文件
+    }
+
+
+    /**
+     * 非缓存场景：格式化待处理的规则日志（返回字符串数组）
+     * 特点：只有一次断链，只有一个折叠段
+     *
+     * 【设计思路】
+     * 1. 不需要提前标记 shouldBreakLine
+     * 2. 遍历时直接判断是否到达断点
+     * 3. 到达断点前：积累到折叠链
+     * 4. 到达断点后：逐个输出并赋值 shouldBreakLine = true
+     */
+    public static formatPendingOutputs_NonCache_Impl(ruleStack: RuleStackItem[]): string[] {
+        if (!ruleStack.length) {
+            throw new Error('系统错误：ruleStack 为空')
+        }
+
+        const allLines: string[] = []
+
+        let unOutputIndex = ruleStack.findIndex(item => !item.outputted)
+
+        if (unOutputIndex < 0) {
+            //允许没有待输出的，连续输出token的情况，上一个已输出的就是最后一个
+            unOutputIndex = ruleStack.length
+        }
+        let pendingRules = ruleStack.slice(unOutputIndex)
+
+        // 最后一个已输出的规则
+        const lastOutputted = ruleStack[unOutputIndex - 1]
+
+        // 计算基准深度
+        // 如果没有已输出的规则（第一次输出），baseDepth = 0
+        let baseDepth = 0
+        if (lastOutputted) {
+            // 否则 baseDepth = 最后一个已输出规则的深度 + 1
+            baseDepth = lastOutputted.displayDepth
+        }
+
+        //最后一个未输出的 OrEntry（使用 findLastIndex 直接获取正向索引）
+        let lastOrIndex = [...pendingRules].reverse().findIndex(item => !!item.orBranchInfo?.isOrEntry)
+
+        const minChainRulesLength = 2
+
+        // 计算断链位置：最后一个 Or 的位置 + 1（如果没有 Or，则至少保留 minChainRulesLength 个规则单独输出）
+        // lastOrIndex = -1 表示没有找到 Or 节点
+        // 注意：如果找到了 Or 节点（lastOrIndex >= 0），则至少要保留 lastOrIndex + 1 个规则单独输出
+        const breakPoint = Math.max(lastOrIndex + 1, minChainRulesLength)
+
+        //获取折叠链和单独输出的规则，如果折叠链只有一个不折叠
+        if (breakPoint < pendingRules.length - 1) {
+            const singleRules = pendingRules.splice(-breakPoint);
+
+            const groups: RuleStackItem[][] = []
+            let currentGroup: RuleStackItem[] = [pendingRules[0]]
+            groups.push(currentGroup)
+
+            for (let i = 1; i < pendingRules.length; i++) {
+                const item = pendingRules[i]
+                const prevItem = pendingRules[i - 1]
+
+                // 如果当前规则和前一个规则的 shouldBreakLine 相同
+                if (item.shouldBreakLine === prevItem.shouldBreakLine) {
+                    currentGroup.push(item)
+                } else {
+                    // 否则开始新的一组
+                    currentGroup = [item]
+                    groups.push(currentGroup)
+                }
+            }
+            for (const group of groups) {
+                if (group[0].shouldBreakLine) {
+                    const result = this.formatMultipleSingleRule(group, baseDepth)
+                    allLines.push(...result.lines)
+                    baseDepth = result.depth
+                } else {
+                    baseDepth++
+                    const lines = this.formatChainRule(group, baseDepth)
+                    allLines.push(...lines)
+                }
+            }
+
+            const result = this.formatMultipleSingleRule(singleRules, baseDepth)
+            allLines.push(...result.lines)
+        } else {
+            const result = this.formatMultipleSingleRule(pendingRules, baseDepth)
+            allLines.push(...result.lines)
+        }
+
+        return allLines
+    }
+
+    /**
+     * 非缓存场景：输出待处理的规则日志（直接输出到控制台）
+     */
+    public static flushPendingOutputs_NonCache_Impl(ruleStack: RuleStackItem[]): number {
+        const lines = this.formatPendingOutputs_NonCache_Impl(ruleStack)
+        lines.forEach(line => this.consoleLog(line))
+
+        // 返回最后的深度（用于兼容现有代码）
+        const lastRule = ruleStack[ruleStack.length - 1]
+        return lastRule?.displayDepth || 0
+    }
+
+    public static flushPendingOutputs_Cache_Impl(ruleStack: RuleStackItem[]): void {
+        let pendingRules = ruleStack.filter(item => !item.outputted)
+
+        if (pendingRules.length === 0) {
+            throw new Error('不该触发没有规则场景')
+        }
+
+        // 【新增】预处理：调整 shouldBreakLine
+        // this.adjustShouldBreakLine(pendingRules)
+
+        // 按照 shouldBreakLine 分组
+        const groups: RuleStackItem[][] = []
+        let currentGroup: RuleStackItem[] = [pendingRules[0]]
+        groups.push(currentGroup)
+
+        for (let i = 1; i < pendingRules.length; i++) {
+            const item = pendingRules[i]
+            const prevItem = pendingRules[i - 1]
+
+            // 如果当前规则和前一个规则的 shouldBreakLine 相同
+            if (item.shouldBreakLine === prevItem.shouldBreakLine) {
+                currentGroup.push(item)
+            } else {
+                // 否则开始新的一组
+                currentGroup = [item]
+                groups.push(currentGroup)
+            }
+        }
+
+        // 输出每一组
+        for (const group of groups) {
+            if (group[0].shouldBreakLine) {
+                // 单个规则：单独输出
+                this.printMultipleSingleRule(group)
+            } else {
+                // 多个规则：折叠输出
+                this.printChainRule(group)
+            }
+        }
+    }
+
+    /**
+     * 格式化折叠链（返回字符串数组）
+     * @param rules
+     * @param depth 兼容非缓存和缓存，
+     */
+    static formatChainRule(rules: RuleStackItem[], depth: number = rules[0].displayDepth): string[] {
+        if (!rules.length) {
+            throw new Error("系统错误")
+        }
+        const names = rules.map(r => SubhutiDebugRuleTracePrint.getRuleItemLogContent(r))
+
+        const displayNames = names.length > 4
+            ? [...names.slice(0, 2), '...', ...names.slice(-2)]
+            : names
+
+        const line = SubhutiDebugRuleTracePrint.formatLine(displayNames.join(' > '), depth, '├─')
+
+        rules.forEach(r => {
+            r.displayDepth = depth
+            r.outputted = true
+        })
+
+        return [line]
+    }
+
+    /**
+     * 打印折叠链（直接输出到控制台）
+     * @param rules
+     * @param depth 兼容非缓存和缓存，
+     */
+    static printChainRule(rules: RuleStackItem[], depth: number = rules[0].displayDepth) {
+        const lines = this.formatChainRule(rules, depth)
+        lines.forEach(line => this.consoleLog(line))
+    }
+
+    /**
+     * 格式化单独规则（返回字符串数组）
+     * 注意：传入的 rules 数组通常只有 1 个元素（单独显示的规则）
+     *
+     * @param rules
+     * @param depth 兼容非缓存和缓存，
+     */
+    static formatMultipleSingleRule(rules: RuleStackItem[], depth: number = rules[0].displayDepth): { lines: string[], depth: number } {
+        const lines: string[] = []
+
+        rules.forEach((item, index) => {
+            depth++
+
+            // 判断是否是最后一个
+            const isLast = index === rules.length - 1
+
+            if (!item.isManuallyAdded) {
+                item.displayDepth = depth
+            }
+
+            let branch = isLast ? '└─' : '├─'
+            let printStr = this.getRuleItemLogContent(item)
+
+            const line = SubhutiDebugRuleTracePrint.formatLine(printStr, item.displayDepth, branch)
+            lines.push(line)
+
+            item.outputted = true
+        })
+
+        return { lines, depth }
+    }
+
+    /**
+     * 打印单独规则（直接输出到控制台）
+     * 注意：传入的 rules 数组通常只有 1 个元素（单独显示的规则）
+     *
+     * @param rules
+     * @param depth 兼容非缓存和缓存，
+     */
+    static printMultipleSingleRule(rules: RuleStackItem[], depth: number = rules[0].displayDepth): number {
+        const result = this.formatMultipleSingleRule(rules, depth)
+        result.lines.forEach(line => this.consoleLog(line))
+        return result.depth
+    }
+
+    private static getRuleItemLogContent(tokenItem: RuleStackItem) {
+        let res = '错误'
+        if (tokenItem.orBranchInfo) {
+            const branchInfo = tokenItem.orBranchInfo
+            if (tokenItem.orBranchInfo.isOrEntry) {
+                // branch = '🔀 '
+                // Or 包裹节点：显示 [Or]
+                res = '🔀 ' + tokenItem.ruleName + '(Or)'
+            } else if (tokenItem.orBranchInfo.isOrBranch) {
+                res = `[Branch #${branchInfo.branchIndex + 1}](${tokenItem.ruleName})`
+                // 🔍 调试：记录 Or 分支被标记为 outputted
+            }
+        } else {
+            if (tokenItem.tokenExpectName) {
+                res = SubhutiDebugRuleTracePrint.getPrintToken(tokenItem)
+            } else {
+                res = tokenItem.ruleName
+            }
+        }
+        if (tokenItem.isManuallyAdded) {
+            // 普通规则：添加缓存标记
+            res += ` ⚡[Cached]`
+        }
+        return res
+    }
+}
+

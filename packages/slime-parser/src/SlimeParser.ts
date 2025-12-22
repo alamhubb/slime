@@ -79,6 +79,10 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
         return this.Option(() => this.TSTypeAnnotation())
     }
 
+    // ============================================
+    // TypeScript: 类型注解
+    // ============================================
+
     /**
      * [TypeScript] 类型注解
      *
@@ -91,33 +95,295 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
         return this.TSType()
     }
 
+    // ============================================
+    // TypeScript: 类型 (Phase 1 - 基础类型)
+    // ============================================
+
     /**
      * [TypeScript] 类型
      *
      * TSType :
-     *     TSNumberKeyword
-     *     (future: TSStringKeyword | TSBooleanKeyword | ...)
+     *     TSPrimaryType
+     *     TSUnionType
+     *     TSIntersectionType
+     *     TSConditionalType
+     *     TSFunctionType
+     *     TSConstructorType
+     *
+     * 优先级（从低到高）：
+     * 1. 联合类型 |
+     * 2. 交叉类型 &
+     * 3. 条件类型 extends ? :
+     * 4. 基础类型
      */
     @SubhutiRule
     TSType(): SubhutiCst | undefined {
+        // Phase 1: 只支持基础类型，后续阶段会扩展
+        return this.TSPrimaryType()
+    }
+
+    /**
+     * [TypeScript] 基础类型
+     *
+     * TSPrimaryType :
+     *     TSKeywordType
+     *     TSLiteralType
+     *     TSTypeReference
+     *     TSParenthesizedType
+     *     TSTypeLiteral
+     *     TSTupleType
+     *     TSArrayType (后缀)
+     */
+    @SubhutiRule
+    TSPrimaryType(): SubhutiCst | undefined {
         return this.Or([
-            { alt: () => this.TSNumberKeyword() }
+            // 基础类型关键字
+            { alt: () => this.TSKeywordType() },
+            // 字面量类型
+            { alt: () => this.TSLiteralType() },
+            // 类型引用 (MyType, Array<T>)
+            { alt: () => this.TSTypeReference() },
+            // 括号类型 (T)
+            { alt: () => this.TSParenthesizedType() },
         ])
     }
 
     /**
-     * [TypeScript] number 类型关键字
+     * [TypeScript] 关键字类型
      *
-     * TSNumberKeyword :
-     *     number
+     * TSKeywordType :
+     *     TSNumberKeyword | TSStringKeyword | TSBooleanKeyword | ...
+     */
+    @SubhutiRule
+    TSKeywordType(): SubhutiCst | undefined {
+        return this.Or([
+            { alt: () => this.TSNumberKeyword() },
+            { alt: () => this.TSStringKeyword() },
+            { alt: () => this.TSBooleanKeyword() },
+            { alt: () => this.TSAnyKeyword() },
+            { alt: () => this.TSUnknownKeyword() },
+            { alt: () => this.TSVoidKeyword() },
+            { alt: () => this.TSNeverKeyword() },
+            { alt: () => this.TSNullKeyword() },
+            { alt: () => this.TSUndefinedKeyword() },
+            { alt: () => this.TSObjectKeyword() },
+            { alt: () => this.TSSymbolKeyword() },
+            { alt: () => this.TSBigIntKeyword() },
+        ])
+    }
+
+    // ============================================
+    // TypeScript: 基础类型关键字 (Phase 1)
+    // ============================================
+
+    /**
+     * [TypeScript] number 类型关键字
      */
     @SubhutiRule
     TSNumberKeyword(): SubhutiCst | undefined {
-        // number 是上下文关键字，使用 IdentifierName 匹配并验证值
-        const token = this.tokenConsumer.IdentifierName()
-        if (!token || token.value !== 'number') {
-            return this.setParseFail()
-        }
-        return token
+        return this.tokenConsumer.TSNumber()
+    }
+
+    /**
+     * [TypeScript] string 类型关键字
+     */
+    @SubhutiRule
+    TSStringKeyword(): SubhutiCst | undefined {
+        return this.tokenConsumer.TSString()
+    }
+
+    /**
+     * [TypeScript] boolean 类型关键字
+     */
+    @SubhutiRule
+    TSBooleanKeyword(): SubhutiCst | undefined {
+        return this.tokenConsumer.TSBoolean()
+    }
+
+    /**
+     * [TypeScript] any 类型关键字
+     */
+    @SubhutiRule
+    TSAnyKeyword(): SubhutiCst | undefined {
+        return this.tokenConsumer.TSAny()
+    }
+
+    /**
+     * [TypeScript] unknown 类型关键字
+     */
+    @SubhutiRule
+    TSUnknownKeyword(): SubhutiCst | undefined {
+        return this.tokenConsumer.TSUnknown()
+    }
+
+    /**
+     * [TypeScript] void 类型关键字
+     * 注意：void 在表达式位置是硬关键字，在类型位置是软关键字
+     */
+    @SubhutiRule
+    TSVoidKeyword(): SubhutiCst | undefined {
+        // 尝试作为硬关键字消费（表达式位置的 void）
+        // 如果失败，尝试作为软关键字消费
+        return this.Or([
+            { alt: () => this.tokenConsumer.Void() },
+        ])
+    }
+
+    /**
+     * [TypeScript] never 类型关键字
+     */
+    @SubhutiRule
+    TSNeverKeyword(): SubhutiCst | undefined {
+        return this.tokenConsumer.TSNever()
+    }
+
+    /**
+     * [TypeScript] null 类型关键字
+     * 注意：null 是硬关键字
+     */
+    @SubhutiRule
+    TSNullKeyword(): SubhutiCst | undefined {
+        return this.tokenConsumer.NullLiteral()
+    }
+
+    /**
+     * [TypeScript] undefined 类型关键字
+     */
+    @SubhutiRule
+    TSUndefinedKeyword(): SubhutiCst | undefined {
+        return this.tokenConsumer.TSUndefined()
+    }
+
+    /**
+     * [TypeScript] object 类型关键字
+     */
+    @SubhutiRule
+    TSObjectKeyword(): SubhutiCst | undefined {
+        return this.tokenConsumer.TSObject()
+    }
+
+    /**
+     * [TypeScript] symbol 类型关键字
+     */
+    @SubhutiRule
+    TSSymbolKeyword(): SubhutiCst | undefined {
+        return this.tokenConsumer.TSSymbol()
+    }
+
+    /**
+     * [TypeScript] bigint 类型关键字
+     */
+    @SubhutiRule
+    TSBigIntKeyword(): SubhutiCst | undefined {
+        return this.tokenConsumer.TSBigint()
+    }
+
+    // ============================================
+    // TypeScript: 字面量类型 (Phase 1)
+    // ============================================
+
+    /**
+     * [TypeScript] 字面量类型
+     *
+     * TSLiteralType :
+     *     StringLiteral
+     *     NumericLiteral
+     *     BooleanLiteral
+     */
+    @SubhutiRule
+    TSLiteralType(): SubhutiCst | undefined {
+        return this.Or([
+            { alt: () => this.tokenConsumer.StringLiteral() },
+            { alt: () => this.tokenConsumer.NumericLiteral() },
+            { alt: () => this.tokenConsumer.True() },
+            { alt: () => this.tokenConsumer.False() },
+        ])
+    }
+
+    // ============================================
+    // TypeScript: 类型引用 (Phase 1)
+    // ============================================
+
+    /**
+     * [TypeScript] 类型引用
+     *
+     * TSTypeReference :
+     *     TSTypeName TSTypeArguments_opt
+     *
+     * TSTypeName :
+     *     Identifier
+     *     TSQualifiedName
+     */
+    @SubhutiRule
+    TSTypeReference(): SubhutiCst | undefined {
+        // 解析类型名称（可能是限定名称 Namespace.Type）
+        this.TSTypeName()
+        // 可选的类型参数 <T, U>
+        this.Option(() => this.TSTypeParameterInstantiation())
+        return undefined
+    }
+
+    /**
+     * [TypeScript] 类型名称
+     *
+     * TSTypeName :
+     *     Identifier
+     *     TSQualifiedName
+     *
+     * TSQualifiedName :
+     *     TSTypeName . Identifier
+     */
+    @SubhutiRule
+    TSTypeName(): SubhutiCst | undefined {
+        // 首先解析标识符
+        this.Identifier()
+        // 然后解析可能的限定名称 (.Identifier)*
+        this.Many(() => {
+            this.tokenConsumer.Dot()
+            this.Identifier()
+        })
+        return undefined
+    }
+
+    /**
+     * [TypeScript] 类型参数实例化
+     *
+     * TSTypeParameterInstantiation :
+     *     < TSTypeList >
+     *
+     * TSTypeList :
+     *     TSType
+     *     TSTypeList , TSType
+     */
+    @SubhutiRule
+    TSTypeParameterInstantiation(): SubhutiCst | undefined {
+        this.tokenConsumer.Less()
+        // 至少一个类型参数
+        this.TSType()
+        // 可选的更多类型参数
+        this.Many(() => {
+            this.tokenConsumer.Comma()
+            this.TSType()
+        })
+        this.tokenConsumer.Greater()
+        return undefined
+    }
+
+    // ============================================
+    // TypeScript: 括号类型 (Phase 1)
+    // ============================================
+
+    /**
+     * [TypeScript] 括号类型
+     *
+     * TSParenthesizedType :
+     *     ( TSType )
+     */
+    @SubhutiRule
+    TSParenthesizedType(): SubhutiCst | undefined {
+        this.tokenConsumer.LParen()
+        this.TSType()
+        this.tokenConsumer.RParen()
+        return undefined
     }
 }
