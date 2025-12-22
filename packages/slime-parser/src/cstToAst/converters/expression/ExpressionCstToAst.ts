@@ -4,7 +4,8 @@
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
-import { SlimeAstUtil, SlimeTokenCreate } from "slime-ast";
+import {SlimeAstUtil, SlimeExpression, SlimeTokenCreate} from "slime-ast";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
 export class ExpressionCstToAst {
 

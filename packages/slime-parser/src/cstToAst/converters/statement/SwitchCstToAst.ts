@@ -2,12 +2,14 @@ import { SubhutiCst } from "subhuti";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 import {
+    SlimeAstUtil,
     SlimeBlockStatement,
     SlimeFunctionDeclaration,
     SlimeFunctionParam,
     SlimeIdentifier,
     SlimeTokenCreate
 } from "slime-ast";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
 export class SwitchCstToAst {
     /**

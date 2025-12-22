@@ -6,13 +6,14 @@ import {
     type SlimeArrayElement,
     type SlimeArrayExpression, type SlimeArrowFunctionExpression, type SlimeAssignmentExpression,
     SlimeAstUtil, type SlimeClassExpression,
-    type SlimeExpression, type SlimeFunctionParam, type SlimeIdentifier,
-    SlimeNodeType, type SlimeSpreadElement,
+    type SlimeExpression, type SlimeFunctionParam, type SlimeIdentifier, SlimeLiteral,
+    SlimeNodeType, SlimeNumericLiteral, type SlimeSpreadElement,
     SlimeStringLiteral, SlimeTokenCreate
 } from "slime-ast";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
 export class LiteralCstToAst {
     // ==================== 字面量相关转换方�?====================

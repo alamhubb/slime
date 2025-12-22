@@ -2,15 +2,19 @@
  * ExportCstToAst - export 相关转换
  */
 import { SubhutiCst } from "subhuti";
-import type {
+import {
+    SlimeAstUtil,
     SlimeExportAllDeclaration,
     SlimeExportDefaultDeclaration,
-    SlimeExportNamedDeclaration, SlimeFunctionParam,
+    SlimeExportNamedDeclaration, SlimeExportSpecifier, SlimeExportSpecifierItem, SlimeFunctionParam, SlimeIdentifier,
+    SlimeLiteral,
     SlimeModuleDeclaration, SlimePattern,
-    SlimeStatement
+    SlimeStatement, SlimeTokenCreate
 } from "slime-ast";
 import SlimeParser from "../../../SlimeParser.ts";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
+import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
 
 export class ExportCstToAst {
 

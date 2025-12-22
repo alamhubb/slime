@@ -10,6 +10,7 @@ import {
 } from "slime-ast";
 import SlimeParser from "../../../SlimeParser.ts";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
 export class FunctionParameterCstToAst {
 

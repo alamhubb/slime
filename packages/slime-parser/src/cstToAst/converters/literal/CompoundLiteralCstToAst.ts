@@ -11,9 +11,9 @@ import {
     type SlimeExpression, type SlimeFunctionParam,
     SlimeIdentifier,
     SlimeLiteral,
-    type SlimeMethodDefinition,
+    type SlimeMethodDefinition, SlimeNodeType,
     type SlimeObjectExpression,
-    type SlimeObjectPropertyItem,
+    type SlimeObjectPropertyItem, SlimeProperty,
     type SlimePropertyDefinition,
     type SlimeSpreadElement,
     type SlimeStatement,
@@ -22,6 +22,7 @@ import {
 import SlimeParser from "../../../SlimeParser.ts";
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
 export class CompoundLiteralCstToAst {
 

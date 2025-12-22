@@ -13,6 +13,7 @@ import {
 import { SlimeAstUtils } from "../../SlimeAstUtils.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
 export class ArrowFunctionCstToAst {
 

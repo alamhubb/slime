@@ -11,6 +11,7 @@ import {
     type SlimeVariableDeclaration,
     type SlimeVariableDeclarator
 } from "slime-ast";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
 export class ControlFlowCstToAst {
 
