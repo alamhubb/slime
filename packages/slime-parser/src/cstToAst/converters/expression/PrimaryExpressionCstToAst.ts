@@ -9,7 +9,7 @@ import {
 import { SubhutiCst } from "subhuti";
 import SlimeParser from "../../../SlimeParser";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer";
-import { checkCstName } from "../../utils";
+import { SlimeAstUtils } from "../../SlimeAstUtils";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil";
 
 export class PrimaryExpressionCstToAst {
@@ -17,7 +17,7 @@ export class PrimaryExpressionCstToAst {
      * 创建条件表达式 AST
      */
     static createConditionalExpressionAst(cst: SubhutiCst): SlimeExpression {
-        checkCstName(cst, SlimeParser.prototype.ConditionalExpression?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ConditionalExpression?.name);
         
         const firstChild = cst.children[0];
         let test = SlimeCstToAstUtil.createExpressionAst(firstChild);
@@ -78,7 +78,7 @@ export class PrimaryExpressionCstToAst {
      * 创建 await 表达式 AST
      */
     static createAwaitExpressionAst(cst: SubhutiCst): any {
-        checkCstName(cst, SlimeParser.prototype.AwaitExpression?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.AwaitExpression?.name);
 
         let awaitToken: any = undefined;
 

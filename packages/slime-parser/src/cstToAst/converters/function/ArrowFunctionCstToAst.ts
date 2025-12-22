@@ -10,7 +10,7 @@ import {
 import { SubhutiCst } from "subhuti";
 import SlimeParser from "../../../SlimeParser";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer";
-import { checkCstName } from "../../utils";
+import { SlimeAstUtils } from "../../SlimeAstUtils";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil";
 
 export class ArrowFunctionCstToAst {
@@ -18,7 +18,7 @@ export class ArrowFunctionCstToAst {
      * 创建箭头函数参数 AST
      */
     static createArrowParametersAst(cst: SubhutiCst): SlimePattern[] {
-        checkCstName(cst, SlimeParser.prototype.ArrowParameters?.name);
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ArrowParameters?.name);
 
         if (cst.children.length === 0) {
             return [];
