@@ -43,10 +43,10 @@ import {
     type SlimeJavascriptFunctionParam,
     SlimeJavascriptAstTypeName
 } from "slime-ast";
-import SlimeCodeMapping, {SlimeCodeLocation, type SlimeGeneratorResult} from "./SlimeCodeMapping.ts";
-import type {SubhutiSourceLocation} from "subhuti";
-import {SubhutiCreateToken} from "subhuti";
-import {SubhutiMatchToken} from "subhuti";
+import SlimeCodeMapping, { SlimeCodeLocation, type SlimeGeneratorResult } from "./SlimeCodeMapping.ts";
+import type { SubhutiSourceLocation } from "subhuti";
+import { SubhutiCreateToken } from "subhuti";
+import { SubhutiMatchToken } from "subhuti";
 import { SlimeJavascriptTokensObj } from "slime-parser";
 import { SlimeJavascriptTokenType } from "slime-token";
 
@@ -86,9 +86,9 @@ const SlimeJavascriptGeneratorTokenMapObj: Record<string, SubhutiCreateToken> = 
 };
 
 export default class SlimeJavascriptGenerator {
-    static mappings: SlimeJavascriptCodeMapping[] = null
-    static lastSourcePosition: SlimeJavascriptCodeLocation = null
-    static generatePosition: SlimeJavascriptCodeLocation = null
+    static mappings: SlimeCodeMapping[] = null
+    static lastSourcePosition: SlimeCodeLocation = null
+    static generatePosition: SlimeCodeLocation = null
     static sourceCodeIndex: number = null
     private static generateCode = ''
     private static generateLine = 0
@@ -120,11 +120,11 @@ export default class SlimeJavascriptGenerator {
         return loc
     }
 
-    static generator(node: SlimeJavascriptBaseNode, tokens: SubhutiMatchToken[]): SlimeJavascriptGeneratorResult {
+    static generator(node: SlimeJavascriptBaseNode, tokens: SubhutiMatchToken[]): SlimeGeneratorResult {
         this.mappings = []
         this.tokens = tokens
-        this.lastSourcePosition = new SlimeJavascriptCodeLocation()
-        this.generatePosition = new SlimeJavascriptCodeLocation()
+        this.lastSourcePosition = new SlimeCodeLocation()
+        this.generatePosition = new SlimeCodeLocation()
         this.sourceCodeIndex = 0
         this.generateLine = 0
         this.generateColumn = 0
@@ -222,7 +222,7 @@ export default class SlimeJavascriptGenerator {
         if (attrs === undefined) return
 
         this.addSpacing()
-        this.addCodeAndMappings({type: 'With', name: 'With', value: 'with'}, node.withToken?.loc) // 使用精确 token 位置
+        this.addCodeAndMappings({ type: 'With', name: 'With', value: 'with' }, node.withToken?.loc) // 使用精确 token 位置
         this.addSpacing()
         this.addLBrace(node.attributesLBraceToken?.loc) // 使用精确 token 位置
         attrs.forEach((attr: any, index: number) => {
@@ -511,8 +511,8 @@ export default class SlimeJavascriptGenerator {
         // 2. 如果只有一个简单标识符参数且没有括号 token，可以省略括号
         const hasParenTokens = node.lParenToken || node.rParenToken
         const canOmitParens = node.params && node.params.length === 1 &&
-                             firstParam?.type === SlimeJavascriptAstTypeName.Identifier &&
-                             !hasParenTokens
+            firstParam?.type === SlimeJavascriptAstTypeName.Identifier &&
+            !hasParenTokens
 
         if (canOmitParens) {
             // 单个标识符参数，且源代码中没有括号
@@ -815,7 +815,7 @@ export default class SlimeJavascriptGenerator {
         if (!identifierName) {
             console.error('generatorIdentifier: node.name is undefined', JSON.stringify(node, null, 2))
         }
-        const identifier = {type: Es6TokenName.IdentifierNameTok, name: Es6TokenName.IdentifierNameTok, value: identifierName}
+        const identifier = { type: Es6TokenName.IdentifierNameTok, name: Es6TokenName.IdentifierNameTok, value: identifierName }
         this.addCodeAndMappings(identifier, node.loc)
     }
 
@@ -1539,7 +1539,7 @@ export default class SlimeJavascriptGenerator {
         // 这样可以在调试时准确定位到原始代码中的数字字面量位置
         // 注意：优先使用 raw 值保持原始格式（如十六进制 0xFF）
         const numValue = node.raw || String(node.value)
-        this.addCodeAndMappings({type: Es6TokenName.NumericLiteral, name: Es6TokenName.NumericLiteral, value: numValue}, node.loc)
+        this.addCodeAndMappings({ type: Es6TokenName.NumericLiteral, name: Es6TokenName.NumericLiteral, value: numValue }, node.loc)
     }
 
     private static generatorStringLiteral(node: SlimeJavascriptStringLiteral) {
@@ -1549,7 +1549,7 @@ export default class SlimeJavascriptGenerator {
         // 注意：优先使用 raw 值保持原始格式（保留原始引号类型）
         // 如果没有 raw，使用单引号包裹 value
         const strValue = node.raw || `'${node.value}'`
-        this.addCodeAndMappings({type: Es6TokenName.StringLiteral, name: Es6TokenName.StringLiteral, value: strValue}, node.loc)
+        this.addCodeAndMappings({ type: Es6TokenName.StringLiteral, name: Es6TokenName.StringLiteral, value: strValue }, node.loc)
     }
 
     /**
@@ -1562,27 +1562,27 @@ export default class SlimeJavascriptGenerator {
 
         if (value === null) {
             // null 字面量
-            this.addCodeAndMappings({type: 'NullLiteral', name: 'NullLiteral', value: 'null'}, node.loc)
+            this.addCodeAndMappings({ type: 'NullLiteral', name: 'NullLiteral', value: 'null' }, node.loc)
         } else if (typeof value === 'boolean') {
             // boolean 字面量
             const boolValue = value ? 'true' : 'false'
-            this.addCodeAndMappings({type: 'BooleanLiteral', name: 'BooleanLiteral', value: boolValue}, node.loc)
+            this.addCodeAndMappings({ type: 'BooleanLiteral', name: 'BooleanLiteral', value: boolValue }, node.loc)
         } else if (typeof value === 'number') {
             // number 字面量（优先使用 raw 保持原始格式）
             const numValue = raw || String(value)
-            this.addCodeAndMappings({type: Es6TokenName.NumericLiteral, name: Es6TokenName.NumericLiteral, value: numValue}, node.loc)
+            this.addCodeAndMappings({ type: Es6TokenName.NumericLiteral, name: Es6TokenName.NumericLiteral, value: numValue }, node.loc)
         } else if (typeof value === 'string') {
             // string 字面量（优先使用 raw 保持原始引号格式）
             const strValue = raw || `'${value}'`
-            this.addCodeAndMappings({type: Es6TokenName.StringLiteral, name: Es6TokenName.StringLiteral, value: strValue}, node.loc)
+            this.addCodeAndMappings({ type: Es6TokenName.StringLiteral, name: Es6TokenName.StringLiteral, value: strValue }, node.loc)
         } else if (typeof value === 'bigint' || (raw && raw.endsWith('n'))) {
             // BigInt 字面量
             const bigintValue = raw || `${value}n`
-            this.addCodeAndMappings({type: 'BigIntLiteral', name: 'BigIntLiteral', value: bigintValue}, node.loc)
+            this.addCodeAndMappings({ type: 'BigIntLiteral', name: 'BigIntLiteral', value: bigintValue }, node.loc)
         } else if (value instanceof RegExp || (node as any).regex) {
             // RegExp 字面量
             const regexValue = raw || String(value)
-            this.addCodeAndMappings({type: 'RegularExpressionLiteral', name: 'RegularExpressionLiteral', value: regexValue}, node.loc)
+            this.addCodeAndMappings({ type: 'RegularExpressionLiteral', name: 'RegularExpressionLiteral', value: regexValue }, node.loc)
         } else {
             // 未知类型，尝试使用 raw 或 String(value)
             const fallbackValue = raw || String(value)
@@ -1600,7 +1600,7 @@ export default class SlimeJavascriptGenerator {
                 return null;  // 无效 loc，不创建映射
             }
 
-            const sourcePosition: SlimeJavascriptCodeLocation = {
+            const sourcePosition: SlimeCodeLocation = {
                 type: cstLocation.type,
                 index: cstLocation.start.index,
                 value: cstLocation.value,
@@ -1614,7 +1614,7 @@ export default class SlimeJavascriptGenerator {
         return null
     }
 
-    private static addCodeAndMappingsBySourcePosition(token: SubhutiCreateToken, sourcePosition: SlimeJavascriptCodeLocation) {
+    private static addCodeAndMappingsBySourcePosition(token: SubhutiCreateToken, sourcePosition: SlimeCodeLocation) {
 
 
         this.addMappings(token, sourcePosition)
@@ -1742,7 +1742,7 @@ export default class SlimeJavascriptGenerator {
     }
 
 
-    private static addMappings(generateToken: SubhutiCreateToken, sourcePosition: SlimeJavascriptCodeLocation) {
+    private static addMappings(generateToken: SubhutiCreateToken, sourcePosition: SlimeCodeLocation) {
         // 移除自动换行逻辑，让 Prettier 来处理格式化
         // 注释掉的代码会导致在不合适的位置插入换行（如 return 和返回值之间）
         // if (this.mappings.length) {
@@ -1752,7 +1752,7 @@ export default class SlimeJavascriptGenerator {
         //   }
         // }
 
-        let generate: SlimeJavascriptCodeLocation = {
+        let generate: SlimeCodeLocation = {
             type: generateToken.name,
             index: this.generateIndex,
             value: generateToken.value,

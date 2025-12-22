@@ -18,7 +18,7 @@ import type { SubhutiMatchToken } from 'subhuti'
 // 测试配置
 // ============================================
 
-const TEST_CODE = 'const a: number = 1'
+const TEST_CODE = 'const a = 1'
 const PARSE_MODE: 'module' | 'script' = 'script'
 
 // ============================================
