@@ -32,6 +32,7 @@ export * from './expression/BinaryExpressionCstToAst';
 export * from './expression/UnaryExpressionCstToAst';
 export * from './expression/MemberCallCstToAst';
 export * from './expression/PrimaryExpressionCstToAst';
+export * from './expression/ExpressionCstToAst';
 
 // literal
 export * from './literal/LiteralCstToAst';

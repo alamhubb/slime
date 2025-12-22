@@ -26,6 +26,9 @@ import { ParametersCstToAst } from "./cstToAst/converters/function/ParametersCst
 import { BinaryExpressionCstToAst } from "./cstToAst/converters/expression/BinaryExpressionCstToAst";
 import { UnaryExpressionCstToAst } from "./cstToAst/converters/expression/UnaryExpressionCstToAst";
 import { PrimaryExpressionCstToAst } from "./cstToAst/converters/expression/PrimaryExpressionCstToAst";
+import { MemberCallCstToAst } from "./cstToAst/converters/expression/MemberCallCstToAst";
+import { ExpressionCstToAst } from "./cstToAst/converters/expression/ExpressionCstToAst";
+import { IdentifierCstToAst } from "./cstToAst/converters/identifier/IdentifierCstToAst";
 import { PatternConvertCstToAst } from "./cstToAst/converters/pattern/PatternConvertCstToAst";
 import { BindingPatternCstToAst } from "./cstToAst/converters/pattern/BindingPatternCstToAst";
 import { LiteralCstToAst } from "./cstToAst/converters/literal/LiteralCstToAst";
@@ -40,315 +43,103 @@ export { SlimeAstUtils } from "./cstToAst/SlimeAstUtils";
  * CST 到 AST 转换器
  */
 export class SlimeCstToAst {
+    // ==================== 表达式相关转换方法 ====================
+
     /**
-     * MultiplicativeOperator CST �?AST
-     * MultiplicativeOperator -> * | / | %
+     * CoverParenthesizedExpressionAndArrowParameterList CST 转 AST - 委托给 ExpressionCstToAst
+     */
+    createCoverParenthesizedExpressionAndArrowParameterListAst(cst: SubhutiCst): SlimeExpression {
+        return ExpressionCstToAst.createCoverParenthesizedExpressionAndArrowParameterListAst(cst);
+    }
+
+    /**
+     * ParenthesizedExpression CST 转 AST - 委托给 ExpressionCstToAst
+     */
+    createParenthesizedExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return ExpressionCstToAst.createParenthesizedExpressionAst(cst);
+    }
+
+    /**
+     * ComputedPropertyName CST 转 AST - 委托给 ExpressionCstToAst
+     */
+    createComputedPropertyNameAst(cst: SubhutiCst): SlimeExpression {
+        return ExpressionCstToAst.createComputedPropertyNameAst(cst);
+    }
+
+    /**
+     * CoverInitializedName CST 转 AST - 委托给 ExpressionCstToAst
+     */
+    createCoverInitializedNameAst(cst: SubhutiCst): any {
+        return ExpressionCstToAst.createCoverInitializedNameAst(cst);
+    }
+
+    /**
+     * CoverCallExpressionAndAsyncArrowHead CST 转 AST - 委托给 ExpressionCstToAst
+     */
+    createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeExpression {
+        return ExpressionCstToAst.createCoverCallExpressionAndAsyncArrowHeadAst(cst);
+    }
+
+    /**
+     * CallMemberExpression CST 转 AST - 委托给 ExpressionCstToAst
+     */
+    createCallMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return ExpressionCstToAst.createCallMemberExpressionAst(cst);
+    }
+
+    /**
+     * ShortCircuitExpression CST 转 AST（透传）- 委托给 ExpressionCstToAst
+     */
+    createShortCircuitExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return ExpressionCstToAst.createShortCircuitExpressionAst(cst);
+    }
+
+    /**
+     * CoalesceExpressionHead CST 转 AST - 委托给 ExpressionCstToAst
+     */
+    createCoalesceExpressionHeadAst(cst: SubhutiCst): SlimeExpression {
+        return ExpressionCstToAst.createCoalesceExpressionHeadAst(cst);
+    }
+    /**
+     * MultiplicativeOperator CST 转 AST - 委托给 ExpressionCstToAst
      */
     createMultiplicativeOperatorAst(cst: SubhutiCst): string {
-        const token = cst.children?.[0]
-        return token?.value || '*'
+        return ExpressionCstToAst.createMultiplicativeOperatorAst(cst);
     }
 
     /**
-     * AssignmentOperator CST �?AST
-     * AssignmentOperator -> *= | /= | %= | += | -= | <<= | >>= | >>>= | &= | ^= | |= | **= | &&= | ||= | ??=
+     * AssignmentOperator CST 转 AST - 委托给 ExpressionCstToAst
      */
     createAssignmentOperatorAst(cst: SubhutiCst): string {
-        const token = cst.children?.[0]
-        return token?.value || '='
+        return ExpressionCstToAst.createAssignmentOperatorAst(cst);
     }
 
     /**
-     * ExpressionBody CST �?AST
-     * ExpressionBody -> AssignmentExpression
+     * ExpressionBody CST 转 AST - 委托给 ExpressionCstToAst
      */
     createExpressionBodyAst(cst: SubhutiCst): SlimeExpression {
-        const firstChild = cst.children?.[0]
-        if (firstChild) {
-            return this.createAssignmentExpressionAst(firstChild)
-        }
-        throw new Error('ExpressionBody has no children')
-    }
-
-    createExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const cached = this.expressionAstCache.get(cst)
-        if (cached) {
-            return cached
-        }
-        const result = this.createExpressionAstUncached(cst)
-        this.expressionAstCache.set(cst, result)
-        return result
-    }
-
-    createExpressionAstUncached(cst: SubhutiCst): SlimeExpression {
-        const astName = cst.name
-        let left
-        if (astName === SlimeParser.prototype.Expression?.name) {
-            // Expression 可能是逗号表达�?(SequenceExpression)
-            // 结构: Expression -> AssignmentExpression | Expression, AssignmentExpression
-            // 收集所有表达式
-            const expressions: SlimeExpression[] = []
-            for (const child of cst.children || []) {
-                if (child.name === 'Comma' || child.value === ',') {
-                    // 跳过逗号 token
-                    continue
-                }
-                expressions.push(this.createExpressionAst(child))
-            }
-
-            if (expressions.length === 1) {
-                // 单个表达式，直接返回
-                left = expressions[0]
-            } else if (expressions.length > 1) {
-                // 多个表达式，创建 SequenceExpression
-                left = {
-                    type: 'SequenceExpression',
-                    expressions: expressions,
-                    loc: cst.loc
-                } as any
-            } else {
-                throw new Error('Expression has no children')
-            }
-        } else if (astName === SlimeParser.prototype.Statement?.name) {
-            left = this.createStatementAst(cst)
-        } else if (astName === SlimeParser.prototype.AssignmentExpression?.name) {
-            left = this.createAssignmentExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.ConditionalExpression?.name) {
-            left = this.createConditionalExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.LogicalORExpression?.name) {
-            left = this.createLogicalORExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.LogicalANDExpression?.name) {
-            left = this.createLogicalANDExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.BitwiseORExpression?.name) {
-            left = this.createBitwiseORExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.BitwiseXORExpression?.name) {
-            left = this.createBitwiseXORExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.BitwiseANDExpression?.name) {
-            left = this.createBitwiseANDExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.EqualityExpression?.name) {
-            left = this.createEqualityExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.RelationalExpression?.name) {
-            left = this.createRelationalExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.ShiftExpression?.name) {
-            left = this.createShiftExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.AdditiveExpression?.name) {
-            left = this.createAdditiveExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.MultiplicativeExpression?.name) {
-            left = this.createMultiplicativeExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.UnaryExpression?.name) {
-            left = this.createUnaryExpressionAst(cst)
-        } else if (astName === 'PostfixExpression') {
-            left = this.createUpdateExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.UpdateExpression?.name || astName === 'UpdateExpression') {
-            left = this.createUpdateExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.LeftHandSideExpression?.name) {
-            left = this.createLeftHandSideExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.CallExpression?.name) {
-            left = this.createCallExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.NewExpression?.name) {
-            left = this.createNewExpressionAst(cst)
-        } else if (astName === 'NewMemberExpressionArguments') {
-            left = this.createNewExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.MemberExpression?.name) {
-            left = this.createMemberExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.PrimaryExpression?.name) {
-            left = this.createPrimaryExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.YieldExpression?.name) {
-            left = this.createYieldExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.AwaitExpression?.name) {
-            left = this.createAwaitExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.SuperProperty?.name) {
-            left = this.createSuperPropertyAst(cst)
-        } else if (astName === SlimeParser.prototype.MetaProperty?.name) {
-            left = this.createMetaPropertyAst(cst)
-        } else if (astName === 'ShortCircuitExpression') {
-            // ES2020: ShortCircuitExpression = LogicalORExpression | CoalesceExpression
-            // ShortCircuitExpression: LogicalANDExpression ShortCircuitExpressionTail?
-            left = this.createExpressionAst(cst.children[0])
-
-            // 检查是否有 ShortCircuitExpressionTail (|| 运算�?
-            if (cst.children.length > 1 && cst.children[1]) {
-                const tailCst = cst.children[1]
-                if (tailCst.name === 'ShortCircuitExpressionTail' ||
-                    tailCst.name === 'LogicalORExpressionTail') {
-                    // 处理尾部：可能是 LogicalORExpressionTail �?CoalesceExpressionTail
-                    left = this.createShortCircuitExpressionTailAst(left, tailCst)
-                }
-            }
-        } else if (astName === 'CoalesceExpression') {
-            // ES2020: CoalesceExpression (处理 ?? 运算�?
-            left = this.createCoalesceExpressionAst(cst)
-        } else if (astName === 'ExponentiationExpression') {
-            // ES2016: ExponentiationExpression (处理 ** 运算�?
-            left = this.createExponentiationExpressionAst(cst)
-        } else if (astName === 'CoverCallExpressionAndAsyncArrowHead') {
-            // ES2017+: Cover grammar for CallExpression and async arrow function
-            // In non-async-arrow context, this is a CallExpression
-            left = this.createCallExpressionAst(cst)
-        } else if (astName === 'OptionalExpression') {
-            // ES2020: Optional chaining (?.)
-            left = this.createOptionalExpressionAst(cst)
-        } else if (astName === SlimeParser.prototype.ArrowFunction?.name || astName === 'ArrowFunction') {
-            // 箭头函数
-            left = this.createArrowFunctionAst(cst)
-        } else if (astName === 'AsyncArrowFunction') {
-            // Async 箭头函数
-            left = this.createAsyncArrowFunctionAst(cst)
-        } else if (astName === SlimeParser.prototype.ImportCall?.name || astName === 'ImportCall') {
-            // ES2020: 动�?import()
-            left = this.createImportCallAst(cst)
-        } else if (astName === 'PrivateIdentifier') {
-            // ES2022: PrivateIdentifier (e.g. #x in `#x in obj`)
-            left = this.createPrivateIdentifierAst(cst)
-        } else {
-            throw new Error('Unsupported expression type: ' + cst.name)
-        }
-        return left
+        return ExpressionCstToAst.createExpressionBodyAst(cst, this.createAssignmentExpressionAst.bind(this));
     }
 
     /**
-     * 创建 OptionalExpression AST（ES2020�?
-     * 处理可选链语法 ?.
-     *
-     * OptionalExpression:
-     *   MemberExpression OptionalChain
-     *   CallExpression OptionalChain
-     *   OptionalExpression OptionalChain
+     * 创建 OptionalExpression AST（ES2020）- 委托给 MemberCallCstToAst
      */
     createOptionalExpressionAst(cst: SubhutiCst): SlimeExpression {
-        // OptionalExpression 结构�?
-        // children[0] = MemberExpression | CallExpression
-        // children[1...n] = OptionalChain
-
-        if (!cst.children || cst.children.length === 0) {
-            throw new Error('OptionalExpression: no children')
-        }
-
-        // 首先处理基础表达式（MemberExpression �?CallExpression�?
-        let result = this.createExpressionAst(cst.children[0])
-
-        // 处理 OptionalChain（可能有多个链式调用�?
-        for (let i = 1; i < cst.children.length; i++) {
-            const chainCst = cst.children[i]
-            if (chainCst.name === 'OptionalChain') {
-                result = this.createOptionalChainAst(result, chainCst)
-            }
-        }
-
-        return result
+        return MemberCallCstToAst.createOptionalExpressionAst(cst);
     }
 
     /**
-     * 创建 OptionalChain AST
-     * 处理 ?. 后的各种访问形式
-     *
-     * 注意：只有紧跟在 ?. 后面的操作是 optional: true
-     * 链式的后续操作（�?foo?.().bar() 中的 .bar()）是 optional: false
+     * 创建 OptionalChain AST - 委托给 MemberCallCstToAst
      */
     createOptionalChainAst(object: SlimeExpression, chainCst: SubhutiCst): SlimeExpression {
-        let result = object
-        // 追踪是否刚遇�??. token，下一个操作是 optional
-        let nextIsOptional = false
-
-        for (const child of chainCst.children) {
-            const name = child.name
-
-            if (name === 'OptionalChaining' || child.value === '?.') {
-                // 遇到 ?. token，下一个操作是 optional
-                nextIsOptional = true
-                continue
-            } else if (name === 'Arguments') {
-                // ()调用 - 可能是可选调用或普通调�?
-                const args = this.createArgumentsAst(child)
-                result = {
-                    type: SlimeNodeType.OptionalCallExpression,
-                    callee: result,
-                    arguments: args,
-                    optional: nextIsOptional,
-                    loc: chainCst.loc
-                } as any
-                nextIsOptional = false
-            } else if (name === 'LBracket' || child.value === '[') {
-                // [expr] 计算属性访�?- 可能是可选或普�?
-                // 下一个子节点是表达式，跳�?]
-                const exprIndex = chainCst.children.indexOf(child) + 1
-                if (exprIndex < chainCst.children.length) {
-                    const property = this.createExpressionAst(chainCst.children[exprIndex])
-                    result = {
-                        type: SlimeNodeType.OptionalMemberExpression,
-                        object: result,
-                        property: property,
-                        computed: true,
-                        optional: nextIsOptional,
-                        loc: chainCst.loc
-                    } as any
-                    nextIsOptional = false
-                }
-            } else if (name === 'IdentifierName') {
-                // .prop 属性访�?- 可能是可选或普�?
-                let property: SlimeIdentifier
-                // IdentifierName 内部包含一�?Identifier 或关键字 token
-                const tokenCst = child.children[0]
-                property = SlimeAstUtil.createIdentifier(tokenCst.value, tokenCst.loc)
-                result = {
-                    type: SlimeNodeType.OptionalMemberExpression,
-                    object: result,
-                    property: property,
-                    computed: false,
-                    optional: nextIsOptional,
-                    loc: chainCst.loc
-                } as any
-                nextIsOptional = false
-            } else if (name === 'Dot' || child.value === '.') {
-                // 普�?. token 不改�?optional 状�?
-                continue
-            } else if (name === 'RBracket' || child.value === ']') {
-                // 跳过 ] token
-                continue
-            } else if (name === 'PrivateIdentifier') {
-                // #prop - 私有属性访�?
-                const property = this.createPrivateIdentifierAst(child)
-                result = {
-                    type: SlimeNodeType.OptionalMemberExpression,
-                    object: result,
-                    property: property,
-                    computed: false,
-                    optional: nextIsOptional,
-                    loc: chainCst.loc
-                } as any
-                nextIsOptional = false
-            } else if (name === 'Expression') {
-                // 计算属性的表达式部分，已在 LBracket 处理中处�?
-                continue
-            }
-        }
-
-        return result
+        return MemberCallCstToAst.createOptionalChainAst(object, chainCst);
     }
 
     /**
-     * 创建 CoalesceExpression AST（ES2020�?
-     * 处理 ?? 空值合并运算符
+     * 创建 CoalesceExpression AST（ES2020）- 委托给 MemberCallCstToAst
      */
     createCoalesceExpressionAst(cst: SubhutiCst): SlimeExpression {
-        // CoalesceExpression -> BitwiseORExpression ( ?? BitwiseORExpression )*
-        if (cst.children.length === 1) {
-            return this.createExpressionAst(cst.children[0])
-        }
-
-        // 有多个子节点，构建左结合的逻辑表达�?
-        let left = this.createExpressionAst(cst.children[0])
-        for (let i = 1; i < cst.children.length; i += 2) {
-            const operator = cst.children[i]  // ?? token
-            const right = this.createExpressionAst(cst.children[i + 1])
-            left = {
-                type: SlimeNodeType.LogicalExpression,
-                operator: '??',
-                left: left,
-                right: right
-            } as any
-        }
-        return left
+        return MemberCallCstToAst.createCoalesceExpressionAst(cst);
     }
 
     // ============================================
@@ -615,11 +406,47 @@ export class SlimeCstToAst {
 
 
     // ============================================
+    // 标识符相关 - 委托给 IdentifierCstToAst
+    // ============================================
+
+    createIdentifierAst(cst: SubhutiCst): any {
+        return IdentifierCstToAst.createIdentifierAst(cst);
+    }
+
+    createIdentifierReferenceAst(cst: SubhutiCst): any {
+        // IdentifierReference 通常包含一个 Identifier
+        if (cst.children && cst.children.length > 0) {
+            return IdentifierCstToAst.createIdentifierAst(cst.children[0]);
+        }
+        return IdentifierCstToAst.createIdentifierAst(cst);
+    }
+
+    createPrivateIdentifierAst(cst: SubhutiCst): any {
+        return IdentifierCstToAst.createPrivateIdentifierAst(cst);
+    }
+
+    createMetaPropertyAst(cst: SubhutiCst): any {
+        return IdentifierCstToAst.createMetaPropertyAst(cst);
+    }
+
+    createSuperPropertyAst(cst: SubhutiCst): any {
+        return IdentifierCstToAst.createSuperPropertyAst(cst);
+    }
+
+    // ============================================
+    // 成员/调用表达式相关 - 委托给 MemberCallCstToAst
+    // ============================================
+
+    createArgumentsAst(cst: SubhutiCst): SlimeExpression[] {
+        return MemberCallCstToAst.createArgumentsAst(cst);
+    }
+
+    // ============================================
     // 以下方法需要后续实现
     // ============================================
 
     createBindingIdentifierAst(cst: SubhutiCst): SlimePattern {
-        throw new Error('createBindingIdentifierAst not implemented');
+        return IdentifierCstToAst.createBindingIdentifierAst(cst) as SlimePattern;
     }
 
     createFormalParameterListAst(cst: SubhutiCst): SlimePattern[] {
@@ -656,10 +483,6 @@ export class SlimeCstToAst {
 
     createExpressionAst(cst: SubhutiCst): SlimeExpression {
         throw new Error('createExpressionAst not implemented');
-    }
-
-    createIdentifierAst(cst: SubhutiCst): any {
-        throw new Error('createIdentifierAst not implemented');
     }
 
     createBindingPatternAst(cst: SubhutiCst): SlimePattern {
@@ -716,6 +539,26 @@ export class SlimeCstToAst {
 
     createAsyncGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
         throw new Error('createAsyncGeneratorExpressionAst not implemented');
+    }
+
+    createStatementAst(cst: SubhutiCst): any {
+        throw new Error('createStatementAst not implemented');
+    }
+
+    createCallExpressionAst(cst: SubhutiCst): SlimeExpression {
+        throw new Error('createCallExpressionAst not implemented');
+    }
+
+    createNewExpressionAst(cst: SubhutiCst): SlimeExpression {
+        throw new Error('createNewExpressionAst not implemented');
+    }
+
+    createMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
+        throw new Error('createMemberExpressionAst not implemented');
+    }
+
+    createImportCallAst(cst: SubhutiCst): SlimeExpression {
+        throw new Error('createImportCallAst not implemented');
     }
 }
 
