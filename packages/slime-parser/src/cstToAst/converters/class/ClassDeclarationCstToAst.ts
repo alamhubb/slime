@@ -1,6 +1,6 @@
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeNodeType, SlimeTokenCreate, SlimeClassDeclaration, SlimeClassExpression, SlimeClassBody, SlimeExpression, SlimeIdentifier } from "slime-ast";
-import { checkCstName, SlimeCstToAst } from "../../../SlimeCstToAstUtil.ts";
+import SlimeCstToAstUtil, { checkCstName } from "../../../SlimeCstToAstUtil.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
 /**
@@ -17,7 +17,7 @@ export class ClassDeclarationCstToAst {
     /**
      * 创建 ClassDeclaration AST
      */
-    static createClassDeclarationAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeClassDeclaration {
+    static createClassDeclarationAst(cst: SubhutiCst): SlimeClassDeclaration {
         // 检查 CST 节点名称是否为 ClassDeclaration
         const astName = checkCstName(cst, SlimeParser.prototype.ClassDeclaration?.name);
 
@@ -32,7 +32,7 @@ export class ClassDeclarationCstToAst {
             if (name === 'Class' || child.value === 'class') {
                 classToken = SlimeTokenCreate.createClassToken(child.loc)
             } else if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
-                id = util.createBindingIdentifierAst(child)
+                id = SlimeCstToAstUtil.createBindingIdentifierAst(child)
             } else if (name === SlimeParser.prototype.ClassTail?.name || name === 'ClassTail') {
                 classTailCst = child
             }
@@ -44,7 +44,7 @@ export class ClassDeclarationCstToAst {
         }
 
         // 解析 ClassTail，获取类体和父类信息
-        const classTailResult = this.createClassTailAst(classTailCst, util)
+        const classTailResult = this.createClassTailAst(classTailCst)
 
         // 创建类声明 AST 节点（id 可能为 null，用于匿名类）
         const ast = SlimeAstUtil.createClassDeclaration(
@@ -59,17 +59,17 @@ export class ClassDeclarationCstToAst {
     /**
      * 创建 ClassExpression AST
      */
-    static createClassExpressionAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeClassExpression {
+    static createClassExpressionAst(cst: SubhutiCst): SlimeClassExpression {
         const astName = checkCstName(cst, SlimeParser.prototype.ClassExpression?.name);
 
         let id: SlimeIdentifier | null = null // class 表达式可选的标识符
         let tailStartIndex = 1 // 默认 ClassTail 位于索引 1
         const nextChild = cst.children[1]
         if (nextChild && nextChild.name === SlimeParser.prototype.BindingIdentifier?.name) {
-            id = util.createBindingIdentifierAst(nextChild) // 若存在标识符则解析
+            id = SlimeCstToAstUtil.createBindingIdentifierAst(nextChild) // 若存在标识符则解析
             tailStartIndex = 2 // ClassTail 的位置后移
         }
-        const classTail = this.createClassTailAst(cst.children[tailStartIndex], util) // 统一解析 ClassTail
+        const classTail = this.createClassTailAst(cst.children[tailStartIndex]) // 统一解析 ClassTail
 
         return SlimeAstUtil.createClassExpression(id, classTail.superClass, classTail.body, cst.loc) // 生成 ClassExpression AST
     }
@@ -77,7 +77,7 @@ export class ClassDeclarationCstToAst {
     /**
      * 创建 ClassTail AST
      */
-    static createClassTailAst(cst: SubhutiCst, util: SlimeCstToAst): {
+    static createClassTailAst(cst: SubhutiCst): {
         superClass: SlimeExpression | null;
         body: SlimeClassBody;
         extendsToken?: any;
@@ -95,11 +95,11 @@ export class ClassDeclarationCstToAst {
         // 遍历 children 找到 ClassHeritage 和 ClassBody
         for (const child of cst.children) {
             if (child.name === SlimeParser.prototype.ClassHeritage?.name) {
-                const heritageResult = this.createClassHeritageAstWithToken(child, util)
+                const heritageResult = this.createClassHeritageAstWithToken(child)
                 superClass = heritageResult.superClass
                 extendsToken = heritageResult.extendsToken
             } else if (child.name === SlimeParser.prototype.ClassBody?.name) {
-                body = util.createClassBodyAst(child)
+                body = SlimeCstToAstUtil.createClassBodyAst(child)
             } else if (child.name === 'LBrace' || child.value === '{') {
                 lBraceToken = SlimeTokenCreate.createLBraceToken(child.loc)
             } else if (child.name === 'RBrace' || child.value === '}') {
@@ -119,15 +119,15 @@ export class ClassDeclarationCstToAst {
     /**
      * 创建 ClassHeritage AST
      */
-    static createClassHeritageAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeExpression {
+    static createClassHeritageAst(cst: SubhutiCst): SlimeExpression {
         const astName = checkCstName(cst, SlimeParser.prototype.ClassHeritage?.name);
-        return util.createLeftHandSideExpressionAst(cst.children[1]) // ClassHeritage -> extends + LeftHandSideExpression
+        return SlimeCstToAstUtil.createLeftHandSideExpressionAst(cst.children[1]) // ClassHeritage -> extends + LeftHandSideExpression
     }
 
     /**
      * 创建 ClassHeritage AST（带 token）
      */
-    static createClassHeritageAstWithToken(cst: SubhutiCst, util: SlimeCstToAst): { superClass: SlimeExpression; extendsToken?: any } {
+    static createClassHeritageAstWithToken(cst: SubhutiCst): { superClass: SlimeExpression; extendsToken?: any } {
         const astName = checkCstName(cst, SlimeParser.prototype.ClassHeritage?.name);
         let extendsToken: any = undefined
 
@@ -137,7 +137,7 @@ export class ClassDeclarationCstToAst {
             extendsToken = SlimeTokenCreate.createExtendsToken(extendsCst.loc)
         }
 
-        const superClass = util.createLeftHandSideExpressionAst(cst.children[1])
+        const superClass = SlimeCstToAstUtil.createLeftHandSideExpressionAst(cst.children[1])
         return { superClass, extendsToken }
     }
 }

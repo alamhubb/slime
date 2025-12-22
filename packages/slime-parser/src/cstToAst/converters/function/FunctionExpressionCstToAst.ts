@@ -1,6 +1,6 @@
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeNodeType, SlimeTokenCreate, SlimeBlockStatement, SlimeFunctionExpression, SlimeFunctionDeclaration, SlimeIdentifier, SlimeFunctionParam, SlimeStatement, SlimePattern, SlimeRestElement } from "slime-ast";
-import { checkCstName, SlimeCstToAst } from "../../../SlimeCstToAstUtil.ts";
+import SlimeCstToAstUtil, { checkCstName } from "../../../SlimeCstToAstUtil.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
 /**
@@ -26,7 +26,7 @@ export class FunctionExpressionCstToAst {
     /**
      * 创建 FunctionExpression AST
      */
-    static createFunctionExpressionAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeFunctionExpression {
+    static createFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
         checkCstName(cst, SlimeParser.prototype.FunctionExpression?.name);
 
         let isAsync = false;
@@ -80,17 +80,17 @@ export class FunctionExpressionCstToAst {
             }
 
             if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
-                functionId = util.createBindingIdentifierAst(child)
+                functionId = SlimeCstToAstUtil.createBindingIdentifierAst(child)
                 continue
             }
 
             if (name === SlimeParser.prototype.FormalParameters?.name || name === 'FormalParameters') {
-                params = util.createFormalParametersAstWrapped(child)
+                params = SlimeCstToAstUtil.createFormalParametersAstWrapped(child)
                 continue
             }
 
             if (name === SlimeParser.prototype.FunctionBody?.name || name === 'FunctionBody') {
-                const bodyStatements = this.createFunctionBodyAst(child, util)
+                const bodyStatements = this.createFunctionBodyAst(child)
                 body = SlimeAstUtil.createBlockStatement(bodyStatements, child.loc)
                 continue
             }
@@ -111,7 +111,7 @@ export class FunctionExpressionCstToAst {
     /**
      * 创建 FunctionBody AST
      */
-    static createFunctionBodyAst(cst: SubhutiCst, util: SlimeCstToAst): Array<SlimeStatement> {
+    static createFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
         const children = cst.children || []
 
         if (children.length === 0) {
@@ -126,24 +126,24 @@ export class FunctionExpressionCstToAst {
         const name = first.name
 
         if (name === 'FunctionBody' || name === SlimeParser.prototype.FunctionBody?.name) {
-            return this.createFunctionBodyAst(first, util)
+            return this.createFunctionBodyAst(first)
         }
 
         if (name === 'FunctionStatementList' || name === SlimeParser.prototype.FunctionStatementList?.name) {
-            return this.createFunctionStatementListAst(first, util)
+            return this.createFunctionStatementListAst(first)
         }
 
         if (name === 'StatementList' || name === SlimeParser.prototype.StatementList?.name) {
-            return util.createStatementListAst(first)
+            return SlimeCstToAstUtil.createStatementListAst(first)
         }
 
-        return util.createStatementListAst(first)
+        return SlimeCstToAstUtil.createStatementListAst(first)
     }
 
     /**
      * 创建 FunctionStatementList AST
      */
-    static createFunctionStatementListAst(cst: SubhutiCst, util: SlimeCstToAst): Array<SlimeStatement> {
+    static createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
         const children = cst.children || []
 
         if (children.length === 0) {
@@ -156,19 +156,19 @@ export class FunctionExpressionCstToAst {
         }
 
         if (first.name === 'StatementList' || first.name === SlimeParser.prototype.StatementList?.name) {
-            return util.createStatementListAst(first)
+            return SlimeCstToAstUtil.createStatementListAst(first)
         }
 
-        return util.createStatementListItemAst(first)
+        return SlimeCstToAstUtil.createStatementListItemAst(first)
     }
 
     /**
      * 创建 AsyncFunctionBody AST（透传）
      */
-    static createAsyncFunctionBodyAst(cst: SubhutiCst, util: SlimeCstToAst): Array<SlimeStatement> {
+    static createAsyncFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
         const firstChild = cst.children?.[0]
         if (firstChild) {
-            return this.createFunctionBodyAst(firstChild, util)
+            return this.createFunctionBodyAst(firstChild)
         }
         return []
     }
@@ -176,10 +176,10 @@ export class FunctionExpressionCstToAst {
     /**
      * 创建 GeneratorBody AST（透传）
      */
-    static createGeneratorBodyAst(cst: SubhutiCst, util: SlimeCstToAst): Array<SlimeStatement> {
+    static createGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
         const firstChild = cst.children?.[0]
         if (firstChild) {
-            return this.createFunctionBodyAst(firstChild, util)
+            return this.createFunctionBodyAst(firstChild)
         }
         return []
     }
@@ -187,10 +187,10 @@ export class FunctionExpressionCstToAst {
     /**
      * 创建 AsyncGeneratorBody AST（透传）
      */
-    static createAsyncGeneratorBodyAst(cst: SubhutiCst, util: SlimeCstToAst): Array<SlimeStatement> {
+    static createAsyncGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
         const firstChild = cst.children?.[0]
         if (firstChild) {
-            return this.createFunctionBodyAst(firstChild, util)
+            return this.createFunctionBodyAst(firstChild)
         }
         return []
     }
@@ -198,7 +198,7 @@ export class FunctionExpressionCstToAst {
     /**
      * 创建 GeneratorDeclaration AST
      */
-    static createGeneratorDeclarationAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeFunctionDeclaration {
+    static createGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
         let id: SlimeIdentifier | null = null
         let params: SlimeFunctionParam[] = []
         let body: SlimeBlockStatement
@@ -206,7 +206,7 @@ export class FunctionExpressionCstToAst {
         const bindingId = cst.children.find(ch =>
             ch.name === SlimeParser.prototype.BindingIdentifier?.name || ch.name === 'BindingIdentifier')
         if (bindingId) {
-            id = util.createBindingIdentifierAst(bindingId)
+            id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingId)
         }
 
         const formalParams = cst.children.find(ch =>
@@ -214,9 +214,9 @@ export class FunctionExpressionCstToAst {
             ch.name === SlimeParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
         if (formalParams) {
             if (formalParams.name === 'FormalParameters' || formalParams.name === SlimeParser.prototype.FormalParameters?.name) {
-                params = util.createFormalParametersAstWrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParametersAstWrapped(formalParams)
             } else {
-                params = util.createFormalParameterListFromEs2025Wrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParameterListFromEs2025Wrapped(formalParams)
             }
         }
 
@@ -224,7 +224,7 @@ export class FunctionExpressionCstToAst {
             ch.name === 'GeneratorBody' || ch.name === SlimeParser.prototype.GeneratorBody?.name ||
             ch.name === 'FunctionBody' || ch.name === SlimeParser.prototype.FunctionBody?.name)
         if (bodyNode) {
-            const bodyStatements = this.createFunctionBodyAst(bodyNode, util)
+            const bodyStatements = this.createFunctionBodyAst(bodyNode)
             body = SlimeAstUtil.createBlockStatement(bodyStatements, bodyNode.loc)
         } else {
             body = SlimeAstUtil.createBlockStatement([])
@@ -244,7 +244,7 @@ export class FunctionExpressionCstToAst {
     /**
      * 创建 AsyncFunctionDeclaration AST
      */
-    static createAsyncFunctionDeclarationAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeFunctionDeclaration {
+    static createAsyncFunctionDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
         let id: SlimeIdentifier | null = null
         let params: SlimeFunctionParam[] = []
         let body: SlimeBlockStatement
@@ -252,7 +252,7 @@ export class FunctionExpressionCstToAst {
         const bindingId = cst.children.find(ch =>
             ch.name === SlimeParser.prototype.BindingIdentifier?.name || ch.name === 'BindingIdentifier')
         if (bindingId) {
-            id = util.createBindingIdentifierAst(bindingId)
+            id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingId)
         }
 
         const formalParams = cst.children.find(ch =>
@@ -260,9 +260,9 @@ export class FunctionExpressionCstToAst {
             ch.name === SlimeParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
         if (formalParams) {
             if (formalParams.name === 'FormalParameters' || formalParams.name === SlimeParser.prototype.FormalParameters?.name) {
-                params = util.createFormalParametersAstWrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParametersAstWrapped(formalParams)
             } else {
-                params = util.createFormalParameterListAstWrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParameterListAstWrapped(formalParams)
             }
         }
 
@@ -270,7 +270,7 @@ export class FunctionExpressionCstToAst {
             ch.name === 'AsyncFunctionBody' || ch.name === SlimeParser.prototype.AsyncFunctionBody?.name ||
             ch.name === 'FunctionBody' || ch.name === SlimeParser.prototype.FunctionBody?.name)
         if (bodyNode) {
-            const bodyStatements = this.createFunctionBodyAst(bodyNode, util)
+            const bodyStatements = this.createFunctionBodyAst(bodyNode)
             body = SlimeAstUtil.createBlockStatement(bodyStatements, bodyNode.loc)
         } else {
             body = SlimeAstUtil.createBlockStatement([])
@@ -282,7 +282,7 @@ export class FunctionExpressionCstToAst {
     /**
      * 创建 AsyncGeneratorDeclaration AST
      */
-    static createAsyncGeneratorDeclarationAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeFunctionDeclaration {
+    static createAsyncGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
         let id: SlimeIdentifier | null = null
         let params: SlimeFunctionParam[] = []
         let body: SlimeBlockStatement
@@ -290,7 +290,7 @@ export class FunctionExpressionCstToAst {
         const bindingId = cst.children.find(ch =>
             ch.name === SlimeParser.prototype.BindingIdentifier?.name || ch.name === 'BindingIdentifier')
         if (bindingId) {
-            id = util.createBindingIdentifierAst(bindingId)
+            id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingId)
         }
 
         const formalParams = cst.children.find(ch =>
@@ -298,9 +298,9 @@ export class FunctionExpressionCstToAst {
             ch.name === SlimeParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
         if (formalParams) {
             if (formalParams.name === 'FormalParameters' || formalParams.name === SlimeParser.prototype.FormalParameters?.name) {
-                params = util.createFormalParametersAstWrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParametersAstWrapped(formalParams)
             } else {
-                params = util.createFormalParameterListFromEs2025Wrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParameterListFromEs2025Wrapped(formalParams)
             }
         }
 
@@ -308,7 +308,7 @@ export class FunctionExpressionCstToAst {
             ch.name === 'AsyncGeneratorBody' || ch.name === SlimeParser.prototype.AsyncGeneratorBody?.name ||
             ch.name === 'FunctionBody' || ch.name === SlimeParser.prototype.FunctionBody?.name)
         if (bodyNode) {
-            const bodyStatements = this.createFunctionBodyAst(bodyNode, util)
+            const bodyStatements = this.createFunctionBodyAst(bodyNode)
             body = SlimeAstUtil.createBlockStatement(bodyStatements, bodyNode.loc)
         } else {
             body = SlimeAstUtil.createBlockStatement([])

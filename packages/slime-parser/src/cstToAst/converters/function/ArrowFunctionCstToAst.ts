@@ -1,6 +1,6 @@
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeNodeType, SlimeTokenCreate, SlimeBlockStatement, SlimeArrowFunctionExpression, SlimeExpression, SlimePattern, SlimeFunctionParam } from "slime-ast";
-import { checkCstName, SlimeCstToAst } from "../../../SlimeCstToAstUtil.ts";
+import SlimeCstToAstUtil, { checkCstName } from "../../../SlimeCstToAstUtil.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
 /**
@@ -21,7 +21,7 @@ export class ArrowFunctionCstToAst {
     /**
      * 创建箭头函数 AST
      */
-    static createArrowFunctionAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeArrowFunctionExpression {
+    static createArrowFunctionAst(cst: SubhutiCst): SlimeArrowFunctionExpression {
         checkCstName(cst, SlimeParser.prototype.ArrowFunction?.name);
 
         let asyncToken: any = undefined
@@ -52,7 +52,7 @@ export class ArrowFunctionCstToAst {
 
         let params: SlimeFunctionParam[];
         if (arrowParametersCst.name === SlimeParser.prototype.BindingIdentifier?.name) {
-            params = [{ param: util.createBindingIdentifierAst(arrowParametersCst) }]
+            params = [{ param: SlimeCstToAstUtil.createBindingIdentifierAst(arrowParametersCst) }]
         } else if (arrowParametersCst.name === SlimeParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name) {
             for (const child of arrowParametersCst.children || []) {
                 if (child.name === 'LParen' || child.value === '(') {
@@ -63,7 +63,7 @@ export class ArrowFunctionCstToAst {
                     commaTokens.push(SlimeTokenCreate.createCommaToken(child.loc))
                 }
             }
-            const rawParams = util.createArrowParametersFromCoverGrammar(arrowParametersCst)
+            const rawParams = SlimeCstToAstUtil.createArrowParametersFromCoverGrammar(arrowParametersCst)
             params = rawParams.map((p, i) => ({
                 param: p,
                 commaToken: commaTokens[i]
@@ -81,7 +81,7 @@ export class ArrowFunctionCstToAst {
                     }
                 }
             }
-            const rawParams = this.createArrowParametersAst(arrowParametersCst, util)
+            const rawParams = this.createArrowParametersAst(arrowParametersCst)
             params = rawParams.map((p, i) => ({
                 param: p,
                 commaToken: commaTokens[i]
@@ -90,7 +90,7 @@ export class ArrowFunctionCstToAst {
             throw new Error(`createArrowFunctionAst: 不支持的参数类型 ${arrowParametersCst.name}`)
         }
 
-        const body = this.createConciseBodyAst(conciseBodyCst, util)
+        const body = this.createConciseBodyAst(conciseBodyCst)
 
         return SlimeAstUtil.createArrowFunctionExpression(
             body, params, body.type !== SlimeNodeType.BlockStatement, isAsync, cst.loc,
@@ -102,16 +102,16 @@ export class ArrowFunctionCstToAst {
     /**
      * 创建 ArrowParameters AST
      */
-    static createArrowParametersAst(cst: SubhutiCst, util: SlimeCstToAst): SlimePattern[] {
+    static createArrowParametersAst(cst: SubhutiCst): SlimePattern[] {
         const firstChild = cst.children?.[0]
         if (!firstChild) return []
 
         if (firstChild.name === SlimeParser.prototype.BindingIdentifier?.name || firstChild.name === 'BindingIdentifier') {
-            return [util.createBindingIdentifierAst(firstChild)]
+            return [SlimeCstToAstUtil.createBindingIdentifierAst(firstChild)]
         }
 
         if (firstChild.name === SlimeParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name) {
-            return util.createArrowParametersFromCoverGrammar(firstChild)
+            return SlimeCstToAstUtil.createArrowParametersFromCoverGrammar(firstChild)
         }
 
         return []
@@ -120,7 +120,7 @@ export class ArrowFunctionCstToAst {
     /**
      * 创建 ArrowFormalParameters AST
      */
-    static createArrowFormalParametersAst(cst: SubhutiCst, util: SlimeCstToAst): SlimePattern[] {
+    static createArrowFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
         const params: SlimePattern[] = []
 
         for (const child of cst.children || []) {
@@ -131,15 +131,15 @@ export class ArrowFunctionCstToAst {
             }
 
             if (child.name === SlimeParser.prototype.UniqueFormalParameters?.name || child.name === 'UniqueFormalParameters') {
-                return util.createFormalParametersAst(child.children?.[0] || child)
+                return SlimeCstToAstUtil.createFormalParametersAst(child.children?.[0] || child)
             }
 
             if (child.name === SlimeParser.prototype.FormalParameters?.name || child.name === 'FormalParameters') {
-                return util.createFormalParametersAst(child)
+                return SlimeCstToAstUtil.createFormalParametersAst(child)
             }
 
             if (child.name === SlimeParser.prototype.BindingIdentifier?.name || child.name === 'BindingIdentifier') {
-                params.push(util.createBindingIdentifierAst(child))
+                params.push(SlimeCstToAstUtil.createBindingIdentifierAst(child))
             }
         }
 
@@ -149,7 +149,7 @@ export class ArrowFunctionCstToAst {
     /**
      * 创建 ConciseBody AST
      */
-    static createConciseBodyAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeExpression | SlimeBlockStatement {
+    static createConciseBodyAst(cst: SubhutiCst): SlimeExpression | SlimeBlockStatement {
         const firstChild = cst.children?.[0]
         if (!firstChild) {
             return SlimeAstUtil.createBlockStatement([])
@@ -158,12 +158,12 @@ export class ArrowFunctionCstToAst {
         if (firstChild.name === SlimeParser.prototype.ExpressionBody?.name || firstChild.name === 'ExpressionBody') {
             const exprChild = firstChild.children?.[0]
             if (exprChild) {
-                return util.createExpressionAst(exprChild)
+                return SlimeCstToAstUtil.createExpressionAst(exprChild)
             }
         }
 
         if (firstChild.name === SlimeParser.prototype.FunctionBody?.name || firstChild.name === 'FunctionBody') {
-            const statements = util.createFunctionBodyAst(firstChild)
+            const statements = SlimeCstToAstUtil.createFunctionBodyAst(firstChild)
             return SlimeAstUtil.createBlockStatement(statements, firstChild.loc)
         }
 
@@ -172,19 +172,19 @@ export class ArrowFunctionCstToAst {
                 ch.name === SlimeParser.prototype.FunctionBody?.name || ch.name === 'FunctionBody'
             )
             if (bodyChild) {
-                const statements = util.createFunctionBodyAst(bodyChild)
+                const statements = SlimeCstToAstUtil.createFunctionBodyAst(bodyChild)
                 return SlimeAstUtil.createBlockStatement(statements, cst.loc)
             }
             return SlimeAstUtil.createBlockStatement([])
         }
 
-        return util.createExpressionAst(firstChild)
+        return SlimeCstToAstUtil.createExpressionAst(firstChild)
     }
 
     /**
      * 创建 AsyncConciseBody AST（透传）
      */
-    static createAsyncConciseBodyAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeExpression | SlimeBlockStatement {
-        return this.createConciseBodyAst(cst, util)
+    static createAsyncConciseBodyAst(cst: SubhutiCst): SlimeExpression | SlimeBlockStatement {
+        return this.createConciseBodyAst(cst)
     }
 }

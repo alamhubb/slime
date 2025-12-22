@@ -1,6 +1,6 @@
 import { SubhutiCst } from "subhuti";
 import { SlimeNodeType, SlimePattern, SlimeRestElement } from "slime-ast";
-import { checkCstName, SlimeCstToAst } from "../../../SlimeCstToAstUtil.ts";
+import SlimeCstToAstUtil, { checkCstName } from "../../../SlimeCstToAstUtil.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
 /**
@@ -18,7 +18,7 @@ export class ParametersCstToAst {
     /**
      * 处理 FormalParameters CST 节点
      */
-    static createFormalParametersAst(cst: SubhutiCst, util: SlimeCstToAst): SlimePattern[] {
+    static createFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
         if (!cst.children || cst.children.length === 0) {
             return []
         }
@@ -29,26 +29,26 @@ export class ParametersCstToAst {
             const name = child.name
 
             if (name === SlimeParser.prototype.FormalParameterList?.name || name === 'FormalParameterList') {
-                return this.createFormalParameterListAst(child, util)
+                return this.createFormalParameterListAst(child)
             }
 
             if (name === SlimeParser.prototype.FormalParameter?.name || name === 'FormalParameter') {
-                params.push(this.createFormalParameterAst(child, util))
+                params.push(this.createFormalParameterAst(child))
                 continue
             }
 
             if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
-                params.push(util.createBindingIdentifierAst(child))
+                params.push(SlimeCstToAstUtil.createBindingIdentifierAst(child))
                 continue
             }
 
             if (name === SlimeParser.prototype.BindingElement?.name || name === 'BindingElement') {
-                params.push(util.createBindingElementAst(child))
+                params.push(SlimeCstToAstUtil.createBindingElementAst(child))
                 continue
             }
 
             if (name === SlimeParser.prototype.FunctionRestParameter?.name || name === 'FunctionRestParameter') {
-                params.push(this.createFunctionRestParameterAst(child, util))
+                params.push(this.createFunctionRestParameterAst(child))
                 continue
             }
 
@@ -64,7 +64,7 @@ export class ParametersCstToAst {
     /**
      * 创建 FormalParameterList AST
      */
-    static createFormalParameterListAst(cst: SubhutiCst, util: SlimeCstToAst): SlimePattern[] {
+    static createFormalParameterListAst(cst: SubhutiCst): SlimePattern[] {
         checkCstName(cst, SlimeParser.prototype.FormalParameterList?.name);
 
         if (!cst.children || cst.children.length === 0) {
@@ -77,22 +77,22 @@ export class ParametersCstToAst {
             const name = child.name
 
             if (name === 'FunctionRestParameter' || name === SlimeParser.prototype.FunctionRestParameter?.name) {
-                params.push(this.createFunctionRestParameterAst(child, util))
+                params.push(this.createFunctionRestParameterAst(child))
                 continue
             }
 
             if (name === 'FormalParameter' || name === SlimeParser.prototype.FormalParameter?.name) {
-                params.push(this.createFormalParameterAst(child, util))
+                params.push(this.createFormalParameterAst(child))
                 continue
             }
 
             if (name === 'BindingElement' || name === SlimeParser.prototype.BindingElement?.name) {
-                params.push(util.createBindingElementAst(child))
+                params.push(SlimeCstToAstUtil.createBindingElementAst(child))
                 continue
             }
 
             if (name === 'BindingIdentifier' || name === SlimeParser.prototype.BindingIdentifier?.name) {
-                params.push(util.createBindingIdentifierAst(child))
+                params.push(SlimeCstToAstUtil.createBindingIdentifierAst(child))
                 continue
             }
 
@@ -107,30 +107,30 @@ export class ParametersCstToAst {
     /**
      * 创建 FormalParameter AST
      */
-    static createFormalParameterAst(cst: SubhutiCst, util: SlimeCstToAst): SlimePattern {
+    static createFormalParameterAst(cst: SubhutiCst): SlimePattern {
         const first = cst.children[0]
         if (first.name === 'BindingElement' || first.name === SlimeParser.prototype.BindingElement?.name) {
-            return util.createBindingElementAst(first)
+            return SlimeCstToAstUtil.createBindingElementAst(first)
         }
-        return util.createBindingElementAst(cst)
+        return SlimeCstToAstUtil.createBindingElementAst(cst)
     }
 
     /**
      * 创建 FunctionRestParameter AST
      */
-    static createFunctionRestParameterAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeRestElement {
+    static createFunctionRestParameterAst(cst: SubhutiCst): SlimeRestElement {
         checkCstName(cst, SlimeParser.prototype.FunctionRestParameter?.name);
         const first = cst.children[0]
-        return util.createBindingRestElementAst(first)
+        return SlimeCstToAstUtil.createBindingRestElementAst(first)
     }
 
     /**
      * 创建 UniqueFormalParameters AST（透传）
      */
-    static createUniqueFormalParametersAst(cst: SubhutiCst, util: SlimeCstToAst): SlimePattern[] {
+    static createUniqueFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
         const firstChild = cst.children?.[0]
         if (firstChild) {
-            return this.createFormalParametersAst(firstChild, util)
+            return this.createFormalParametersAst(firstChild)
         }
         return []
     }

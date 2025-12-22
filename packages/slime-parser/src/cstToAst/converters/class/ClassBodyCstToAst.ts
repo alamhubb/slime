@@ -1,6 +1,6 @@
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeNodeType, SlimeTokenCreate, SlimeClassBody, SlimeMethodDefinition, SlimePropertyDefinition, SlimeStatement } from "slime-ast";
-import { checkCstName, SlimeCstToAst } from "../../../SlimeCstToAstUtil.ts";
+import SlimeCstToAstUtil, { checkCstName } from "../../../SlimeCstToAstUtil.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
 /**
@@ -20,7 +20,7 @@ export class ClassBodyCstToAst {
     /**
      * 创建 ClassBody AST
      */
-    static createClassBodyAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeClassBody {
+    static createClassBodyAst(cst: SubhutiCst): SlimeClassBody {
         const astName = checkCstName(cst, SlimeParser.prototype.ClassBody?.name);
         const elementsWrapper = cst.children && cst.children[0] // ClassBody -> ClassElementList?，第一项为列表容器
         const body: Array<SlimeMethodDefinition | SlimePropertyDefinition | any> = [] // 收集类成员 (any 用于 StaticBlock)
@@ -54,7 +54,7 @@ export class ClassBodyCstToAst {
 
                 // 处理静态块
                 if (classStaticBlockCst) {
-                    const staticBlock = this.createClassStaticBlockAst(classStaticBlockCst, util)
+                    const staticBlock = this.createClassStaticBlockAst(classStaticBlockCst)
                     if (staticBlock) {
                         body.push(staticBlock)
                     }
@@ -65,9 +65,9 @@ export class ClassBodyCstToAst {
                 if (targetCst) {
                     // 根据成员类型直接调用对应方法
                     if (targetCst.name === SlimeParser.prototype.MethodDefinition?.name) {
-                        body.push(util.createMethodDefinitionAst(staticCst, targetCst))
+                        body.push(SlimeCstToAstUtil.createMethodDefinitionAst(staticCst, targetCst))
                     } else if (targetCst.name === SlimeParser.prototype.FieldDefinition?.name) {
-                        body.push(util.createFieldDefinitionAst(staticCst, targetCst))
+                        body.push(SlimeCstToAstUtil.createFieldDefinitionAst(staticCst, targetCst))
                     }
                 }
             }
@@ -82,11 +82,11 @@ export class ClassBodyCstToAst {
     /**
      * 创建 ClassElementList AST
      */
-    static createClassElementListAst(cst: SubhutiCst, util: SlimeCstToAst): any[] {
+    static createClassElementListAst(cst: SubhutiCst): any[] {
         const elements: any[] = []
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.ClassElement?.name || child.name === 'ClassElement') {
-                const element = this.createClassElementAst(child, util)
+                const element = this.createClassElementAst(child)
                 if (element) {
                     elements.push(element)
                 }
@@ -98,7 +98,7 @@ export class ClassBodyCstToAst {
     /**
      * 创建 ClassElement AST
      */
-    static createClassElementAst(cst: SubhutiCst, util: SlimeCstToAst): any {
+    static createClassElementAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
         if (!firstChild) return null
 
@@ -116,13 +116,13 @@ export class ClassBodyCstToAst {
         // 根据类型处理
         if (actualChild.name === SlimeParser.prototype.MethodDefinition?.name ||
             actualChild.name === 'MethodDefinition') {
-            return util.createMethodDefinitionAst(staticCst, actualChild)
+            return SlimeCstToAstUtil.createMethodDefinitionAst(staticCst, actualChild)
         } else if (actualChild.name === SlimeParser.prototype.FieldDefinition?.name ||
             actualChild.name === 'FieldDefinition') {
-            return util.createFieldDefinitionAst(staticCst, actualChild)
+            return SlimeCstToAstUtil.createFieldDefinitionAst(staticCst, actualChild)
         } else if (actualChild.name === SlimeParser.prototype.ClassStaticBlock?.name ||
             actualChild.name === 'ClassStaticBlock') {
-            return this.createClassStaticBlockAst(actualChild, util)
+            return this.createClassStaticBlockAst(actualChild)
         }
 
         return null
@@ -132,7 +132,7 @@ export class ClassBodyCstToAst {
      * 创建 ClassStaticBlock AST (ES2022)
      * ClassStaticBlock: static { ClassStaticBlockBody }
      */
-    static createClassStaticBlockAst(cst: SubhutiCst, util: SlimeCstToAst): any {
+    static createClassStaticBlockAst(cst: SubhutiCst): any {
         // CST 结构: ClassStaticBlock -> [IdentifierName:"static", LBrace, ClassStaticBlockBody, RBrace]
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined
@@ -153,7 +153,7 @@ export class ClassBodyCstToAst {
                         ? stmtListCst.children?.find((c: any) => c.name === 'StatementList')
                         : stmtListCst
                     if (actualStatementList) {
-                        bodyStatements = util.createStatementListAst(actualStatementList)
+                        bodyStatements = SlimeCstToAstUtil.createStatementListAst(actualStatementList)
                     }
                 }
             }
@@ -165,13 +165,13 @@ export class ClassBodyCstToAst {
     /**
      * 创建 ClassStaticBlockBody AST
      */
-    static createClassStaticBlockBodyAst(cst: SubhutiCst, util: SlimeCstToAst): Array<SlimeStatement> {
+    static createClassStaticBlockBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
         const stmtList = cst.children?.find(ch =>
             ch.name === 'ClassStaticBlockStatementList' ||
             ch.name === SlimeParser.prototype.ClassStaticBlockStatementList?.name
         )
         if (stmtList) {
-            return this.createClassStaticBlockStatementListAst(stmtList, util)
+            return this.createClassStaticBlockStatementListAst(stmtList)
         }
         return []
     }
@@ -179,12 +179,12 @@ export class ClassBodyCstToAst {
     /**
      * 创建 ClassStaticBlockStatementList AST
      */
-    static createClassStaticBlockStatementListAst(cst: SubhutiCst, util: SlimeCstToAst): Array<SlimeStatement> {
+    static createClassStaticBlockStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
         const stmtList = cst.children?.find(ch =>
             ch.name === 'StatementList' || ch.name === SlimeParser.prototype.StatementList?.name
         )
         if (stmtList) {
-            return util.createStatementListAst(stmtList)
+            return SlimeCstToAstUtil.createStatementListAst(stmtList)
         }
         return []
     }

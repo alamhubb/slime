@@ -1,545 +1,158 @@
 import { SubhutiCst } from "subhuti";
-import {
-    SlimeExpression,
-    SlimeAstUtil,
-    SlimeTokenCreate,
-    SlimeNodeType,
-    SlimeCallArgument,
-    SlimeSuper,
-    SlimeIdentifier
-} from "slime-ast";
-import { checkCstName, SlimeCstToAst } from "../../SlimeCstToAstUtil.ts";
+import { SlimeExpression, SlimeAstUtil, SlimeNodeType } from "slime-ast";
+import SlimeCstToAstUtil, { checkCstName } from "../../SlimeCstToAstUtil.ts";
 import SlimeParser from "../../SlimeParser.ts";
 
 export class MemberCallCstToAst {
 
-    static createCallExpressionAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeExpression {
-        const isCallExpr = cst.name === SlimeParser.prototype.CallExpression?.name || cst.name === 'CallExpression';
-        const isCoverExpr = cst.name === 'CoverCallExpressionAndAsyncArrowHead';
+    static createCallExpressionAst(cst: SubhutiCst): SlimeExpression {
+        checkCstName(cst, SlimeParser.prototype.CallExpression?.name || 'CallExpression');
 
-        if (!isCallExpr && !isCoverExpr) {
-            throw new Error(`createCallExpressionAst: Expected CallExpression or CoverCallExpressionAndAsyncArrowHead, got ${cst.name}`);
+        if (cst.children!.length === 1) {
+            return SlimeCstToAstUtil.createExpressionAst(cst.children![0]);
         }
 
-        if (cst.children && cst.children.length === 1) {
-            const first = cst.children[0];
-            if (first.name === SlimeParser.prototype.SuperCall?.name) {
-                return util.createSuperCallAst(first);
-            }
-            return util.createExpressionAst(first);
-        }
+        const callee = SlimeCstToAstUtil.createExpressionAst(cst.children![0]);
+        const args = MemberCallCstToAst.createArgumentsAst(cst.children![1]);
 
-        let current: SlimeExpression;
-        const firstChild = cst.children![0];
+        return SlimeAstUtil.createCallExpression(callee, args, cst.loc) as SlimeExpression;
+    }
 
-        if (firstChild.name === 'CoverCallExpressionAndAsyncArrowHead') {
-            current = MemberCallCstToAst.createCallExpressionAst(firstChild, util);
-        } else if (firstChild.name === SlimeParser.prototype.MemberExpression?.name || firstChild.name === 'MemberExpression') {
-            current = util.createMemberExpressionAst(firstChild);
-        } else if (firstChild.name === SlimeParser.prototype.SuperCall?.name || firstChild.name === 'SuperCall') {
-            current = util.createSuperCallAst(firstChild);
-        } else if (firstChild.name === SlimeParser.prototype.ImportCall?.name || firstChild.name === 'ImportCall') {
-            current = util.createImportCallAst(firstChild);
+    static createSuperCallAst(cst: SubhutiCst): SlimeExpression {
+        const args = MemberCallCstToAst.createArgumentsAst(cst.children![1]);
+        return SlimeAstUtil.createSuperCall(args, cst.loc) as SlimeExpression;
+    }
+
+    static createImportCallAst(cst: SubhutiCst): SlimeExpression {
+        const source = SlimeCstToAstUtil.createExpressionAst(cst.children![2]);
+        return SlimeAstUtil.createImportCall(source, cst.loc) as SlimeExpression;
+    }
+
+    static createSuperPropertyAst(cst: SubhutiCst): SlimeExpression {
+        let property;
+        let computed = false;
+
+        if (cst.children![1].value === '[') {
+            computed = true;
+            property = SlimeCstToAstUtil.createExpressionAst(cst.children![2]);
         } else {
-            current = util.createExpressionAst(firstChild);
+            property = SlimeCstToAstUtil.createIdentifierNameAst(cst.children![2]);
         }
 
-        for (let i = 1; i < cst.children!.length; i++) {
+        return SlimeAstUtil.createSuperProperty(property, computed, cst.loc) as SlimeExpression;
+    }
+
+    static createMetaPropertyAst(cst: SubhutiCst): SlimeExpression {
+        const meta = SlimeCstToAstUtil.createIdentifierAst(cst.children![0]);
+        const property = SlimeCstToAstUtil.createIdentifierAst(cst.children![2]);
+        return SlimeAstUtil.createMetaProperty(meta, property, cst.loc) as SlimeExpression;
+    }
+
+    static createArgumentsAst(cst: SubhutiCst): any[] {
+        if (cst.children!.length <= 2) return [];
+        return MemberCallCstToAst.createArgumentListAst(cst.children![1]);
+    }
+
+    static createArgumentListAst(cst: SubhutiCst): any[] {
+        const result = [];
+        for (let i = 0; i < cst.children!.length; i += 2) {
             const child = cst.children![i];
-
-            if (child.name === SlimeParser.prototype.Arguments?.name || child.name === 'Arguments') {
-                const args = MemberCallCstToAst.createArgumentsAst(child, util);
-                current = SlimeAstUtil.createCallExpression(current, args) as SlimeExpression;
-            } else if (child.name === 'DotMemberExpression') {
-                const dotChild = child.children![0];
-                const identifierNameCst = child.children![1];
-                const tokenCst = identifierNameCst.children![0];
-                const property = SlimeAstUtil.createIdentifier(tokenCst.value as string, tokenCst.loc);
-                const dotOp = SlimeTokenCreate.createDotToken(dotChild.loc);
-                current = SlimeAstUtil.createMemberExpression(current, dotOp, property);
-            } else if (child.name === 'Dot') {
-                const dotOp = SlimeTokenCreate.createDotToken(child.loc);
-                const nextChild = cst.children![i + 1];
-                let property: SlimeIdentifier | null = null;
-                if (nextChild) {
-                    if (nextChild.name === SlimeParser.prototype.IdentifierName?.name || nextChild.name === 'IdentifierName') {
-                        const tokenCst = nextChild.children![0];
-                        property = SlimeAstUtil.createIdentifier(tokenCst.value as string, tokenCst.loc);
-                        i++;
-                    } else if (nextChild.name === 'PrivateIdentifier') {
-                        property = util.createPrivateIdentifierAst(nextChild);
-                        i++;
-                    }
-                }
-                current = SlimeAstUtil.createMemberExpression(current, dotOp, property);
-            } else if (child.name === 'BracketExpression') {
-                const propertyExpression = util.createExpressionAst(child.children![1]);
-                current = {
-                    type: SlimeNodeType.MemberExpression,
-                    object: current,
-                    property: propertyExpression,
-                    computed: true,
-                    optional: false,
-                    loc: cst.loc
-                } as any;
-            } else if (child.name === 'LBracket') {
-                const expressionChild = cst.children![i + 1];
-                if (expressionChild && expressionChild.name !== 'RBracket') {
-                    const propertyExpression = util.createExpressionAst(expressionChild);
-                    current = {
-                        type: SlimeNodeType.MemberExpression,
-                        object: current,
-                        property: propertyExpression,
-                        computed: true,
-                        optional: false,
-                        loc: cst.loc
-                    } as any;
-                    i += 2;
-                }
-            } else if (child.name === SlimeParser.prototype.TemplateLiteral?.name || child.name === 'TemplateLiteral') {
-                const quasi = util.createTemplateLiteralAst(child);
-                current = {
-                    type: 'TaggedTemplateExpression',
-                    tag: current,
-                    quasi: quasi,
-                    loc: cst.loc
-                } as any;
-            }
-        }
-
-        return current;
-    }
-
-    static createSuperCallAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeExpression {
-        checkCstName(cst, SlimeParser.prototype.SuperCall?.name || 'SuperCall');
-        const argumentsCst = cst.children![1];
-        const argumentsAst = MemberCallCstToAst.createArgumentsAst(argumentsCst, util);
-
-        const superNode: SlimeSuper = {
-            type: "Super",
-            loc: cst.children![0].loc
-        };
-
-        return SlimeAstUtil.createCallExpression(superNode, argumentsAst) as SlimeExpression;
-    }
-
-    static createImportCallAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeExpression {
-        checkCstName(cst, SlimeParser.prototype.ImportCall?.name || 'ImportCall');
-        const args: SlimeCallArgument[] = [];
-
-        for (const child of cst.children!) {
-            if (child.name === SlimeParser.prototype.AssignmentExpression?.name) {
-                const expr = util.createAssignmentExpressionAst(child);
-                args.push(SlimeAstUtil.createCallArgument(expr));
-            }
-        }
-
-        const importIdentifier: SlimeIdentifier = SlimeAstUtil.createIdentifier('import', cst.children![0].loc);
-        return SlimeAstUtil.createCallExpression(importIdentifier, args) as SlimeExpression;
-    }
-
-    static createSuperPropertyAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeExpression {
-        const superNode: SlimeSuper = {
-            type: "Super",
-            loc: cst.children![0].loc
-        };
-
-        const second = cst.children![1];
-        if (second.name === 'BracketExpression') {
-            const propertyExpression = util.createExpressionAst(second.children![1]);
-            return {
-                type: SlimeNodeType.MemberExpression,
-                object: superNode,
-                property: propertyExpression,
-                computed: true,
-                optional: false,
-                loc: cst.loc
-            } as any;
-        } else if (second.name === 'LBracket') {
-            const expressionCst = cst.children![2];
-            const propertyExpression = util.createExpressionAst(expressionCst);
-            return {
-                type: SlimeNodeType.MemberExpression,
-                object: superNode,
-                property: propertyExpression,
-                computed: true,
-                optional: false,
-                loc: cst.loc
-            } as any;
-        } else if (second.name === 'Dot') {
-            const identifierNameCst = cst.children![2];
-            let property: SlimeIdentifier;
-            if (identifierNameCst.name === 'IdentifierName' || identifierNameCst.name === SlimeParser.prototype.IdentifierName?.name) {
-                const tokenCst = identifierNameCst.children![0];
-                property = SlimeAstUtil.createIdentifier(tokenCst.value as string, tokenCst.loc);
+            if (child.name === 'SpreadElement') {
+                result.push({
+                    type: SlimeNodeType.SpreadElement,
+                    argument: SlimeCstToAstUtil.createExpressionAst(child.children![1]),
+                    loc: child.loc
+                });
             } else {
-                property = SlimeAstUtil.createIdentifier(identifierNameCst.value as string, identifierNameCst.loc);
-            }
-
-            return {
-                type: SlimeNodeType.MemberExpression,
-                object: superNode,
-                property: property,
-                computed: false,
-                optional: false,
-                loc: cst.loc
-            } as any;
-        } else {
-            const propToken = cst.children![2];
-            const property = SlimeAstUtil.createIdentifier(propToken.value as string, propToken.loc);
-
-            return {
-                type: SlimeNodeType.MemberExpression,
-                object: superNode,
-                property: property,
-                computed: false,
-                optional: false,
-                loc: cst.loc
-            } as any;
-        }
-    }
-
-    static createMetaPropertyAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeExpression {
-        const first = cst.children![0];
-        if (first.name === SlimeParser.prototype.NewTarget?.name) {
-            return {
-                type: 'MetaProperty',
-                meta: SlimeAstUtil.createIdentifier('new', first.loc),
-                property: SlimeAstUtil.createIdentifier('target', first.loc),
-                loc: cst.loc
-            } as any;
-        } else {
-            return {
-                type: 'MetaProperty',
-                meta: SlimeAstUtil.createIdentifier('import', first.loc),
-                property: SlimeAstUtil.createIdentifier('meta', first.loc),
-                loc: cst.loc
-            } as any;
-        }
-    }
-
-    static createArgumentsAst(cst: SubhutiCst, util: SlimeCstToAst): Array<SlimeCallArgument> {
-        checkCstName(cst, SlimeParser.prototype.Arguments?.name || 'Arguments');
-        const first1 = cst.children![1];
-        if (first1 && first1.name === SlimeParser.prototype.ArgumentList?.name) {
-            return MemberCallCstToAst.createArgumentListAst(first1, util);
-        }
-        return [];
-    }
-
-    static createArgumentListAst(cst: SubhutiCst, util: SlimeCstToAst): Array<SlimeCallArgument> {
-        checkCstName(cst, SlimeParser.prototype.ArgumentList?.name || 'ArgumentList');
-        const arguments_: Array<SlimeCallArgument> = [];
-
-        let currentArg: SlimeExpression | any = null;
-        let hasArg = false;
-        let pendingEllipsis: SubhutiCst | null = null;
-
-        for (let i = 0; i < cst.children!.length; i++) {
-            const child = cst.children![i];
-
-            if (child.name === 'Ellipsis') {
-                pendingEllipsis = child;
-            } else if (child.name === SlimeParser.prototype.AssignmentExpression?.name) {
-                if (hasArg) {
-                    arguments_.push(SlimeAstUtil.createCallArgument(currentArg, undefined));
-                }
-
-                const expr = util.createAssignmentExpressionAst(child);
-                if (pendingEllipsis) {
-                    const ellipsisToken = SlimeTokenCreate.createEllipsisToken(pendingEllipsis.loc);
-                    currentArg = SlimeAstUtil.createSpreadElement(expr, child.loc, ellipsisToken);
-                    pendingEllipsis = null;
-                } else {
-                    currentArg = expr;
-                }
-                hasArg = true;
-            } else if (child.name === SlimeParser.prototype.SpreadElement?.name) {
-                if (hasArg) {
-                    arguments_.push(SlimeAstUtil.createCallArgument(currentArg, undefined));
-                }
-                currentArg = util.createSpreadElementAst(child);
-                hasArg = true;
-            } else if (child.name === 'Comma' || child.value === ',') {
-                const commaToken = SlimeTokenCreate.createCommaToken(child.loc);
-                if (hasArg) {
-                    arguments_.push(SlimeAstUtil.createCallArgument(currentArg, commaToken));
-                    hasArg = false;
-                    currentArg = null;
-                }
+                result.push(SlimeCstToAstUtil.createExpressionAst(child));
             }
         }
-
-        if (hasArg) {
-            arguments_.push(SlimeAstUtil.createCallArgument(currentArg, undefined));
-        }
-
-        return arguments_;
+        return result;
     }
 
-    static createMemberExpressionFirstOr(cst: SubhutiCst, util: SlimeCstToAst): SlimeExpression | SlimeSuper {
-        if (cst.name === SlimeParser.prototype.PrimaryExpression?.name || cst.name === 'PrimaryExpression') {
-            return util.createPrimaryExpressionAst(cst);
-        } else if (cst.name === SlimeParser.prototype.SuperProperty?.name || cst.name === 'SuperProperty') {
-            return MemberCallCstToAst.createSuperPropertyAst(cst, util);
-        } else if (cst.name === SlimeParser.prototype.MetaProperty?.name || cst.name === 'MetaProperty') {
-            return MemberCallCstToAst.createMetaPropertyAst(cst, util);
-        } else if (cst.name === 'NewMemberExpressionArguments') {
-            return MemberCallCstToAst.createNewExpressionAst(cst, util);
-        } else {
-            throw new Error('createMemberExpressionFirstOr: Unsupported type: ' + cst.name);
-        }
+    static createMemberExpressionFirstOr(cst: SubhutiCst): SlimeExpression {
+        const name = cst.name;
+        if (name === 'PrimaryExpression') return SlimeCstToAstUtil.createPrimaryExpressionAst(cst);
+        if (name === 'MemberExpression') return MemberCallCstToAst.createMemberExpressionAst(cst);
+        if (name === 'SuperProperty') return MemberCallCstToAst.createSuperPropertyAst(cst);
+        if (name === 'MetaProperty') return MemberCallCstToAst.createMetaPropertyAst(cst);
+        if (name === 'NewExpression') return MemberCallCstToAst.createNewExpressionAst(cst);
+        return SlimeCstToAstUtil.createExpressionAst(cst);
     }
 
-    static createNewExpressionAst(cst: SubhutiCst, util: SlimeCstToAst): any {
-        const isNewMemberExpr = cst.name === 'NewMemberExpressionArguments';
-        const isNewExpr = cst.name === SlimeParser.prototype.NewExpression?.name || cst.name === 'NewExpression';
+    static createNewExpressionAst(cst: SubhutiCst): SlimeExpression {
+        checkCstName(cst, SlimeParser.prototype.NewExpression?.name || 'NewExpression');
 
-        if (!isNewMemberExpr && !isNewExpr) {
-            throw new Error('createNewExpressionAst: Unsupported type ' + cst.name);
+        if (cst.children![0].value === 'new') {
+            const callee = MemberCallCstToAst.createMemberExpressionFirstOr(cst.children![1]);
+            const args = cst.children![2] ? MemberCallCstToAst.createArgumentsAst(cst.children![2]) : [];
+            return SlimeAstUtil.createNewExpression(callee, args, cst.loc) as SlimeExpression;
         }
 
-        if (isNewMemberExpr) {
-            let newToken: any = undefined;
-            let lParenToken: any = undefined;
-            let rParenToken: any = undefined;
-
-            const newCst = cst.children![0];
-            if (newCst && (newCst.name === 'New' || newCst.value === 'new')) {
-                newToken = SlimeTokenCreate.createNewToken(newCst.loc);
-            }
-
-            const argsCst = cst.children![2];
-            if (argsCst && argsCst.children) {
-                for (const child of argsCst.children) {
-                    if (child.name === 'LParen' || child.value === '(') {
-                        lParenToken = SlimeTokenCreate.createLParenToken(child.loc);
-                    } else if (child.name === 'RParen' || child.value === ')') {
-                        rParenToken = SlimeTokenCreate.createRParenToken(child.loc);
-                    }
-                }
-            }
-
-            const calleeExpression = MemberCallCstToAst.createMemberExpressionAst(cst.children![1], util);
-            const args = MemberCallCstToAst.createArgumentsAst(cst.children![2], util);
-
-            return SlimeAstUtil.createNewExpression(
-                calleeExpression, args, cst.loc,
-                newToken, lParenToken, rParenToken
-            );
-        } else {
-            const firstChild = cst.children![0];
-            if (firstChild.name === 'New' || firstChild.value === 'new') {
-                const newToken = SlimeTokenCreate.createNewToken(firstChild.loc);
-                const innerNewExpr = cst.children![1];
-                const calleeExpression = MemberCallCstToAst.createNewExpressionAst(innerNewExpr, util);
-
-                return SlimeAstUtil.createNewExpression(
-                    calleeExpression, [], cst.loc,
-                    newToken, undefined, undefined
-                );
-            } else {
-                return util.createExpressionAst(firstChild);
-            }
-        }
+        return MemberCallCstToAst.createMemberExpressionAst(cst.children![0]);
     }
 
-    static createMemberExpressionAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeExpression {
+    static createMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
         checkCstName(cst, SlimeParser.prototype.MemberExpression?.name || 'MemberExpression');
 
-        if (!cst.children || cst.children.length === 0) {
-            throw new Error('MemberExpression has no children');
+        if (cst.children && cst.children.length > 1) {
+            let left = MemberCallCstToAst.createMemberExpressionFirstOr(cst.children[0]);
+
+            for (let i = 1; i < cst.children.length; i++) {
+                const part = cst.children[i];
+
+                if (part.name === 'MemberExpressionPart') {
+                    const op = part.children![0];
+                    if (op.value === '[') {
+                        const property = SlimeCstToAstUtil.createExpressionAst(part.children![1]);
+                        left = SlimeAstUtil.createMemberExpression(left, property, true, part.loc) as SlimeExpression;
+                    } else if (op.value === '.') {
+                        const property = SlimeCstToAstUtil.createIdentifierNameAst(part.children![1]);
+                        left = SlimeAstUtil.createMemberExpression(left, property, false, part.loc) as SlimeExpression;
+                    }
+                } else if (part.name === 'TemplateLiteral') {
+                    const quasi = SlimeCstToAstUtil.createTemplateLiteralAst(part);
+                    left = SlimeAstUtil.createTaggedTemplateExpression(left, quasi, part.loc) as SlimeExpression;
+                }
+            }
+            return left;
         }
+
+        return MemberCallCstToAst.createMemberExpressionFirstOr(cst.children![0]);
+    }
+
+    static createOptionalExpressionAst(cst: SubhutiCst): SlimeExpression {
+        checkCstName(cst, SlimeParser.prototype.OptionalExpression?.name || 'OptionalExpression');
+
+        let object = SlimeCstToAstUtil.createExpressionAst(cst.children![0]);
+        return MemberCallCstToAst.createOptionalChainAst(cst.children![1], object);
+    }
+
+    static createOptionalChainAst(cst: SubhutiCst, object: SlimeExpression): SlimeExpression {
+        const isOptional = cst.children![0].value === '?.';
+        const part = isOptional ? cst.children![1] : cst.children![0];
 
         let current: SlimeExpression;
-        let startIdx = 1;
-
-        if (cst.children[0].name === 'New') {
-            const newCst = cst.children[0];
-            const memberExprCst = cst.children[1];
-            const argsCst = cst.children[2];
-
-            const callee = MemberCallCstToAst.createMemberExpressionAst(memberExprCst, util);
-            const args = argsCst ? MemberCallCstToAst.createArgumentsAst(argsCst, util) : [];
-
-            const newToken = SlimeTokenCreate.createNewToken(newCst.loc);
-            let lParenToken: any = undefined;
-            let rParenToken: any = undefined;
-
-            if (argsCst && argsCst.children) {
-                for (const child of argsCst.children) {
-                    if (child.name === 'LParen' || child.value === '(') {
-                        lParenToken = SlimeTokenCreate.createLParenToken(child.loc);
-                    } else if (child.name === 'RParen' || child.value === ')') {
-                        rParenToken = SlimeTokenCreate.createRParenToken(child.loc);
-                    }
-                }
-            }
-
-            current = {
-                type: 'NewExpression',
-                callee: callee,
-                arguments: args,
-                newToken: newToken,
-                lParenToken: lParenToken,
-                rParenToken: rParenToken,
-                loc: cst.loc
-            } as any;
-
-            startIdx = 3;
+        if (part.name === 'Arguments') {
+            const args = MemberCallCstToAst.createArgumentsAst(part);
+            current = SlimeAstUtil.createOptionalCallExpression(object, args, isOptional, cst.loc) as SlimeExpression;
+        } else if (part.value === '[') {
+            const property = SlimeCstToAstUtil.createExpressionAst(isOptional ? cst.children![2] : cst.children![1]);
+            current = SlimeAstUtil.createOptionalMemberExpression(object, property, true, isOptional, cst.loc) as SlimeExpression;
+        } else if (part.name === 'IdentifierName') {
+            const property = SlimeCstToAstUtil.createIdentifierNameAst(part);
+            current = SlimeAstUtil.createOptionalMemberExpression(object, property, false, isOptional, cst.loc) as SlimeExpression;
         } else {
-            current = MemberCallCstToAst.createMemberExpressionFirstOr(cst.children[0], util) as SlimeExpression;
+            // IdentifierName maybe?
+            const property = SlimeCstToAstUtil.createIdentifierNameAst(part);
+            current = SlimeAstUtil.createOptionalMemberExpression(object, property, false, isOptional, cst.loc) as SlimeExpression;
         }
 
-        for (let i = startIdx; i < cst.children.length; i++) {
-            const child = cst.children[i];
-
-            if (child.name === 'DotIdentifier') {
-                const dotToken = SlimeTokenCreate.createDotToken(child.children![0].loc);
-                let property: SlimeIdentifier | null = null;
-                if (child.children![1]) {
-                    const identifierNameCst = child.children![1];
-                    if (identifierNameCst.name === SlimeParser.prototype.IdentifierName?.name) {
-                        const tokenCst = identifierNameCst.children![0];
-                        property = SlimeAstUtil.createIdentifier(tokenCst.value as string, tokenCst.loc);
-                    } else {
-                        property = util.createIdentifierAst(identifierNameCst);
-                    }
-                }
-                current = SlimeAstUtil.createMemberExpression(current, dotToken, property as SlimeIdentifier);
-            } else if (child.name === 'Dot') {
-                const dotToken = SlimeTokenCreate.createDotToken(child.loc);
-                const nextChild = cst.children[i + 1];
-                let property: SlimeIdentifier | null = null;
-                if (nextChild) {
-                    if (nextChild.name === SlimeParser.prototype.IdentifierName?.name || nextChild.name === 'IdentifierName') {
-                        const tokenCst = nextChild.children![0];
-                        property = SlimeAstUtil.createIdentifier(tokenCst.value as string, tokenCst.loc);
-                        i++;
-                    } else if (nextChild.name === 'PrivateIdentifier') {
-                        property = util.createPrivateIdentifierAst(nextChild);
-                        i++;
-                    }
-                }
-                current = SlimeAstUtil.createMemberExpression(current, dotToken, property as SlimeIdentifier);
-            } else if (child.name === 'BracketExpression') {
-                const propertyExpression = util.createExpressionAst(child.children![1]);
-                current = {
-                    type: SlimeNodeType.MemberExpression,
-                    object: current,
-                    property: propertyExpression,
-                    computed: true,
-                    optional: false,
-                    loc: cst.loc
-                } as any;
-            } else if (child.name === 'LBracket') {
-                const expressionChild = cst.children[i + 1];
-                if (expressionChild) {
-                    const propertyExpression = util.createExpressionAst(expressionChild);
-                    current = {
-                        type: SlimeNodeType.MemberExpression,
-                        object: current,
-                        property: propertyExpression,
-                        computed: true,
-                        optional: false,
-                        loc: cst.loc
-                    } as any;
-                    i += 2;
-                }
-            } else if (child.name === SlimeParser.prototype.Arguments?.name || child.name === 'Arguments') {
-                const args = MemberCallCstToAst.createArgumentsAst(child, util);
-                current = SlimeAstUtil.createCallExpression(current, args) as SlimeExpression;
-            } else if (child.name === SlimeParser.prototype.TemplateLiteral?.name || child.name === 'TemplateLiteral') {
-                const quasi = util.createTemplateLiteralAst(child);
-                current = {
-                    type: 'TaggedTemplateExpression',
-                    tag: current,
-                    quasi: quasi,
-                    loc: cst.loc
-                } as any;
-            }
+        const nextChain = isOptional ? cst.children![cst.children!.length - 1] : cst.children![cst.children!.length - 1];
+        if (nextChain && nextChain.name === 'OptionalChain') {
+            return MemberCallCstToAst.createOptionalChainAst(nextChain, current);
         }
 
         return current;
-    }
-
-    static createOptionalExpressionAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeExpression {
-        if (!cst.children || cst.children.length === 0) {
-            throw new Error('OptionalExpression: no children');
-        }
-
-        let result = util.createExpressionAst(cst.children[0]);
-
-        for (let i = 1; i < cst.children.length; i++) {
-            const chainCst = cst.children[i];
-            if (chainCst.name === 'OptionalChain') {
-                result = MemberCallCstToAst.createOptionalChainAst(result, chainCst, util);
-            }
-        }
-
-        return result;
-    }
-
-    static createOptionalChainAst(object: SlimeExpression, chainCst: SubhutiCst, util: SlimeCstToAst): SlimeExpression {
-        let result = object;
-        let nextIsOptional = false;
-
-        for (const child of chainCst.children!) {
-            const name = child.name;
-
-            if (name === 'OptionalChaining' || child.value === '?.') {
-                nextIsOptional = true;
-                continue;
-            } else if (name === 'Arguments') {
-                const args = MemberCallCstToAst.createArgumentsAst(child, util);
-                result = {
-                    type: SlimeNodeType.OptionalCallExpression,
-                    callee: result,
-                    arguments: args,
-                    optional: nextIsOptional,
-                    loc: chainCst.loc
-                } as any;
-                nextIsOptional = false;
-            } else if (name === 'LBracket' || child.value === '[') {
-                const exprIndex = chainCst.children!.indexOf(child) + 1;
-                if (exprIndex < chainCst.children!.length) {
-                    const property = util.createExpressionAst(chainCst.children![exprIndex]);
-                    result = {
-                        type: SlimeNodeType.OptionalMemberExpression,
-                        object: result,
-                        property: property,
-                        computed: true,
-                        optional: nextIsOptional,
-                        loc: chainCst.loc
-                    } as any;
-                    nextIsOptional = false;
-                }
-            } else if (name === 'IdentifierName') {
-                const tokenCst = child.children![0];
-                const property = SlimeAstUtil.createIdentifier(tokenCst.value as string, tokenCst.loc);
-                result = {
-                    type: SlimeNodeType.OptionalMemberExpression,
-                    object: result,
-                    property: property,
-                    computed: false,
-                    optional: nextIsOptional,
-                    loc: chainCst.loc
-                } as any;
-                nextIsOptional = false;
-            } else if (name === 'PrivateIdentifier') {
-                const property = util.createPrivateIdentifierAst(child);
-                result = {
-                    type: SlimeNodeType.OptionalMemberExpression,
-                    object: result,
-                    property: property,
-                    computed: false,
-                    optional: nextIsOptional,
-                    loc: chainCst.loc
-                } as any;
-                nextIsOptional = false;
-            }
-        }
-
-        return result;
     }
 }
