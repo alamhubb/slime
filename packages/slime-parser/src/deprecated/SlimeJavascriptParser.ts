@@ -464,17 +464,23 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             // 普通标识符（需要验证 Unicode 转义）
             {
                 alt: () => {
-                    this.tokenConsumer.IdentifierName()
-                    const cst = this.curCst
-                    if (!cst) return
-                    const value = cst.value!
-                    // 如果包含 Unicode 转义，验证解码后的字符是否有效
+                    // 1. 先前瞻检查是否匹配
+                    if (!this.match(SlimeJavascriptTokenType.IdentifierName)) {
+                        return this.setParseFail()
+                    }
+
+                    // 2. 从当前 token 获取值（还没消费）
+                    const value = this.curToken!.tokenValue!
+
+                    // 3. 验证 Unicode 转义
                     if (value.includes('\\u')) {
                         if (!isValidIdentifierWithEscapes(value)) {
-                            this.setParseFail()
+                            return this.setParseFail()
                         }
                     }
-                    return cst
+
+                    // 4. 验证通过后才消费
+                    return this.tokenConsumer.IdentifierName()
                 }
             },
             // 所有 ReservedWord 都可以作为 IdentifierName

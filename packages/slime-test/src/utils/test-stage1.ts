@@ -8,6 +8,7 @@
  *   npx tsx slime/packages/slime-test/src/utils/test-stage1.ts 100 -s       # 从第100个开始，遇错停止
  */
 import {runTests, testStage1} from './test-framework.ts'
+import SlimeJavascriptParser from "../../../slime-parser/src/deprecated/SlimeJavascriptParser.ts";
 
 // 运行测试
 runTests(testStage1, {
@@ -15,5 +16,6 @@ runTests(testStage1, {
     description: '词法分析 → 语法分析',
     startFrom: 1,
     stopOnFail: true,
+    ParserClass: SlimeJavascriptParser
 })
 
