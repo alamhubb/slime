@@ -795,7 +795,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             ])
         })
 
-        this.curCst
+
     }
 
     /**
@@ -807,7 +807,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     Elision() {
         this.tokenConsumer.Comma()
         this.Many(() => this.tokenConsumer.Comma())
-        this.curCst
+
     }
 
     /**
@@ -868,7 +868,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.Comma()
             this.PropertyDefinition(params)
         })
-        this.curCst
+
     }
 
     /**
@@ -1050,7 +1050,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.Expression({...params, In: true})
         })
 
-        this.curCst
+
     }
 
     // ----------------------------------------
@@ -1115,7 +1115,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             }
         ]))
 
-        this.curCst
+
     }
 
     /**
@@ -1252,7 +1252,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             }
         ]))
 
-        this.curCst
+
     }
 
     /**
@@ -1400,7 +1400,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             ])
         })
 
-        this.curCst
+
     }
 
     // ----------------------------------------
@@ -1429,7 +1429,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
 
         this.Many(() => this.OptionalChain(params))
 
-        this.curCst
+
     }
 
     /**
@@ -1510,7 +1510,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             }
         ]))
 
-        this.curCst
+
     }
 
     /**
@@ -1716,7 +1716,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.ExponentiationExpression(params)
         })
 
-        this.curCst
+
     }
 
     /**
@@ -1750,7 +1750,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.MultiplicativeExpression(params)
         })
 
-        this.curCst
+
     }
 
     /**
@@ -1773,7 +1773,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.AdditiveExpression(params)
         })
 
-        this.curCst
+
     }
 
     /**
@@ -1797,7 +1797,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.PrivateIdentifier()
             this.tokenConsumer.In()
             this.ShiftExpression(params)
-            this.curCst
+
         }
 
         this.ShiftExpression(params)
@@ -1815,7 +1815,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.ShiftExpression(params)
         })
 
-        this.curCst
+
     }
 
     /**
@@ -1840,7 +1840,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.RelationalExpression(params)
         })
 
-        this.curCst
+
     }
 
     /**
@@ -1857,7 +1857,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.EqualityExpression(params)
         })
 
-        this.curCst
+
     }
 
     /**
@@ -1874,7 +1874,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.BitwiseANDExpression(params)
         })
 
-        this.curCst
+
     }
 
     /**
@@ -1891,7 +1891,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.BitwiseXORExpression(params)
         })
 
-        this.curCst
+
     }
 
     /**
@@ -1908,7 +1908,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.BitwiseORExpression(params)
         })
 
-        this.curCst
+
     }
 
     /**
@@ -2012,7 +2012,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         // 根据后续 token 决定走哪条路径（可选）
         this.Option(() => this.ShortCircuitExpressionTail(params))
 
-        this.curCst
+
     }
 
     /**
@@ -2160,7 +2160,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.AssignmentExpression(params)
         })
 
-        this.curCst
+
     }
 
     // ============================================
@@ -2293,7 +2293,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         } else {
             this.Many(() => this.StatementListItem(params))
         }
-        this.curCst
+
     }
 
     /**
@@ -2353,7 +2353,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.Comma()
             this.LexicalBinding(params)
         })
-        this.curCst
+
     }
 
     /**
@@ -2402,7 +2402,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.Comma()
             this.VariableDeclaration(params)
         })
-        this.curCst
+
     }
 
     /**
@@ -2549,7 +2549,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.Comma()
             this.BindingProperty(params)
         })
-        this.curCst
+
     }
 
     /**
@@ -2564,7 +2564,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.Comma()
             this.BindingElisionElement(params)
         })
-        this.curCst
+
     }
 
     /**
@@ -2622,7 +2622,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     SingleNameBinding(params: ExpressionParams = {}) {
         this.BindingIdentifier(params)
         this.Option(() => this.Initializer({...params, In: true}))
-        this.curCst
+
     }
 
     /**
@@ -2672,7 +2672,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         // 检查当前 token 是否是分号
         if (this.match(SlimeJavascriptTokenType.Semicolon)) {
             this.tokenConsumer.Semicolon()
-            this.curCst
+            return
         }
 
         // 没有显式分号，检查是否满足 ASI 条件
@@ -2684,7 +2684,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         }
 
         // 满足 ASI 条件，返回成功
-        this.curCst
+
     }
 
     /**
@@ -2853,7 +2853,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         // do-while 语句的分号是特殊的 ASI 场景：总是可以省略
         // 如果有分号则消费，否则直接继续
         this.Option(() => this.tokenConsumer.Semicolon())
-        this.curCst
+
     }
 
     /**
@@ -3256,7 +3256,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     @SubhutiRule
     CaseClauses(params: StatementParams = {}) {
         this.AtLeastOne(() => this.CaseClause(params))
-        this.curCst
+
     }
 
     /**
@@ -3269,7 +3269,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.Expression({...params, In: true})
         this.tokenConsumer.Colon()
         this.Option(() => this.StatementList(params))
-        this.curCst
+
     }
 
     /**
@@ -3281,7 +3281,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.Default()
         this.tokenConsumer.Colon()
         this.Option(() => this.StatementList(params))
-        this.curCst
+
     }
 
     // ----------------------------------------
@@ -3474,7 +3474,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.assertNoLineBreak()  // [no LineTerminator here]
         this.tokenConsumer.Arrow()
         this.ConciseBody(params)
-        this.curCst
+
     }
 
     /**
@@ -3621,7 +3621,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.Async()
         this.assertNoLineBreak()  // [no LineTerminator here]
         this.ArrowFormalParameters({Yield: false, Await: true})
-        this.curCst
+
     }
 
     // ============================================
@@ -3668,8 +3668,14 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             // FunctionRestParameter[?Yield, ?Await]
             {alt: () => this.FunctionRestParameter(params)},
             // [empty]
-            {alt: () => this.curCst}
+            {alt: () => this.empty()}
         ])
+    }
+
+
+    @SubhutiRule
+    empty() {
+
     }
 
     /**
@@ -3684,7 +3690,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.Comma()
             this.FormalParameter(params)
         })
-        this.curCst
+
     }
 
     /**
@@ -3731,7 +3737,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             Return: true  // FunctionStatementList 总是设置 Return: true
         }
         this.Option(() => this.StatementList(statementParams))
-        this.curCst
+
     }
 
     /**
@@ -3936,7 +3942,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.LBrace()
         this.AsyncFunctionBody()
         this.tokenConsumer.RBrace()
-        this.curCst
+
     }
 
     /**
@@ -3954,7 +3960,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.LBrace()
         this.AsyncFunctionBody()
         this.tokenConsumer.RBrace()
-        this.curCst
+
     }
 
     /**
@@ -4031,7 +4037,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.LBrace()
         this.AsyncGeneratorBody()
         this.tokenConsumer.RBrace()
-        this.curCst
+
     }
 
     /**
@@ -4050,7 +4056,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.tokenConsumer.LBrace()
         this.AsyncGeneratorBody()
         this.tokenConsumer.RBrace()
-        this.curCst
+
     }
 
     /**
@@ -4138,7 +4144,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     PropertySetParameterList() {
         this.FormalParameter({Yield: false, Await: false})
         this.Option(() => this.tokenConsumer.Comma())  // 可选尾随逗号（引擎扩展）
-        this.curCst
+
     }
 
     // ============================================
@@ -4223,7 +4229,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     @SubhutiRule
     ClassElementList(params: ExpressionParams = {}) {
         this.AtLeastOne(() => this.ClassElement(params))
-        this.curCst
+
     }
 
     /**
@@ -4291,7 +4297,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.ClassElementName(params)
         // Initializer 中的 await/yield 不能作为表达式使用，只能作为标识符
         this.Option(() => this.Initializer({...params, In: true, Yield: false, Await: false}))
-        this.curCst
+
     }
 
     /**
@@ -4338,7 +4344,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     @SubhutiRule
     ClassStaticBlockStatementList() {
         this.Option(() => this.StatementList({Yield: false, Await: true, Return: false}))
-        this.curCst
+
     }
 
     // ============================================
@@ -4378,7 +4384,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.Option(() => this.tokenConsumer.HashbangComment())
         // ScriptBody_opt
         this.Option(() => this.ScriptBody())
-        this.curCst
+
     }
 
     /**
@@ -4400,7 +4406,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         this.Option(() => this.tokenConsumer.HashbangComment())
         // ModuleBody_opt
         this.Option(() => this.ModuleBody())
-        this.curCst
+
     }
 
     /**
@@ -4425,7 +4431,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         } else {
             this.Many(() => this.ModuleItem())
         }
-        this.curCst
+
     }
 
     /**
@@ -4591,7 +4597,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.Comma()
             this.ImportSpecifier()
         })
-        this.curCst
+
     }
 
     /**
@@ -4686,7 +4692,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.StringLiteral()
         })
 
-        this.curCst
+
     }
 
     /**
@@ -4857,7 +4863,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.Comma()
             this.ExportSpecifier()
         })
-        this.curCst
+
     }
 
     /**
@@ -5022,7 +5028,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.Comma()
             this.AssignmentProperty(params)
         })
-        this.curCst
+
     }
 
     /**
@@ -5037,7 +5043,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             this.tokenConsumer.Comma()
             this.AssignmentElisionElement(params)
         })
-        this.curCst
+
     }
 
     /**
@@ -5084,7 +5090,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     AssignmentElement(params: ExpressionParams = {}) {
         this.DestructuringAssignmentTarget(params)
         this.Option(() => this.Initializer({...params, In: true}))
-        this.curCst
+
     }
 
     /**
