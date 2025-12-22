@@ -64,9 +64,9 @@ import {
     SlimeJavascriptExportAllDeclaration,
     SlimeJavascriptExportSpecifier,
 } from "slime-ast";
-import {SubhutiCst, type SubhutiSourceLocation} from "subhuti";
+import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
 import SlimeJavascriptParser from "./SlimeJavascriptParser.ts";
-import {SlimeJavascriptAstUtil, SlimeJavascriptTokenCreate, SlimeJavascriptAstTypeName} from "slime-ast";
+import { SlimeJavascriptAstUtil, SlimeJavascriptTokenCreate, SlimeJavascriptAstTypeName } from "slime-ast";
 import {
     SlimeJavascriptArrowFunctionCstToAst,
     SlimeJavascriptAssignmentPatternCstToAst,
@@ -95,7 +95,7 @@ import {
     SlimeJavascriptVariableCstToAst,
     SlimeJavascriptClassDeclarationCstToAst,
 } from "./slimeJavascriptCstToAst";
-import {LiteralCstToAst} from "../cstToAst";
+
 
 
 // ============================================
@@ -459,7 +459,13 @@ export class SlimeJavascriptCstToAst {
     }
 
     createExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptExpressionCstToAst.createExpressionAst(cst)
+        const cached = this.expressionAstCache.get(cst)
+        if (cached) {
+            return cached
+        }
+        const result = this.createExpressionAstUncached(cst)
+        this.expressionAstCache.set(cst, result)
+        return result
     }
 
     createExpressionAstUncached(cst: SubhutiCst): SlimeJavascriptExpression {
