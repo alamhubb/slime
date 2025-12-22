@@ -12,9 +12,11 @@
  */
 import {
     Subhuti,
+    SubhutiRule,
+    type SubhutiCst,
 } from "subhuti"
 import SlimeTokenConsumer from "./SlimeTokenConsumer.ts"
-import SlimeJavascriptParser from "./deprecated/SlimeJavascriptParser.ts";
+import SlimeJavascriptParser, { type ExpressionParams } from "./deprecated/SlimeJavascriptParser.ts";
 
 // ============================================
 // 保留字集合（用于 Identifier 验证）
@@ -50,4 +52,72 @@ import SlimeJavascriptParser from "./deprecated/SlimeJavascriptParser.ts";
 @Subhuti
 export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsumer> extends SlimeJavascriptParser<T> {
 
+    // ============================================
+    // TypeScript 扩展: 类型注解
+    // ============================================
+
+    /**
+     * [TypeScript] 重写 BindingIdentifier 以支持可选的类型注解
+     *
+     * BindingIdentifier[Yield, Await] :
+     *     Identifier
+     *     yield
+     *     await
+     *
+     * [TypeScript 扩展]:
+     *     BindingIdentifier TSTypeAnnotation_opt
+     */
+    @SubhutiRule
+    override BindingIdentifier(params: ExpressionParams = {}): SubhutiCst | undefined {
+        // 首先解析基础的 BindingIdentifier
+        this.Or([
+            { alt: () => this.Identifier() },
+            { alt: () => this.tokenConsumer.Yield() },
+            { alt: () => this.tokenConsumer.Await() }
+        ])
+        // [TypeScript] 可选的类型注解
+        return this.Option(() => this.TSTypeAnnotation())
+    }
+
+    /**
+     * [TypeScript] 类型注解
+     *
+     * TSTypeAnnotation :
+     *     : TSType
+     */
+    @SubhutiRule
+    TSTypeAnnotation(): SubhutiCst | undefined {
+        this.tokenConsumer.Colon()
+        return this.TSType()
+    }
+
+    /**
+     * [TypeScript] 类型
+     *
+     * TSType :
+     *     TSNumberKeyword
+     *     (future: TSStringKeyword | TSBooleanKeyword | ...)
+     */
+    @SubhutiRule
+    TSType(): SubhutiCst | undefined {
+        return this.Or([
+            { alt: () => this.TSNumberKeyword() }
+        ])
+    }
+
+    /**
+     * [TypeScript] number 类型关键字
+     *
+     * TSNumberKeyword :
+     *     number
+     */
+    @SubhutiRule
+    TSNumberKeyword(): SubhutiCst | undefined {
+        // number 是上下文关键字，使用 IdentifierName 匹配并验证值
+        const token = this.tokenConsumer.IdentifierName()
+        if (!token || token.value !== 'number') {
+            return this.setParseFail()
+        }
+        return token
+    }
 }

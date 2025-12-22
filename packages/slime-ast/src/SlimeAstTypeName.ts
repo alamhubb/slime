@@ -101,6 +101,9 @@ export const SlimeAstTypeName = {
     ExportSpecifier: "ExportSpecifier",
     ExportDefaultDeclaration: "ExportDefaultDeclaration",
     ExportAllDeclaration: "ExportAllDeclaration",
-} as const;
 
+    // --- TypeScript ---
+    TSTypeAnnotation: "TSTypeAnnotation",
+    TSNumberKeyword: "TSNumberKeyword",
+} as const;
 

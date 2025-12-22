@@ -48,7 +48,7 @@ import type { SubhutiSourceLocation } from "subhuti";
 import { SubhutiCreateToken } from "subhuti";
 import { SubhutiMatchToken } from "subhuti";
 import { SlimeJavascriptTokensObj } from "slime-parser";
-import {SlimeJavascriptTokenType} from "slime-token";
+import { SlimeJavascriptTokenType } from "slime-token";
 
 // 创建软关键字的 token 对象（用于代码生成）
 const createSoftKeywordToken = (name: string, value: string): SubhutiCreateToken => ({
@@ -814,6 +814,42 @@ export default class SlimeJavascriptGenerator {
         }
         const identifier = { type: SlimeJavascriptTokenType.IdentifierName, name: SlimeJavascriptTokenType.IdentifierName, value: identifierName }
         this.addCodeAndMappings(identifier, node.loc)
+
+        // [TypeScript] 输出类型注解
+        if ((node as any).typeAnnotation) {
+            this.generatorTSTypeAnnotation((node as any).typeAnnotation)
+        }
+    }
+
+    /**
+     * [TypeScript] 生成类型注解：: number
+     */
+    private static generatorTSTypeAnnotation(node: any) {
+        // 输出冒号
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Colon, node.colonToken?.loc)
+        this.addSpacing()
+        // 输出类型
+        this.generatorTSType(node.typeAnnotation)
+    }
+
+    /**
+     * [TypeScript] 生成类型
+     */
+    private static generatorTSType(node: any) {
+        if (node.type === 'TSNumberKeyword') {
+            this.generatorTSNumberKeyword(node)
+        } else {
+            throw new Error(`Unknown TSType: ${node.type}`)
+        }
+    }
+
+    /**
+     * [TypeScript] 生成 number 类型关键字
+     */
+    private static generatorTSNumberKeyword(node: any) {
+        // number 是上下文关键字，作为标识符输出
+        const numberKeyword = { type: SlimeJavascriptTokenType.IdentifierName, name: SlimeJavascriptTokenType.IdentifierName, value: 'number' }
+        this.addCodeAndMappings(numberKeyword, node.loc)
     }
 
     private static generatorFunctionDeclaration(node: any) {

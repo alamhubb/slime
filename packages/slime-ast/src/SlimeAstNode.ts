@@ -958,6 +958,27 @@ export interface SlimeCatchClause extends SlimeBaseNode, Omit<SlimeExtends<ESTre
 export interface SlimeIdentifier extends SlimeBaseNode, SlimeBaseExpression, SlimeBasePattern, SlimeExtends<ESTree.Identifier> {
     type: typeof SlimeAstTypeName.Identifier;
     name: string;
+    /** [TypeScript] 类型注解 */
+    typeAnnotation?: SlimeTSTypeAnnotation;
+}
+
+// ============================================
+// TypeScript 类型节点
+// ============================================
+
+/** [TypeScript] 类型注解节点 */
+export interface SlimeTSTypeAnnotation extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSTypeAnnotation;
+    colonToken?: SlimeColonToken;
+    typeAnnotation: SlimeTSType;
+}
+
+/** [TypeScript] 类型联合 */
+export type SlimeTSType = SlimeTSNumberKeyword;
+
+/** [TypeScript] number 类型关键字 */
+export interface SlimeTSNumberKeyword extends SlimeBaseNode {
+    type: typeof SlimeAstTypeName.TSNumberKeyword;
 }
 
 export type SlimeLiteral = SlimeSimpleLiteral | SlimeRegExpLiteral | SlimeBigIntLiteral;

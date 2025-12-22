@@ -18,7 +18,7 @@ import type { SubhutiMatchToken } from 'subhuti'
 // 测试配置
 // ============================================
 
-const TEST_CODE = 'const a = 1'
+const TEST_CODE = 'const a: number = 1'
 const PARSE_MODE: 'module' | 'script' = 'script'
 
 // ============================================
@@ -119,6 +119,13 @@ function runTest() {
     originalTokens.forEach((t, i) => {
         console.log(`     [${i}] ${t.tokenName}: "${t.tokenValue}"`)
     })
+    console.log('')
+
+    // 调试：打印 AST 中的类型注解
+    const declaration = (ast as any).body?.[0]?.declarations?.[0]
+    const id = declaration?.id
+    console.log('   [DEBUG] VariableDeclarator.id:', id?.name)
+    console.log('   [DEBUG] VariableDeclarator.id.typeAnnotation:', id?.typeAnnotation)
     console.log('')
 
     // 第二步: 使用 Generator 生成代码
