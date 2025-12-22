@@ -74,7 +74,7 @@ import {
     BinaryExpressionCstToAst,
     BindingPatternCstToAst,
     BlockCstToAst,
-    ClassBodyCstToAst,
+    ClassDeclarationCstToAst,
     ClassDeclarationCstToAst,
     CompoundLiteralCstToAst,
     ControlFlowCstToAst,
@@ -763,22 +763,22 @@ export class SlimeCstToAst {
         return VariableCstToAst.createHoistableDeclarationAst(cst)
     }
 
-    // === class / ClassBodyCstToAst ===
+    // === class / ClassDeclarationCstToAst ===
 
     createClassElementNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral | SlimeExpression {
-        return ClassBodyCstToAst.createClassElementNameAst(cst)
+        return ClassDeclarationCstToAst.createClassElementNameAst(cst)
     }
 
     isComputedPropertyName(cst: SubhutiCst): boolean {
-        return ClassBodyCstToAst.isComputedPropertyName(cst)
+        return ClassDeclarationCstToAst.isComputedPropertyName(cst)
     }
 
     isStaticModifier(cst: SubhutiCst | null): boolean {
-        return ClassBodyCstToAst.isStaticModifier(cst)
+        return ClassDeclarationCstToAst.isStaticModifier(cst)
     }
 
     createClassDeclarationAst(cst: SubhutiCst): SlimeClassDeclaration {
-        return ClassBodyCstToAst.createClassDeclarationAst(cst)
+        return ClassDeclarationCstToAst.createClassDeclarationAst(cst)
     }
 
     createClassTailAst(cst: SubhutiCst): {
@@ -788,47 +788,47 @@ export class SlimeCstToAst {
         lBraceToken?: any;
         rBraceToken?: any;
     } {
-        return ClassBodyCstToAst.createClassTailAst(cst)
+        return ClassDeclarationCstToAst.createClassTailAst(cst)
     }
 
     createClassHeritageAst(cst: SubhutiCst): SlimeExpression {
-        return ClassBodyCstToAst.createClassHeritageAst(cst)
+        return ClassDeclarationCstToAst.createClassHeritageAst(cst)
     }
 
     createClassHeritageAstWithToken(cst: SubhutiCst): { superClass: SlimeExpression; extendsToken?: any } {
-        return ClassBodyCstToAst.createClassHeritageAstWithToken(cst)
+        return ClassDeclarationCstToAst.createClassHeritageAstWithToken(cst)
     }
 
     createFieldDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimePropertyDefinition {
-        return ClassBodyCstToAst.createFieldDefinitionAst(staticCst, cst)
+        return ClassDeclarationCstToAst.createFieldDefinitionAst(staticCst, cst)
     }
 
     createClassBodyAst(cst: SubhutiCst): SlimeClassBody {
-        return ClassBodyCstToAst.createClassBodyAst(cst)
+        return ClassDeclarationCstToAst.createClassBodyAst(cst)
     }
 
     createClassStaticBlockAst(cst: SubhutiCst): any {
-        return ClassBodyCstToAst.createClassStaticBlockAst(cst)
+        return ClassDeclarationCstToAst.createClassStaticBlockAst(cst)
     }
 
     createClassElementAst(cst: SubhutiCst): any {
-        return ClassBodyCstToAst.createClassElementAst(cst)
+        return ClassDeclarationCstToAst.createClassElementAst(cst)
     }
 
     createClassElementListAst(cst: SubhutiCst): any[] {
-        return ClassBodyCstToAst.createClassElementListAst(cst)
+        return ClassDeclarationCstToAst.createClassElementListAst(cst)
     }
 
     createClassStaticBlockBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
-        return ClassBodyCstToAst.createClassStaticBlockBodyAst(cst)
+        return ClassDeclarationCstToAst.createClassStaticBlockBodyAst(cst)
     }
 
     createClassStaticBlockStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
-        return ClassBodyCstToAst.createClassStaticBlockStatementListAst(cst)
+        return ClassDeclarationCstToAst.createClassStaticBlockStatementListAst(cst)
     }
 
     createClassExpressionAst(cst: SubhutiCst): SlimeClassExpression {
-        return ClassBodyCstToAst.createClassExpressionAst(cst)
+        return ClassDeclarationCstToAst.createClassExpressionAst(cst)
     }
 
     // === class / MethodDefinitionCstToAst ===
@@ -1208,7 +1208,7 @@ export class SlimeCstToAst {
     createModuleItemListAst(cst: SubhutiCst): Array<SlimeStatement | SlimeModuleDeclaration> {
         return ModuleCstToAst.createModuleItemListAst(cst)
     }
-    // === class / ClassBodyCstToAst ===
+    // === class / ClassDeclarationCstToAst ===
 }
 
 const SlimeCstToAstUtil = new SlimeCstToAst()

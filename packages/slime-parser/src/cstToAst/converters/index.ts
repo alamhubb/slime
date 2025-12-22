@@ -16,7 +16,7 @@ export * from './declaration/FunctionDeclarationCstToAst';
 
 // class
 export * from './class/ClassDeclarationCstToAst';
-export * from './class/ClassBodyCstToAst';
+export * from './class/ClassDeclarationCstToAst.ts';
 export * from './class/MethodDefinitionCstToAst';
 
 // function
