@@ -1,20 +1,20 @@
 /**
  * UnaryExpressionCstToAst - 一元/更新表达式转换
  */
-import { SubhutiCst } from "subhuti";
+import {SubhutiCst} from "subhuti";
 import {
     SlimeAstUtil, type SlimeBlockStatement,
     SlimeExpression,
     type SlimeFunctionExpression,
     type SlimeFunctionParam,
-    type SlimeIdentifier, SlimeNodeType
+    type SlimeIdentifier, SlimeNodeType, SlimeTokenCreate
 } from "slime-ast";
-import { SlimeAstUtils } from "../SlimeAstUtils.ts";
+import {SlimeAstUtils} from "../SlimeAstUtils.ts";
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 
 export class UnaryExpressionCstToAst {
-
 
     static createUnaryExpressionAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.UnaryExpression?.name);
@@ -124,63 +124,47 @@ export class UnaryExpressionCstToAst {
         return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
-    static createAdditiveExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.AdditiveExpression?.name);
-        if (cst.children.length > 1) {
-            // 有运算符，创�?BinaryExpression
-            // 支持多个运算符：x + y + z => BinaryExpression(BinaryExpression(x, +, y), +, z)
-            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
+    static createYieldExpressionAst(cst: SubhutiCst): any {
+        // yield [*] AssignmentExpression?
+        let yieldToken: any = undefined
+        let asteriskToken: any = undefined
+        let delegate = false
+        let startIndex = 1
 
-            // 循环处理剩余�?(operator, operand) �?
-            // CST结构: [operand, operator, operand, operator, operand, ...]
-            for (let i = 1; i < cst.children.length; i += 2) {
-                // 获取运算�?- 可能是token也可能是CST节点
-                const operatorNode = cst.children[i]
-                const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
-
-                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
-
-                left = {
-                    type: SlimeNodeType.BinaryExpression,
-                    operator: operator,
-                    left: left,
-                    right: right,
-                    loc: cst.loc
-                } as any
-            }
-
-            return left
+        // 提取 yield token
+        if (cst.children[0] && (cst.children[0].name === 'Yield' || cst.children[0].value === 'yield')) {
+            yieldToken = SlimeTokenCreate.createYieldToken(cst.children[0].loc)
         }
-        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
+
+        if (cst.children[1] && cst.children[1].name === SlimeTokenConsumer.prototype.Asterisk?.name) {
+            asteriskToken = SlimeTokenCreate.createAsteriskToken(cst.children[1].loc)
+            delegate = true
+            startIndex = 2
+        }
+        let argument: any = null
+        if (cst.children[startIndex]) {
+            argument = SlimeCstToAstUtil.createAssignmentExpressionAst(cst.children[startIndex])
+        }
+
+        return SlimeAstUtil.createYieldExpression(argument, delegate, cst.loc, yieldToken, asteriskToken)
     }
 
-    static createMultiplicativeExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.MultiplicativeExpression?.name);
-        if (cst.children.length > 1) {
-            // 有运算符，创�?BinaryExpression
-            // 支持多个运算符：a * b * c => BinaryExpression(BinaryExpression(a, *, b), *, c)
-            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
+    static createAwaitExpressionAst(cst: SubhutiCst): any {
+        // await UnaryExpression
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.AwaitExpression?.name);
 
-            // 循环处理剩余�?(operator, operand) �?
-            for (let i = 1; i < cst.children.length; i += 2) {
-                // 获取运算�?- 可能是token也可能是CST节点
-                const operatorNode = cst.children[i]
-                const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
+        let awaitToken: any = undefined
 
-                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
-
-                left = {
-                    type: SlimeNodeType.BinaryExpression,
-                    operator: operator,
-                    left: left,
-                    right: right,
-                    loc: cst.loc
-                } as any
-            }
-
-            return left
+        // 提取 await token
+        if (cst.children[0] && (cst.children[0].name === 'Await' || cst.children[0].value === 'await')) {
+            awaitToken = SlimeTokenCreate.createAwaitToken(cst.children[0].loc)
         }
-        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
+
+        const argumentCst = cst.children[1]
+        const argument = SlimeCstToAstUtil.createExpressionAst(argumentCst)
+
+        return SlimeAstUtil.createAwaitExpression(argument, cst.loc, awaitToken)
     }
+
 
 }
