@@ -191,8 +191,9 @@ import {
 
 import {SlimeAstTypeName} from "./SlimeAstTypeName.ts";
 import type { SubhutiSourceLocation } from "subhuti";
+import SlimeAstCreateUtils from "../SlimeAstCreateUtils.ts";
 
-class SlimeAstCreateUtils {
+class SlimeJavascriptAstCreateUtils {
   // ============================================
   // 通用辅助方法
   // ============================================
