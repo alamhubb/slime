@@ -119,6 +119,10 @@ import {SlimeAstUtils} from "./cstToAst";
  */
 export class SlimeCstToAst {
     readonly expressionAstCache = new WeakMap<SubhutiCst, SlimeExpression>()
+
+    createExpressionBodyAst(){
+        return
+    }
 }
 
 const SlimeCstToAstUtil = new SlimeCstToAst()
