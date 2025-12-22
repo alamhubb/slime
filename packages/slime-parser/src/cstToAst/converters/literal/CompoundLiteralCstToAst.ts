@@ -35,14 +35,14 @@ export class CompoundLiteralCstToAst {
         const first = cst.children[0]
 
         if (first.name === SlimeParser.prototype.LiteralPropertyName?.name || first.name === 'LiteralPropertyName') {
-            return this.createLiteralPropertyNameAst(first)
+            return SlimeCstToAstUtil.createLiteralPropertyNameAst(first)
         } else if (first.name === SlimeParser.prototype.ComputedPropertyName?.name || first.name === 'ComputedPropertyName') {
             // [expression]: value
             // ComputedPropertyName -> LBracket + AssignmentExpression + RBracket
-            return this.createAssignmentExpressionAst(first.children[1])
+            return SlimeCstToAstUtil.createAssignmentExpressionAst(first.children[1])
         }
         // 回退：可能first直接就是 LiteralPropertyName 的内�?
-        return this.createLiteralPropertyNameAst(first)
+        return SlimeCstToAstUtil.createLiteralPropertyNameAst(first)
     }
 
 
@@ -79,15 +79,15 @@ export class CompoundLiteralCstToAst {
         }
         // Identifier (旧版�?Es2025)
         else if (first.name === 'Identifier' || first.name === SlimeParser.prototype.Identifier?.name) {
-            return this.createIdentifierAst(first)
+            return SlimeCstToAstUtil.createIdentifierAst(first)
         }
         // NumericLiteral
         else if (first.name === SlimeTokenConsumer.prototype.NumericLiteral?.name || first.name === 'NumericLiteral' || first.name === 'Number') {
-            return this.createNumericLiteralAst(first)
+            return SlimeCstToAstUtil.createNumericLiteralAst(first)
         }
         // StringLiteral
         else if (first.name === SlimeTokenConsumer.prototype.StringLiteral?.name || first.name === 'StringLiteral' || first.name === 'String') {
-            return this.createStringLiteralAst(first)
+            return SlimeCstToAstUtil.createStringLiteralAst(first)
         }
         // 如果是直接的 token（有 value 属性），创�?Identifier
         else if (first.value !== undefined) {
@@ -120,7 +120,7 @@ export class CompoundLiteralCstToAst {
         }
 
         return SlimeAstUtil.createSpreadElement(
-            this.createAssignmentExpressionAst(expression),
+            SlimeCstToAstUtil.createAssignmentExpressionAst(expression),
             cst.loc,
             ellipsisToken
         )
@@ -145,13 +145,13 @@ export class CompoundLiteralCstToAst {
                 if (hasElement) {
                     elements.push(SlimeAstUtil.createArrayElement(currentElement, undefined))
                 }
-                currentElement = this.createAssignmentExpressionAst(child)
+                currentElement = SlimeCstToAstUtil.createAssignmentExpressionAst(child)
                 hasElement = true
             } else if (child.name === SlimeParser.prototype.SpreadElement?.name) {
                 if (hasElement) {
                     elements.push(SlimeAstUtil.createArrayElement(currentElement, undefined))
                 }
-                currentElement = this.createSpreadElementAst(child)
+                currentElement = SlimeCstToAstUtil.createSpreadElementAst(child)
                 hasElement = true
             } else if (child.name === SlimeParser.prototype.Elision?.name) {
                 // Elision 代表空元素：[1, , 3] - 可能包含多个逗号
@@ -213,7 +213,7 @@ export class CompoundLiteralCstToAst {
         }
 
         const elementList = cst.children.find(ch => ch.name === SlimeParser.prototype.ElementList?.name)
-        const elements = elementList ? this.createElementListAst(elementList) : []
+        const elements = elementList ? SlimeCstToAstUtil.createElementListAst(elementList) : []
 
         // 处理 ArrayLiteral 顶层�?Comma �?Elision（尾随逗号和省略）
         // 例如 [x,,] -> ElementList 后面�?Comma �?Elision
@@ -273,7 +273,7 @@ export class CompoundLiteralCstToAst {
                     if (hasProperty) {
                         properties.push(SlimeAstUtil.createObjectPropertyItem(currentProperty!, undefined))
                     }
-                    currentProperty = this.createPropertyDefinitionAst(child)
+                    currentProperty = SlimeCstToAstUtil.createPropertyDefinitionAst(child)
                     hasProperty = true
                 } else if (child.name === 'Comma' || child.value === ',') {
                     // 逗号与前面的属性配�?
@@ -310,7 +310,7 @@ export class CompoundLiteralCstToAst {
         if (first.name === 'Ellipsis' || first.value === '...') {
             // PropertyDefinition -> Ellipsis + AssignmentExpression
             const AssignmentExpressionCst = cst.children[1]
-            const argument = this.createAssignmentExpressionAst(AssignmentExpressionCst)
+            const argument = SlimeCstToAstUtil.createAssignmentExpressionAst(AssignmentExpressionCst)
 
             // 返回SpreadElement（作为Property的一种特殊形式）
             return {
@@ -323,8 +323,8 @@ export class CompoundLiteralCstToAst {
             const PropertyNameCst = cst.children[0]
             const AssignmentExpressionCst = cst.children[2]
 
-            const key = this.createPropertyNameAst(PropertyNameCst)
-            const value = this.createAssignmentExpressionAst(AssignmentExpressionCst)
+            const key = SlimeCstToAstUtil.createPropertyNameAst(PropertyNameCst)
+            const value = SlimeCstToAstUtil.createAssignmentExpressionAst(AssignmentExpressionCst)
 
             const keyAst = SlimeAstUtil.createPropertyAst(key, value)
 
@@ -336,7 +336,7 @@ export class CompoundLiteralCstToAst {
             return keyAst
         } else if (first.name === SlimeParser.prototype.MethodDefinition?.name) {
             // 方法定义（对象中的方法没有static�?
-            const SlimeMethodDefinition = this.createMethodDefinitionAst(null, first)
+            const SlimeMethodDefinition = SlimeCstToAstUtil.createMethodDefinitionAst(null, first)
 
             const keyAst = SlimeAstUtil.createPropertyAst(SlimeMethodDefinition.key, SlimeMethodDefinition.value)
 
@@ -357,7 +357,7 @@ export class CompoundLiteralCstToAst {
         } else if (first.name === SlimeParser.prototype.IdentifierReference?.name) {
             // 属性简�?{name} -> {name: name}
             const identifierCst = first.children[0] // IdentifierReference -> Identifier
-            const identifier = this.createIdentifierAst(identifierCst)
+            const identifier = SlimeCstToAstUtil.createIdentifierAst(identifierCst)
             const keyAst = SlimeAstUtil.createPropertyAst(identifier, identifier)
             keyAst.shorthand = true
             return keyAst
@@ -368,10 +368,10 @@ export class CompoundLiteralCstToAst {
             const initializerCst = first.children[1]
 
             const identifierCst = identifierRefCst.children[0] // IdentifierReference -> Identifier
-            const identifier = this.createIdentifierAst(identifierCst)
+            const identifier = SlimeCstToAstUtil.createIdentifierAst(identifierCst)
 
             // Initializer -> Assign + AssignmentExpression
-            const defaultValue = this.createAssignmentExpressionAst(initializerCst.children[1])
+            const defaultValue = SlimeCstToAstUtil.createAssignmentExpressionAst(initializerCst.children[1])
 
             // 创建 AssignmentPattern 作为 value
             const assignmentPattern = {

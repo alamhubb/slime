@@ -34,7 +34,7 @@ export class ExportCstToAst {
                 // * as name
                 return {
                     type: 'exportAll',
-                    exported: this.createModuleExportNameAst(exportedName)
+                    exported: SlimeCstToAstUtil.createModuleExportNameAst(exportedName)
                 }
             } else {
                 // * (export all)
@@ -50,7 +50,7 @@ export class ExportCstToAst {
         if (namedExports) {
             return {
                 type: 'namedExports',
-                specifiers: this.createNamedExportsAst(namedExports)
+                specifiers: SlimeCstToAstUtil.createNamedExportsAst(namedExports)
             }
         }
 
@@ -118,7 +118,7 @@ export class ExportCstToAst {
         let attributes: any[] = []
         let withToken: any = undefined
         if (withClauseCst) {
-            const parsed = this.createWithClauseAst(withClauseCst)
+            const parsed = SlimeCstToAstUtil.createWithClauseAst(withClauseCst)
             attributes = parsed.attributes
             withToken = parsed.withToken
         }
@@ -127,18 +127,18 @@ export class ExportCstToAst {
         if (isDefault) {
             let decl: any = null
             if (hoistableDeclaration) {
-                decl = this.createHoistableDeclarationAst(hoistableDeclaration)
+                decl = SlimeCstToAstUtil.createHoistableDeclarationAst(hoistableDeclaration)
             } else if (classDeclaration) {
-                decl = this.createClassDeclarationAst(classDeclaration)
+                decl = SlimeCstToAstUtil.createClassDeclarationAst(classDeclaration)
             } else if (assignmentExpression) {
-                decl = this.createAssignmentExpressionAst(assignmentExpression)
+                decl = SlimeCstToAstUtil.createAssignmentExpressionAst(assignmentExpression)
             }
             return SlimeAstUtil.createExportDefaultDeclaration(decl, cst.loc, exportToken, defaultToken)
         }
 
         // export ExportFromClause FromClause ; (export * from ... or export { } from ...)
         if (exportFromClause && fromClause) {
-            const fromClauseResult = this.createFromClauseAst(fromClause)
+            const fromClauseResult = SlimeCstToAstUtil.createFromClauseAst(fromClause)
 
             // Check if it's export * or export * as name
             const hasAsterisk = exportFromClause.children?.some((ch: any) =>
@@ -150,7 +150,7 @@ export class ExportCstToAst {
                 const moduleExportName = exportFromClause.children?.find((ch: any) =>
                     ch.name === SlimeParser.prototype.ModuleExportName?.name)
                 if (moduleExportName) {
-                    exported = this.createModuleExportNameAst(moduleExportName)
+                    exported = SlimeCstToAstUtil.createModuleExportNameAst(moduleExportName)
                 }
                 const result = SlimeAstUtil.createExportAllDeclaration(
                     fromClauseResult.source, exported, cst.loc,
@@ -169,7 +169,7 @@ export class ExportCstToAst {
                     ch.name === SlimeParser.prototype.NamedExports?.name || ch.name === 'NamedExports'
                 )
                 const specifiers = namedExportsCst
-                    ? this.createNamedExportsAst(namedExportsCst)
+                    ? SlimeCstToAstUtil.createNamedExportsAst(namedExportsCst)
                     : []
                 const result = SlimeAstUtil.createExportNamedDeclaration(
                     null, specifiers, fromClauseResult.source, cst.loc,
@@ -186,7 +186,7 @@ export class ExportCstToAst {
 
         // export NamedExports ; (export { ... })
         if (namedExports) {
-            const specifiers = this.createNamedExportsAst(namedExports)
+            const specifiers = SlimeCstToAstUtil.createNamedExportsAst(namedExports)
             return SlimeAstUtil.createExportNamedDeclaration(
                 null, specifiers, null, cst.loc, exportToken, undefined, semicolonToken
             )
@@ -194,7 +194,7 @@ export class ExportCstToAst {
 
         // export VariableStatement
         if (variableStatement) {
-            const decl = this.createVariableStatementAst(variableStatement)
+            const decl = SlimeCstToAstUtil.createVariableStatementAst(variableStatement)
             return SlimeAstUtil.createExportNamedDeclaration(
                 decl, [], null, cst.loc, exportToken
             )
@@ -202,7 +202,7 @@ export class ExportCstToAst {
 
         // export Declaration
         if (declaration) {
-            const decl = this.createDeclarationAst(declaration)
+            const decl = SlimeCstToAstUtil.createDeclarationAst(declaration)
             return SlimeAstUtil.createExportNamedDeclaration(
                 decl, [], null, cst.loc, exportToken
             )
@@ -220,9 +220,9 @@ export class ExportCstToAst {
 
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.ExportsList?.name) {
-                return this.createExportsListAst(child)
+                return SlimeCstToAstUtil.createExportsListAst(child)
             } else if (child.name === SlimeParser.prototype.ExportSpecifier?.name) {
-                specifiers.push({ specifier: this.createExportSpecifierAst(child) })
+                specifiers.push({ specifier: SlimeCstToAstUtil.createExportSpecifierAst(child) })
             }
         }
 
@@ -241,7 +241,7 @@ export class ExportCstToAst {
                 if (lastSpecifier) {
                     specifiers.push({ specifier: lastSpecifier })
                 }
-                lastSpecifier = this.createExportSpecifierAst(child)
+                lastSpecifier = SlimeCstToAstUtil.createExportSpecifierAst(child)
             } else if (child.name === SlimeTokenConsumer.prototype.Comma?.name || child.value === ',') {
                 if (lastSpecifier) {
                     specifiers.push({
@@ -274,9 +274,9 @@ export class ExportCstToAst {
             const child = children[i]
             if (child.name === SlimeParser.prototype.ModuleExportName?.name) {
                 if (!local) {
-                    local = this.createModuleExportNameAst(child)
+                    local = SlimeCstToAstUtil.createModuleExportNameAst(child)
                 } else {
-                    exported = this.createModuleExportNameAst(child)
+                    exported = SlimeCstToAstUtil.createModuleExportNameAst(child)
                 }
             } else if (child.name === SlimeTokenConsumer.prototype.As?.name || child.value === 'as') {
                 asToken = SlimeTokenCreate.createAsToken(child.loc)
@@ -301,7 +301,7 @@ export class ExportCstToAst {
         }
 
         if (first.name === SlimeParser.prototype.IdentifierName?.name) {
-            return this.createIdentifierNameAst(first)
+            return SlimeCstToAstUtil.createIdentifierNameAst(first)
         } else if (first.name === SlimeTokenConsumer.prototype.StringLiteral?.name) {
             return SlimeAstUtil.createStringLiteral(first.value, first.loc)
         } else {

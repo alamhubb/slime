@@ -28,10 +28,10 @@ export class ClassBodyCstToAst {
             throw new Error('createClassElementNameAst: ClassElementName has no children')
         }
         if (first.name === 'PrivateIdentifier') {
-            return this.createPrivateIdentifierAst(first)
+            return SlimeCstToAstUtil.createPrivateIdentifierAst(first)
         }
         // PropertyName
-        return this.createPropertyNameAst(first)
+        return SlimeCstToAstUtil.createPropertyNameAst(first)
     }
 
 
@@ -92,7 +92,7 @@ export class ClassBodyCstToAst {
             if (name === 'Class' || child.value === 'class') {
                 classToken = SlimeTokenCreate.createClassToken(child.loc)
             } else if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
-                id = this.createBindingIdentifierAst(child)
+                id = SlimeCstToAstUtil.createBindingIdentifierAst(child)
             } else if (name === SlimeParser.prototype.ClassTail?.name || name === 'ClassTail') {
                 classTailCst = child
             }
@@ -104,7 +104,7 @@ export class ClassBodyCstToAst {
         }
 
         // 解析 ClassTail，获取类体和父类信息
-        const classTailResult = this.createClassTailAst(classTailCst)
+        const classTailResult = SlimeCstToAstUtil.createClassTailAst(classTailCst)
 
         // 创建类声�?AST 节点（id 可能�?null，用于匿名类�?
         const ast = SlimeAstUtil.createClassDeclaration(
@@ -133,11 +133,11 @@ export class ClassBodyCstToAst {
         // 遍历 children 找到 ClassHeritage �?ClassBody
         for (const child of cst.children) {
             if (child.name === SlimeParser.prototype.ClassHeritage?.name) {
-                const heritageResult = this.createClassHeritageAstWithToken(child)
+                const heritageResult = SlimeCstToAstUtil.createClassHeritageAstWithToken(child)
                 superClass = heritageResult.superClass
                 extendsToken = heritageResult.extendsToken
             } else if (child.name === SlimeParser.prototype.ClassBody?.name) {
-                body = this.createClassBodyAst(child)
+                body = SlimeCstToAstUtil.createClassBodyAst(child)
             } else if (child.name === 'LBrace' || child.value === '{') {
                 lBraceToken = SlimeTokenCreate.createLBraceToken(child.loc)
             } else if (child.name === 'RBrace' || child.value === '}') {
@@ -156,7 +156,7 @@ export class ClassBodyCstToAst {
 
     static createClassHeritageAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassHeritage?.name);
-        return this.createLeftHandSideExpressionAst(cst.children[1]) // ClassHeritage -> extends + LeftHandSideExpression
+        return SlimeCstToAstUtil.createLeftHandSideExpressionAst(cst.children[1]) // ClassHeritage -> extends + LeftHandSideExpression
     }
 
     static createClassHeritageAstWithToken(cst: SubhutiCst): { superClass: SlimeExpression; extendsToken?: any } {
@@ -169,7 +169,7 @@ export class ClassBodyCstToAst {
             extendsToken = SlimeTokenCreate.createExtendsToken(extendsCst.loc)
         }
 
-        const superClass = this.createLeftHandSideExpressionAst(cst.children[1])
+        const superClass = SlimeCstToAstUtil.createLeftHandSideExpressionAst(cst.children[1])
         return { superClass, extendsToken }
     }
 
@@ -180,22 +180,22 @@ export class ClassBodyCstToAst {
         // FieldDefinition -> (ClassElementName | PropertyName) + Initializer?
         // ES2022: ClassElementName = PrivateIdentifier | PropertyName
         const elementNameCst = cst.children[0]
-        const key = this.createClassElementNameAst(elementNameCst)
+        const key = SlimeCstToAstUtil.createClassElementNameAst(elementNameCst)
 
         // 检查是否是计算属�?
-        const isComputed = this.isComputedPropertyName(elementNameCst)
+        const isComputed = SlimeCstToAstUtil.isComputedPropertyName(elementNameCst)
 
         // 检查是否有初始化器
         let value: SlimeExpression | null = null
         if (cst.children.length > 1) {
             const initializerCst = cst.children[1]
             if (initializerCst && initializerCst.name === SlimeParser.prototype.Initializer?.name) {
-                value = this.createInitializerAst(initializerCst)
+                value = SlimeCstToAstUtil.createInitializerAst(initializerCst)
             }
         }
 
         // 检查是否有 static 修饰�?
-        const isStatic = this.isStaticModifier(staticCst)
+        const isStatic = SlimeCstToAstUtil.isStaticModifier(staticCst)
 
         // 注意参数顺序�?key, value, computed, isStatic, loc)
         return SlimeAstUtil.createPropertyDefinition(key, value, isComputed, isStatic || false, cst.loc)
@@ -236,7 +236,7 @@ export class ClassBodyCstToAst {
 
                 // 处理静态块
                 if (classStaticBlockCst) {
-                    const staticBlock = this.createClassStaticBlockAst(classStaticBlockCst)
+                    const staticBlock = SlimeCstToAstUtil.createClassStaticBlockAst(classStaticBlockCst)
                     if (staticBlock) {
                         body.push(staticBlock)
                     }
@@ -246,9 +246,9 @@ export class ClassBodyCstToAst {
                 if (targetCst) {
                     // 根据成员类型直接调用对应方法
                     if (targetCst.name === SlimeParser.prototype.MethodDefinition?.name) {
-                        body.push(this.createMethodDefinitionAst(staticCst, targetCst))
+                        body.push(SlimeCstToAstUtil.createMethodDefinitionAst(staticCst, targetCst))
                     } else if (targetCst.name === SlimeParser.prototype.FieldDefinition?.name) {
-                        body.push(this.createFieldDefinitionAst(staticCst, targetCst))
+                        body.push(SlimeCstToAstUtil.createFieldDefinitionAst(staticCst, targetCst))
                     }
                 }
             }
@@ -285,7 +285,7 @@ export class ClassBodyCstToAst {
                         ? stmtListCst.children?.find((c: any) => c.name === 'StatementList')
                         : stmtListCst
                     if (actualStatementList) {
-                        bodyStatements = this.createStatementListAst(actualStatementList)
+                        bodyStatements = SlimeCstToAstUtil.createStatementListAst(actualStatementList)
                     }
                 }
             }
@@ -317,13 +317,13 @@ export class ClassBodyCstToAst {
         // 根据类型处理
         if (actualChild.name === SlimeParser.prototype.MethodDefinition?.name ||
             actualChild.name === 'MethodDefinition') {
-            return this.createMethodDefinitionAst(staticCst, actualChild)
+            return SlimeCstToAstUtil.createMethodDefinitionAst(staticCst, actualChild)
         } else if (actualChild.name === SlimeParser.prototype.FieldDefinition?.name ||
             actualChild.name === 'FieldDefinition') {
-            return this.createFieldDefinitionAst(staticCst, actualChild)
+            return SlimeCstToAstUtil.createFieldDefinitionAst(staticCst, actualChild)
         } else if (actualChild.name === SlimeParser.prototype.ClassStaticBlock?.name ||
             actualChild.name === 'ClassStaticBlock') {
-            return this.createClassStaticBlockAst(actualChild)
+            return SlimeCstToAstUtil.createClassStaticBlockAst(actualChild)
         }
 
         return null
@@ -337,7 +337,7 @@ export class ClassBodyCstToAst {
         const elements: any[] = []
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.ClassElement?.name || child.name === 'ClassElement') {
-                const element = this.createClassElementAst(child)
+                const element = SlimeCstToAstUtil.createClassElementAst(child)
                 if (element) {
                     elements.push(element)
                 }
@@ -355,7 +355,7 @@ export class ClassBodyCstToAst {
             ch.name === SlimeParser.prototype.ClassStaticBlockStatementList?.name
         )
         if (stmtList) {
-            return this.createClassStaticBlockStatementListAst(stmtList)
+            return SlimeCstToAstUtil.createClassStaticBlockStatementListAst(stmtList)
         }
         return []
     }
@@ -368,7 +368,7 @@ export class ClassBodyCstToAst {
             ch.name === 'StatementList' || ch.name === SlimeParser.prototype.StatementList?.name
         )
         if (stmtList) {
-            return this.createStatementListAst(stmtList)
+            return SlimeCstToAstUtil.createStatementListAst(stmtList)
         }
         return []
     }
@@ -381,10 +381,10 @@ export class ClassBodyCstToAst {
         let tailStartIndex = 1 // 默认 ClassTail 位于索引 1
         const nextChild = cst.children[1]
         if (nextChild && nextChild.name === SlimeParser.prototype.BindingIdentifier?.name) {
-            id = this.createBindingIdentifierAst(nextChild) // 若存在标识符则解�?
+            id = SlimeCstToAstUtil.createBindingIdentifierAst(nextChild) // 若存在标识符则解�?
             tailStartIndex = 2 // ClassTail 的位置后�?
         }
-        const classTail = this.createClassTailAst(cst.children[tailStartIndex]) // 统一解析 ClassTail
+        const classTail = SlimeCstToAstUtil.createClassTailAst(cst.children[tailStartIndex]) // 统一解析 ClassTail
 
         return SlimeAstUtil.createClassExpression(id, classTail.superClass, classTail.body, cst.loc) // 生成 ClassExpression AST
     }

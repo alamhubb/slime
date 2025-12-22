@@ -22,10 +22,10 @@ export default class FunctionParameterCstToAst {
 
         if (argumentCst.name === SlimeParser.prototype.BindingIdentifier?.name) {
             // 简单情况：...rest
-            argument = this.createBindingIdentifierAst(argumentCst)
+            argument = SlimeCstToAstUtil.createBindingIdentifierAst(argumentCst)
         } else if (argumentCst.name === SlimeParser.prototype.BindingPattern?.name) {
             // 嵌套解构�?..[a, b] �?...{x, y}
-            argument = this.createBindingPatternAst(argumentCst)
+            argument = SlimeCstToAstUtil.createBindingPatternAst(argumentCst)
         } else {
             throw new Error(`BindingRestElement: 不支持的类型 ${argumentCst.name}`)
         }
@@ -36,7 +36,7 @@ export default class FunctionParameterCstToAst {
     static createFunctionRestParameterAst(cst: SubhutiCst): SlimeRestElement {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.FunctionRestParameter?.name);
         const first = cst.children[0]
-        return this.createBindingRestElementAst(first)
+        return SlimeCstToAstUtil.createBindingRestElementAst(first)
     }
 
 
@@ -51,12 +51,12 @@ export default class FunctionParameterCstToAst {
             if (child.value === '...' || child.name === 'Ellipsis') continue
 
             if (child.name === SlimeParser.prototype.BindingIdentifier?.name || child.name === 'BindingIdentifier') {
-                argument = this.createBindingIdentifierAst(child)
+                argument = SlimeCstToAstUtil.createBindingIdentifierAst(child)
             } else if (child.name === SlimeParser.prototype.BindingRestElement?.name || child.name === 'BindingRestElement') {
                 // BindingRestElement 已经包含�?RestElement 的完整结构，直接返回
-                return this.createBindingRestElementAst(child)
+                return SlimeCstToAstUtil.createBindingRestElementAst(child)
             } else if (child.name === SlimeParser.prototype.BindingPattern?.name || child.name === 'BindingPattern') {
-                argument = this.createBindingPatternAst(child)
+                argument = SlimeCstToAstUtil.createBindingPatternAst(child)
             }
         }
 
@@ -71,9 +71,9 @@ export default class FunctionParameterCstToAst {
         // FormalParameter: BindingElement
         const first = cst.children[0]
         if (first.name === 'BindingElement' || first.name === SlimeParser.prototype.BindingElement?.name) {
-            return this.createBindingElementAst(first)
+            return SlimeCstToAstUtil.createBindingElementAst(first)
         }
-        return this.createBindingElementAst(cst)
+        return SlimeCstToAstUtil.createBindingElementAst(cst)
     }
 
     static createFormalParameterListAst(cst: SubhutiCst): SlimePattern[] {
@@ -90,25 +90,25 @@ export default class FunctionParameterCstToAst {
 
             // FunctionRestParameter - rest参数
             if (name === 'FunctionRestParameter' || name === SlimeParser.prototype.FunctionRestParameter?.name) {
-                params.push(this.createFunctionRestParameterAst(child))
+                params.push(SlimeCstToAstUtil.createFunctionRestParameterAst(child))
                 continue
             }
 
             // FormalParameter - 直接的参数
             if (name === 'FormalParameter' || name === SlimeParser.prototype.FormalParameter?.name) {
-                params.push(this.createFormalParameterAst(child))
+                params.push(SlimeCstToAstUtil.createFormalParameterAst(child))
                 continue
             }
 
             // BindingElement
             if (name === 'BindingElement' || name === SlimeParser.prototype.BindingElement?.name) {
-                params.push(this.createBindingElementAst(child))
+                params.push(SlimeCstToAstUtil.createBindingElementAst(child))
                 continue
             }
 
             // BindingIdentifier
             if (name === 'BindingIdentifier' || name === SlimeParser.prototype.BindingIdentifier?.name) {
-                params.push(this.createBindingIdentifierAst(child))
+                params.push(SlimeCstToAstUtil.createBindingIdentifierAst(child))
                 continue
             }
 
@@ -133,12 +133,12 @@ export default class FunctionParameterCstToAst {
                 if (lastParam) {
                     params.push(SlimeAstUtil.createFunctionParam(lastParam))
                 }
-                lastParam = this.createFormalParameterAst(child)
+                lastParam = SlimeCstToAstUtil.createFormalParameterAst(child)
             } else if (child.name === SlimeParser.prototype.FunctionRestParameter?.name) {
                 if (lastParam) {
                     params.push(SlimeAstUtil.createFunctionParam(lastParam))
                 }
-                lastParam = this.createFunctionRestParameterAst(child)
+                lastParam = SlimeCstToAstUtil.createFunctionRestParameterAst(child)
             } else if (child.name === SlimeTokenConsumer.prototype.Comma?.name || child.value === ',') {
                 if (lastParam) {
                     params.push(SlimeAstUtil.createFunctionParam(lastParam, SlimeTokenCreate.createCommaToken(child.loc)))
@@ -170,30 +170,30 @@ export default class FunctionParameterCstToAst {
 
             // FormalParameterList
             if (name === SlimeParser.prototype.FormalParameterList?.name || name === 'FormalParameterList') {
-                return this.createFormalParameterListAst(child)
+                return SlimeCstToAstUtil.createFormalParameterListAst(child)
             }
 
             // FormalParameter
             if (name === SlimeParser.prototype.FormalParameter?.name || name === 'FormalParameter') {
-                params.push(this.createFormalParameterAst(child))
+                params.push(SlimeCstToAstUtil.createFormalParameterAst(child))
                 continue
             }
 
             // BindingIdentifier - 直接作为参数
             if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
-                params.push(this.createBindingIdentifierAst(child))
+                params.push(SlimeCstToAstUtil.createBindingIdentifierAst(child))
                 continue
             }
 
             // BindingElement
             if (name === SlimeParser.prototype.BindingElement?.name || name === 'BindingElement') {
-                params.push(this.createBindingElementAst(child))
+                params.push(SlimeCstToAstUtil.createBindingElementAst(child))
                 continue
             }
 
             // FunctionRestParameter
             if (name === SlimeParser.prototype.FunctionRestParameter?.name || name === 'FunctionRestParameter') {
-                params.push(this.createFunctionRestParameterAst(child))
+                params.push(SlimeCstToAstUtil.createFunctionRestParameterAst(child))
                 continue
             }
 
@@ -252,7 +252,7 @@ export default class FunctionParameterCstToAst {
                     hasParam = false
                     currentParam = null
                 }
-                params.push(...this.createFormalParameterListFromEs2025Wrapped(child))
+                params.push(...SlimeCstToAstUtil.createFormalParameterListFromEs2025Wrapped(child))
                 continue
             }
 
@@ -261,7 +261,7 @@ export default class FunctionParameterCstToAst {
                 if (hasParam) {
                     params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
                 }
-                currentParam = this.createFunctionRestParameterAst(child)
+                currentParam = SlimeCstToAstUtil.createFunctionRestParameterAst(child)
                 hasParam = true
                 continue
             }
@@ -271,7 +271,7 @@ export default class FunctionParameterCstToAst {
                 if (hasParam) {
                     params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
                 }
-                currentParam = this.createFormalParameterAst(child)
+                currentParam = SlimeCstToAstUtil.createFormalParameterAst(child)
                 hasParam = true
                 continue
             }
@@ -281,7 +281,7 @@ export default class FunctionParameterCstToAst {
                 if (hasParam) {
                     params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
                 }
-                currentParam = this.createBindingElementAst(child)
+                currentParam = SlimeCstToAstUtil.createBindingElementAst(child)
                 hasParam = true
                 continue
             }
@@ -290,7 +290,7 @@ export default class FunctionParameterCstToAst {
                 if (hasParam) {
                     params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
                 }
-                currentParam = this.createBindingIdentifierAst(child)
+                currentParam = SlimeCstToAstUtil.createBindingIdentifierAst(child)
                 hasParam = true
                 continue
             }
@@ -338,7 +338,7 @@ export default class FunctionParameterCstToAst {
                 if (hasParam) {
                     params.push(SlimeAstUtil.createFunctionParam(currentParam!, undefined))
                 }
-                currentParam = this.createFormalParameterAst(child)
+                currentParam = SlimeCstToAstUtil.createFormalParameterAst(child)
                 hasParam = true
             }
         }
@@ -361,10 +361,10 @@ export default class FunctionParameterCstToAst {
         }
         const first = cst.children[0]
         if (first.name === 'FormalParameters' || first.name === SlimeParser.prototype.FormalParameters?.name) {
-            return this.createFormalParametersAst(first)
+            return SlimeCstToAstUtil.createFormalParametersAst(first)
         }
         // 可能直接�?FormalParameterList
-        return this.createFormalParametersAst(cst)
+        return SlimeCstToAstUtil.createFormalParametersAst(cst)
     }
 
     /** 返回包装类型的版�?*/
@@ -375,9 +375,9 @@ export default class FunctionParameterCstToAst {
         }
         const first = cst.children[0]
         if (first.name === 'FormalParameters' || first.name === SlimeParser.prototype.FormalParameters?.name) {
-            return this.createFormalParametersAstWrapped(first)
+            return SlimeCstToAstUtil.createFormalParametersAstWrapped(first)
         }
         // 可能直接�?FormalParameterList
-        return this.createFormalParametersAstWrapped(cst)
+        return SlimeCstToAstUtil.createFormalParametersAstWrapped(cst)
     }
 }

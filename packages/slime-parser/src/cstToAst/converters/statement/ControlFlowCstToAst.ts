@@ -24,7 +24,7 @@ export class ControlFlowCstToAst {
     static createBreakableStatementAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
         if (firstChild) {
-            return this.createStatementDeclarationAst(firstChild)
+            return SlimeCstToAstUtil.createStatementDeclarationAst(firstChild)
         }
         throw new Error('BreakableStatement has no children')
     }
@@ -36,7 +36,7 @@ export class ControlFlowCstToAst {
     static createIterationStatementAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
         if (firstChild) {
-            return this.createStatementDeclarationAst(firstChild)
+            return SlimeCstToAstUtil.createStatementDeclarationAst(firstChild)
         }
         throw new Error('IterationStatement has no children')
     }
@@ -90,13 +90,13 @@ export class ControlFlowCstToAst {
 
             // Expression (test condition)
             if (name === SlimeParser.prototype.Expression?.name || name === 'Expression') {
-                test = this.createExpressionAst(child)
+                test = SlimeCstToAstUtil.createExpressionAst(child)
                 continue
             }
 
             // IfStatementBody
             if (name === SlimeParser.prototype.IfStatementBody?.name || name === 'IfStatementBody') {
-                const body = this.createIfStatementBodyAst(child)
+                const body = SlimeCstToAstUtil.createIfStatementBodyAst(child)
                 if (!foundElse) {
                     consequent = body
                 } else {
@@ -107,7 +107,7 @@ export class ControlFlowCstToAst {
 
             // Legacy: 直接�?Statement
             if (name === SlimeParser.prototype.Statement?.name || name === 'Statement') {
-                const stmts = this.createStatementAst(child)
+                const stmts = SlimeCstToAstUtil.createStatementAst(child)
                 const body = Array.isArray(stmts) ? stmts[0] : stmts
                 if (!foundElse) {
                     consequent = body
@@ -133,17 +133,17 @@ export class ControlFlowCstToAst {
             const name = child.name
 
             if (name === SlimeParser.prototype.Statement?.name || name === 'Statement') {
-                const stmts = this.createStatementAst(child)
+                const stmts = SlimeCstToAstUtil.createStatementAst(child)
                 return Array.isArray(stmts) ? stmts[0] : stmts
             }
 
             if (name === SlimeParser.prototype.FunctionDeclaration?.name || name === 'FunctionDeclaration') {
-                return this.createFunctionDeclarationAst(child)
+                return SlimeCstToAstUtil.createFunctionDeclarationAst(child)
             }
         }
 
         // 如果没有找到子节点，尝试直接处理
-        return this.createStatementDeclarationAst(cst)
+        return SlimeCstToAstUtil.createStatementDeclarationAst(cst)
     }
 
 
@@ -203,33 +203,33 @@ export class ControlFlowCstToAst {
 
             // VariableDeclarationList (for var) - init
             if (name === SlimeParser.prototype.VariableDeclarationList?.name || name === 'VariableDeclarationList') {
-                init = this.createVariableDeclarationFromList(child, 'var')
+                init = SlimeCstToAstUtil.createVariableDeclarationFromList(child, 'var')
                 continue
             }
 
             // LexicalDeclaration (for let/const) - init
             // 注意：LexicalDeclaration 内部包含了分�?
             if (name === SlimeParser.prototype.LexicalDeclaration?.name || name === 'LexicalDeclaration') {
-                init = this.createLexicalDeclarationAst(child)
+                init = SlimeCstToAstUtil.createLexicalDeclarationAst(child)
                 hasLexicalDeclaration = true
                 continue
             }
 
             // VariableDeclaration (legacy) - init
             if (name === SlimeParser.prototype.VariableDeclaration?.name || name === 'VariableDeclaration') {
-                init = this.createVariableDeclarationAst(child)
+                init = SlimeCstToAstUtil.createVariableDeclarationAst(child)
                 continue
             }
 
             // Expression - 收集所有表达式
             if (name === SlimeParser.prototype.Expression?.name || name === 'Expression') {
-                expressions.push(this.createExpressionAst(child))
+                expressions.push(SlimeCstToAstUtil.createExpressionAst(child))
                 continue
             }
 
             // Statement (body)
             if (name === SlimeParser.prototype.Statement?.name || name === 'Statement') {
-                const stmts = this.createStatementAst(child)
+                const stmts = SlimeCstToAstUtil.createStatementAst(child)
                 body = Array.isArray(stmts) ? stmts[0] : stmts
                 continue
             }
@@ -313,11 +313,11 @@ export class ControlFlowCstToAst {
             let id;
 
             if (actualBinding.name === SlimeParser.prototype.BindingPattern?.name || actualBinding.name === 'BindingPattern') {
-                id = this.createBindingPatternAst(actualBinding);
+                id = SlimeCstToAstUtil.createBindingPatternAst(actualBinding);
             } else if (actualBinding.name === SlimeParser.prototype.BindingIdentifier?.name || actualBinding.name === 'BindingIdentifier') {
-                id = this.createBindingIdentifierAst(actualBinding);
+                id = SlimeCstToAstUtil.createBindingIdentifierAst(actualBinding);
             } else {
-                id = this.createBindingIdentifierAst(actualBinding);
+                id = SlimeCstToAstUtil.createBindingIdentifierAst(actualBinding);
             }
 
             const kind = letOrConstCst.children[0].value  // 'let' or 'const'
@@ -339,8 +339,8 @@ export class ControlFlowCstToAst {
             }
         } else if (varTokenCst && bindingIdCst && initializerCst) {
             // ES5 遗留语法: for (var x = init in expr) - 非严格模式下允许
-            const id = this.createBindingIdentifierAst(bindingIdCst)
-            const init = this.createInitializerAst(initializerCst)
+            const id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingIdCst)
+            const init = SlimeCstToAstUtil.createInitializerAst(initializerCst)
             left = {
                 type: SlimeNodeType.VariableDeclaration,
                 declarations: [{
@@ -363,15 +363,15 @@ export class ControlFlowCstToAst {
                 }
             }
         } else if (leftHandSideCst) {
-            left = this.createLeftHandSideExpressionAst(leftHandSideCst)
+            left = SlimeCstToAstUtil.createLeftHandSideExpressionAst(leftHandSideCst)
         } else if (varBindingCst) {
             // var ForBinding
             const actualBinding = varBindingCst.children[0]
             let id;
             if (actualBinding.name === SlimeParser.prototype.BindingPattern?.name || actualBinding.name === 'BindingPattern') {
-                id = this.createBindingPatternAst(actualBinding);
+                id = SlimeCstToAstUtil.createBindingPatternAst(actualBinding);
             } else {
-                id = this.createBindingIdentifierAst(actualBinding);
+                id = SlimeCstToAstUtil.createBindingIdentifierAst(actualBinding);
             }
             left = {
                 type: SlimeNodeType.VariableDeclaration,
@@ -402,7 +402,7 @@ export class ControlFlowCstToAst {
         if (inOrOfIndex !== -1 && inOrOfIndex + 1 < cst.children.length) {
             const rightCst = cst.children[inOrOfIndex + 1]
             if (rightCst.name !== 'RParen') {
-                right = this.createExpressionAst(rightCst)
+                right = SlimeCstToAstUtil.createExpressionAst(rightCst)
             }
         }
 
@@ -412,7 +412,7 @@ export class ControlFlowCstToAst {
             ch.name === 'Statement'
         )
         if (statementCst) {
-            const bodyStatements = this.createStatementAst(statementCst)
+            const bodyStatements = SlimeCstToAstUtil.createStatementAst(statementCst)
             body = Array.isArray(bodyStatements) && bodyStatements.length > 0
                 ? bodyStatements[0]
                 : bodyStatements
@@ -459,9 +459,9 @@ export class ControlFlowCstToAst {
         const expression = cst.children.find(ch => ch.name === SlimeParser.prototype.Expression?.name)
         const statement = cst.children.find(ch => ch.name === SlimeParser.prototype.Statement?.name)
 
-        const test = expression ? this.createExpressionAst(expression) : null
+        const test = expression ? SlimeCstToAstUtil.createExpressionAst(expression) : null
         // createStatementAst返回数组，取第一个元�?
-        const bodyArray = statement ? this.createStatementAst(statement) : []
+        const bodyArray = statement ? SlimeCstToAstUtil.createStatementAst(statement) : []
         const body = bodyArray.length > 0 ? bodyArray[0] : null
 
         return SlimeAstUtil.createWhileStatement(test, body, cst.loc, whileToken, lParenToken, rParenToken)
@@ -497,10 +497,10 @@ export class ControlFlowCstToAst {
             } else if (name === 'Semicolon' || child.value === ';') {
                 semicolonToken = SlimeTokenCreate.createSemicolonToken(child.loc)
             } else if (name === SlimeParser.prototype.Statement?.name || name === 'Statement') {
-                const bodyArray = this.createStatementAst(child)
+                const bodyArray = SlimeCstToAstUtil.createStatementAst(child)
                 body = bodyArray.length > 0 ? bodyArray[0] : null
             } else if (name === SlimeParser.prototype.Expression?.name || name === 'Expression') {
-                test = this.createExpressionAst(child)
+                test = SlimeCstToAstUtil.createExpressionAst(child)
             }
         }
 
@@ -534,11 +534,11 @@ export class ControlFlowCstToAst {
 
         // 提取 discriminant（判断表达式�?
         const discriminantCst = cst.children?.find(ch => ch.name === SlimeParser.prototype.Expression?.name)
-        const discriminant = discriminantCst ? this.createExpressionAst(discriminantCst) : null
+        const discriminant = discriminantCst ? SlimeCstToAstUtil.createExpressionAst(discriminantCst) : null
 
         // 提取 cases（从 CaseBlock 中）
         const caseBlockCst = cst.children?.find(ch => ch.name === SlimeParser.prototype.CaseBlock?.name)
-        const cases = caseBlockCst ? this.extractCasesFromCaseBlock(caseBlockCst) : []
+        const cases = caseBlockCst ? SlimeCstToAstUtil.extractCasesFromCaseBlock(caseBlockCst) : []
 
         // �?CaseBlock 提取 brace tokens
         if (caseBlockCst && caseBlockCst.children) {

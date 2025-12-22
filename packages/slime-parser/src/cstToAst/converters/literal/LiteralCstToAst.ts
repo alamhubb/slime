@@ -237,11 +237,11 @@ export class LiteralCstToAst {
                 quasis.push(SlimeAstUtil.createTemplateElement(false, raw, cooked, child.loc))
             } else if (child.name === SlimeParser.prototype.Expression?.name ||
                 child.name === 'Expression') {
-                expressions.push(this.createExpressionAst(child))
+                expressions.push(SlimeCstToAstUtil.createExpressionAst(child))
             } else if (child.name === SlimeParser.prototype.TemplateMiddleList?.name ||
                 child.name === 'TemplateMiddleList') {
                 // 递归处理嵌套�?TemplateMiddleList
-                this.processTemplateMiddleList(child, quasis, expressions)
+                SlimeCstToAstUtil.processTemplateMiddleList(child, quasis, expressions)
             }
         }
     }
@@ -261,7 +261,7 @@ export class LiteralCstToAst {
 
         // 情况2：TemplateMiddleList -> 有更多插�?
         if (first.name === SlimeParser.prototype.TemplateMiddleList?.name) {
-            this.processTemplateMiddleList(first, quasis, expressions)
+            SlimeCstToAstUtil.processTemplateMiddleList(first, quasis, expressions)
 
             // 然后处理TemplateTail
             if (cst.children[1] && cst.children[1].name === SlimeTokenConsumer.prototype.TemplateTail?.name) {
@@ -316,12 +316,12 @@ export class LiteralCstToAst {
             // Expression
             else if (child.name === SlimeParser.prototype.Expression?.name ||
                 child.name === 'Expression') {
-                expressions.push(this.createExpressionAst(child))
+                expressions.push(SlimeCstToAstUtil.createExpressionAst(child))
             }
             // TemplateSpans
             else if (child.name === SlimeParser.prototype.TemplateSpans?.name ||
                 child.name === 'TemplateSpans') {
-                this.processTemplateSpans(child, quasis, expressions)
+                SlimeCstToAstUtil.processTemplateSpans(child, quasis, expressions)
             }
         }
 

@@ -77,19 +77,19 @@ export default class FunctionDeclarationCstToAst {
 
             // BindingIdentifier - function name
             if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
-                functionName = this.createBindingIdentifierAst(child)
+                functionName = SlimeCstToAstUtil.createBindingIdentifierAst(child)
                 continue
             }
 
             // FormalParameters - function parameters (使用包装类型)
             if (name === SlimeParser.prototype.FormalParameters?.name || name === 'FormalParameters') {
-                params = this.createFormalParametersAstWrapped(child)
+                params = SlimeCstToAstUtil.createFormalParametersAstWrapped(child)
                 continue
             }
 
             // FunctionBody - function body
             if (name === SlimeParser.prototype.FunctionBody?.name || name === 'FunctionBody') {
-                const statements = this.createFunctionBodyAst(child)
+                const statements = SlimeCstToAstUtil.createFunctionBodyAst(child)
                 body = SlimeAstUtil.createBlockStatement(statements, child.loc)
                 continue
             }
@@ -121,7 +121,7 @@ export default class FunctionDeclarationCstToAst {
         const bindingId = cst.children.find(ch =>
             ch.name === SlimeParser.prototype.BindingIdentifier?.name || ch.name === 'BindingIdentifier')
         if (bindingId) {
-            id = this.createBindingIdentifierAst(bindingId)
+            id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingId)
         }
 
         // 查找 FormalParameters �?FormalParameterList (使用包装类型)
@@ -130,9 +130,9 @@ export default class FunctionDeclarationCstToAst {
             ch.name === SlimeParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
         if (formalParams) {
             if (formalParams.name === 'FormalParameters' || formalParams.name === SlimeParser.prototype.FormalParameters?.name) {
-                params = this.createFormalParametersAstWrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParametersAstWrapped(formalParams)
             } else {
-                params = this.createFormalParameterListFromEs2025Wrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParameterListFromEs2025Wrapped(formalParams)
             }
         }
 
@@ -141,7 +141,7 @@ export default class FunctionDeclarationCstToAst {
             ch.name === 'GeneratorBody' || ch.name === SlimeParser.prototype.GeneratorBody?.name ||
             ch.name === 'FunctionBody' || ch.name === SlimeParser.prototype.FunctionBody?.name)
         if (bodyNode) {
-            const bodyStatements = this.createFunctionBodyAst(bodyNode)
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(bodyNode)
             body = SlimeAstUtil.createBlockStatement(bodyStatements, bodyNode.loc)
         } else {
             body = SlimeAstUtil.createBlockStatement([])
@@ -172,7 +172,7 @@ export default class FunctionDeclarationCstToAst {
         const bindingId = cst.children.find(ch =>
             ch.name === SlimeParser.prototype.BindingIdentifier?.name || ch.name === 'BindingIdentifier')
         if (bindingId) {
-            id = this.createBindingIdentifierAst(bindingId)
+            id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingId)
         }
 
         // 查找 FormalParameters �?FormalParameterList
@@ -181,9 +181,9 @@ export default class FunctionDeclarationCstToAst {
             ch.name === SlimeParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
         if (formalParams) {
             if (formalParams.name === 'FormalParameters' || formalParams.name === SlimeParser.prototype.FormalParameters?.name) {
-                params = this.createFormalParametersAstWrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParametersAstWrapped(formalParams)
             } else {
-                params = this.createFormalParameterListAstWrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParameterListAstWrapped(formalParams)
             }
         }
 
@@ -192,7 +192,7 @@ export default class FunctionDeclarationCstToAst {
             ch.name === 'AsyncFunctionBody' || ch.name === SlimeParser.prototype.AsyncFunctionBody?.name ||
             ch.name === 'FunctionBody' || ch.name === SlimeParser.prototype.FunctionBody?.name)
         if (bodyNode) {
-            const bodyStatements = this.createFunctionBodyAst(bodyNode)
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(bodyNode)
             body = SlimeAstUtil.createBlockStatement(bodyStatements, bodyNode.loc)
         } else {
             body = SlimeAstUtil.createBlockStatement([])
@@ -214,7 +214,7 @@ export default class FunctionDeclarationCstToAst {
         const bindingId = cst.children.find(ch =>
             ch.name === SlimeParser.prototype.BindingIdentifier?.name || ch.name === 'BindingIdentifier')
         if (bindingId) {
-            id = this.createBindingIdentifierAst(bindingId)
+            id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingId)
         }
 
         // 查找 FormalParameters �?FormalParameterList (使用包装类型)
@@ -223,9 +223,9 @@ export default class FunctionDeclarationCstToAst {
             ch.name === SlimeParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
         if (formalParams) {
             if (formalParams.name === 'FormalParameters' || formalParams.name === SlimeParser.prototype.FormalParameters?.name) {
-                params = this.createFormalParametersAstWrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParametersAstWrapped(formalParams)
             } else {
-                params = this.createFormalParameterListFromEs2025Wrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParameterListFromEs2025Wrapped(formalParams)
             }
         }
 
@@ -234,7 +234,7 @@ export default class FunctionDeclarationCstToAst {
             ch.name === 'AsyncGeneratorBody' || ch.name === SlimeParser.prototype.AsyncGeneratorBody?.name ||
             ch.name === 'FunctionBody' || ch.name === SlimeParser.prototype.FunctionBody?.name)
         if (bodyNode) {
-            const bodyStatements = this.createFunctionBodyAst(bodyNode)
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(bodyNode)
             body = SlimeAstUtil.createBlockStatement(bodyStatements, bodyNode.loc)
         } else {
             body = SlimeAstUtil.createBlockStatement([])

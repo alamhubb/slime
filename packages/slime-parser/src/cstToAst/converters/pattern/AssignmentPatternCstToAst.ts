@@ -22,10 +22,10 @@ export default class AssignmentPatternCstToAst {
 
         if (firstChild.name === SlimeParser.prototype.ObjectAssignmentPattern?.name ||
             firstChild.name === 'ObjectAssignmentPattern') {
-            return this.createObjectAssignmentPatternAst(firstChild) as any
+            return SlimeCstToAstUtil.createObjectAssignmentPatternAst(firstChild) as any
         } else if (firstChild.name === SlimeParser.prototype.ArrayAssignmentPattern?.name ||
             firstChild.name === 'ArrayAssignmentPattern') {
-            return this.createArrayAssignmentPatternAst(firstChild) as any
+            return SlimeCstToAstUtil.createArrayAssignmentPatternAst(firstChild) as any
         }
 
         throw new Error(`Unknown AssignmentPattern type: ${firstChild.name}`)
@@ -35,14 +35,14 @@ export default class AssignmentPatternCstToAst {
      * ObjectAssignmentPattern CST �?AST
      */
     static createObjectAssignmentPatternAst(cst: SubhutiCst): SlimeObjectPattern {
-        return this.createObjectBindingPatternAst(cst)
+        return SlimeCstToAstUtil.createObjectBindingPatternAst(cst)
     }
 
     /**
      * ArrayAssignmentPattern CST �?AST
      */
     static createArrayAssignmentPatternAst(cst: SubhutiCst): SlimeArrayPattern {
-        return this.createArrayBindingPatternAst(cst)
+        return SlimeCstToAstUtil.createArrayBindingPatternAst(cst)
     }
 
 
@@ -54,7 +54,7 @@ export default class AssignmentPatternCstToAst {
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.AssignmentProperty?.name ||
                 child.name === 'AssignmentProperty') {
-                properties.push(this.createAssignmentPropertyAst(child))
+                properties.push(SlimeCstToAstUtil.createAssignmentPropertyAst(child))
             }
         }
         return properties
@@ -64,41 +64,41 @@ export default class AssignmentPatternCstToAst {
      * AssignmentProperty CST �?AST
      */
     static createAssignmentPropertyAst(cst: SubhutiCst): any {
-        return this.createBindingPropertyAst(cst)
+        return SlimeCstToAstUtil.createBindingPropertyAst(cst)
     }
 
     /**
      * AssignmentElementList CST �?AST
      */
     static createAssignmentElementListAst(cst: SubhutiCst): any[] {
-        return this.createBindingElementListAst(cst)
+        return SlimeCstToAstUtil.createBindingElementListAst(cst)
     }
 
     /**
      * AssignmentElement CST �?AST
      */
     static createAssignmentElementAst(cst: SubhutiCst): any {
-        return this.createBindingElementAst(cst)
+        return SlimeCstToAstUtil.createBindingElementAst(cst)
     }
 
     /**
      * AssignmentElisionElement CST �?AST
      */
     static createAssignmentElisionElementAst(cst: SubhutiCst): any {
-        return this.createBindingElisionElementAst(cst)
+        return SlimeCstToAstUtil.createBindingElisionElementAst(cst)
     }
 
     /**
      * AssignmentRestElement CST �?AST
      */
     static createAssignmentRestElementAst(cst: SubhutiCst): any {
-        return this.createBindingRestElementAst(cst)
+        return SlimeCstToAstUtil.createBindingRestElementAst(cst)
     }
 
     /**
      * AssignmentRestProperty CST �?AST
      */
     static createAssignmentRestPropertyAst(cst: SubhutiCst): any {
-        return this.createBindingRestPropertyAst(cst)
+        return SlimeCstToAstUtil.createBindingRestPropertyAst(cst)
     }
 }

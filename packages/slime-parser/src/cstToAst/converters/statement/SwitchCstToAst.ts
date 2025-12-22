@@ -15,7 +15,7 @@ export default class SwitchCstToAst {
      * CaseClause -> case Expression : StatementList?
      */
     static createCaseClauseAst(cst: SubhutiCst): any {
-        return this.createSwitchCaseAst(cst)
+        return SlimeCstToAstUtil.createSwitchCaseAst(cst)
     }
 
     /**
@@ -23,7 +23,7 @@ export default class SwitchCstToAst {
      * DefaultClause -> default : StatementList?
      */
     static createDefaultClauseAst(cst: SubhutiCst): any {
-        return this.createSwitchCaseAst(cst)
+        return SlimeCstToAstUtil.createSwitchCaseAst(cst)
     }
 
     /**
@@ -34,7 +34,7 @@ export default class SwitchCstToAst {
         const cases: any[] = []
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.CaseClause?.name || child.name === 'CaseClause') {
-                cases.push(this.createSwitchCaseAst(child))
+                cases.push(SlimeCstToAstUtil.createSwitchCaseAst(child))
             }
         }
         return cases
@@ -45,7 +45,7 @@ export default class SwitchCstToAst {
      * CaseBlock -> { CaseClauses? DefaultClause? CaseClauses? }
      */
     static createCaseBlockAst(cst: SubhutiCst): any[] {
-        return this.extractCasesFromCaseBlock(cst)
+        return SlimeCstToAstUtil.extractCasesFromCaseBlock(cst)
     }
 
 
@@ -82,10 +82,10 @@ export default class SwitchCstToAst {
             }
 
             const testCst = cst.children?.find(ch => ch.name === SlimeParser.prototype.Expression?.name)
-            test = testCst ? this.createExpressionAst(testCst) : null
+            test = testCst ? SlimeCstToAstUtil.createExpressionAst(testCst) : null
 
             const stmtListCst = cst.children?.find(ch => ch.name === SlimeParser.prototype.StatementList?.name)
-            consequent = stmtListCst ? this.createStatementListAst(stmtListCst) : []
+            consequent = stmtListCst ? SlimeCstToAstUtil.createStatementListAst(stmtListCst) : []
         } else if (cst.name === SlimeParser.prototype.DefaultClause?.name) {
             // DefaultClause 结构�?
             // children[0]: DefaultTok
@@ -103,7 +103,7 @@ export default class SwitchCstToAst {
             test = null  // default 没有 test
 
             const stmtListCst = cst.children?.find(ch => ch.name === SlimeParser.prototype.StatementList?.name)
-            consequent = stmtListCst ? this.createStatementListAst(stmtListCst) : []
+            consequent = stmtListCst ? SlimeCstToAstUtil.createStatementListAst(stmtListCst) : []
         }
 
         return SlimeAstUtil.createSwitchCase(consequent, test, cst.loc, caseToken, defaultToken, colonToken)
@@ -129,12 +129,12 @@ export default class SwitchCstToAst {
                 // CaseClauses 包含多个 CaseClause
                 if (child.children) {
                     child.children.forEach(caseClauseCst => {
-                        cases.push(this.createSwitchCaseAst(caseClauseCst))
+                        cases.push(SlimeCstToAstUtil.createSwitchCaseAst(caseClauseCst))
                     })
                 }
             } else if (child.name === SlimeParser.prototype.DefaultClause?.name) {
                 // DefaultClause
-                cases.push(this.createSwitchCaseAst(child))
+                cases.push(SlimeCstToAstUtil.createSwitchCaseAst(child))
             }
         })
 

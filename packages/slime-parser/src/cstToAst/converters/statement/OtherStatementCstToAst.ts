@@ -66,7 +66,7 @@ export class OtherStatementCstToAst {
             } else if (child.name === 'Semicolon' || child.value === ';') {
                 semicolonToken = SlimeTokenCreate.createSemicolonToken(child.loc)
             } else if (child.name === SlimeParser.prototype.Expression?.name || child.name === 'Expression') {
-                argument = this.createExpressionAst(child)
+                argument = SlimeCstToAstUtil.createExpressionAst(child)
             }
         }
 
@@ -90,11 +90,11 @@ export class OtherStatementCstToAst {
             } else if (child.name === 'Semicolon' || child.value === ';') {
                 semicolonToken = SlimeTokenCreate.createSemicolonToken(child.loc)
             } else if (child.name === SlimeParser.prototype.LabelIdentifier?.name || child.name === 'LabelIdentifier') {
-                label = this.createLabelIdentifierAst(child)
+                label = SlimeCstToAstUtil.createLabelIdentifierAst(child)
             } else if (child.name === SlimeParser.prototype.IdentifierName?.name) {
-                label = this.createIdentifierNameAst(child)
+                label = SlimeCstToAstUtil.createIdentifierNameAst(child)
             } else if (child.name === SlimeTokenConsumer.prototype.IdentifierName?.name) {
-                label = this.createIdentifierAst(child)
+                label = SlimeCstToAstUtil.createIdentifierAst(child)
             }
         }
 
@@ -118,11 +118,11 @@ export class OtherStatementCstToAst {
             } else if (child.name === 'Semicolon' || child.value === ';') {
                 semicolonToken = SlimeTokenCreate.createSemicolonToken(child.loc)
             } else if (child.name === SlimeParser.prototype.LabelIdentifier?.name || child.name === 'LabelIdentifier') {
-                label = this.createLabelIdentifierAst(child)
+                label = SlimeCstToAstUtil.createLabelIdentifierAst(child)
             } else if (child.name === SlimeParser.prototype.IdentifierName?.name) {
-                label = this.createIdentifierNameAst(child)
+                label = SlimeCstToAstUtil.createIdentifierNameAst(child)
             } else if (child.name === SlimeTokenConsumer.prototype.IdentifierName?.name) {
-                label = this.createIdentifierAst(child)
+                label = SlimeCstToAstUtil.createIdentifierAst(child)
             }
         }
 
@@ -153,9 +153,9 @@ export class OtherStatementCstToAst {
         const catchCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Catch?.name)
         const finallyCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Finally?.name)
 
-        const block = blockCst ? this.createBlockAst(blockCst) : null
-        const handler = catchCst ? this.createCatchAst(catchCst) : null
-        const finalizer = finallyCst ? this.createFinallyAst(finallyCst) : null
+        const block = blockCst ? SlimeCstToAstUtil.createBlockAst(blockCst) : null
+        const handler = catchCst ? SlimeCstToAstUtil.createCatchAst(catchCst) : null
+        const finalizer = finallyCst ? SlimeCstToAstUtil.createFinallyAst(finallyCst) : null
 
         return SlimeAstUtil.createTryStatement(block, handler, finalizer, cst.loc, tryToken, finallyToken)
     }
@@ -171,7 +171,7 @@ export class OtherStatementCstToAst {
         // Finally: FinallyTok Block
 
         const blockCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Block?.name)
-        return blockCst ? this.createBlockAst(blockCst) : null
+        return blockCst ? SlimeCstToAstUtil.createBlockAst(blockCst) : null
     }
 
 
@@ -204,8 +204,8 @@ export class OtherStatementCstToAst {
         const paramCst = cst.children.find(ch => ch.name === SlimeParser.prototype.CatchParameter?.name)
         const blockCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Block?.name)
 
-        const param = paramCst ? this.createCatchParameterAst(paramCst) : null
-        const body = blockCst ? this.createBlockAst(blockCst) : SlimeAstUtil.createBlockStatement([])
+        const param = paramCst ? SlimeCstToAstUtil.createCatchParameterAst(paramCst) : null
+        const body = blockCst ? SlimeCstToAstUtil.createBlockAst(blockCst) : SlimeAstUtil.createBlockStatement([])
 
         return SlimeAstUtil.createCatchClause(body, param, cst.loc, catchToken, lParenToken, rParenToken)
     }
@@ -219,9 +219,9 @@ export class OtherStatementCstToAst {
         const first = cst.children[0]
 
         if (first.name === SlimeParser.prototype.BindingIdentifier?.name) {
-            return this.createBindingIdentifierAst(first)
+            return SlimeCstToAstUtil.createBindingIdentifierAst(first)
         } else if (first.name === SlimeParser.prototype.BindingPattern?.name) {
-            return this.createBindingPatternAst(first)
+            return SlimeCstToAstUtil.createBindingPatternAst(first)
         }
 
         return null
@@ -251,7 +251,7 @@ export class OtherStatementCstToAst {
                     child.name === 'Semicolon' || child.value === ';') {
                     semicolonToken = SlimeTokenCreate.createSemicolonToken(child.loc)
                 } else if (!argument) {
-                    argument = this.createExpressionAst(child)
+                    argument = SlimeCstToAstUtil.createExpressionAst(child)
                 }
             }
         }
@@ -271,7 +271,7 @@ export class OtherStatementCstToAst {
             } else if (child.name === SlimeParser.prototype.Expression?.name ||
                 child.name === 'Expression' ||
                 !expression) {
-                expression = this.createExpressionAst(child)
+                expression = SlimeCstToAstUtil.createExpressionAst(child)
             }
         }
 
@@ -301,7 +301,7 @@ export class OtherStatementCstToAst {
 
                 // LabelIdentifier -> Identifier | yield | await
                 if (name === SlimeParser.prototype.LabelIdentifier?.name || name === 'LabelIdentifier') {
-                    label = this.createLabelIdentifierAst(child)
+                    label = SlimeCstToAstUtil.createLabelIdentifierAst(child)
                     continue
                 }
 
@@ -312,24 +312,24 @@ export class OtherStatementCstToAst {
                     if (itemChild) {
                         // 使用 createStatementDeclarationAst 而不�?createStatementAst
                         // 因为 LabelledItem 可能直接包含 FunctionDeclaration
-                        body = this.createStatementDeclarationAst(itemChild)
+                        body = SlimeCstToAstUtil.createStatementDeclarationAst(itemChild)
                     }
                     continue
                 }
 
                 // 旧版兼容：直接是 Statement
                 if (name === SlimeParser.prototype.Statement?.name || name === 'Statement') {
-                    body = this.createStatementDeclarationAst(child)
+                    body = SlimeCstToAstUtil.createStatementDeclarationAst(child)
                     continue
                 }
 
                 // 旧版兼容：直接是 Identifier
                 if (name === SlimeParser.prototype.IdentifierName?.name) {
-                    label = this.createIdentifierNameAst(child)
+                    label = SlimeCstToAstUtil.createIdentifierNameAst(child)
                     continue
                 }
                 if (name === SlimeTokenConsumer.prototype.IdentifierName?.name) {
-                    label = this.createIdentifierAst(child)
+                    label = SlimeCstToAstUtil.createIdentifierAst(child)
                     continue
                 }
             }
@@ -364,10 +364,10 @@ export class OtherStatementCstToAst {
             } else if (child.name === 'RParen' || child.value === ')') {
                 rParenToken = child
             } else if (child.name === SlimeParser.prototype.Expression?.name || child.name === 'Expression') {
-                object = this.createExpressionAst(child)
+                object = SlimeCstToAstUtil.createExpressionAst(child)
             } else if (child.name === SlimeParser.prototype.Statement?.name || child.name === 'Statement') {
                 // createStatementAst 返回数组，取第一个元�?
-                const bodyArray = this.createStatementAst(child)
+                const bodyArray = SlimeCstToAstUtil.createStatementAst(child)
                 body = Array.isArray(bodyArray) && bodyArray.length > 0 ? bodyArray[0] : bodyArray
             }
         }
@@ -410,7 +410,7 @@ export class OtherStatementCstToAst {
     static createLabelledItemAst(cst: SubhutiCst): any {
         const firstChild = cst.children?.[0]
         if (firstChild) {
-            return this.createStatementDeclarationAst(firstChild)
+            return SlimeCstToAstUtil.createStatementDeclarationAst(firstChild)
         }
         throw new Error('LabelledItem has no children')
     }

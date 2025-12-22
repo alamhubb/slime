@@ -144,7 +144,7 @@ export class IdentifierCstToAst {
             throw new Error('LabelIdentifier has no children')
         }
 
-        return this.createIdentifierAst(child)
+        return SlimeCstToAstUtil.createIdentifierAst(child)
     }
 
 
@@ -168,7 +168,7 @@ export class IdentifierCstToAst {
             throw new Error('IdentifierReference has no children')
         }
 
-        return this.createIdentifierAst(child)
+        return SlimeCstToAstUtil.createIdentifierAst(child)
     }
 
 

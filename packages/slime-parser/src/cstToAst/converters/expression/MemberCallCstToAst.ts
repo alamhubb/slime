@@ -16,13 +16,13 @@ export class MemberCallCstToAst {
 
     static createMemberExpressionFirstOr(cst: SubhutiCst): SlimeExpression | SlimeSuper {
         if (cst.name === SlimeParser.prototype.PrimaryExpression?.name || cst.name === 'PrimaryExpression') {
-            return this.createPrimaryExpressionAst(cst)
+            return SlimeCstToAstUtil.createPrimaryExpressionAst(cst)
         } else if (cst.name === SlimeParser.prototype.SuperProperty?.name || cst.name === 'SuperProperty') {
-            return this.createSuperPropertyAst(cst)
+            return SlimeCstToAstUtil.createSuperPropertyAst(cst)
         } else if (cst.name === SlimeParser.prototype.MetaProperty?.name || cst.name === 'MetaProperty') {
-            return this.createMetaPropertyAst(cst)
+            return SlimeCstToAstUtil.createMetaPropertyAst(cst)
         } else if (cst.name === 'NewMemberExpressionArguments') {
-            return this.createNewExpressionAst(cst)
+            return SlimeCstToAstUtil.createNewExpressionAst(cst)
         } else if (cst.name === 'New') {
             // Es2025Parser: new MemberExpression Arguments 是直接的 token 序列
             // 这种情况应该�?createMemberExpressionAst 中处�?
@@ -53,8 +53,8 @@ export class MemberCallCstToAst {
             const memberExprCst = cst.children[1]
             const argsCst = cst.children[2]
 
-            const callee = this.createMemberExpressionAst(memberExprCst)
-            const args = argsCst ? this.createArgumentsAst(argsCst) : []
+            const callee = SlimeCstToAstUtil.createMemberExpressionAst(memberExprCst)
+            const args = argsCst ? SlimeCstToAstUtil.createArgumentsAst(argsCst) : []
 
             // 提取 tokens
             const newToken = SlimeTokenCreate.createNewToken(newCst.loc)
@@ -84,7 +84,7 @@ export class MemberCallCstToAst {
             // �?Arguments 之后继续处理（如 .bar�?
             startIdx = 3
         } else {
-            current = this.createMemberExpressionFirstOr(cst.children[0]) as SlimeExpression
+            current = SlimeCstToAstUtil.createMemberExpressionFirstOr(cst.children[0]) as SlimeExpression
         }
 
         // 循环处理剩余的children（Dot+IdentifierName、LBracket+Expression+RBracket、Arguments、TemplateLiteral�?
@@ -105,7 +105,7 @@ export class MemberCallCstToAst {
                         property = SlimeAstUtil.createIdentifier(tokenCst.value, tokenCst.loc)
                     } else {
                         // 直接是token（向后兼容）
-                        property = this.createIdentifierAst(identifierNameCst)
+                        property = SlimeCstToAstUtil.createIdentifierAst(identifierNameCst)
                     }
                 }
 
@@ -138,7 +138,7 @@ export class MemberCallCstToAst {
 
             } else if (child.name === 'BracketExpression') {
                 // [expression] - computed property access (旧版兼容)
-                const propertyExpression = this.createExpressionAst(child.children[1])
+                const propertyExpression = SlimeCstToAstUtil.createExpressionAst(child.children[1])
                 current = {
                     type: SlimeNodeType.MemberExpression,
                     object: current,
@@ -153,7 +153,7 @@ export class MemberCallCstToAst {
                 // [expression] - computed property access
                 const expressionChild = cst.children[i + 1]
                 if (expressionChild) {
-                    const propertyExpression = this.createExpressionAst(expressionChild)
+                    const propertyExpression = SlimeCstToAstUtil.createExpressionAst(expressionChild)
                     current = {
                         type: SlimeNodeType.MemberExpression,
                         object: current,
@@ -167,12 +167,12 @@ export class MemberCallCstToAst {
 
             } else if (child.name === SlimeParser.prototype.Arguments?.name || child.name === 'Arguments') {
                 // () - function call
-                const args = this.createArgumentsAst(child)
+                const args = SlimeCstToAstUtil.createArgumentsAst(child)
                 current = SlimeAstUtil.createCallExpression(current, args) as SlimeExpression
 
             } else if (child.name === SlimeParser.prototype.TemplateLiteral?.name || child.name === 'TemplateLiteral') {
                 // `template` - Tagged Template
-                const quasi = this.createTemplateLiteralAst(child)
+                const quasi = SlimeCstToAstUtil.createTemplateLiteralAst(child)
                 current = {
                     type: 'TaggedTemplateExpression',
                     tag: current,
@@ -197,7 +197,7 @@ export class MemberCallCstToAst {
         const first1 = cst.children[1]
         if (first1) {
             if (first1.name === SlimeParser.prototype.ArgumentList?.name) {
-                const res = this.createArgumentListAst(first1)
+                const res = SlimeCstToAstUtil.createArgumentListAst(first1)
                 return res
             }
         }
@@ -226,7 +226,7 @@ export class MemberCallCstToAst {
                     arguments_.push(SlimeAstUtil.createCallArgument(currentArg!, undefined))
                 }
 
-                const expr = this.createAssignmentExpressionAst(child)
+                const expr = SlimeCstToAstUtil.createAssignmentExpressionAst(child)
                 if (pendingEllipsis) {
                     // 创建 SpreadElement
                     const ellipsisToken = SlimeTokenCreate.createEllipsisToken(pendingEllipsis.loc)
@@ -241,7 +241,7 @@ export class MemberCallCstToAst {
                 if (hasArg) {
                     arguments_.push(SlimeAstUtil.createCallArgument(currentArg!, undefined))
                 }
-                currentArg = this.createSpreadElementAst(child)
+                currentArg = SlimeCstToAstUtil.createSpreadElementAst(child)
                 hasArg = true
             } else if (child.name === 'Comma' || child.value === ',') {
                 // 逗号与前面的参数配对
@@ -276,9 +276,9 @@ export class MemberCallCstToAst {
             // 单个子节点，可能是SuperCall
             const first = cst.children[0]
             if (first.name === SlimeParser.prototype.SuperCall?.name) {
-                return this.createSuperCallAst(first)
+                return SlimeCstToAstUtil.createSuperCallAst(first)
             }
-            return this.createExpressionAst(first)
+            return SlimeCstToAstUtil.createExpressionAst(first)
         }
 
         // 多个children：MemberExpression + Arguments + 可选的链式调用
@@ -293,16 +293,16 @@ export class MemberCallCstToAst {
         if (firstChild.name === 'CoverCallExpressionAndAsyncArrowHead') {
             // CoverCallExpressionAndAsyncArrowHead 结构: [MemberExpression, Arguments]
             // 递归处理�?
-            current = this.createCallExpressionAst(firstChild)
+            current = SlimeCstToAstUtil.createCallExpressionAst(firstChild)
         } else if (firstChild.name === SlimeParser.prototype.MemberExpression?.name || firstChild.name === 'MemberExpression') {
-            current = this.createMemberExpressionAst(firstChild)
+            current = SlimeCstToAstUtil.createMemberExpressionAst(firstChild)
         } else if (firstChild.name === SlimeParser.prototype.SuperCall?.name || firstChild.name === 'SuperCall') {
-            current = this.createSuperCallAst(firstChild)
+            current = SlimeCstToAstUtil.createSuperCallAst(firstChild)
         } else if (firstChild.name === SlimeParser.prototype.ImportCall?.name || firstChild.name === 'ImportCall') {
-            current = this.createImportCallAst(firstChild)
+            current = SlimeCstToAstUtil.createImportCallAst(firstChild)
         } else {
             // 尝试作为表达式处�?
-            current = this.createExpressionAst(firstChild)
+            current = SlimeCstToAstUtil.createExpressionAst(firstChild)
         }
 
         // 循环处理所有后续children
@@ -311,7 +311,7 @@ export class MemberCallCstToAst {
 
             if (child.name === SlimeParser.prototype.Arguments?.name || child.name === 'Arguments') {
                 // () - 函数调用
-                const args = this.createArgumentsAst(child)
+                const args = SlimeCstToAstUtil.createArgumentsAst(child)
                 current = SlimeAstUtil.createCallExpression(current, args) as SlimeExpression
 
             } else if (child.name === 'DotMemberExpression') {
@@ -344,7 +344,7 @@ export class MemberCallCstToAst {
 
             } else if (child.name === 'BracketExpression') {
                 // [expr] - computed property (旧版兼容)
-                const propertyExpression = this.createExpressionAst(child.children[1])
+                const propertyExpression = SlimeCstToAstUtil.createExpressionAst(child.children[1])
                 current = {
                     type: SlimeNodeType.MemberExpression,
                     object: current,
@@ -358,7 +358,7 @@ export class MemberCallCstToAst {
                 // Es2025Parser产生的是直接�?LBracket + Expression + RBracket
                 const expressionChild = cst.children[i + 1]
                 if (expressionChild && expressionChild.name !== 'RBracket') {
-                    const propertyExpression = this.createExpressionAst(expressionChild)
+                    const propertyExpression = SlimeCstToAstUtil.createExpressionAst(expressionChild)
                     current = {
                         type: SlimeNodeType.MemberExpression,
                         object: current,
@@ -372,7 +372,7 @@ export class MemberCallCstToAst {
 
             } else if (child.name === SlimeParser.prototype.TemplateLiteral?.name || child.name === 'TemplateLiteral') {
                 // `template` - Tagged Template
-                const quasi = this.createTemplateLiteralAst(child)
+                const quasi = SlimeCstToAstUtil.createTemplateLiteralAst(child)
                 current = {
                     type: 'TaggedTemplateExpression',
                     tag: current,
@@ -396,7 +396,7 @@ export class MemberCallCstToAst {
      * CallMemberExpression -> MemberExpression Arguments
      */
     static createCallMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
-        return this.createCallExpressionAst(cst)
+        return SlimeCstToAstUtil.createCallExpressionAst(cst)
     }
 
 
@@ -435,8 +435,8 @@ export class MemberCallCstToAst {
                 }
             }
 
-            const calleeExpression = this.createMemberExpressionAst(cst.children[1])
-            const args = this.createArgumentsAst(cst.children[2])
+            const calleeExpression = SlimeCstToAstUtil.createMemberExpressionAst(cst.children[1])
+            const args = SlimeCstToAstUtil.createArgumentsAst(cst.children[2])
 
             return SlimeAstUtil.createNewExpression(
                 calleeExpression, args, cst.loc,
@@ -452,7 +452,7 @@ export class MemberCallCstToAst {
                 // 这是 `new NewExpression` 形式，创建无参数�?NewExpression
                 const newToken = SlimeTokenCreate.createNewToken(firstChild.loc)
                 const innerNewExpr = cst.children[1]
-                const calleeExpression = this.createNewExpressionAst(innerNewExpr)
+                const calleeExpression = SlimeCstToAstUtil.createNewExpressionAst(innerNewExpr)
 
                 return SlimeAstUtil.createNewExpression(
                     calleeExpression, [], cst.loc,
@@ -460,7 +460,7 @@ export class MemberCallCstToAst {
                 )
             } else {
                 // 这是 MemberExpression 形式，递归处理
-                return this.createExpressionAst(firstChild)
+                return SlimeCstToAstUtil.createExpressionAst(firstChild)
             }
         }
     }
@@ -472,7 +472,7 @@ export class MemberCallCstToAst {
         // children[0]: SuperTok token
         // children[1]: Arguments CST
         const argumentsCst = cst.children[1]
-        const argumentsAst: SlimeCallArgument[] = this.createArgumentsAst(argumentsCst)
+        const argumentsAst: SlimeCallArgument[] = SlimeCstToAstUtil.createArgumentsAst(argumentsCst)
 
         // 创建Super节点作为callee
         const superNode: SlimeSuper = {
@@ -495,7 +495,7 @@ export class MemberCallCstToAst {
         const second = cst.children[1]
         if (second.name === 'BracketExpression') {
             // super[expression] - 旧版兼容
-            const propertyExpression = this.createExpressionAst(second.children[1])
+            const propertyExpression = SlimeCstToAstUtil.createExpressionAst(second.children[1])
             return {
                 type: SlimeNodeType.MemberExpression,
                 object: superNode,
@@ -508,7 +508,7 @@ export class MemberCallCstToAst {
             // Es2025Parser: super[expression]
             // children: [SuperTok, LBracket, Expression, RBracket]
             const expressionCst = cst.children[2]
-            const propertyExpression = this.createExpressionAst(expressionCst)
+            const propertyExpression = SlimeCstToAstUtil.createExpressionAst(expressionCst)
             return {
                 type: SlimeNodeType.MemberExpression,
                 object: superNode,

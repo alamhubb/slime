@@ -39,7 +39,7 @@ export class UnaryExpressionCstToAst {
             }
 
             // 是表达式节点，递归处理
-            return this.createExpressionAst(child)
+            return SlimeCstToAstUtil.createExpressionAst(child)
         }
 
         // 如果有两个子节点，是一元运算符表达�?
@@ -64,7 +64,7 @@ export class UnaryExpressionCstToAst {
         const operator = operatorMap[operatorToken.name] || operatorToken.value
 
         // 递归处理操作�?
-        const argument = this.createExpressionAst(argumentCst)
+        const argument = SlimeCstToAstUtil.createExpressionAst(argumentCst)
 
         // 创建 UnaryExpression AST
         return {
@@ -89,7 +89,7 @@ export class UnaryExpressionCstToAst {
             if (isPrefix) {
                 // Prefix: ++argument or --argument
                 const operator = first.value || first.loc?.value
-                const argument = this.createExpressionAst(cst.children[1])
+                const argument = SlimeCstToAstUtil.createExpressionAst(cst.children[1])
                 return {
                     type: SlimeNodeType.UpdateExpression,
                     operator: operator,
@@ -99,7 +99,7 @@ export class UnaryExpressionCstToAst {
                 } as any
             } else {
                 // Postfix: argument++ or argument--
-                const argument = this.createExpressionAst(cst.children[0])
+                const argument = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
                 let operator: string | undefined
                 for (let i = 1; i < cst.children.length; i++) {
                     const child = cst.children[i]
@@ -120,7 +120,7 @@ export class UnaryExpressionCstToAst {
                 }
             }
         }
-        return this.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
     static createAdditiveExpressionAst(cst: SubhutiCst): SlimeExpression {
@@ -128,7 +128,7 @@ export class UnaryExpressionCstToAst {
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
             // 支持多个运算符：x + y + z => BinaryExpression(BinaryExpression(x, +, y), +, z)
-            let left = this.createExpressionAst(cst.children[0])
+            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
 
             // 循环处理剩余�?(operator, operand) �?
             // CST结构: [operand, operator, operand, operator, operand, ...]
@@ -137,7 +137,7 @@ export class UnaryExpressionCstToAst {
                 const operatorNode = cst.children[i]
                 const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
 
-                const right = this.createExpressionAst(cst.children[i + 1])
+                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
                     type: SlimeNodeType.BinaryExpression,
@@ -150,7 +150,7 @@ export class UnaryExpressionCstToAst {
 
             return left
         }
-        return this.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
     static createMultiplicativeExpressionAst(cst: SubhutiCst): SlimeExpression {
@@ -158,7 +158,7 @@ export class UnaryExpressionCstToAst {
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
             // 支持多个运算符：a * b * c => BinaryExpression(BinaryExpression(a, *, b), *, c)
-            let left = this.createExpressionAst(cst.children[0])
+            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
 
             // 循环处理剩余�?(operator, operand) �?
             for (let i = 1; i < cst.children.length; i += 2) {
@@ -166,7 +166,7 @@ export class UnaryExpressionCstToAst {
                 const operatorNode = cst.children[i]
                 const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
 
-                const right = this.createExpressionAst(cst.children[i + 1])
+                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
                     type: SlimeNodeType.BinaryExpression,
@@ -179,7 +179,7 @@ export class UnaryExpressionCstToAst {
 
             return left
         }
-        return this.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
 }

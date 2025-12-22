@@ -28,7 +28,7 @@ export class ExpressionCstToAst {
         }
         let argument: any = null
         if (cst.children[startIndex]) {
-            argument = this.createAssignmentExpressionAst(cst.children[startIndex])
+            argument = SlimeCstToAstUtil.createAssignmentExpressionAst(cst.children[startIndex])
         }
 
         return SlimeAstUtil.createYieldExpression(argument, delegate, cst.loc, yieldToken, asteriskToken)
@@ -46,7 +46,7 @@ export class ExpressionCstToAst {
         }
 
         const argumentCst = cst.children[1]
-        const argument = this.createExpressionAst(argumentCst)
+        const argument = SlimeCstToAstUtil.createExpressionAst(argumentCst)
 
         return SlimeAstUtil.createAwaitExpression(argument, cst.loc, awaitToken)
     }
@@ -54,7 +54,7 @@ export class ExpressionCstToAst {
     static createConditionalExpressionAst(cst: SubhutiCst): SlimeExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ConditionalExpression?.name);
         const firstChild = cst.children[0]
-        let test = this.createExpressionAst(firstChild)
+        let test = SlimeCstToAstUtil.createExpressionAst(firstChild)
         let alternate
         let consequent
 
@@ -63,7 +63,7 @@ export class ExpressionCstToAst {
         let colonToken: any = undefined
 
         if (cst.children.length === 1) {
-            return this.createExpressionAst(cst.children[0])
+            return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
         } else {
             // CST children: [LogicalORExpression, Question, AssignmentExpression, Colon, AssignmentExpression]
             const questionCst = cst.children[1]
@@ -76,8 +76,8 @@ export class ExpressionCstToAst {
                 colonToken = SlimeTokenCreate.createColonToken(colonCst.loc)
             }
 
-            consequent = this.createAssignmentExpressionAst(cst.children[2])
-            alternate = this.createAssignmentExpressionAst(cst.children[4])
+            consequent = SlimeCstToAstUtil.createAssignmentExpressionAst(cst.children[2])
+            alternate = SlimeCstToAstUtil.createAssignmentExpressionAst(cst.children[4])
         }
 
         return SlimeAstUtil.createConditionalExpression(test, consequent, alternate, cst.loc, questionToken, colonToken)

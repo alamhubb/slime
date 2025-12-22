@@ -42,7 +42,7 @@ export class VariableCstToAst {
 
             // VariableDeclaration
             if (name === SlimeParser.prototype.VariableDeclaration?.name || name === 'VariableDeclaration') {
-                declarations.push(this.createVariableDeclaratorFromVarDeclaration(child))
+                declarations.push(SlimeCstToAstUtil.createVariableDeclaratorFromVarDeclaration(child))
             }
         }
 
@@ -65,11 +65,11 @@ export class VariableCstToAst {
         if (!firstChild) return null
 
         if (firstChild.name === SlimeParser.prototype.BindingIdentifier?.name || firstChild.name === 'BindingIdentifier') {
-            return this.createBindingIdentifierAst(firstChild)
+            return SlimeCstToAstUtil.createBindingIdentifierAst(firstChild)
         } else if (firstChild.name === SlimeParser.prototype.BindingPattern?.name || firstChild.name === 'BindingPattern') {
-            return this.createBindingPatternAst(firstChild)
+            return SlimeCstToAstUtil.createBindingPatternAst(firstChild)
         }
-        return this.createBindingIdentifierAst(firstChild)
+        return SlimeCstToAstUtil.createBindingIdentifierAst(firstChild)
     }
 
 
@@ -88,7 +88,7 @@ export class VariableCstToAst {
         )
 
         const kind = letOrConst?.children?.[0]?.value || 'let'
-        const id = forBinding ? this.createForBindingAst(forBinding) : null
+        const id = forBinding ? SlimeCstToAstUtil.createForBindingAst(forBinding) : null
 
         return {
             type: SlimeNodeType.VariableDeclaration,
@@ -107,7 +107,7 @@ export class VariableCstToAst {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Initializer?.name);
         // Initializer -> Eq + AssignmentExpression
         const assignmentExpressionCst = cst.children[1]
-        return this.createAssignmentExpressionAst(assignmentExpressionCst)
+        return SlimeCstToAstUtil.createAssignmentExpressionAst(assignmentExpressionCst)
     }
 
 
@@ -123,9 +123,9 @@ export class VariableCstToAst {
         let id: SlimeIdentifier | SlimePattern
 
         if (firstChild.name === SlimeParser.prototype.BindingIdentifier?.name) {
-            id = this.createBindingIdentifierAst(firstChild)
+            id = SlimeCstToAstUtil.createBindingIdentifierAst(firstChild)
         } else if (firstChild.name === SlimeParser.prototype.BindingPattern?.name) {
-            id = this.createBindingPatternAst(firstChild)
+            id = SlimeCstToAstUtil.createBindingPatternAst(firstChild)
         } else {
             throw new Error(`Unexpected variable declarator id type: ${firstChild.name}`)
         }
@@ -141,11 +141,11 @@ export class VariableCstToAst {
             if (initCst) {
                 // 检查initCst是否是AssignmentExpression
                 if (initCst.name === SlimeParser.prototype.AssignmentExpression?.name) {
-                    const init = this.createAssignmentExpressionAst(initCst)
+                    const init = SlimeCstToAstUtil.createAssignmentExpressionAst(initCst)
                     variableDeclarator = SlimeAstUtil.createVariableDeclarator(id, eqAst, init)
                 } else {
                     // 如果不是AssignmentExpression，直接作为表达式处理
-                    const init = this.createExpressionAst(initCst)
+                    const init = SlimeCstToAstUtil.createExpressionAst(initCst)
                     variableDeclarator = SlimeAstUtil.createVariableDeclarator(id, eqAst, init)
                 }
             } else {
@@ -173,11 +173,11 @@ export class VariableCstToAst {
             const name = child.name
 
             if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
-                id = this.createBindingIdentifierAst(child)
+                id = SlimeCstToAstUtil.createBindingIdentifierAst(child)
             } else if (name === SlimeParser.prototype.BindingPattern?.name || name === 'BindingPattern') {
-                id = this.createBindingPatternAst(child)
+                id = SlimeCstToAstUtil.createBindingPatternAst(child)
             } else if (name === SlimeParser.prototype.Initializer?.name || name === 'Initializer') {
-                init = this.createInitializerAst(child)
+                init = SlimeCstToAstUtil.createInitializerAst(child)
             }
         }
 
@@ -198,7 +198,7 @@ export class VariableCstToAst {
                 item.name === SlimeParser.prototype.LexicalBinding?.name ||
                 item.name === 'VariableDeclarator'
             )
-            .map(item => this.createVariableDeclaratorAst(item)) as any[]
+            .map(item => SlimeCstToAstUtil.createVariableDeclaratorAst(item)) as any[]
         return declarations
     }
 
@@ -216,9 +216,9 @@ export class VariableCstToAst {
 
             const name = child.name
             if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
-                id = this.createBindingIdentifierAst(child)
+                id = SlimeCstToAstUtil.createBindingIdentifierAst(child)
             } else if (name === SlimeParser.prototype.BindingPattern?.name || name === 'BindingPattern') {
-                id = this.createBindingPatternAst(child)
+                id = SlimeCstToAstUtil.createBindingPatternAst(child)
             } else if (name === SlimeParser.prototype.Initializer?.name || name === 'Initializer') {
                 // Initializer: = AssignmentExpression
                 // children[0] �?Assign token，children[1] �?AssignmentExpression
@@ -226,7 +226,7 @@ export class VariableCstToAst {
                     const assignCst = child.children[0]
                     assignToken = SlimeTokenCreate.createAssignToken(assignCst.loc)
                 }
-                init = this.createInitializerAst(child)
+                init = SlimeCstToAstUtil.createInitializerAst(child)
             }
         }
 
@@ -276,7 +276,7 @@ export class VariableCstToAst {
             if (name === 'BindingList' || name === SlimeParser.prototype.BindingList?.name) {
                 for (const binding of child.children || []) {
                     if (binding.name === 'LexicalBinding' || binding.name === SlimeParser.prototype.LexicalBinding?.name) {
-                        declarations.push(this.createLexicalBindingAst(binding))
+                        declarations.push(SlimeCstToAstUtil.createLexicalBindingAst(binding))
                     }
                     // Skip commas
                     if (binding.value === ',') continue
@@ -286,7 +286,7 @@ export class VariableCstToAst {
 
             // Direct LexicalBinding
             if (name === 'LexicalBinding' || name === SlimeParser.prototype.LexicalBinding?.name) {
-                declarations.push(this.createLexicalBindingAst(child))
+                declarations.push(SlimeCstToAstUtil.createLexicalBindingAst(child))
             }
         }
 
@@ -301,8 +301,8 @@ export class VariableCstToAst {
 
     static createVariableDeclarationAst(cst: SubhutiCst): SlimeVariableDeclaration {
         //直接返回声明
-        //                 this.Statement()
-        //                 this.Declaration()
+        //                 SlimeCstToAstUtil.Statement()
+        //                 SlimeCstToAstUtil.Declaration()
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.VariableDeclaration?.name);
         let kindCst: SubhutiCst = cst.children[0].children[0]
 
@@ -319,7 +319,7 @@ export class VariableCstToAst {
 
         let declarations: SlimeVariableDeclarator[] = []
         if (cst.children[1]) {
-            declarations = this.createVariableDeclarationListAst(cst.children[1])
+            declarations = SlimeCstToAstUtil.createVariableDeclarationListAst(cst.children[1])
         }
         return SlimeAstUtil.createVariableDeclaration(kindToken, declarations, cst.loc)
     }
@@ -343,7 +343,7 @@ export class VariableCstToAst {
                 for (const varDeclCst of child.children || []) {
                     if (varDeclCst.name === SlimeParser.prototype.VariableDeclaration?.name ||
                         varDeclCst.name === 'VariableDeclaration') {
-                        declarations.push(this.createVariableDeclaratorFromVarDeclaration(varDeclCst))
+                        declarations.push(SlimeCstToAstUtil.createVariableDeclaratorFromVarDeclaration(varDeclCst))
                     }
                 }
             }
@@ -367,16 +367,16 @@ export class VariableCstToAst {
         const name = first.name
 
         if (name === SlimeParser.prototype.VariableDeclaration?.name || name === 'VariableDeclaration') {
-            return this.createVariableDeclarationAst(first);
+            return SlimeCstToAstUtil.createVariableDeclarationAst(first);
         } else if (name === SlimeParser.prototype.LexicalDeclaration?.name || name === 'LexicalDeclaration') {
             // LexicalDeclaration: let/const declarations
-            return this.createLexicalDeclarationAst(first);
+            return SlimeCstToAstUtil.createLexicalDeclarationAst(first);
         } else if (name === SlimeParser.prototype.ClassDeclaration?.name || name === 'ClassDeclaration') {
-            return this.createClassDeclarationAst(first);
+            return SlimeCstToAstUtil.createClassDeclarationAst(first);
         } else if (name === SlimeParser.prototype.FunctionDeclaration?.name || name === 'FunctionDeclaration') {
-            return this.createFunctionDeclarationAst(first);
+            return SlimeCstToAstUtil.createFunctionDeclarationAst(first);
         } else if (name === SlimeParser.prototype.HoistableDeclaration?.name || name === 'HoistableDeclaration') {
-            return this.createHoistableDeclarationAst(first);
+            return SlimeCstToAstUtil.createHoistableDeclarationAst(first);
         } else {
             throw new Error(`Unsupported Declaration type: ${name}`)
         }
@@ -388,16 +388,16 @@ export class VariableCstToAst {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.HoistableDeclaration?.name);
         const first = cst.children[0]
         if (first.name === SlimeParser.prototype.FunctionDeclaration?.name || first.name === 'FunctionDeclaration') {
-            return this.createFunctionDeclarationAst(first)
+            return SlimeCstToAstUtil.createFunctionDeclarationAst(first)
         } else if (first.name === SlimeParser.prototype.GeneratorDeclaration?.name || first.name === 'GeneratorDeclaration') {
             // GeneratorDeclaration -> 类似FunctionDeclaration但有*�?
-            return this.createGeneratorDeclarationAst(first)
+            return SlimeCstToAstUtil.createGeneratorDeclarationAst(first)
         } else if (first.name === SlimeParser.prototype.AsyncFunctionDeclaration?.name || first.name === 'AsyncFunctionDeclaration') {
             // AsyncFunctionDeclaration -> async function
-            return this.createAsyncFunctionDeclarationAst(first)
+            return SlimeCstToAstUtil.createAsyncFunctionDeclarationAst(first)
         } else if (first.name === SlimeParser.prototype.AsyncGeneratorDeclaration?.name || first.name === 'AsyncGeneratorDeclaration') {
             // AsyncGeneratorDeclaration -> async function*
-            return this.createAsyncGeneratorDeclarationAst(first)
+            return SlimeCstToAstUtil.createAsyncGeneratorDeclarationAst(first)
         } else {
             throw new Error(`Unsupported HoistableDeclaration type: ${first.name}`)
         }

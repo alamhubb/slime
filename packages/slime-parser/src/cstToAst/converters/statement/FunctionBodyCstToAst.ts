@@ -21,11 +21,11 @@ export default class FunctionBodyCstToAst {
 
         // If child is StatementList, process it
         if (first.name === 'StatementList' || first.name === SlimeParser.prototype.StatementList?.name) {
-            return this.createStatementListAst(first)
+            return SlimeCstToAstUtil.createStatementListAst(first)
         }
 
         // If child is a statement directly
-        return this.createStatementListItemAst(first)
+        return SlimeCstToAstUtil.createStatementListItemAst(first)
     }
 
 
@@ -47,28 +47,28 @@ export default class FunctionBodyCstToAst {
 
         // Handle nested FunctionBody (from GeneratorBody, AsyncFunctionBody, AsyncGeneratorBody)
         if (name === 'FunctionBody' || name === SlimeParser.prototype.FunctionBody?.name) {
-            return this.createFunctionBodyAst(first)
+            return SlimeCstToAstUtil.createFunctionBodyAst(first)
         }
 
         // Handle FunctionStatementList (ES2025)
         if (name === 'FunctionStatementList' || name === SlimeParser.prototype.FunctionStatementList?.name) {
-            return this.createFunctionStatementListAst(first)
+            return SlimeCstToAstUtil.createFunctionStatementListAst(first)
         }
 
         // Handle StatementList (legacy)
         if (name === 'StatementList' || name === SlimeParser.prototype.StatementList?.name) {
-            return this.createStatementListAst(first)
+            return SlimeCstToAstUtil.createStatementListAst(first)
         }
 
         // If the first child is a statement directly, process it
-        return this.createStatementListAst(first)
+        return SlimeCstToAstUtil.createStatementListAst(first)
     }
 
     /**
      * GeneratorBody CST �?AST（透传�?FunctionBody�?
      */
     static createGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
-        return this.createFunctionBodyAst(cst)
+        return SlimeCstToAstUtil.createFunctionBodyAst(cst)
     }
 
 
@@ -76,7 +76,7 @@ export default class FunctionBodyCstToAst {
      * AsyncFunctionBody CST �?AST（透传�?FunctionBody�?
      */
     static createAsyncFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
-        return this.createFunctionBodyAst(cst)
+        return SlimeCstToAstUtil.createFunctionBodyAst(cst)
     }
 
 
@@ -85,6 +85,6 @@ export default class FunctionBodyCstToAst {
      * AsyncGeneratorBody CST �?AST（透传�?FunctionBody�?
      */
     static createAsyncGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
-        return this.createFunctionBodyAst(cst)
+        return SlimeCstToAstUtil.createFunctionBodyAst(cst)
     }
 }
