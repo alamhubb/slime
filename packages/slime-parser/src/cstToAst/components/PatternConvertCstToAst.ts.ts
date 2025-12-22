@@ -11,7 +11,7 @@ import {
     type SlimeObjectPattern,
     type SlimeObjectPatternProperty,
     type SlimeAssignmentProperty,
-    type SlimeRestElement
+    type SlimeRestElement, SlimeStatement
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import SlimeParser from "../../SlimeParser.ts";
@@ -545,5 +545,26 @@ export class PatternConvertCstToAstTs {
 
         // 其他类型直接返回
         return expr
+    }
+
+
+    static createBindingRestElementAst(cst: SubhutiCst): SlimeRestElement {
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.BindingRestElement?.name);
+        // BindingRestElement: ... BindingIdentifier | ... BindingPattern
+        const argumentCst = cst.children[1]
+
+        let argument: SlimeIdentifier | SlimePattern
+
+        if (argumentCst.name === SlimeParser.prototype.BindingIdentifier?.name) {
+            // 简单情况：...rest
+            argument = SlimeCstToAstUtil.createBindingIdentifierAst(argumentCst)
+        } else if (argumentCst.name === SlimeParser.prototype.BindingPattern?.name) {
+            // 嵌套解构�?..[a, b] �?...{x, y}
+            argument = SlimeCstToAstUtil.createBindingPatternAst(argumentCst)
+        } else {
+            throw new Error(`BindingRestElement: 不支持的类型 ${argumentCst.name}`)
+        }
+
+        return SlimeAstUtil.createRestElement(argument)
     }
 }

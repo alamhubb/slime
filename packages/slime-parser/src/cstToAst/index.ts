@@ -11,8 +11,8 @@ export * from './module/ImportCstToAst.ts';
 export * from './module/ModuleCstToAst.ts';
 
 // declaration
-export * from './declaration/VariableCstToAst.ts';
-export * from './declaration/FunctionDeclarationCstToAst.ts';
+export * from './statements/VariableCstToAst.ts';
+export * from './function/FunctionDeclarationCstToAst.ts';
 
 // class
 export * from './class/ClassDeclarationCstToAst.ts';
@@ -22,29 +22,28 @@ export * from './class/MethodDefinitionCstToAst.ts';
 // function
 export * from './function/FunctionExpressionCstToAst.ts';
 export * from './function/ArrowFunctionCstToAst.ts';
-export * from './function/FunctionParameterCstToAst.ts';
+export * from './components/FunctionParameterCstToAst.ts';
 
 // statement
-export * from './statement/BlockCstToAst.ts';
-export * from './statement/ControlFlowCstToAst.ts';
-export * from './statement/FunctionBodyCstToAst.ts';
-export * from './statement/OtherStatementCstToAst.ts';
+export * from './statements/BlockCstToAst.ts';
+export * from './statements/ControlFlowCstToAst.ts';
+export * from './components/FunctionBodyCstToAst.ts';
+export * from './statements/OtherStatementCstToAst.ts';
 
 // expression
-export * from './expression/ExpressionCstToAst.ts';
-export * from './expression/PrimaryExpressionCstToAst.ts';
-export * from './expression/AssignmentExpressionCstToAst.ts';
-export * from './expression/BinaryExpressionCstToAst.ts';
-export * from './expression/UnaryExpressionCstToAst.ts';
-export * from './expression/MemberCallCstToAst.ts';
-export * from './expression/OptionalExpressionCstToAst.ts';
+export * from './expressions/ExpressionCstToAst.ts';
+export * from './expressions/PrimaryExpressionCstToAst.ts';
+export * from './expressions/BinaryExpressionCstToAst.ts';
+export * from './expressions/UnaryExpressionCstToAst.ts';
+export * from './expressions/MemberCallCstToAst.ts';
+export * from './expressions/OptionalExpressionCstToAst.ts';
 
 // literal
 export * from './literal/LiteralCstToAst.ts';
 export * from './literal/CompoundLiteralCstToAst.ts';
 
 // pattern
-export * from './pattern/BindingPatternCstToAst.ts';
-export * from './pattern/AssignmentPatternCstToAst.ts';
-export * from './pattern/PatternConvertCstToAst.ts.ts';
+export * from './components/BindingPatternCstToAst.ts';
+export * from './components/AssignmentPatternCstToAst.ts';
+export * from './components/PatternConvertCstToAst.ts.ts';
 

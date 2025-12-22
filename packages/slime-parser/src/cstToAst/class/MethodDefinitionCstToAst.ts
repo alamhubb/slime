@@ -1,7 +1,7 @@
 /**
  * MethodDefinitionCstToAst - 方法定义转换
  */
-import { SubhutiCst } from "subhuti";
+import {SubhutiCst} from "subhuti";
 import {
     SlimeAstUtil,
     type SlimeBlockStatement, SlimeExpression,
@@ -10,7 +10,7 @@ import {
     type SlimeIdentifier, SlimeLiteral, SlimeMethodDefinition, SlimeNodeType, SlimePattern, SlimeTokenCreate
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
-import { SlimeAstUtils } from "../SlimeAstUtils.ts";
+import {SlimeAstUtils} from "../SlimeAstUtils.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
 export class MethodDefinitionCstToAst {
@@ -123,8 +123,6 @@ export class MethodDefinitionCstToAst {
     }
 
 
-
-
     /**
      * AsyncMethod CST �?AST
      * AsyncMethod -> async ClassElementName ( UniqueFormalParameters ) { AsyncFunctionBody }
@@ -134,15 +132,12 @@ export class MethodDefinitionCstToAst {
     }
 
 
-
-
     /**
      * AsyncGeneratorMethod CST �?AST
      */
     static createAsyncGeneratorMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
         return SlimeCstToAstUtil.createMethodDefinitionAstInternal(cst, 'method', true, true)
     }
-
 
 
     /**
@@ -221,8 +216,6 @@ export class MethodDefinitionCstToAst {
 
         return methodDef
     }
-
-
 
 
     /**
@@ -413,36 +406,6 @@ export class MethodDefinitionCstToAst {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * [内部方法] 普通方法定�?
      * 处理 ES2025 Parser �?ClassElementName ( UniqueFormalParameters ) { FunctionBody } 结构
@@ -536,8 +499,6 @@ export class MethodDefinitionCstToAst {
     }
 
 
-
-
     /**
      * [内部方法] getter 方法 (以 IdentifierNameTok="get" 开始)
      * 处理 ES2025 Parser 的 IdentifierNameTok="get" ClassElementName ( ) { FunctionBody } 结构
@@ -613,14 +574,6 @@ export class MethodDefinitionCstToAst {
 
         return methodDef
     }
-
-
-
-
-
-
-
-
 
 
     /**
@@ -712,7 +665,6 @@ export class MethodDefinitionCstToAst {
     }
 
 
-
     /**
      * [内部方法] generator 方法 (�?MethodDefinition children 直接处理)
      * @internal
@@ -720,13 +672,6 @@ export class MethodDefinitionCstToAst {
     static createMethodDefinitionGeneratorMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
         return SlimeCstToAstUtil.createMethodDefinitionGeneratorMethodAst(staticCst, cst)
     }
-
-
-
-
-
-
-
 
 
     /**
@@ -741,16 +686,6 @@ export class MethodDefinitionCstToAst {
         }
         return SlimeCstToAstUtil.createMethodDefinitionAsyncMethodAst(staticCst, cst)
     }
-
-
-
-
-
-
-
-
-
-
 
 
     /**
@@ -772,7 +707,6 @@ export class MethodDefinitionCstToAst {
     }
 
 
-
     /** 返回包装类型的版�?*/
     static createPropertySetParameterListAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
         // PropertySetParameterList: FormalParameter
@@ -790,6 +724,275 @@ export class MethodDefinitionCstToAst {
     }
 
 
+    /**
+     * [内部方法] generator 方法
+     * 处理 ES2025 Parser 的 * ClassElementName ( UniqueFormalParameters ) { GeneratorBody } 结构
+     * @internal
+     */
+    static createMethodDefinitionGeneratorMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        // GeneratorMethod children: [Asterisk, ClassElementName, LParen, UniqueFormalParameters?, RParen, LBrace, GeneratorBody, RBrace]
+        const children = cst.children
+        let i = 0
+
+        // Token fields
+        let staticToken: any = undefined
+        let asteriskToken: any = undefined
+        let lParenToken: any = undefined
+        let rParenToken: any = undefined
+        let lBraceToken: any = undefined
+        let rBraceToken: any = undefined
+
+        // 检查 static token
+        if (staticCst && (staticCst.name === 'Static' || staticCst.value === 'static')) {
+            staticToken = SlimeTokenCreate.createStaticToken(staticCst.loc)
+        }
+
+        // Asterisk
+        if (children[i]?.name === 'Asterisk' || children[i]?.value === '*') {
+            asteriskToken = SlimeTokenCreate.createAsteriskToken(children[i].loc)
+            i++
+        }
+
+        const classElementNameCst = children[i++]
+        const key = SlimeCstToAstUtil.createClassElementNameAst(classElementNameCst)
+        const isComputed = SlimeCstToAstUtil.isComputedPropertyName(classElementNameCst)
+
+        // LParen - 保存 token 信息
+        if (children[i]?.name === 'LParen') {
+            lParenToken = SlimeTokenCreate.createLParenToken(children[i].loc)
+            i++
+        }
+
+        // UniqueFormalParameters
+        let params: SlimePattern[] = []
+        if (children[i]?.name === 'UniqueFormalParameters' || children[i]?.name === SlimeParser.prototype.UniqueFormalParameters?.name) {
+            params = SlimeCstToAstUtil.createUniqueFormalParametersAst(children[i])
+            i++
+        }
+
+        // RParen - 保存 token 信息
+        if (children[i]?.name === 'RParen') {
+            rParenToken = SlimeTokenCreate.createRParenToken(children[i].loc)
+            i++
+        }
+        // LBrace - 保存 token 信息
+        if (children[i]?.name === 'LBrace') {
+            lBraceToken = SlimeTokenCreate.createLBraceToken(children[i].loc)
+            i++
+        }
+
+        // GeneratorBody 或 FunctionBody
+        let body: SlimeBlockStatement
+        const bodyChild = children[i]
+        if (bodyChild?.name === 'GeneratorBody' || bodyChild?.name === SlimeParser.prototype.GeneratorBody?.name ||
+            bodyChild?.name === 'FunctionBody' || bodyChild?.name === SlimeParser.prototype.FunctionBody?.name) {
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(bodyChild)
+            i++
+            // RBrace
+            if (children[i]?.name === 'RBrace') {
+                rBraceToken = SlimeTokenCreate.createRBraceToken(children[i].loc)
+            }
+            body = SlimeAstUtil.createBlockStatement(bodyStatements, cst.loc, lBraceToken, rBraceToken)
+        } else {
+            if (children[i]?.name === 'RBrace') {
+                rBraceToken = SlimeTokenCreate.createRBraceToken(children[i].loc)
+            }
+            body = SlimeAstUtil.createBlockStatement([], undefined, lBraceToken, rBraceToken)
+        }
+
+        // 创建函数表达式，传递 token 信息
+        const functionExpression = SlimeAstUtil.createFunctionExpression(
+            body, null, params as any, true, false, cst.loc,
+            undefined, undefined, asteriskToken, lParenToken, rParenToken, lBraceToken, rBraceToken
+        )
+
+        const methodDef = SlimeAstUtil.createMethodDefinition(key, functionExpression, 'method', isComputed, SlimeCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, undefined, asteriskToken)
+
+        return methodDef
+    }
+
+
+    /**
+     * [内部方法] async 方法
+     * 处理 ES2025 Parser 的 async ClassElementName ( UniqueFormalParameters ) { AsyncFunctionBody } 结构
+     * @internal
+     */
+    static createMethodDefinitionAsyncMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        // AsyncMethod children: [AsyncTok, ClassElementName, LParen, UniqueFormalParameters?, RParen, LBrace, AsyncFunctionBody, RBrace]
+        const children = cst.children
+        let i = 0
+
+        // Token fields
+        let staticToken: any = undefined
+        let asyncToken: any = undefined
+        let lParenToken: any = undefined
+        let rParenToken: any = undefined
+        let lBraceToken: any = undefined
+        let rBraceToken: any = undefined
+
+        // 检查 static token
+        if (staticCst && (staticCst.name === 'Static' || staticCst.value === 'static')) {
+            staticToken = SlimeTokenCreate.createStaticToken(staticCst.loc)
+        }
+
+        // AsyncTok
+        if (children[i]?.name === 'Async' || children[i]?.value === 'async') {
+            asyncToken = SlimeTokenCreate.createAsyncToken(children[i].loc)
+            i++
+        }
+
+        const classElementNameCst = children[i++]
+        const key = SlimeCstToAstUtil.createClassElementNameAst(classElementNameCst)
+        const isComputed = SlimeCstToAstUtil.isComputedPropertyName(classElementNameCst)
+
+        // LParen - 保存 token 信息
+        if (children[i]?.name === 'LParen') {
+            lParenToken = SlimeTokenCreate.createLParenToken(children[i].loc)
+            i++
+        }
+
+        // UniqueFormalParameters
+        let params: SlimePattern[] = []
+        if (children[i]?.name === 'UniqueFormalParameters' || children[i]?.name === SlimeParser.prototype.UniqueFormalParameters?.name) {
+            params = SlimeCstToAstUtil.createUniqueFormalParametersAst(children[i])
+            i++
+        }
+
+        // RParen - 保存 token 信息
+        if (children[i]?.name === 'RParen') {
+            rParenToken = SlimeTokenCreate.createRParenToken(children[i].loc)
+            i++
+        }
+        // LBrace - 保存 token 信息
+        if (children[i]?.name === 'LBrace') {
+            lBraceToken = SlimeTokenCreate.createLBraceToken(children[i].loc)
+            i++
+        }
+
+        // AsyncFunctionBody 或 FunctionBody
+        let body: SlimeBlockStatement
+        const bodyChild = children[i]
+        if (bodyChild?.name === 'AsyncFunctionBody' || bodyChild?.name === SlimeParser.prototype.AsyncFunctionBody?.name ||
+            bodyChild?.name === 'FunctionBody' || bodyChild?.name === SlimeParser.prototype.FunctionBody?.name) {
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(bodyChild)
+            i++
+            // RBrace
+            if (children[i]?.name === 'RBrace') {
+                rBraceToken = SlimeTokenCreate.createRBraceToken(children[i].loc)
+            }
+            body = SlimeAstUtil.createBlockStatement(bodyStatements, cst.loc, lBraceToken, rBraceToken)
+        } else {
+            if (children[i]?.name === 'RBrace') {
+                rBraceToken = SlimeTokenCreate.createRBraceToken(children[i].loc)
+            }
+            body = SlimeAstUtil.createBlockStatement([], undefined, lBraceToken, rBraceToken)
+        }
+
+        // 创建函数表达式，传递 token 信息
+        const functionExpression = SlimeAstUtil.createFunctionExpression(
+            body, null, params as any, false, true, cst.loc,
+            undefined, asyncToken, undefined, lParenToken, rParenToken, lBraceToken, rBraceToken
+        )
+
+        const methodDef = SlimeAstUtil.createMethodDefinition(key, functionExpression, 'method', isComputed, SlimeCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, undefined, undefined, asyncToken)
+
+        return methodDef
+    }
+
+
+    /**
+     * [内部方法] async generator 方法
+     * 处理 ES2025 Parser 的 async * ClassElementName ( ... ) { AsyncGeneratorBody } 结构
+     * @internal
+     */
+    static createMethodDefinitionAsyncGeneratorMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        // AsyncGeneratorMethod children: [AsyncTok, Asterisk, ClassElementName, LParen, UniqueFormalParameters?, RParen, LBrace, AsyncGeneratorBody, RBrace]
+        const children = cst.children
+        let i = 0
+
+        // Token fields
+        let staticToken: any = undefined
+        let asyncToken: any = undefined
+        let asteriskToken: any = undefined
+        let lParenToken: any = undefined
+        let rParenToken: any = undefined
+        let lBraceToken: any = undefined
+        let rBraceToken: any = undefined
+
+        // 检查 static token
+        if (staticCst && (staticCst.name === 'Static' || staticCst.value === 'static')) {
+            staticToken = SlimeTokenCreate.createStaticToken(staticCst.loc)
+        }
+
+        // AsyncTok
+        if (children[i]?.name === 'Async' || children[i]?.value === 'async') {
+            asyncToken = SlimeTokenCreate.createAsyncToken(children[i].loc)
+            i++
+        }
+
+        // Asterisk
+        if (children[i]?.name === 'Asterisk' || children[i]?.value === '*') {
+            asteriskToken = SlimeTokenCreate.createAsteriskToken(children[i].loc)
+            i++
+        }
+
+        const classElementNameCst = children[i++]
+        const key = SlimeCstToAstUtil.createClassElementNameAst(classElementNameCst)
+        const isComputed = SlimeCstToAstUtil.isComputedPropertyName(classElementNameCst)
+
+        // LParen - 保存 token 信息
+        if (children[i]?.name === 'LParen') {
+            lParenToken = SlimeTokenCreate.createLParenToken(children[i].loc)
+            i++
+        }
+
+        // UniqueFormalParameters
+        let params: SlimePattern[] = []
+        if (children[i]?.name === 'UniqueFormalParameters' || children[i]?.name === SlimeParser.prototype.UniqueFormalParameters?.name) {
+            params = SlimeCstToAstUtil.createUniqueFormalParametersAst(children[i])
+            i++
+        }
+
+        // RParen - 保存 token 信息
+        if (children[i]?.name === 'RParen') {
+            rParenToken = SlimeTokenCreate.createRParenToken(children[i].loc)
+            i++
+        }
+        // LBrace - 保存 token 信息
+        if (children[i]?.name === 'LBrace') {
+            lBraceToken = SlimeTokenCreate.createLBraceToken(children[i].loc)
+            i++
+        }
+
+        // AsyncGeneratorBody 或 FunctionBody
+        let body: SlimeBlockStatement
+        const bodyChild = children[i]
+        if (bodyChild?.name === 'AsyncGeneratorBody' || bodyChild?.name === SlimeParser.prototype.AsyncGeneratorBody?.name ||
+            bodyChild?.name === 'FunctionBody' || bodyChild?.name === SlimeParser.prototype.FunctionBody?.name) {
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(bodyChild)
+            i++
+            // RBrace
+            if (children[i]?.name === 'RBrace') {
+                rBraceToken = SlimeTokenCreate.createRBraceToken(children[i].loc)
+            }
+            body = SlimeAstUtil.createBlockStatement(bodyStatements, cst.loc, lBraceToken, rBraceToken)
+        } else {
+            if (children[i]?.name === 'RBrace') {
+                rBraceToken = SlimeTokenCreate.createRBraceToken(children[i].loc)
+            }
+            body = SlimeAstUtil.createBlockStatement([], undefined, lBraceToken, rBraceToken)
+        }
+
+        // 创建函数表达式，传递 token 信息
+        const functionExpression = SlimeAstUtil.createFunctionExpression(
+            body, null, params as any, true, true, cst.loc,
+            undefined, asyncToken, asteriskToken, lParenToken, rParenToken, lBraceToken, rBraceToken
+        )
+
+        const methodDef = SlimeAstUtil.createMethodDefinition(key, functionExpression, 'method', isComputed, SlimeCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, undefined, asteriskToken, asyncToken)
+
+        return methodDef
+    }
 
 
 }

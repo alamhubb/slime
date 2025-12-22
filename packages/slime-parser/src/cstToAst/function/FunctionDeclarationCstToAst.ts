@@ -4,7 +4,7 @@ import {
     SlimeClassExpression, type SlimeExpression,
     type SlimeFunctionDeclaration,
     type SlimeFunctionParam,
-    SlimeIdentifier, SlimeNodeType, SlimeTokenCreate
+    SlimeIdentifier, SlimeMethodDefinition, SlimeNodeType, SlimeStatement, SlimeTokenCreate
 } from "slime-ast";
 import {SlimeAstUtils} from "../SlimeAstUtils.ts";
 import SlimeParser from "../../SlimeParser.ts";
@@ -251,5 +251,30 @@ export class FunctionDeclarationCstToAst {
             loc: cst.loc
         } as SlimeFunctionDeclaration
     }
+
+
+    static createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
+        // FunctionStatementList: StatementList?
+        const children = cst.children || []
+
+        if (children.length === 0) {
+            return []
+        }
+
+        const first = children[0]
+        if (!first) {
+            return []
+        }
+
+        // If child is StatementList, process it
+        if (first.name === 'StatementList' || first.name === SlimeParser.prototype.StatementList?.name) {
+            return SlimeCstToAstUtil.createStatementListAst(first)
+        }
+
+        // If child is a statement directly
+        return SlimeCstToAstUtil.createStatementListItemAst(first)
+    }
+
+
 
 }
