@@ -623,7 +623,7 @@ export class SlimeCstToAst {
      * NameSpaceImport -> * as ImportedBinding
      */
     createNameSpaceImportAst(cst: SubhutiCst): SlimeImportNamespaceSpecifier {
-        return ImportCstToAst.createNameSpaceImportAst(cst, this)
+        return ImportCstToAst.createNameSpaceImportAst(cst)
     }
 
     /**
@@ -631,7 +631,7 @@ export class SlimeCstToAst {
      * NamedImports -> { } | { ImportsList } | { ImportsList , }
      */
     createNamedImportsAst(cst: SubhutiCst): Array<SlimeImportSpecifier> {
-        return ImportCstToAst.createNamedImportsAst(cst, this)
+        return ImportCstToAst.createNamedImportsAst(cst)
     }
 
     /**
@@ -639,7 +639,7 @@ export class SlimeCstToAst {
      * ImportsList -> ImportSpecifier (, ImportSpecifier)*
      */
     createImportsListAst(cst: SubhutiCst): Array<SlimeImportSpecifier> {
-        return ImportCstToAst.createImportsListAst(cst, this)
+        return ImportCstToAst.createImportsListAst(cst)
     }
 
     /**
@@ -647,7 +647,7 @@ export class SlimeCstToAst {
      * ImportSpecifier -> ImportedBinding | ModuleExportName as ImportedBinding
      */
     createImportSpecifierAst(cst: SubhutiCst): SlimeImportSpecifier {
-        return ImportCstToAst.createImportSpecifierAst(cst, this)
+        return ImportCstToAst.createImportSpecifierAst(cst)
     }
 
     /**
@@ -655,7 +655,7 @@ export class SlimeCstToAst {
      * AttributeKey -> IdentifierName | StringLiteral
      */
     createAttributeKeyAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
-        return ImportCstToAst.createAttributeKeyAst(cst, this)
+        return ImportCstToAst.createAttributeKeyAst(cst)
     }
 
     /**
@@ -663,7 +663,7 @@ export class SlimeCstToAst {
      * ExportFromClause -> * | * as ModuleExportName | NamedExports
      */
     createExportFromClauseAst(cst: SubhutiCst): any {
-        return ExportCstToAst.createExportFromClauseAst(cst, this)
+        return ExportCstToAst.createExportFromClauseAst(cst)
     }
 
     /**
@@ -671,7 +671,7 @@ export class SlimeCstToAst {
      * WithEntries -> AttributeKey : StringLiteral (, AttributeKey : StringLiteral)*
      */
     createWithEntriesAst(cst: SubhutiCst): any[] {
-        return ImportCstToAst.createWithEntriesAst(cst, this)
+        return ImportCstToAst.createWithEntriesAst(cst)
     }
 
     createModuleItemAst(item: SubhutiCst): SlimeStatement | SlimeModuleDeclaration | SlimeStatement[] | undefined {
@@ -688,38 +688,38 @@ export class SlimeCstToAst {
     }
 
     createImportDeclarationAst(cst: SubhutiCst): SlimeImportDeclaration {
-        return ImportCstToAst.createImportDeclarationAst(cst, this)
+        return ImportCstToAst.createImportDeclarationAst(cst)
     }
 
     /** 解析 WithClause: with { type: "json" } */
     createWithClauseAst(cst: SubhutiCst): { attributes: any[], withToken: any } {
-        return ImportCstToAst.createWithClauseAst(cst, this)
+        return ImportCstToAst.createWithClauseAst(cst)
     }
 
 
     createFromClauseAst(cst: SubhutiCst): { source: SlimeStringLiteral, fromToken?: any } {
-        return ImportCstToAst.createFromClauseAst(cst, this)
+        return ImportCstToAst.createFromClauseAst(cst)
     }
 
     createModuleSpecifierAst(cst: SubhutiCst): SlimeStringLiteral {
-        return ImportCstToAst.createModuleSpecifierAst(cst, this)
+        return ImportCstToAst.createModuleSpecifierAst(cst)
     }
 
     createImportClauseAst(cst: SubhutiCst): { specifiers: Array<SlimeImportSpecifierItem>, lBraceToken?: any, rBraceToken?: any } {
-        return ImportCstToAst.createImportClauseAst(cst, this)
+        return ImportCstToAst.createImportClauseAst(cst)
     }
 
     createImportedDefaultBindingAst(cst: SubhutiCst): SlimeImportDefaultSpecifier {
-        return ImportCstToAst.createImportedDefaultBindingAst(cst, this)
+        return ImportCstToAst.createImportedDefaultBindingAst(cst)
     }
 
     createImportedBindingAst(cst: SubhutiCst): SlimeIdentifier {
-        return ImportCstToAst.createImportedBindingAst(cst, this)
+        return ImportCstToAst.createImportedBindingAst(cst)
     }
 
     /** 返回包装类型的版本，包含 brace tokens */
     createNamedImportsListAstWrapped(cst: SubhutiCst): { specifiers: Array<SlimeImportSpecifierItem>, lBraceToken?: any, rBraceToken?: any } {
-        return ImportCstToAst.createNamedImportsListAstWrapped(cst, this)
+        return ImportCstToAst.createNamedImportsListAstWrapped(cst)
     }
 
     createIdentifierNameAst(cst: SubhutiCst): SlimeIdentifier {
@@ -938,47 +938,47 @@ export class SlimeCstToAst {
     }
 
     createExportDeclarationAst(cst: SubhutiCst): SlimeExportDefaultDeclaration | SlimeExportNamedDeclaration | SlimeExportAllDeclaration {
-        return ExportCstToAst.createExportDeclarationAst(cst, this)
+        return ExportCstToAst.createExportDeclarationAst(cst)
     }
 
     /**
      * 创建 NamedExports AST (export { a, b, c })
      */
     createNamedExportsAst(cst: SubhutiCst): SlimeExportSpecifierItem[] {
-        return ExportCstToAst.createNamedExportsAst(cst, this)
+        return ExportCstToAst.createNamedExportsAst(cst)
     }
 
     /**
      * 创建 ExportsList AST
      */
     createExportsListAst(cst: SubhutiCst): SlimeExportSpecifierItem[] {
-        return ExportCstToAst.createExportsListAst(cst, this)
+        return ExportCstToAst.createExportsListAst(cst)
     }
 
     /**
      * 创建 ExportSpecifier AST
      */
     createExportSpecifierAst(cst: SubhutiCst): SlimeExportSpecifier {
-        return ExportCstToAst.createExportSpecifierAst(cst, this)
+        return ExportCstToAst.createExportSpecifierAst(cst)
     }
 
     /**
      * 创建 ModuleExportName AST
      */
     createModuleExportNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
-        return ExportCstToAst.createModuleExportNameAst(cst, this)
+        return ExportCstToAst.createModuleExportNameAst(cst)
     }
 
     createDeclarationAst(cst: SubhutiCst): SlimeDeclaration {
-        return HoistableCstToAst.createDeclarationAst(cst, this)
+        return HoistableCstToAst.createDeclarationAst(cst)
     }
 
     createLexicalDeclarationAst(cst: SubhutiCst): SlimeVariableDeclaration {
-        return VariableCstToAst.createLexicalDeclarationAst(cst, this)
+        return VariableCstToAst.createLexicalDeclarationAst(cst)
     }
 
     createLexicalBindingAst(cst: SubhutiCst): SlimeVariableDeclarator {
-        return VariableCstToAst.createLexicalBindingAst(cst, this)
+        return VariableCstToAst.createLexicalBindingAst(cst)
     }
 
     /**
@@ -986,7 +986,7 @@ export class SlimeCstToAst {
      * ES2025 VariableStatement: var VariableDeclarationList ;
      */
     createVariableStatementAst(cst: SubhutiCst): SlimeVariableDeclaration {
-        return VariableCstToAst.createVariableStatementAst(cst, this)
+        return VariableCstToAst.createVariableStatementAst(cst)
     }
 
     /**
@@ -994,35 +994,35 @@ export class SlimeCstToAst {
      * VariableDeclaration: BindingIdentifier Initializer? | BindingPattern Initializer
      */
     createVariableDeclaratorFromVarDeclaration(cst: SubhutiCst): SlimeVariableDeclarator {
-        return VariableCstToAst.createVariableDeclaratorFromVarDeclaration(cst, this)
+        return VariableCstToAst.createVariableDeclaratorFromVarDeclaration(cst)
     }
 
     createHoistableDeclarationAst(cst: SubhutiCst): SlimeDeclaration {
-        return HoistableCstToAst.createHoistableDeclarationAst(cst, this)
+        return HoistableCstToAst.createHoistableDeclarationAst(cst)
     }
 
     createGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
-        return FunctionExpressionCstToAst.createGeneratorDeclarationAst(cst, this)
+        return FunctionExpressionCstToAst.createGeneratorDeclarationAst(cst)
     }
 
     createAsyncFunctionDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
-        return FunctionExpressionCstToAst.createAsyncFunctionDeclarationAst(cst, this)
+        return FunctionExpressionCstToAst.createAsyncFunctionDeclarationAst(cst)
     }
 
     createAsyncGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
-        return FunctionExpressionCstToAst.createAsyncGeneratorDeclarationAst(cst, this)
+        return FunctionExpressionCstToAst.createAsyncGeneratorDeclarationAst(cst)
     }
 
     createVariableDeclarationAst(cst: SubhutiCst): SlimeVariableDeclaration {
-        return VariableCstToAst.createVariableDeclarationAst(cst, this)
+        return VariableCstToAst.createVariableDeclarationAst(cst)
     }
 
     createVariableDeclarationListAst(cst: SubhutiCst): SlimeVariableDeclarator[] {
-        return VariableCstToAst.createVariableDeclarationListAst(cst, this)
+        return VariableCstToAst.createVariableDeclarationListAst(cst)
     }
 
     createClassDeclarationAst(cst: SubhutiCst): SlimeClassDeclaration {
-        return ClassDeclarationCstToAst.createClassDeclarationAst(cst, this)
+        return ClassDeclarationCstToAst.createClassDeclarationAst(cst)
     }
 
     createClassTailAst(cst: SubhutiCst): {
@@ -1032,23 +1032,23 @@ export class SlimeCstToAst {
         lBraceToken?: any;
         rBraceToken?: any;
     } {
-        return ClassDeclarationCstToAst.createClassTailAst(cst, this)
+        return ClassDeclarationCstToAst.createClassTailAst(cst)
     }
 
     createClassHeritageAst(cst: SubhutiCst): SlimeExpression {
-        return ClassDeclarationCstToAst.createClassHeritageAst(cst, this)
+        return ClassDeclarationCstToAst.createClassHeritageAst(cst)
     }
 
     createClassHeritageAstWithToken(cst: SubhutiCst): { superClass: SlimeExpression; extendsToken?: any } {
-        return ClassDeclarationCstToAst.createClassHeritageAstWithToken(cst, this)
+        return ClassDeclarationCstToAst.createClassHeritageAstWithToken(cst)
     }
 
     createInitializerAst(cst: SubhutiCst): SlimeExpression {
-        return VariableCstToAst.createInitializerAst(cst, this)
+        return VariableCstToAst.createInitializerAst(cst)
     }
 
     createFieldDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimePropertyDefinition {
-        return MethodDefinitionCstToAst.createFieldDefinitionAst(staticCst, cst, this)
+        return MethodDefinitionCstToAst.createFieldDefinitionAst(staticCst, cst)
     }
 
     /**
@@ -1105,7 +1105,7 @@ export class SlimeCstToAst {
     }
 
     createClassBodyAst(cst: SubhutiCst): SlimeClassBody {
-        return ClassBodyCstToAst.createClassBodyAst(cst, this)
+        return ClassBodyCstToAst.createClassBodyAst(cst)
     }
 
     /**
@@ -1113,7 +1113,7 @@ export class SlimeCstToAst {
      * ClassStaticBlock: static { ClassStaticBlockBody }
      */
     createClassStaticBlockAst(cst: SubhutiCst): any {
-        return ClassBodyCstToAst.createClassStaticBlockAst(cst, this)
+        return ClassBodyCstToAst.createClassStaticBlockAst(cst)
     }
 
     // ==================== 函数/类相关转换方法 ====================
@@ -1123,7 +1123,7 @@ export class SlimeCstToAst {
      * GeneratorMethod -> * ClassElementName ( UniqueFormalParameters ) { GeneratorBody }
      */
     createGeneratorMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
-        return MethodDefinitionCstToAst.createGeneratorMethodAst(cst, this)
+        return MethodDefinitionCstToAst.createGeneratorMethodAst(cst)
     }
 
     /**
@@ -1138,7 +1138,7 @@ export class SlimeCstToAst {
      * AsyncMethod -> async ClassElementName ( UniqueFormalParameters ) { AsyncFunctionBody }
      */
     createAsyncMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
-        return MethodDefinitionCstToAst.createAsyncMethodAst(cst, this)
+        return MethodDefinitionCstToAst.createAsyncMethodAst(cst)
     }
 
     /**
@@ -1152,7 +1152,7 @@ export class SlimeCstToAst {
      * AsyncGeneratorMethod CST 到 AST
      */
     createAsyncGeneratorMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
-        return MethodDefinitionCstToAst.createAsyncGeneratorMethodAst(cst, this)
+        return MethodDefinitionCstToAst.createAsyncGeneratorMethodAst(cst)
     }
 
     /**
@@ -1167,35 +1167,35 @@ export class SlimeCstToAst {
      * ClassElement -> MethodDefinition | static MethodDefinition | FieldDefinition | ...
      */
     createClassElementAst(cst: SubhutiCst): any {
-        return ClassBodyCstToAst.createClassElementAst(cst, this)
+        return ClassBodyCstToAst.createClassElementAst(cst)
     }
 
     /**
      * ClassElementList CST 到 AST
      */
     createClassElementListAst(cst: SubhutiCst): any[] {
-        return ClassBodyCstToAst.createClassElementListAst(cst, this)
+        return ClassBodyCstToAst.createClassElementListAst(cst)
     }
 
     /**
      * ClassStaticBlockBody CST 到 AST
      */
     createClassStaticBlockBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
-        return ClassBodyCstToAst.createClassStaticBlockBodyAst(cst, this)
+        return ClassBodyCstToAst.createClassStaticBlockBodyAst(cst)
     }
 
     /**
      * ClassStaticBlockStatementList CST 到 AST
      */
     createClassStaticBlockStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
-        return ClassBodyCstToAst.createClassStaticBlockStatementListAst(cst, this)
+        return ClassBodyCstToAst.createClassStaticBlockStatementListAst(cst)
     }
 
     /**
      * PropertySetParameterList CST 到 AST
      */
     createPropertySetParameterListAst(cst: SubhutiCst): SlimePattern[] {
-        return MethodDefinitionCstToAst.createPropertySetParameterListAst(cst, this)
+        return MethodDefinitionCstToAst.createPropertySetParameterListAst(cst)
     }
 
     /**
@@ -1250,7 +1250,7 @@ export class SlimeCstToAst {
     }
 
     createFormalParameterListAst(cst: SubhutiCst): SlimePattern[] {
-        return ParametersCstToAst.createFormalParameterListAst(cst, this)
+        return ParametersCstToAst.createFormalParameterListAst(cst)
     }
 
     createBindingElementAst(cst: SubhutiCst): any {
@@ -1313,7 +1313,7 @@ export class SlimeCstToAst {
 
 
     createFunctionRestParameterAst(cst: SubhutiCst): SlimeRestElement {
-        return ParametersCstToAst.createFunctionRestParameterAst(cst, this)
+        return ParametersCstToAst.createFunctionRestParameterAst(cst)
     }
 
     createBindingRestElementAst(cst: SubhutiCst): SlimeRestElement {
@@ -1337,11 +1337,11 @@ export class SlimeCstToAst {
     }
 
     createFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
-        return FunctionExpressionCstToAst.createFunctionBodyAst(cst, this)
+        return FunctionExpressionCstToAst.createFunctionBodyAst(cst)
     }
 
     createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
-        return FunctionExpressionCstToAst.createFunctionStatementListAst(cst, this)
+        return FunctionExpressionCstToAst.createFunctionStatementListAst(cst)
     }
 
     /**
@@ -1378,7 +1378,7 @@ export class SlimeCstToAst {
     }
 
     createMethodDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
-        return MethodDefinitionCstToAst.createMethodDefinitionAst(staticCst, cst, this)
+        return MethodDefinitionCstToAst.createMethodDefinitionAst(staticCst, cst)
     }
 
     /**
@@ -2255,7 +2255,7 @@ export class SlimeCstToAst {
     }
 
     createExpressionStatementAst(cst: SubhutiCst): SlimeExpressionStatement {
-        return PrimaryExpressionCstToAst.createExpressionStatementAst(cst, this);
+        return PrimaryExpressionCstToAst.createExpressionStatementAst(cst);
     }
 
     /**
@@ -2264,7 +2264,7 @@ export class SlimeCstToAst {
      * ES2025: if ( Expression ) IfStatementBody [else IfStatementBody]
      */
     createIfStatementAst(cst: SubhutiCst): any {
-        return ControlFlowCstToAst.createIfStatementAst(cst, this)
+        return ControlFlowCstToAst.createIfStatementAst(cst)
     }
 
     /**
@@ -2272,7 +2272,7 @@ export class SlimeCstToAst {
      * IfStatementBody: Statement | FunctionDeclaration
      */
     createIfStatementBodyAst(cst: SubhutiCst): any {
-        return ControlFlowCstToAst.createIfStatementBodyAst(cst, this)
+        return ControlFlowCstToAst.createIfStatementBodyAst(cst)
     }
 
     /**
@@ -2285,7 +2285,7 @@ export class SlimeCstToAst {
      * 注意：LexicalDeclaration 内部已经包含分号（SemicolonASI）
      */
     createForStatementAst(cst: SubhutiCst): any {
-        return ControlFlowCstToAst.createForStatementAst(cst, this)
+        return ControlFlowCstToAst.createForStatementAst(cst)
     }
 
     /**
@@ -2320,21 +2320,21 @@ export class SlimeCstToAst {
      * 创建 for...in / for...of 语句 AST
      */
     createForInOfStatementAst(cst: SubhutiCst): any {
-        return ControlFlowCstToAst.createForInOfStatementAst(cst, this)
+        return ControlFlowCstToAst.createForInOfStatementAst(cst)
     }
 
     /**
      * 创建 while 语句 AST
      */
     createWhileStatementAst(cst: SubhutiCst): any {
-        return ControlFlowCstToAst.createWhileStatementAst(cst, this)
+        return ControlFlowCstToAst.createWhileStatementAst(cst)
     }
 
     /**
      * 创建 do...while 语句 AST
      */
     createDoWhileStatementAst(cst: SubhutiCst): any {
-        return ControlFlowCstToAst.createDoWhileStatementAst(cst, this)
+        return ControlFlowCstToAst.createDoWhileStatementAst(cst)
     }
 
     /**
@@ -2390,7 +2390,7 @@ export class SlimeCstToAst {
      * BreakableStatement -> IterationStatement | SwitchStatement
      */
     createBreakableStatementAst(cst: SubhutiCst): any {
-        return ControlFlowCstToAst.createBreakableStatementAst(cst, this)
+        return ControlFlowCstToAst.createBreakableStatementAst(cst)
     }
 
     /**
@@ -2398,7 +2398,7 @@ export class SlimeCstToAst {
      * IterationStatement -> DoWhileStatement | WhileStatement | ForStatement | ForInOfStatement
      */
     createIterationStatementAst(cst: SubhutiCst): any {
-        return ControlFlowCstToAst.createIterationStatementAst(cst, this)
+        return ControlFlowCstToAst.createIterationStatementAst(cst)
     }
 
     /**
@@ -2475,7 +2475,7 @@ export class SlimeCstToAst {
      * ForDeclaration -> LetOrConst ForBinding
      */
     createForDeclarationAst(cst: SubhutiCst): any {
-        return ControlFlowCstToAst.createForDeclarationAst(cst, this)
+        return ControlFlowCstToAst.createForDeclarationAst(cst)
     }
 
     /**
@@ -2483,7 +2483,7 @@ export class SlimeCstToAst {
      * ForBinding -> BindingIdentifier | BindingPattern
      */
     createForBindingAst(cst: SubhutiCst): any {
-        return ControlFlowCstToAst.createForBindingAst(cst, this)
+        return ControlFlowCstToAst.createForBindingAst(cst)
     }
 
     /**

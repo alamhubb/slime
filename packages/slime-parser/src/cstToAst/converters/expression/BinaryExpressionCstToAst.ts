@@ -1,7 +1,7 @@
 import { SubhutiCst } from "subhuti";
 import { SlimeExpression, SlimeAstUtil, SlimeNodeType, SlimeTokenCreate } from "slime-ast";
-import SlimeCstToAstUtil, { checkCstName } from "../../SlimeCstToAstUtil.ts";
-import SlimeParser from "../../SlimeParser.ts";
+import SlimeCstToAstUtil, { checkCstName } from "../../../SlimeCstToAstUtil.ts";
+import SlimeParser from "../../../SlimeParser.ts";
 
 export class BinaryExpressionCstToAst {
 
@@ -233,7 +233,7 @@ export class BinaryExpressionCstToAst {
     static createExponentiationExpressionAst(cst: SubhutiCst): SlimeExpression {
         if (cst.children && cst.children.length > 1) {
             const left = SlimeCstToAstUtil.createExpressionAst(cst.children[0]);
-            const right = BinaryExpressionCstToAst.createExponentiationExpressionAst(cst.children[2]);
+            const right = this.createExponentiationExpressionAst(cst.children[2]);
             return {
                 type: SlimeNodeType.BinaryExpression,
                 operator: '**',
@@ -261,5 +261,13 @@ export class BinaryExpressionCstToAst {
             return left;
         }
         return SlimeCstToAstUtil.createExpressionAst(cst.children![0]);
+    }
+
+    static createShortCircuitExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeCstToAstUtil.createAstFromCst(cst.children![0]);
+    }
+
+    static createCoalesceExpressionHeadAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeCstToAstUtil.createAstFromCst(cst.children![0]);
     }
 }

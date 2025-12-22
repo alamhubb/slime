@@ -1,6 +1,6 @@
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeNodeType, SlimeTokenCreate, SlimePattern, SlimeArrayPattern, SlimeObjectPattern, SlimeRestElement, SlimeIdentifier, SlimeAssignmentProperty, SlimeArrayPatternElement, SlimeObjectPatternProperty, SlimeLBracketToken, SlimeRBracketToken, SlimeLBraceToken, SlimeRBraceToken, SlimeCommaToken } from "slime-ast";
-import { checkCstName, SlimeCstToAst } from "../../../SlimeCstToAstUtil.ts";
+import SlimeCstToAstUtil, { checkCstName } from "../../../SlimeCstToAstUtil.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 
 /**
@@ -24,14 +24,14 @@ export class BindingPatternCstToAst {
     /**
      * 创建 BindingPattern AST
      */
-    static createBindingPatternAst(cst: SubhutiCst, util: SlimeCstToAst): SlimePattern {
+    static createBindingPatternAst(cst: SubhutiCst): SlimePattern {
         checkCstName(cst, SlimeParser.prototype.BindingPattern?.name)
         const child = cst.children[0]
 
         if (child.name === SlimeParser.prototype.ArrayBindingPattern?.name) {
-            return this.createArrayBindingPatternAst(child, util)
+            return this.createArrayBindingPatternAst(child)
         } else if (child.name === SlimeParser.prototype.ObjectBindingPattern?.name) {
-            return this.createObjectBindingPatternAst(child, util)
+            return this.createObjectBindingPatternAst(child)
         } else {
             throw new Error(`Unknown BindingPattern type: ${child.name}`)
         }
@@ -40,7 +40,7 @@ export class BindingPatternCstToAst {
     /**
      * 创建 ArrayBindingPattern AST
      */
-    static createArrayBindingPatternAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeArrayPattern {
+    static createArrayBindingPatternAst(cst: SubhutiCst): SlimeArrayPattern {
         checkCstName(cst, SlimeParser.prototype.ArrayBindingPattern?.name)
 
         const elements: SlimeArrayPatternElement[] = []
@@ -83,7 +83,7 @@ export class BindingPatternCstToAst {
                         ch.name === SlimeParser.prototype.BindingElement?.name)
 
                     if (bindingElement) {
-                        const element = util.createBindingElementAst(bindingElement)
+                        const element = SlimeCstToAstUtil.createBindingElementAst(bindingElement)
                         if (element) {
                             elements.push({ element })
                         }
@@ -122,7 +122,7 @@ export class BindingPatternCstToAst {
         // 检查 BindingRestElement
         const restElement = cst.children.find(ch => ch.name === SlimeParser.prototype.BindingRestElement?.name)
         if (restElement) {
-            const restNode = this.createBindingRestElementAst(restElement, util)
+            const restNode = this.createBindingRestElementAst(restElement)
             elements.push({ element: restNode as any })
         }
 
@@ -138,7 +138,7 @@ export class BindingPatternCstToAst {
     /**
      * 创建 ObjectBindingPattern AST
      */
-    static createObjectBindingPatternAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeObjectPattern {
+    static createObjectBindingPatternAst(cst: SubhutiCst): SlimeObjectPattern {
         checkCstName(cst, SlimeParser.prototype.ObjectBindingPattern?.name)
 
         const properties: SlimeObjectPatternProperty[] = []
@@ -168,10 +168,10 @@ export class BindingPatternCstToAst {
                         ch.name === SlimeParser.prototype.SingleNameBinding?.name)
 
                     if (singleName) {
-                        const value = this.createSingleNameBindingAst(singleName, util)
+                        const value = this.createSingleNameBindingAst(singleName)
                         const identifier = singleName.children.find((ch: any) =>
                             ch.name === SlimeParser.prototype.BindingIdentifier?.name)
-                        const key = util.createBindingIdentifierAst(identifier)
+                        const key = SlimeCstToAstUtil.createBindingIdentifierAst(identifier)
 
                         properties.push({
                             property: {
@@ -191,9 +191,9 @@ export class BindingPatternCstToAst {
                             ch.name === SlimeParser.prototype.BindingElement?.name)
 
                         if (propName && bindingElement) {
-                            const key = util.createPropertyNameAst(propName)
-                            const value = util.createBindingElementAst(bindingElement)
-                            const isComputed = util.isComputedPropertyName(propName)
+                            const key = SlimeCstToAstUtil.createPropertyNameAst(propName)
+                            const value = SlimeCstToAstUtil.createBindingElementAst(bindingElement)
+                            const isComputed = SlimeCstToAstUtil.isComputedPropertyName(propName)
 
                             properties.push({
                                 property: {
@@ -215,7 +215,7 @@ export class BindingPatternCstToAst {
         // 检查 BindingRestProperty
         const restProp = cst.children.find(ch => ch.name === SlimeParser.prototype.BindingRestProperty?.name)
         if (restProp) {
-            const restNode = this.createBindingRestPropertyAst(restProp, util)
+            const restNode = this.createBindingRestPropertyAst(restProp)
             properties.push({ property: restNode as any })
         }
 
@@ -231,7 +231,7 @@ export class BindingPatternCstToAst {
     /**
      * 创建 SingleNameBinding AST
      */
-    static createSingleNameBindingAst(cst: SubhutiCst, util: SlimeCstToAst): any {
+    static createSingleNameBindingAst(cst: SubhutiCst): any {
         checkCstName(cst, SlimeParser.prototype.SingleNameBinding?.name);
         const bindingIdentifier = cst.children.find(ch =>
             ch.name === SlimeParser.prototype.BindingIdentifier?.name)
@@ -242,10 +242,10 @@ export class BindingPatternCstToAst {
             throw new Error('SingleNameBinding missing BindingIdentifier')
         }
 
-        const id = util.createBindingIdentifierAst(bindingIdentifier)
+        const id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingIdentifier)
 
         if (initializer) {
-            const init = util.createInitializerAst(initializer)
+            const init = SlimeCstToAstUtil.createInitializerAst(initializer)
             return {
                 type: SlimeNodeType.AssignmentPattern,
                 left: id,
@@ -260,7 +260,7 @@ export class BindingPatternCstToAst {
     /**
      * 创建 BindingRestElement AST
      */
-    static createBindingRestElementAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeRestElement {
+    static createBindingRestElementAst(cst: SubhutiCst): SlimeRestElement {
         checkCstName(cst, SlimeParser.prototype.BindingRestElement?.name);
         const argumentCst = cst.children.find(ch =>
             ch.name === SlimeParser.prototype.BindingIdentifier?.name ||
@@ -272,9 +272,9 @@ export class BindingPatternCstToAst {
 
         let argument: SlimePattern
         if (argumentCst.name === SlimeParser.prototype.BindingIdentifier?.name) {
-            argument = util.createBindingIdentifierAst(argumentCst)
+            argument = SlimeCstToAstUtil.createBindingIdentifierAst(argumentCst)
         } else if (argumentCst.name === SlimeParser.prototype.BindingPattern?.name) {
-            argument = this.createBindingPatternAst(argumentCst, util)
+            argument = this.createBindingPatternAst(argumentCst)
         } else {
             throw new Error(`BindingRestElement: unsupported type ${argumentCst.name}`)
         }
@@ -285,7 +285,7 @@ export class BindingPatternCstToAst {
     /**
      * 创建 BindingRestProperty AST
      */
-    static createBindingRestPropertyAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeRestElement {
+    static createBindingRestPropertyAst(cst: SubhutiCst): SlimeRestElement {
         const argument = cst.children?.find(ch =>
             ch.name === SlimeParser.prototype.BindingIdentifier?.name ||
             ch.name === 'BindingIdentifier')
@@ -294,19 +294,19 @@ export class BindingPatternCstToAst {
             throw new Error('BindingRestProperty missing BindingIdentifier')
         }
 
-        const id = util.createBindingIdentifierAst(argument)
+        const id = SlimeCstToAstUtil.createBindingIdentifierAst(argument)
         return SlimeAstUtil.createRestElement(id, cst.loc)
     }
 
     /**
      * 创建 BindingPropertyList AST
      */
-    static createBindingPropertyListAst(cst: SubhutiCst, util: SlimeCstToAst): any[] {
+    static createBindingPropertyListAst(cst: SubhutiCst): any[] {
         const properties: any[] = []
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.BindingProperty?.name ||
                 child.name === 'BindingProperty') {
-                properties.push(this.createBindingPropertyAst(child, util))
+                properties.push(this.createBindingPropertyAst(child))
             }
         }
         return properties
@@ -315,14 +315,14 @@ export class BindingPatternCstToAst {
     /**
      * 创建 BindingProperty AST
      */
-    static createBindingPropertyAst(cst: SubhutiCst, util: SlimeCstToAst): any {
+    static createBindingPropertyAst(cst: SubhutiCst): any {
         const children = cst.children || []
 
         const singleNameBinding = children.find(ch =>
             ch.name === SlimeParser.prototype.SingleNameBinding?.name ||
             ch.name === 'SingleNameBinding')
         if (singleNameBinding) {
-            return this.createSingleNameBindingAst(singleNameBinding, util)
+            return this.createSingleNameBindingAst(singleNameBinding)
         }
 
         const propName = children.find(ch =>
@@ -333,9 +333,9 @@ export class BindingPatternCstToAst {
             ch.name === 'BindingElement')
 
         if (propName && bindingElement) {
-            const key = util.createPropertyNameAst(propName)
-            const value = util.createBindingElementAst(bindingElement)
-            const isComputed = util.isComputedPropertyName(propName)
+            const key = SlimeCstToAstUtil.createPropertyNameAst(propName)
+            const value = SlimeCstToAstUtil.createBindingElementAst(bindingElement)
+            const isComputed = SlimeCstToAstUtil.isComputedPropertyName(propName)
 
             return {
                 type: SlimeNodeType.Property,
@@ -354,18 +354,18 @@ export class BindingPatternCstToAst {
     /**
      * 创建 BindingElementList AST
      */
-    static createBindingElementListAst(cst: SubhutiCst, util: SlimeCstToAst): any[] {
+    static createBindingElementListAst(cst: SubhutiCst): any[] {
         const elements: any[] = []
         for (const child of cst.children || []) {
             if (child.name === SlimeParser.prototype.BindingElement?.name ||
                 child.name === 'BindingElement') {
-                elements.push(util.createBindingElementAst(child))
+                elements.push(SlimeCstToAstUtil.createBindingElementAst(child))
             } else if (child.name === SlimeParser.prototype.BindingRestElement?.name ||
                 child.name === 'BindingRestElement') {
-                elements.push(this.createBindingRestElementAst(child, util))
+                elements.push(this.createBindingRestElementAst(child))
             } else if (child.name === SlimeParser.prototype.BindingElisionElement?.name ||
                 child.name === 'BindingElisionElement') {
-                elements.push(this.createBindingElisionElementAst(child, util))
+                elements.push(this.createBindingElisionElementAst(child))
             }
         }
         return elements
@@ -374,13 +374,13 @@ export class BindingPatternCstToAst {
     /**
      * 创建 BindingElisionElement AST
      */
-    static createBindingElisionElementAst(cst: SubhutiCst, util: SlimeCstToAst): any {
+    static createBindingElisionElementAst(cst: SubhutiCst): any {
         const bindingElement = cst.children?.find(ch =>
             ch.name === SlimeParser.prototype.BindingElement?.name ||
             ch.name === 'BindingElement')
 
         if (bindingElement) {
-            return util.createBindingElementAst(bindingElement)
+            return SlimeCstToAstUtil.createBindingElementAst(bindingElement)
         }
 
         return null

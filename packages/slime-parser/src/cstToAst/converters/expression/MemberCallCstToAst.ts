@@ -13,13 +13,13 @@ export class MemberCallCstToAst {
         }
 
         const callee = SlimeCstToAstUtil.createExpressionAst(cst.children![0]);
-        const args = MemberCallCstToAst.createArgumentsAst(cst.children![1]);
+        const args = this.createArgumentsAst(cst.children![1]);
 
         return SlimeAstUtil.createCallExpression(callee, args, cst.loc) as SlimeExpression;
     }
 
     static createSuperCallAst(cst: SubhutiCst): SlimeExpression {
-        const args = MemberCallCstToAst.createArgumentsAst(cst.children![1]);
+        const args = this.createArgumentsAst(cst.children![1]);
         return SlimeAstUtil.createSuperCall(args, cst.loc) as SlimeExpression;
     }
 
@@ -50,7 +50,7 @@ export class MemberCallCstToAst {
 
     static createArgumentsAst(cst: SubhutiCst): any[] {
         if (cst.children!.length <= 2) return [];
-        return MemberCallCstToAst.createArgumentListAst(cst.children![1]);
+        return this.createArgumentListAst(cst.children![1]);
     }
 
     static createArgumentListAst(cst: SubhutiCst): any[] {
@@ -73,10 +73,10 @@ export class MemberCallCstToAst {
     static createMemberExpressionFirstOr(cst: SubhutiCst): SlimeExpression {
         const name = cst.name;
         if (name === 'PrimaryExpression') return SlimeCstToAstUtil.createPrimaryExpressionAst(cst);
-        if (name === 'MemberExpression') return MemberCallCstToAst.createMemberExpressionAst(cst);
-        if (name === 'SuperProperty') return MemberCallCstToAst.createSuperPropertyAst(cst);
-        if (name === 'MetaProperty') return MemberCallCstToAst.createMetaPropertyAst(cst);
-        if (name === 'NewExpression') return MemberCallCstToAst.createNewExpressionAst(cst);
+        if (name === 'MemberExpression') return this.createMemberExpressionAst(cst);
+        if (name === 'SuperProperty') return this.createSuperPropertyAst(cst);
+        if (name === 'MetaProperty') return this.createMetaPropertyAst(cst);
+        if (name === 'NewExpression') return this.createNewExpressionAst(cst);
         return SlimeCstToAstUtil.createExpressionAst(cst);
     }
 
@@ -84,19 +84,19 @@ export class MemberCallCstToAst {
         checkCstName(cst, SlimeParser.prototype.NewExpression?.name || 'NewExpression');
 
         if (cst.children![0].value === 'new') {
-            const callee = MemberCallCstToAst.createMemberExpressionFirstOr(cst.children![1]);
-            const args = cst.children![2] ? MemberCallCstToAst.createArgumentsAst(cst.children![2]) : [];
+            const callee = this.createMemberExpressionFirstOr(cst.children![1]);
+            const args = cst.children![2] ? this.createArgumentsAst(cst.children![2]) : [];
             return SlimeAstUtil.createNewExpression(callee, args, cst.loc) as SlimeExpression;
         }
 
-        return MemberCallCstToAst.createMemberExpressionAst(cst.children![0]);
+        return this.createMemberExpressionAst(cst.children![0]);
     }
 
     static createMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
         checkCstName(cst, SlimeParser.prototype.MemberExpression?.name || 'MemberExpression');
 
         if (cst.children && cst.children.length > 1) {
-            let left = MemberCallCstToAst.createMemberExpressionFirstOr(cst.children[0]);
+            let left = this.createMemberExpressionFirstOr(cst.children[0]);
 
             for (let i = 1; i < cst.children.length; i++) {
                 const part = cst.children[i];
@@ -118,14 +118,14 @@ export class MemberCallCstToAst {
             return left;
         }
 
-        return MemberCallCstToAst.createMemberExpressionFirstOr(cst.children![0]);
+        return this.createMemberExpressionFirstOr(cst.children![0]);
     }
 
     static createOptionalExpressionAst(cst: SubhutiCst): SlimeExpression {
         checkCstName(cst, SlimeParser.prototype.OptionalExpression?.name || 'OptionalExpression');
 
         let object = SlimeCstToAstUtil.createExpressionAst(cst.children![0]);
-        return MemberCallCstToAst.createOptionalChainAst(cst.children![1], object);
+        return this.createOptionalChainAst(cst.children![1], object);
     }
 
     static createOptionalChainAst(cst: SubhutiCst, object: SlimeExpression): SlimeExpression {
@@ -134,7 +134,7 @@ export class MemberCallCstToAst {
 
         let current: SlimeExpression;
         if (part.name === 'Arguments') {
-            const args = MemberCallCstToAst.createArgumentsAst(part);
+            const args = this.createArgumentsAst(part);
             current = SlimeAstUtil.createOptionalCallExpression(object, args, isOptional, cst.loc) as SlimeExpression;
         } else if (part.value === '[') {
             const property = SlimeCstToAstUtil.createExpressionAst(isOptional ? cst.children![2] : cst.children![1]);
@@ -143,16 +143,27 @@ export class MemberCallCstToAst {
             const property = SlimeCstToAstUtil.createIdentifierNameAst(part);
             current = SlimeAstUtil.createOptionalMemberExpression(object, property, false, isOptional, cst.loc) as SlimeExpression;
         } else {
-            // IdentifierName maybe?
             const property = SlimeCstToAstUtil.createIdentifierNameAst(part);
             current = SlimeAstUtil.createOptionalMemberExpression(object, property, false, isOptional, cst.loc) as SlimeExpression;
         }
 
-        const nextChain = isOptional ? cst.children![cst.children!.length - 1] : cst.children![cst.children!.length - 1];
+        const nextChain = cst.children![cst.children!.length - 1];
         if (nextChain && nextChain.name === 'OptionalChain') {
-            return MemberCallCstToAst.createOptionalChainAst(nextChain, current);
+            return this.createOptionalChainAst(nextChain, current);
         }
 
         return current;
+    }
+
+    static createCallMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeCstToAstUtil.createAstFromCst(cst.children![0]);
+    }
+
+    static createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeCstToAstUtil.createAstFromCst(cst.children![0]);
+    }
+
+    static createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeCstToAstUtil.createAstFromCst(cst.children![0]);
     }
 }

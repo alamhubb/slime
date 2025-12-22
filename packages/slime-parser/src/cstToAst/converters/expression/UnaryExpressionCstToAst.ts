@@ -1,7 +1,7 @@
 import { SubhutiCst } from "subhuti";
 import { SlimeExpression, SlimeAstUtil, SlimeNodeType } from "slime-ast";
-import SlimeCstToAstUtil, { checkCstName } from "../../SlimeCstToAstUtil.ts";
-import SlimeParser from "../../SlimeParser.ts";
+import SlimeCstToAstUtil, { checkCstName } from "../../../SlimeCstToAstUtil.ts";
+import SlimeParser from "../../../SlimeParser.ts";
 
 export class UnaryExpressionCstToAst {
 
@@ -17,7 +17,7 @@ export class UnaryExpressionCstToAst {
         const operand = UnaryExpressionCstToAst.createUnaryExpressionAst(cst.children![1]);
 
         if (operator === 'delete' || operator === 'void' || operator === 'typeof' || operator === '+' || operator === '-' || operator === '~' || operator === '!') {
-            return SlimeAstUtil.createUnaryExpression(operator, true, operand, cst.loc) as SlimeExpression;
+            return SlimeAstUtil.createUnaryExpression(operator, operand, cst.loc) as SlimeExpression;
         }
 
         return operand;

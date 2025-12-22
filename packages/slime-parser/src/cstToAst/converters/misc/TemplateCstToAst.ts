@@ -1,6 +1,6 @@
 import { SubhutiCst } from "subhuti";
 import { SlimeAstUtil, SlimeExpression } from "slime-ast";
-import { checkCstName, SlimeCstToAst } from "../../../SlimeCstToAstUtil.ts";
+import SlimeCstToAstUtil, { checkCstName } from "../../../SlimeCstToAstUtil.ts";
 import SlimeParser from "../../../SlimeParser.ts";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
 
@@ -18,7 +18,7 @@ export class TemplateCstToAst {
     /**
      * 创建 TemplateLiteral AST
      */
-    static createTemplateLiteralAst(cst: SubhutiCst, util: SlimeCstToAst): SlimeExpression {
+    static createTemplateLiteralAst(cst: SubhutiCst): SlimeExpression {
         checkCstName(cst, SlimeParser.prototype.TemplateLiteral?.name)
 
         const first = cst.children[0]
@@ -53,11 +53,11 @@ export class TemplateCstToAst {
             }
             else if (child.name === SlimeParser.prototype.Expression?.name ||
                 child.name === 'Expression') {
-                expressions.push(util.createExpressionAst(child))
+                expressions.push(SlimeCstToAstUtil.createExpressionAst(child))
             }
             else if (child.name === SlimeParser.prototype.TemplateSpans?.name ||
                 child.name === 'TemplateSpans') {
-                this.processTemplateSpans(child, quasis, expressions, util)
+                this.processTemplateSpans(child, quasis, expressions)
             }
         }
 
@@ -67,7 +67,7 @@ export class TemplateCstToAst {
     /**
      * 处理 TemplateSpans
      */
-    static processTemplateSpans(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[], util: SlimeCstToAst): void {
+    static processTemplateSpans(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[]): void {
         const first = cst.children[0]
 
         if (first.name === SlimeTokenConsumer.prototype.TemplateTail?.name) {
@@ -78,12 +78,12 @@ export class TemplateCstToAst {
         }
 
         if (first.name === SlimeParser.prototype.TemplateMiddleList?.name) {
-            this.processTemplateMiddleList(first, quasis, expressions, util)
+            this.processTemplateMiddleList(first, quasis, expressions)
 
             if (cst.children[1] && cst.children[1].name === SlimeTokenConsumer.prototype.TemplateTail?.name) {
                 const tail = cst.children[1]
                 const raw = tail.value || ''
-                const cooked = raw.slice(1, -1)
+                const cooked = tail.value ? tail.value.slice(1, -1) : ''
                 quasis.push(SlimeAstUtil.createTemplateElement(true, raw, cooked, tail.loc))
             }
         }
@@ -92,21 +92,21 @@ export class TemplateCstToAst {
     /**
      * 处理 TemplateMiddleList
      */
-    static processTemplateMiddleList(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[], util: SlimeCstToAst): void {
+    static processTemplateMiddleList(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[]): void {
         for (let i = 0; i < cst.children.length; i++) {
             const child = cst.children[i]
 
             if (child.name === SlimeTokenConsumer.prototype.TemplateMiddle?.name ||
                 child.name === 'TemplateMiddle') {
                 const raw = child.value || ''
-                const cooked = raw.slice(1, -2)
+                const cooked = child.value ? child.value.slice(1, -2) : ''
                 quasis.push(SlimeAstUtil.createTemplateElement(false, raw, cooked, child.loc))
             } else if (child.name === SlimeParser.prototype.Expression?.name ||
                 child.name === 'Expression') {
-                expressions.push(util.createExpressionAst(child))
+                expressions.push(SlimeCstToAstUtil.createExpressionAst(child))
             } else if (child.name === SlimeParser.prototype.TemplateMiddleList?.name ||
                 child.name === 'TemplateMiddleList') {
-                this.processTemplateMiddleList(child, quasis, expressions, util)
+                this.processTemplateMiddleList(child, quasis, expressions)
             }
         }
     }

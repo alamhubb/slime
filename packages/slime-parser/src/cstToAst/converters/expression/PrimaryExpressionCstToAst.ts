@@ -21,14 +21,14 @@ export class PrimaryExpressionCstToAst {
         if (child.name === 'AsyncGeneratorExpression') return SlimeCstToAstUtil.createAsyncGeneratorExpressionAst(child);
         if (child.name === 'RegularExpressionLiteral') return SlimeCstToAstUtil.createRegExpLiteralAst(child);
         if (child.name === 'TemplateLiteral') return SlimeCstToAstUtil.createTemplateLiteralAst(child);
-        if (child.name === 'ParenthesizedExpression') return PrimaryExpressionCstToAst.createParenthesizedExpressionAst(child);
+        if (child.name === 'ParenthesizedExpression') return this.createParenthesizedExpressionAst(child);
 
         return SlimeCstToAstUtil.createExpressionAst(child);
     }
 
     static createParenthesizedExpressionAst(cst: SubhutiCst): SlimeExpression {
         const expression = SlimeCstToAstUtil.createExpressionAst(cst.children![1]);
-        return expression; // Usually we strip parentheses in AST unless needed
+        return expression;
     }
 
     static createComputedPropertyNameAst(cst: SubhutiCst): SlimeExpression {
@@ -63,8 +63,6 @@ export class PrimaryExpressionCstToAst {
     }
 
     static createCoverParenthesizedExpressionAndArrowParameterListAst(cst: SubhutiCst): any {
-        // This is a complex grammar cover, usually handled by checking the context
-        // For now, we just pass through to the expression inside if it's a parenthesized expression
         return SlimeCstToAstUtil.createExpressionAst(cst.children![1]);
     }
 
@@ -79,5 +77,33 @@ export class PrimaryExpressionCstToAst {
     static createExpressionStatementAst(cst: SubhutiCst): any {
         const expression = SlimeCstToAstUtil.createExpressionAst(cst.children![0]);
         return SlimeAstUtil.createExpressionStatement(expression, cst.loc);
+    }
+
+    static createMultiplicativeOperatorAst(cst: SubhutiCst): string {
+        return cst.children![0].value;
+    }
+
+    static createAssignmentOperatorAst(cst: SubhutiCst): string {
+        return cst.children![0].value;
+    }
+
+    static createAssignmentExpressionAst(cst: SubhutiCst): SlimeExpression {
+        if (cst.children!.length === 1) {
+            return SlimeCstToAstUtil.createExpressionAst(cst.children![0]);
+        }
+        const left = SlimeCstToAstUtil.createExpressionAst(cst.children![0]);
+        const operator = cst.children![1].value;
+        const right = SlimeCstToAstUtil.createExpressionAst(cst.children![2]);
+        return SlimeAstUtil.createAssignmentExpression(operator as any, left, right, cst.loc) as SlimeExpression;
+    }
+
+    static createConditionalExpressionAst(cst: SubhutiCst): SlimeExpression {
+        if (cst.children!.length === 1) {
+            return SlimeCstToAstUtil.createExpressionAst(cst.children![0]);
+        }
+        const test = SlimeCstToAstUtil.createExpressionAst(cst.children![0]);
+        const consequent = SlimeCstToAstUtil.createExpressionAst(cst.children![2]);
+        const alternate = SlimeCstToAstUtil.createExpressionAst(cst.children![4]);
+        return SlimeAstUtil.createConditionalExpression(test, consequent, alternate, cst.loc) as SlimeExpression;
     }
 }
