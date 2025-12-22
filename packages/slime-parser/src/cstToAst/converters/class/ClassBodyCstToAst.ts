@@ -3,6 +3,16 @@
  */
 import {SubhutiCst} from "subhuti";
 import SlimeTokenConsumer from "../../../SlimeTokenConsumer.ts";
+import {
+    SlimeAstUtil,
+    SlimeClassBody, SlimeClassExpression,
+    SlimeExpression, SlimeIdentifier, SlimeLiteral,
+    SlimeMethodDefinition, SlimeNodeType,
+    SlimePropertyDefinition, SlimeStatement,
+    SlimeTokenCreate
+} from "slime-ast";
+import {SlimeAstUtils} from "../../SlimeAstUtils.ts";
+import SlimeParser from "../../../SlimeParser.ts";
 
 export class ClassBodyCstToAst {
 
@@ -47,8 +57,6 @@ export class ClassBodyCstToAst {
 
         return hasComputedPropertyName(cst)
     }
-
-
 
 
     /**
@@ -162,7 +170,7 @@ export class ClassBodyCstToAst {
         }
 
         const superClass = this.createLeftHandSideExpressionAst(cst.children[1])
-        return { superClass, extendsToken }
+        return {superClass, extendsToken}
     }
 
 
@@ -192,7 +200,6 @@ export class ClassBodyCstToAst {
         // 注意参数顺序�?key, value, computed, isStatic, loc)
         return SlimeAstUtil.createPropertyDefinition(key, value, isComputed, isStatic || false, cst.loc)
     }
-
 
 
     createClassBodyAst(cst: SubhutiCst): SlimeClassBody {
@@ -288,7 +295,6 @@ export class ClassBodyCstToAst {
     }
 
 
-
     /**
      * ClassElement CST �?AST
      * ClassElement -> MethodDefinition | static MethodDefinition | FieldDefinition | ...
@@ -368,8 +374,6 @@ export class ClassBodyCstToAst {
     }
 
 
-
-
     createClassExpressionAst(cst: SubhutiCst): SlimeClassExpression {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ClassExpression?.name);
 
@@ -384,7 +388,6 @@ export class ClassBodyCstToAst {
 
         return SlimeAstUtil.createClassExpression(id, classTail.superClass, classTail.body, cst.loc) // 生成 ClassExpression AST
     }
-
 
 
 }
