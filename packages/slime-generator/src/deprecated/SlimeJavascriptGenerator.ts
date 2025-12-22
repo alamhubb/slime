@@ -43,12 +43,12 @@ import {
     type SlimeJavascriptFunctionParam,
     SlimeJavascriptAstTypeName
 } from "slime-ast";
-import SlimeCodeMapping, { SlimeCodeLocation, type SlimeGeneratorResult } from "./SlimeCodeMapping.ts";
-import type { SubhutiSourceLocation } from "subhuti";
-import { SubhutiCreateToken } from "subhuti";
-import { SubhutiMatchToken } from "subhuti";
-import { SlimeJavascriptTokensObj } from "slime-parser";
-import { SlimeJavascriptTokenType } from "slime-token";
+import SlimeCodeMapping, {SlimeCodeLocation, type SlimeGeneratorResult} from "./SlimeCodeMapping.ts";
+import type {SubhutiSourceLocation} from "subhuti";
+import {SubhutiCreateToken} from "subhuti";
+import {SubhutiMatchToken} from "subhuti";
+import {SlimeJavascriptTokensObj} from "slime-parser";
+import {SlimeJavascriptTokenType} from "slime-token";
 
 // 创建软关键字的 token 对象（用于代码生成）
 const createSoftKeywordToken = (name: string, value: string): SubhutiCreateToken => ({
@@ -219,7 +219,7 @@ export default class SlimeJavascriptGenerator {
         if (attrs === undefined) return
 
         this.addSpacing()
-        this.addCodeAndMappings({ type: 'With', name: 'With', value: 'with' }, node.withToken?.loc) // 使用精确 token 位置
+        this.addCodeAndMappings({type: 'With', name: 'With', value: 'with'}, node.withToken?.loc) // 使用精确 token 位置
         this.addSpacing()
         this.addLBrace(node.attributesLBraceToken?.loc) // 使用精确 token 位置
         attrs.forEach((attr: any, index: number) => {
@@ -812,7 +812,11 @@ export default class SlimeJavascriptGenerator {
         if (!identifierName) {
             console.error('generatorIdentifier: node.name is undefined', JSON.stringify(node, null, 2))
         }
-        const identifier = { type: SlimeJavascriptTokenType.IdentifierName, name: SlimeJavascriptTokenType.IdentifierName, value: identifierName }
+        const identifier = {
+            type: SlimeJavascriptTokenType.IdentifierName,
+            name: SlimeJavascriptTokenType.IdentifierName,
+            value: identifierName
+        }
         this.addCodeAndMappings(identifier, node.loc)
 
         // [TypeScript] 输出类型注解
@@ -848,7 +852,11 @@ export default class SlimeJavascriptGenerator {
      */
     private static generatorTSNumberKeyword(node: any) {
         // number 是上下文关键字，作为标识符输出
-        const numberKeyword = { type: SlimeJavascriptTokenType.IdentifierName, name: SlimeJavascriptTokenType.IdentifierName, value: 'number' }
+        const numberKeyword = {
+            type: SlimeJavascriptTokenType.IdentifierName,
+            name: SlimeJavascriptTokenType.IdentifierName,
+            value: 'number'
+        }
         this.addCodeAndMappings(numberKeyword, node.loc)
     }
 
@@ -1572,7 +1580,11 @@ export default class SlimeJavascriptGenerator {
         // 这样可以在调试时准确定位到原始代码中的数字字面量位置
         // 注意：优先使用 raw 值保持原始格式（如十六进制 0xFF）
         const numValue = node.raw || String(node.value)
-        this.addCodeAndMappings({ type: SlimeJavascriptTokenType.NumericLiteral, name: SlimeJavascriptTokenType.NumericLiteral, value: numValue }, node.loc)
+        this.addCodeAndMappings({
+            type: SlimeJavascriptTokenType.NumericLiteral,
+            name: SlimeJavascriptTokenType.NumericLiteral,
+            value: numValue
+        }, node.loc)
     }
 
     private static generatorStringLiteral(node: SlimeJavascriptStringLiteral) {
@@ -1582,7 +1594,11 @@ export default class SlimeJavascriptGenerator {
         // 注意：优先使用 raw 值保持原始格式（保留原始引号类型）
         // 如果没有 raw，使用单引号包裹 value
         const strValue = node.raw || `'${node.value}'`
-        this.addCodeAndMappings({ type: SlimeJavascriptTokenType.StringLiteral, name: SlimeJavascriptTokenType.StringLiteral, value: strValue }, node.loc)
+        this.addCodeAndMappings({
+            type: SlimeJavascriptTokenType.StringLiteral,
+            name: SlimeJavascriptTokenType.StringLiteral,
+            value: strValue
+        }, node.loc)
     }
 
     /**
@@ -1595,27 +1611,39 @@ export default class SlimeJavascriptGenerator {
 
         if (value === null) {
             // null 字面量
-            this.addCodeAndMappings({ type: 'NullLiteral', name: 'NullLiteral', value: 'null' }, node.loc)
+            this.addCodeAndMappings({type: 'NullLiteral', name: 'NullLiteral', value: 'null'}, node.loc)
         } else if (typeof value === 'boolean') {
             // boolean 字面量
             const boolValue = value ? 'true' : 'false'
-            this.addCodeAndMappings({ type: 'BooleanLiteral', name: 'BooleanLiteral', value: boolValue }, node.loc)
+            this.addCodeAndMappings({type: 'BooleanLiteral', name: 'BooleanLiteral', value: boolValue}, node.loc)
         } else if (typeof value === 'number') {
             // number 字面量（优先使用 raw 保持原始格式）
             const numValue = raw || String(value)
-            this.addCodeAndMappings({ type: SlimeJavascriptTokenType.NumericLiteral, name: SlimeJavascriptTokenType.NumericLiteral, value: numValue }, node.loc)
+            this.addCodeAndMappings({
+                type: SlimeJavascriptTokenType.NumericLiteral,
+                name: SlimeJavascriptTokenType.NumericLiteral,
+                value: numValue
+            }, node.loc)
         } else if (typeof value === 'string') {
             // string 字面量（优先使用 raw 保持原始引号格式）
             const strValue = raw || `'${value}'`
-            this.addCodeAndMappings({ type: SlimeJavascriptTokenType.StringLiteral, name: SlimeJavascriptTokenType.StringLiteral, value: strValue }, node.loc)
+            this.addCodeAndMappings({
+                type: SlimeJavascriptTokenType.StringLiteral,
+                name: SlimeJavascriptTokenType.StringLiteral,
+                value: strValue
+            }, node.loc)
         } else if (typeof value === 'bigint' || (raw && raw.endsWith('n'))) {
             // BigInt 字面量
             const bigintValue = raw || `${value}n`
-            this.addCodeAndMappings({ type: 'BigIntLiteral', name: 'BigIntLiteral', value: bigintValue }, node.loc)
+            this.addCodeAndMappings({type: 'BigIntLiteral', name: 'BigIntLiteral', value: bigintValue}, node.loc)
         } else if (value instanceof RegExp || (node as any).regex) {
             // RegExp 字面量
             const regexValue = raw || String(value)
-            this.addCodeAndMappings({ type: 'RegularExpressionLiteral', name: 'RegularExpressionLiteral', value: regexValue }, node.loc)
+            this.addCodeAndMappings({
+                type: 'RegularExpressionLiteral',
+                name: 'RegularExpressionLiteral',
+                value: regexValue
+            }, node.loc)
         } else {
             // 未知类型，尝试使用 raw 或 String(value)
             const fallbackValue = raw || String(value)
