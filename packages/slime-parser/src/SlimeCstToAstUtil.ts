@@ -1056,27 +1056,27 @@ export class SlimeCstToAst {
     // === statement / SwitchCstToAst ===
 
     createCaseClauseAst(cst: SubhutiCst): any {
-        return SwitchCstToAst.createCaseClauseAst(cst)
+        return ControlFlowCstToAst.createCaseClauseAst(cst)
     }
 
     createDefaultClauseAst(cst: SubhutiCst): any {
-        return SwitchCstToAst.createDefaultClauseAst(cst)
+        return ControlFlowCstToAst.createDefaultClauseAst(cst)
     }
 
     createCaseClausesAst(cst: SubhutiCst): any[] {
-        return SwitchCstToAst.createCaseClausesAst(cst)
+        return ControlFlowCstToAst.createCaseClausesAst(cst)
     }
 
     createCaseBlockAst(cst: SubhutiCst): any[] {
-        return SwitchCstToAst.createCaseBlockAst(cst)
+        return ControlFlowCstToAst.createCaseBlockAst(cst)
     }
 
     createSwitchCaseAst(cst: SubhutiCst): any {
-        return SwitchCstToAst.createSwitchCaseAst(cst)
+        return ControlFlowCstToAst.createSwitchCaseAst(cst)
     }
 
     extractCasesFromCaseBlock(caseBlockCst: SubhutiCst): any[] {
-        return SwitchCstToAst.extractCasesFromCaseBlock(caseBlockCst)
+        return ControlFlowCstToAst.extractCasesFromCaseBlock(caseBlockCst)
     }
 
     // === module / ExportCstToAst ===
