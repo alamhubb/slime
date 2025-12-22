@@ -92,7 +92,7 @@ import {
     SlimeJavascriptUpdateOperatorTokenTypes,
 } from "slime-token";
 
-class SlimeJavascriptTokenFactory {
+export class SlimeJavascriptTokenFactory {
     // ============================================
     // 变量声明关键字 Token
     // ============================================
