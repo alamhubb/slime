@@ -17,62 +17,38 @@ import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
  */
 export class OtherStatementCstToAst {
 
+    static createReturnStatementAst(cst: SubhutiCst): SlimeReturnStatement {
+        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ReturnStatement?.name);
 
-    /**
-     * SemicolonASI CST �?AST
-     * 处理自动分号插入
-     */
-    static createSemicolonASIAst(cst: SubhutiCst): any {
-        // ASI 不产生实际的 AST 节点，返�?null
-        return null
-    }
-
-    /**
-     * 创建空语�?AST
-     */
-    static createEmptyStatementAst(cst: SubhutiCst): any {
-        // 兼容 EmptyStatement 和旧�?NotEmptySemicolon
-        // SlimeAstUtils.checkCstName(cst, Es2025Parser.prototype.EmptyStatement?.name);
-
-        let semicolonToken: any = undefined
-
-        // EmptyStatement 可能直接�?Semicolon token
-        if (cst.value === ';' || cst.name === SlimeTokenConsumer.prototype.Semicolon?.name) {
-            semicolonToken = SlimeTokenCreate.createSemicolonToken(cst.loc)
-        } else {
-            // �?semicolon token
-            const semicolonCst = cst.children?.find(ch => ch.name === 'Semicolon' || ch.value === ';')
-            if (semicolonCst) {
-                semicolonToken = SlimeTokenCreate.createSemicolonToken(semicolonCst.loc)
-            }
-        }
-
-        return SlimeAstUtil.createEmptyStatement(cst.loc, semicolonToken)
-    }
-
-    /**
-     * 创建 throw 语句 AST
-     */
-    static createThrowStatementAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ThrowStatement?.name);
-        // ThrowStatement: throw Expression ;
-
-        let throwToken: any = undefined
-        let semicolonToken: any = undefined
+        // return 语句可能有或没有表达�?
+        // children[0] = ReturnTok
+        // children[1] = Expression? | Semicolon | SemicolonASI
         let argument: any = null
+        let returnToken: any = undefined
+        let semicolonToken: any = undefined
 
-        for (const child of cst.children || []) {
-            if (child.name === 'Throw' || child.value === 'throw') {
-                throwToken = SlimeTokenCreate.createThrowToken(child.loc)
-            } else if (child.name === 'Semicolon' || child.value === ';') {
-                semicolonToken = SlimeTokenCreate.createSemicolonToken(child.loc)
-            } else if (child.name === SlimeParser.prototype.Expression?.name || child.name === 'Expression') {
-                argument = SlimeCstToAstUtil.createExpressionAst(child)
+        // 提取 return token
+        const returnCst = cst.children[0]
+        if (returnCst && (returnCst.name === 'Return' || returnCst.value === 'return')) {
+            returnToken = SlimeTokenCreate.createReturnToken(returnCst.loc)
+        }
+
+        if (cst.children.length > 1) {
+            for (let i = 1; i < cst.children.length; i++) {
+                const child = cst.children[i]
+                // 跳过分号相关节点
+                if (child.name === 'Semicolon' || child.name === 'SemicolonASI' ||
+                    child.name === 'Semicolon' || child.value === ';') {
+                    semicolonToken = SlimeTokenCreate.createSemicolonToken(child.loc)
+                } else if (!argument) {
+                    argument = SlimeCstToAstUtil.createExpressionAst(child)
+                }
             }
         }
 
-        return SlimeAstUtil.createThrowStatement(argument, cst.loc, throwToken, semicolonToken)
+        return SlimeAstUtil.createReturnStatement(argument, cst.loc, returnToken, semicolonToken)
     }
+
 
     /**
      * 创建 break 语句 AST
@@ -101,6 +77,7 @@ export class OtherStatementCstToAst {
 
         return SlimeAstUtil.createBreakStatement(label, cst.loc, breakToken, semicolonToken)
     }
+
 
     /**
      * 创建 continue 语句 AST
@@ -163,18 +140,6 @@ export class OtherStatementCstToAst {
 
 
     /**
-     * 创建 Finally 子句 AST
-     */
-    static createFinallyAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Finally?.name);
-        // Finally: FinallyTok Block
-
-        const blockCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Block?.name)
-        return blockCst ? SlimeCstToAstUtil.createBlockAst(blockCst) : null
-    }
-
-
-    /**
      * Catch CST �?CatchClause AST
      * Catch -> catch ( CatchParameter ) Block | catch Block
      */
@@ -206,6 +171,7 @@ export class OtherStatementCstToAst {
         return SlimeAstUtil.createCatchClause(body, param, cst.loc, catchToken, lParenToken, rParenToken)
     }
 
+
     /**
      * 创建 CatchParameter AST
      */
@@ -223,37 +189,43 @@ export class OtherStatementCstToAst {
         return null
     }
 
-    static createReturnStatementAst(cst: SubhutiCst): SlimeReturnStatement {
-        const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ReturnStatement?.name);
 
-        // return 语句可能有或没有表达�?
-        // children[0] = ReturnTok
-        // children[1] = Expression? | Semicolon | SemicolonASI
-        let argument: any = null
-        let returnToken: any = undefined
+    /**
+     * 创建 Finally 子句 AST
+     */
+    static createFinallyAst(cst: SubhutiCst): any {
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.Finally?.name);
+        // Finally: FinallyTok Block
+
+        const blockCst = cst.children.find(ch => ch.name === SlimeParser.prototype.Block?.name)
+        return blockCst ? SlimeCstToAstUtil.createBlockAst(blockCst) : null
+    }
+
+
+    /**
+     * 创建 throw 语句 AST
+     */
+    static createThrowStatementAst(cst: SubhutiCst): any {
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ThrowStatement?.name);
+        // ThrowStatement: throw Expression ;
+
+        let throwToken: any = undefined
         let semicolonToken: any = undefined
+        let argument: any = null
 
-        // 提取 return token
-        const returnCst = cst.children[0]
-        if (returnCst && (returnCst.name === 'Return' || returnCst.value === 'return')) {
-            returnToken = SlimeTokenCreate.createReturnToken(returnCst.loc)
-        }
-
-        if (cst.children.length > 1) {
-            for (let i = 1; i < cst.children.length; i++) {
-                const child = cst.children[i]
-                // 跳过分号相关节点
-                if (child.name === 'Semicolon' || child.name === 'SemicolonASI' ||
-                    child.name === 'Semicolon' || child.value === ';') {
-                    semicolonToken = SlimeTokenCreate.createSemicolonToken(child.loc)
-                } else if (!argument) {
-                    argument = SlimeCstToAstUtil.createExpressionAst(child)
-                }
+        for (const child of cst.children || []) {
+            if (child.name === 'Throw' || child.value === 'throw') {
+                throwToken = SlimeTokenCreate.createThrowToken(child.loc)
+            } else if (child.name === 'Semicolon' || child.value === ';') {
+                semicolonToken = SlimeTokenCreate.createSemicolonToken(child.loc)
+            } else if (child.name === SlimeParser.prototype.Expression?.name || child.name === 'Expression') {
+                argument = SlimeCstToAstUtil.createExpressionAst(child)
             }
         }
 
-        return SlimeAstUtil.createReturnStatement(argument, cst.loc, returnToken, semicolonToken)
+        return SlimeAstUtil.createThrowStatement(argument, cst.loc, throwToken, semicolonToken)
     }
+
 
     static createExpressionStatementAst(cst: SubhutiCst): SlimeExpressionStatement {
         const astName = SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.ExpressionStatement?.name);
@@ -272,6 +244,61 @@ export class OtherStatementCstToAst {
         }
 
         return SlimeAstUtil.createExpressionStatement(expression, cst.loc, semicolonToken)
+    }
+
+
+    /**
+     * 创建空语�?AST
+     */
+    static createEmptyStatementAst(cst: SubhutiCst): any {
+        // 兼容 EmptyStatement 和旧�?NotEmptySemicolon
+        // SlimeAstUtils.checkCstName(cst, Es2025Parser.prototype.EmptyStatement?.name);
+
+        let semicolonToken: any = undefined
+
+        // EmptyStatement 可能直接�?Semicolon token
+        if (cst.value === ';' || cst.name === SlimeTokenConsumer.prototype.Semicolon?.name) {
+            semicolonToken = SlimeTokenCreate.createSemicolonToken(cst.loc)
+        } else {
+            // �?semicolon token
+            const semicolonCst = cst.children?.find(ch => ch.name === 'Semicolon' || ch.value === ';')
+            if (semicolonCst) {
+                semicolonToken = SlimeTokenCreate.createSemicolonToken(semicolonCst.loc)
+            }
+        }
+
+        return SlimeAstUtil.createEmptyStatement(cst.loc, semicolonToken)
+    }
+
+
+    /**
+     * SemicolonASI CST �?AST
+     * 处理自动分号插入
+     */
+    static createSemicolonASIAst(cst: SubhutiCst): any {
+        // ASI 不产生实际的 AST 节点，返�?null
+        return null
+    }
+
+
+    /**
+     * 创建 debugger 语句 AST
+     */
+    static createDebuggerStatementAst(cst: SubhutiCst): any {
+        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.DebuggerStatement?.name);
+
+        let debuggerToken: any = undefined
+        let semicolonToken: any = undefined
+
+        for (const child of cst.children || []) {
+            if (child.name === 'Debugger' || child.value === 'debugger') {
+                debuggerToken = SlimeTokenCreate.createDebuggerToken(child.loc)
+            } else if (child.name === 'Semicolon' || child.value === ';') {
+                semicolonToken = SlimeTokenCreate.createSemicolonToken(child.loc)
+            }
+        }
+
+        return SlimeAstUtil.createDebuggerStatement(cst.loc, debuggerToken, semicolonToken)
     }
 
 
@@ -338,6 +365,20 @@ export class OtherStatementCstToAst {
         }
     }
 
+
+    /**
+     * LabelledItem CST �?AST（透传�?
+     * LabelledItem -> Statement | FunctionDeclaration
+     */
+    static createLabelledItemAst(cst: SubhutiCst): any {
+        const firstChild = cst.children?.[0]
+        if (firstChild) {
+            return SlimeCstToAstUtil.createStatementDeclarationAst(firstChild)
+        }
+        throw new Error('LabelledItem has no children')
+    }
+
+
     /**
      * 创建 with 语句 AST
      * WithStatement: with ( Expression ) Statement
@@ -378,36 +419,5 @@ export class OtherStatementCstToAst {
         }
     }
 
-    /**
-     * 创建 debugger 语句 AST
-     */
-    static createDebuggerStatementAst(cst: SubhutiCst): any {
-        SlimeAstUtils.checkCstName(cst, SlimeParser.prototype.DebuggerStatement?.name);
-
-        let debuggerToken: any = undefined
-        let semicolonToken: any = undefined
-
-        for (const child of cst.children || []) {
-            if (child.name === 'Debugger' || child.value === 'debugger') {
-                debuggerToken = SlimeTokenCreate.createDebuggerToken(child.loc)
-            } else if (child.name === 'Semicolon' || child.value === ';') {
-                semicolonToken = SlimeTokenCreate.createSemicolonToken(child.loc)
-            }
-        }
-
-        return SlimeAstUtil.createDebuggerStatement(cst.loc, debuggerToken, semicolonToken)
-    }
-
-    /**
-     * LabelledItem CST �?AST（透传�?
-     * LabelledItem -> Statement | FunctionDeclaration
-     */
-    static createLabelledItemAst(cst: SubhutiCst): any {
-        const firstChild = cst.children?.[0]
-        if (firstChild) {
-            return SlimeCstToAstUtil.createStatementDeclarationAst(firstChild)
-        }
-        throw new Error('LabelledItem has no children')
-    }
 
 }
