@@ -1,9 +1,3 @@
-import type * as ESTree from "estree";
-import {
-    SlimeAstTypeName
-} from "./SlimeAstTypeName.ts";
-
-
 import type { SubhutiSourceLocation } from "subhuti";
 import {
     SlimeJavascriptArrayExpression,
