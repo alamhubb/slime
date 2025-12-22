@@ -11,8 +11,7 @@ import {
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
-import {SlimeJavascriptTokenConsumer} from "../../index.ts";
-import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
+import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 
 export class SlimeJavascriptFunctionParameterCstToAstSingle {
 
