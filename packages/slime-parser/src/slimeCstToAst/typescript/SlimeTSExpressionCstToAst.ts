@@ -1,7 +1,7 @@
 import {SubhutiCst} from "subhuti";
 import {
     SlimeJavascriptAstCreateUtils,
-    SlimeJavascriptAstTypeName,
+    SlimeAstTypeName,
     SlimeJavascriptClassDeclaration, SlimeJavascriptClassExpression, SlimeJavascriptExpression,
     SlimeJavascriptIdentifier,
     SlimeJavascriptTokenCreateUtils
@@ -10,7 +10,7 @@ import {SlimeJavascriptTSDeclarationCstToAstSingle} from "./SlimeTSDeclarationCs
 
 export class SlimeJavascriptTSExpressionCstToAstSingle {
     /**
-     * [TypeScript] 转换 TSAsExpression CST �?AST
+     * [TypeScript] 转换 TSAsExpression CST �?AST
      * expression as Type
      */
     createTSAsExpressionAst(expression: any, typeCst: SubhutiCst, loc: any): any {
@@ -24,7 +24,7 @@ export class SlimeJavascriptTSExpressionCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSSatisfiesExpression CST �?AST
+     * [TypeScript] 转换 TSSatisfiesExpression CST �?AST
      * expression satisfies Type
      */
     createTSSatisfiesExpressionAst(expression: any, typeCst: SubhutiCst, loc: any): any {
@@ -38,7 +38,7 @@ export class SlimeJavascriptTSExpressionCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSNonNullExpression CST �?AST
+     * [TypeScript] 转换 TSNonNullExpression CST �?AST
      * expression!
      */
     createTSNonNullExpressionAst(expression: any, loc: any): any {
@@ -51,7 +51,7 @@ export class SlimeJavascriptTSExpressionCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTypeAssertion CST �?AST
+     * [TypeScript] 转换 TSTypeAssertion CST �?AST
      * <Type>expression
      */
     createTSTypeAssertionAst(cst: SubhutiCst): any {
@@ -76,7 +76,7 @@ export class SlimeJavascriptTSExpressionCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTypePredicate CST �?AST
+     * [TypeScript] 转换 TSTypePredicate CST �?AST
      * x is Type / asserts x is Type / asserts x
      */
     createTSTypePredicateAst(cst: SubhutiCst): any {

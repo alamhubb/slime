@@ -1,10 +1,10 @@
 import {SubhutiCst} from "subhuti";
-import {SlimeJavascriptAstTypeName, SlimeJavascriptAstTypeName} from "SlimeJavascript-ast";
+import {SlimeAstTypeName, SlimeAstTypeName} from "SlimeJavascript-ast";
 import {SlimeJavascriptTSCompositeTypeCstToAstSingle} from "./SlimeTSCompositeTypeCstToAst.ts";
 
 export class SlimeJavascriptTSObjectTypeCstToAstSingle {
     /**
-     * [TypeScript] 转换 TSTypeLiteral CST �?AST
+     * [TypeScript] 转换 TSTypeLiteral CST �?AST
      */
     createTSTypeLiteralAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -25,7 +25,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTypeMember CST �?AST
+     * [TypeScript] 转换 TSTypeMember CST �?AST
      */
     createTSTypeMemberAst(cst: SubhutiCst): any {
         const child = cst.children?.[0]
@@ -60,7 +60,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSPropertyOrMethodSignature CST �?AST
+     * [TypeScript] 转换 TSPropertyOrMethodSignature CST �?AST
      */
     createTSPropertyOrMethodSignatureAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -118,7 +118,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] �?PropertyName CST 中提�?key
+     * [TypeScript] �?PropertyName CST 中提�?key
      */
     extractPropertyNameKey(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -165,7 +165,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
             throw new Error('ComputedPropertyName not yet supported in TSPropertyOrMethodSignature')
         }
 
-        // 回退：尝试直接从 children 中提�?
+        // 回退：尝试直接从 children 中提�?
         const tokenCst = firstChild.children?.[0]?.children?.[0] || firstChild.children?.[0] || firstChild
         return {
             type: 'Identifier',
@@ -175,7 +175,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSPropertySignature CST �?AST
+     * [TypeScript] 转换 TSPropertySignature CST �?AST
      */
     createTSPropertySignatureAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -229,7 +229,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSMethodSignature CST �?AST
+     * [TypeScript] 转换 TSMethodSignature CST �?AST
      */
     createTSMethodSignatureAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -268,7 +268,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSCallSignatureDeclaration CST �?AST
+     * [TypeScript] 转换 TSCallSignatureDeclaration CST �?AST
      */
     createTSCallSignatureDeclarationAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -295,7 +295,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSConstructSignatureDeclaration CST �?AST
+     * [TypeScript] 转换 TSConstructSignatureDeclaration CST �?AST
      */
     createTSConstructSignatureDeclarationAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -321,7 +321,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSMappedType CST �?AST
+     * [TypeScript] 转换 TSMappedType CST �?AST
      * { [K in keyof T]: T[K] }
      */
     createTSMappedTypeAst(cst: SubhutiCst): any {
@@ -333,7 +333,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
         let nameType: any = undefined
         let typeAnnotation: any = undefined
 
-        // 解析 readonly 修饰�?
+        // 解析 readonly 修饰�?
         for (let i = 0; i < children.length; i++) {
             const child = children[i]
             if (child.value === '+' && children[i + 1]?.value === 'readonly') {
@@ -356,25 +356,25 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
                 loc: identifierCst.loc,
             }
 
-            // 找到 in 后面的约束类�?
+            // 找到 in 后面的约束类�?
             const tsTypes = children.filter(c => c.name === 'TSType')
             if (tsTypes.length > 0) {
                 typeParameter.constraint = this.createTSTypeAst(tsTypes[0])
             }
 
-            // 找到 as 后面�?nameType
+            // 找到 as 后面�?nameType
             const asIndex = children.findIndex(c => c.value === 'as')
             if (asIndex !== -1 && tsTypes.length > 1) {
                 nameType = this.createTSTypeAst(tsTypes[1])
             }
         }
 
-        // 解析 optional 修饰�?(?, +?, -?)
+        // 解析 optional 修饰�?(?, +?, -?)
         for (let i = 0; i < children.length; i++) {
             const child = children[i]
             // 跳过 LBracket 内的 ?
             if (child.value === ']') {
-                // 检�?] 后面�??
+                // 检�?] 后面�??
                 const next = children[i + 1]
                 if (next?.value === '?') {
                     optional = true
@@ -386,7 +386,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
             }
         }
 
-        // 找到值类型（冒号后面�?TSType�?
+        // 找到值类型（冒号后面�?TSType�?
         const colonIndex = children.findIndex(c => c.value === ':')
         if (colonIndex !== -1) {
             const tsTypesAfterColon = children.slice(colonIndex + 1).filter(c => c.name === 'TSType')
@@ -409,7 +409,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSIndexSignature CST �?AST
+     * [TypeScript] 转换 TSIndexSignature CST �?AST
      */
     createTSIndexSignatureAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -422,9 +422,9 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
             if (child.name === 'TSReadonly' || child.value === 'readonly') {
                 readonly = true
             } else if (child.name === 'Identifier' || child.name === 'IdentifierName') {
-                // 索引参数�?
+                // 索引参数�?
                 const tokenCst = child.children?.[0] || child
-                // 查找后面的类型注�?
+                // 查找后面的类型注�?
                 const idx = children.indexOf(child)
                 const colonIdx = children.findIndex((c, i) => i > idx && (c.name === 'Colon' || c.value === ':'))
                 if (colonIdx !== -1 && children[colonIdx + 1]?.name === 'TSType') {
@@ -461,7 +461,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTypeMember CST �?AST
+     * [TypeScript] 转换 TSTypeMember CST �?AST
      */
     createTSTypeMemberAst(cst: SubhutiCst): any {
         const child = cst.children?.[0]
@@ -486,7 +486,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
         if (name === 'TSConstructSignatureDeclaration') {
             return this.createTSConstructSignatureDeclarationAst(child)
         }
-        // 处理 TSPropertyOrMethodSignature（合并的属�?方法签名�?
+        // 处理 TSPropertyOrMethodSignature（合并的属�?方法签名�?
         if (name === 'TSPropertyOrMethodSignature') {
             return this.createTSPropertyOrMethodSignatureAst(child)
         }
@@ -496,7 +496,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTypeLiteral CST �?AST
+     * [TypeScript] 转换 TSTypeLiteral CST �?AST
      */
     createTSTypeLiteralAst(cst: SubhutiCst): any {
         const children = cst.children || []

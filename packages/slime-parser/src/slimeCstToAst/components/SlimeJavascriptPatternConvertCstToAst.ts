@@ -3,7 +3,7 @@ import {
     type SlimeJavascriptBlockStatement,
     type SlimeJavascriptExpression,
     type SlimeJavascriptFunctionParam,
-    SlimeJavascriptAstTypeName,
+    SlimeAstTypeName,
     type SlimeJavascriptPattern,
     SlimeJavascriptTokenCreateUtils,
     type SlimeJavascriptArrayPattern,
@@ -554,7 +554,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
         // BindingRestElement: ... BindingIdentifier | ... BindingPattern
         const argumentCst = cst.children[1]
 
-        let argument: SlimeIdentifier | SlimeJavascriptPattern
+        let argument: SlimeIdentifier | SlimePattern
 
         if (argumentCst.name === SlimeParser.prototype.BindingIdentifier?.name) {
             // 简单情况：...rest

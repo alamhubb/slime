@@ -1,15 +1,15 @@
 import {SubhutiCst} from "subhuti";
 import {
     SlimeJavascriptAstCreateUtils,
-    SlimeJavascriptAstTypeName, type SlimeJavascriptBlockStatement, type SlimeJavascriptFunctionDeclaration,
-    type SlimeJavascriptFunctionParam, SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, SlimeJavascriptTokenCreateUtils
+    SlimeAstTypeName, type SlimeJavascriptBlockStatement, type SlimeJavascriptFunctionDeclaration,
+    type SlimeJavascriptFunctionParam, SlimeJavascriptIdentifier, SlimeAstTypeName, SlimeJavascriptTokenCreateUtils
 } from "SlimeJavascript-ast";
 import {SlimeJavascriptTSExpressionCstToAstSingle} from "./SlimeTSExpressionCstToAst.ts";
 
 export class SlimeJavascriptTSFunctionTypeCstToAstSingle {
 
     /**
-     * [TypeScript] 转换 TSFunctionType CST �?AST
+     * [TypeScript] 转换 TSFunctionType CST �?AST
      */
     createTSFunctionTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -39,7 +39,7 @@ export class SlimeJavascriptTSFunctionTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSConstructorType CST �?AST
+     * [TypeScript] 转换 TSConstructorType CST �?AST
      */
     createTSConstructorTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -69,7 +69,7 @@ export class SlimeJavascriptTSFunctionTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSParameterList CST �?AST
+     * [TypeScript] 转换 TSParameterList CST �?AST
      */
     createTSParameterListAst(cst: SubhutiCst): any[] {
         const children = cst.children || []
@@ -87,7 +87,7 @@ export class SlimeJavascriptTSFunctionTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSParameter CST �?AST
+     * [TypeScript] 转换 TSParameter CST �?AST
      */
     createTSParameterAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -134,7 +134,7 @@ export class SlimeJavascriptTSFunctionTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTypeParameterDeclaration CST �?AST
+     * [TypeScript] 转换 TSTypeParameterDeclaration CST �?AST
      */
     createTSTypeParameterDeclarationAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -154,7 +154,7 @@ export class SlimeJavascriptTSFunctionTypeCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSTypeParameter CST �?AST
+     * [TypeScript] 转换 TSTypeParameter CST �?AST
      */
     createTSTypeParameterAst(cst: SubhutiCst): any {
         const children = cst.children || []

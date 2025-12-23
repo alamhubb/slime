@@ -162,7 +162,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
         return SlimeJavascriptCreateUtils.createProgram([], 'script')
     }
 
-    createModuleItemListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration> {
+    createModuleItemListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement | SlimeModuleDeclaration> {
         const asts = cst.children.map(item => {
             // Es2025Parser uses ModuleItem wrapper
             if (item.name === SlimeParser.prototype.ModuleItem?.name || item.name === 'ModuleItem') {
@@ -177,7 +177,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
         return asts.flat()
     }
 
-    createModuleItemAst(item: SubhutiCst): SlimeStatement | SlimeJavascriptModuleDeclaration | SlimeJavascriptStatement[] | undefined {
+    createModuleItemAst(item: SubhutiCst): SlimeStatement | SlimeModuleDeclaration | SlimeStatement[] | undefined {
         const name = item.name
         if (name === SlimeParser.prototype.ExportDeclaration?.name || name === 'ExportDeclaration') {
             return SlimeCstToAstUtil.createExportDeclarationAst(item)

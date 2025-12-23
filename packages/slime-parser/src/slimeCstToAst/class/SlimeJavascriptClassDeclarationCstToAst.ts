@@ -7,7 +7,7 @@ import {
     SlimeJavascriptCreateUtils,
     SlimeJavascriptClassBody, SlimeJavascriptClassDeclaration, SlimeJavascriptClassExpression,
     SlimeJavascriptExpression, SlimeJavascriptIdentifier, SlimeJavascriptLiteral,
-    SlimeJavascriptMethodDefinition, SlimeJavascriptAstTypeName,
+    SlimeJavascriptMethodDefinition, SlimeAstTypeName,
     SlimeJavascriptPropertyDefinition, SlimeJavascriptStatement,
     SlimeJavascriptTokenCreateUtils, SlimeClassBody, SlimeClassDeclaration, SlimeIdentifier, SlimeTokenCreateUtils,
     SlimeAstCreateUtils, SlimeClassExpression, SlimeExpression, SlimePropertyDefinition, SlimeAstTypeName,
@@ -75,7 +75,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
     createClassBodyAst(cst: SubhutiCst): SlimeClassBody {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassBody?.name);
         const elementsWrapper = cst.children && cst.children[0] // ClassBody -> ClassElementList?，第一项为列表容器
-        const body: Array<SlimeJavascriptMethodDefinition | SlimeJavascriptPropertyDefinition | any> = [] // 收集类成�?(any 用于 StaticBlock)
+        const body: Array<SlimeJavascriptMethodDefinition | SlimePropertyDefinition | any> = [] // 收集类成�?(any 用于 StaticBlock)
         if (elementsWrapper && Array.isArray(elementsWrapper.children)) {
             for (const element of elementsWrapper.children) { // 遍历 ClassElement
                 const elementChildren = element.children ?? [] // 兼容无子节点情况
@@ -339,7 +339,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
      * ClassElementName CST �?AST
      * ClassElementName :: PropertyName | PrivateIdentifier
      */
-    createClassElementNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeJavascriptLiteral | SlimeJavascriptExpression {
+    createClassElementNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral | SlimeExpression {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassElementName?.name)
         const first = cst.children[0]
         if (!first) {

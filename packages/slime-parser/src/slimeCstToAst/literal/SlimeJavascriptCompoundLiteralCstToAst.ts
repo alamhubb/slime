@@ -11,7 +11,7 @@ import {
     type SlimeJavascriptExpression, type SlimeJavascriptFunctionParam,
     SlimeJavascriptIdentifier,
     SlimeJavascriptLiteral,
-    type SlimeJavascriptMethodDefinition, SlimeJavascriptAstTypeName,
+    type SlimeJavascriptMethodDefinition, SlimeAstTypeName,
     type SlimeJavascriptObjectExpression,
     type SlimeJavascriptObjectPropertyItem, SlimeJavascriptProperty,
     type SlimeJavascriptPropertyDefinition,
@@ -54,7 +54,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
 
         if (cst.children.length > 2) {
             const PropertyDefinitionListCst = cst.children[1]
-            let currentProperty: SlimeProperty | SlimeJavascriptSpreadElement | null = null
+            let currentProperty: SlimeProperty | SlimeSpreadElement | null = null
             let hasProperty = false
 
             for (const child of PropertyDefinitionListCst.children) {
@@ -214,7 +214,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
             }
 
             // 继承MethodDefinition的kind标志（getter/setter/method�?
-            if (SlimeJavascriptMethodDefinition.kind === 'get' || SlimeJavascriptMethodDefinition.kind === 'set') {
+            if (SlimeJavascriptMethodDefinition.kind === 'get' || SlimeMethodDefinition.kind === 'set') {
                 keyAst.kind = SlimeJavascriptMethodDefinition.kind
             } else {
                 // 普通方法使�?method: true
@@ -258,7 +258,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
     }
 
 
-    createPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeJavascriptLiteral | SlimeJavascriptExpression {
+    createPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral | SlimeExpression {
         if (!cst || !cst.children || cst.children.length === 0) {
             throw new Error('createPropertyNameAst: invalid cst or no children')
         }
@@ -277,7 +277,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
     }
 
 
-    createLiteralPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeJavascriptLiteral {
+    createLiteralPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
         if (!cst) {
             throw new Error('createLiteralPropertyNameAst: cst is null')
         }
@@ -350,7 +350,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
 
         // 遍历所有子节点，处�?AssignmentExpression、SpreadElement、Elision �?Comma
         // 每个元素与其后面的逗号配对
-        let currentElement: SlimeExpression | SlimeJavascriptSpreadElement | null = null
+        let currentElement: SlimeExpression | SlimeSpreadElement | null = null
         let hasElement = false
 
         for (let i = 0; i < cst.children.length; i++) {

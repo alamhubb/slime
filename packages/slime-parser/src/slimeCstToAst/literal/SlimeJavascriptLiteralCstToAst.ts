@@ -7,7 +7,7 @@ import {
     type SlimeJavascriptArrayExpression, type SlimeJavascriptArrowFunctionExpression, type SlimeJavascriptAssignmentExpression,
     SlimeJavascriptCreateUtils, type SlimeJavascriptClassExpression,
     type SlimeJavascriptExpression, type SlimeJavascriptFunctionParam, type SlimeJavascriptIdentifier, SlimeJavascriptLiteral,
-    SlimeJavascriptAstTypeName, SlimeJavascriptNumericLiteral, type SlimeJavascriptSpreadElement,
+    SlimeAstTypeName, SlimeJavascriptNumericLiteral, type SlimeJavascriptSpreadElement,
     SlimeJavascriptStringLiteral, SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";

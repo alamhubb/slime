@@ -1,7 +1,7 @@
 import {SubhutiCst} from "subhuti";
 import {
     SlimeJavascriptAstCreateUtils,
-    SlimeJavascriptAstTypeName,
+    SlimeAstTypeName,
     SlimeJavascriptCreateUtils,
     SlimeJavascriptProgram,
     SlimeJavascriptTokenCreateUtils
@@ -12,7 +12,7 @@ import {SlimeJavascriptTSFunctionTypeCstToAstSingle} from "./SlimeTSFunctionType
 export class SlimeJavascriptTSModuleCstToAstSingle {
 
     /**
-     * [TypeScript] 转换 TSModuleDeclaration CST �?AST
+     * [TypeScript] 转换 TSModuleDeclaration CST �?AST
      * namespace A.B.C { } / module "name" { }
      */
     createTSModuleDeclarationAst(cst: SubhutiCst): any {
@@ -23,11 +23,11 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
         let declare = false
         let global = false
 
-        // 检查是否是 namespace �?module
+        // 检查是否是 namespace �?module
         const isNamespace = children.some(c => c.value === 'namespace')
         const isModule = children.some(c => c.value === 'module')
 
-        // 找到模块标识�?
+        // 找到模块标识�?
         const moduleIdCst = children.find(c => c.name === 'TSModuleIdentifier')
         if (moduleIdCst) {
             id = this.createTSModuleIdentifierAst(moduleIdCst)
@@ -45,7 +45,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
             }
         }
 
-        // 找到模块�?
+        // 找到模块�?
         const moduleBlockCst = children.find(c => c.name === 'TSModuleBlock')
         if (moduleBlockCst) {
             body = this.createTSModuleBlockAst(moduleBlockCst)
@@ -62,7 +62,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSModuleBlock CST �?AST
+     * [TypeScript] 转换 TSModuleBlock CST �?AST
      */
     createTSModuleBlockAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -83,7 +83,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSModuleIdentifier CST �?AST
+     * [TypeScript] 转换 TSModuleIdentifier CST �?AST
      * 支持点分隔的嵌套命名空间 A.B.C
      */
     createTSModuleIdentifierAst(cst: SubhutiCst): any {
@@ -114,13 +114,13 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSDeclareStatement CST �?AST
+     * [TypeScript] 转换 TSDeclareStatement CST �?AST
      * declare const/let/var/function/class/namespace/module/global
      */
     createTSDeclareStatementAst(cst: SubhutiCst): any {
         const children = cst.children || []
 
-        // 检查声明类�?
+        // 检查声明类�?
         const hasConst = children.some(c => c.name === 'Const' || c.value === 'const')
         const hasLet = children.some(c => c.name === 'Let' || c.value === 'let')
         const hasVar = children.some(c => c.name === 'Var' || c.value === 'var')
@@ -237,11 +237,11 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
 
 
     // ============================================
-    // [TypeScript] Phase 7 - 模块和命名空�?
+    // [TypeScript] Phase 7 - 模块和命名空�?
     // ============================================
 
     /**
-     * [TypeScript] 重写 ImportDeclaration 转换，支�?import type
+     * [TypeScript] 重写 ImportDeclaration 转换，支�?import type
      *
      * import type { User } from "./types"
      * import { type Config, getValue } from "./config"
@@ -253,11 +253,11 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
         let importKind: 'type' | 'value' = 'value'
         let hasTypeKeyword = false
 
-        // 查找 type 关键字（�?import 之后�?
+        // 查找 type 关键字（�?import 之后�?
         for (let i = 0; i < children.length; i++) {
             const child = children[i]
             if (child.value === 'type' && i > 0) {
-                // 确保 type �?import 之后，且不是 ImportClause 内部�?type
+                // 确保 type �?import 之后，且不是 ImportClause 内部�?type
                 const prevChild = children[i - 1]
                 if (prevChild.name === 'Import' || prevChild.value === 'import') {
                     importKind = 'type'
@@ -281,7 +281,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
         const moduleSpecifierCst = children.find(c => c.name === 'ModuleSpecifier')
 
         // 查找 WithClause (ES2025 Import Attributes)
-        // 可能直接�?WithClause，也可能包装�?ImportWithClauseOpt �?
+        // 可能直接�?WithClause，也可能包装�?ImportWithClauseOpt �?
         let withClauseCst = children.find(c => c.name === 'WithClause')
         if (!withClauseCst) {
             const importWithClauseOptCst = children.find(c => c.name === 'ImportWithClauseOpt')
@@ -328,7 +328,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
             withToken
         )
 
-        // 添加 importKind 属�?
+        // 添加 importKind 属�?
         if (importKind === 'type') {
             result.importKind = 'type'
         }
@@ -337,7 +337,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 ImportClause，支持内�?type 导入
+     * [TypeScript] 转换 ImportClause，支持内�?type 导入
      */
     createImportClauseAst(cst: SubhutiCst, importKind: 'type' | 'value'): {
         specifiers: any[],
@@ -393,7 +393,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 NamedImports，支持内�?type 导入
+     * [TypeScript] 转换 NamedImports，支持内�?type 导入
      */
     createNamedImportsAst(cst: SubhutiCst, importKind: 'type' | 'value'): {
         specifiers: any[],
@@ -436,14 +436,14 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 ImportSpecifier，支持内�?type
+     * [TypeScript] 转换 ImportSpecifier，支持内�?type
      *
      * import { type Config, getValue } from "./config"
      */
     createImportSpecifierAst(cst: SubhutiCst, parentImportKind: 'type' | 'value'): any {
         const children = cst.children || []
 
-        // 检查是否有内联 type 关键�?
+        // 检查是否有内联 type 关键�?
         let hasInlineType = false
         for (const child of children) {
             if (child.value === 'type') {
@@ -452,9 +452,9 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
             }
         }
 
-        // 找到 ModuleExportName �?ImportedBinding
+        // 找到 ModuleExportName �?ImportedBinding
         // CST 结构: ModuleExportName [as ImportedBinding]
-        // 或�? ImportedBinding (没有 as)
+        // 或�? ImportedBinding (没有 as)
         const moduleExportNameCst = children.find(c => c.name === 'ModuleExportName')
         const importedBindingCst = children.find(c => c.name === 'ImportedBinding')
 
@@ -495,7 +495,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
     }
 
     /**
-     * �?CST 节点提取标识�?
+     * �?CST 节点提取标识�?
      */
     extractIdentifier(cst: SubhutiCst): any {
         if (cst.name === 'ImportedBinding') {
@@ -515,7 +515,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
                 loc: tokenCst.loc,
             }
         }
-        // 直接�?token
+        // 直接�?token
         if (cst.value) {
             return {
                 type: 'Identifier',
@@ -527,7 +527,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 重写 ExportDeclaration 转换，支�?export type
+     * [TypeScript] 重写 ExportDeclaration 转换，支�?export type
      *
      * export type { User }
      * export type { Config as AppConfig }
@@ -538,7 +538,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
         // 检查是否是 export type
         let exportKind: 'type' | 'value' = 'value'
 
-        // 查找 type 关键字（�?export 之后�?
+        // 查找 type 关键字（�?export 之后�?
         for (let i = 0; i < children.length; i++) {
             const child = children[i]
             if (child.value === 'type' && i > 0) {
@@ -550,12 +550,12 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
             }
         }
 
-        // 如果�?export type，使用特殊处�?
+        // 如果�?export type，使用特殊处�?
         if (exportKind === 'type') {
             return this.createExportTypeDeclarationAst(cst)
         }
 
-        // 否则直接调用原始实现（避免递归�?
+        // 否则直接调用原始实现（避免递归�?
         return SlimeJavascriptExportCstToAst.createExportDeclarationAst(cst)
     }
 
@@ -572,7 +572,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
         // 获取 NamedExports
         const namedExportsCst = children.find(c => c.name === 'NamedExports')
 
-        // 获取 FromClause (可�?
+        // 获取 FromClause (可�?
         const fromClauseCst = children.find(c => c.name === 'FromClause')
 
         let specifiers: any[] = []
@@ -626,7 +626,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
     createExportSpecifierAst(cst: SubhutiCst): any {
         const children = cst.children || []
 
-        // 找到标识�?
+        // 找到标识�?
         const identifiers = children.filter(c =>
             c.name === 'ModuleExportName' ||
             c.name === 'Identifier' ||

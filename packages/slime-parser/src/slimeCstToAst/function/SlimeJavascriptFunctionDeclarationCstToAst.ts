@@ -10,7 +10,7 @@ import {
     type SlimeJavascriptFunctionParam,
     SlimeJavascriptIdentifier,
     SlimeJavascriptMethodDefinition,
-    SlimeJavascriptAstTypeName,
+    SlimeAstTypeName,
     SlimeJavascriptStatement,
     SlimeJavascriptTokenCreateUtils,
     SlimeFunctionDeclaration, SlimeIdentifier, SlimeFunctionParam, SlimeBlockStatement, SlimeTokenCreateUtils,

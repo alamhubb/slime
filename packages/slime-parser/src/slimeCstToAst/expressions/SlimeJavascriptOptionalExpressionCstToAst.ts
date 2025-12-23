@@ -3,7 +3,7 @@ import {
     SlimeJavascriptExpression,
     type SlimeJavascriptFunctionExpression,
     type SlimeJavascriptIdentifier,
-    SlimeJavascriptAstTypeName
+    SlimeAstTypeName
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 

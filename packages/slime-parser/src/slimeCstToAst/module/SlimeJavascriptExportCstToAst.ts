@@ -19,7 +19,7 @@ import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascri
 
 export class SlimeJavascriptExportCstToAstSingle {
 
-    createExportDeclarationAst(cst: SubhutiCst): SlimeExportDefaultDeclaration | SlimeJavascriptExportNamedDeclaration | SlimeJavascriptExportAllDeclaration {
+    createExportDeclarationAst(cst: SubhutiCst): SlimeExportDefaultDeclaration | SlimeExportNamedDeclaration | SlimeExportAllDeclaration {
         let astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ExportDeclaration?.name);
         const children = cst.children || []
 
@@ -301,7 +301,7 @@ export class SlimeJavascriptExportCstToAstSingle {
     /**
      * 创建 ModuleExportName AST
      */
-    createModuleExportNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeJavascriptLiteral {
+    createModuleExportNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
         const first = cst.children?.[0]
         if (!first) {
             throw new Error('ModuleExportName has no children')

@@ -5,7 +5,7 @@ import {
     SlimeJavascriptCreateUtils, SlimeJavascriptBlockStatement, type SlimeJavascriptExportAllDeclaration,
     type SlimeJavascriptExportDefaultDeclaration,
     type SlimeJavascriptExportNamedDeclaration, SlimeJavascriptExpressionStatement,
-    SlimeJavascriptFunctionDeclaration, SlimeJavascriptFunctionExpression, SlimeJavascriptAstTypeName, SlimeJavascriptStatement,
+    SlimeJavascriptFunctionDeclaration, SlimeJavascriptFunctionExpression, SlimeAstTypeName, SlimeJavascriptStatement,
     SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";

@@ -6,7 +6,7 @@ import {
     SlimeJavascriptCreateUtils, SlimeJavascriptCallArgument, SlimeJavascriptExpression,
     SlimeJavascriptIdentifier, type SlimeJavascriptImportDeclaration, SlimeJavascriptImportDefaultSpecifier, SlimeJavascriptImportNamespaceSpecifier,
     SlimeJavascriptImportSpecifier, SlimeJavascriptImportSpecifierItem, SlimeJavascriptLiteral,
-    type SlimeJavascriptModuleDeclaration, SlimeJavascriptAstTypeName, SlimeJavascriptPattern, type SlimeJavascriptStatement,
+    type SlimeJavascriptModuleDeclaration, SlimeAstTypeName, SlimeJavascriptPattern, type SlimeJavascriptStatement,
     SlimeJavascriptStringLiteral, SlimeJavascriptTokenCreateUtils, SlimeJavascriptVariableDeclarator
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
@@ -362,7 +362,7 @@ export class SlimeJavascriptImportCstToAstSingle {
      * AttributeKey CST �?AST
      * AttributeKey -> IdentifierName | StringLiteral
      */
-    createAttributeKeyAst(cst: SubhutiCst): SlimeIdentifier | SlimeJavascriptLiteral {
+    createAttributeKeyAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
         const firstChild = cst.children?.[0]
         if (!firstChild) throw new Error('AttributeKey has no children')
 

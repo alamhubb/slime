@@ -3,7 +3,7 @@ import {
     SlimeJavascriptCreateUtils,
     type SlimeJavascriptBlockStatement,
     SlimeJavascriptFunctionExpression, type SlimeJavascriptFunctionParam,
-    SlimeJavascriptIdentifier, type SlimeJavascriptMethodDefinition, SlimeJavascriptAstTypeName,
+    SlimeJavascriptIdentifier, type SlimeJavascriptMethodDefinition, SlimeAstTypeName,
     SlimeJavascriptPattern, SlimeJavascriptRestElement, type SlimeJavascriptReturnStatement,
     SlimeJavascriptStatement, SlimeJavascriptTokenCreateUtils,
     SlimeJavascriptVariableDeclarator

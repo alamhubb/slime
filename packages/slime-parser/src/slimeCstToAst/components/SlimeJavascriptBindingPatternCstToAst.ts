@@ -9,7 +9,7 @@ import {
     SlimeJavascriptIdentifier, type SlimeJavascriptObjectPattern,
     SlimeJavascriptPattern,
     SlimeJavascriptRestElement, type SlimeJavascriptReturnStatement,
-    type SlimeJavascriptStatement, SlimeJavascriptTokenCreateUtils, SlimeJavascriptAstTypeName,
+    type SlimeJavascriptStatement, SlimeJavascriptTokenCreateUtils, SlimeAstTypeName,
     type SlimeJavascriptArrayPatternElement, type SlimeJavascriptLBracketToken, type SlimeJavascriptRBracketToken,
     type SlimeJavascriptCommaToken, type SlimeJavascriptLBraceToken, type SlimeJavascriptRBraceToken,
     type SlimeJavascriptObjectPatternProperty, type SlimeJavascriptAssignmentProperty, SlimePattern, SlimeAstTypeName,

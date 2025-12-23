@@ -10,7 +10,7 @@ import {
     SlimeJavascriptMethodDefinition,
     SlimeJavascriptPattern,
     SlimeJavascriptTokenCreateUtils,
-    SlimeJavascriptAstTypeName, SlimeJavascriptArrowFunctionExpression, SlimeJavascriptIdentifier,
+    SlimeAstTypeName, SlimeJavascriptArrowFunctionExpression, SlimeJavascriptIdentifier,
     SlimeArrowFunctionExpression, SlimePattern, SlimeFunctionParam
 } from "slime-ast";
 
@@ -133,7 +133,7 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
         // 形式2: [CoverCallExpressionAndAsyncArrowHead, Arrow, AsyncConciseBody]
 
         let params: SlimePattern[] = []
-        let body: SlimeExpression | SlimeJavascriptBlockStatement
+        let body: SlimeExpression | SlimeBlockStatement
         let arrowIndex = -1
         let arrowToken: any = undefined
         let asyncToken: any = undefined

@@ -5,14 +5,14 @@ import { SubhutiCst } from "subhuti";
 import {
     SlimeJavascriptCreateUtils, type SlimeJavascriptCallArgument,
     SlimeJavascriptExpression,
-    type SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, type SlimeJavascriptPattern, SlimeJavascriptSpreadElement, type SlimeJavascriptSuper,
+    type SlimeJavascriptIdentifier, SlimeAstTypeName, type SlimeJavascriptPattern, SlimeJavascriptSpreadElement, type SlimeJavascriptSuper,
     SlimeJavascriptTokenCreateUtils,
     type SlimeJavascriptVariableDeclarator
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
-import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
+import { SlimeJavascriptVariableCstToAstSingle } from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptMemberCallCstToAstSingle {
 
@@ -577,16 +577,16 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             // new.target
             return {
                 type: 'MetaProperty',
-                meta: SlimeCreateUtils.createIdentifier('new', first.loc),
-                property: SlimeCreateUtils.createIdentifier('target', first.loc),
+                meta: SlimeJavascriptCreateUtils.createIdentifier('new', first.loc),
+                property: SlimeJavascriptCreateUtils.createIdentifier('target', first.loc),
                 loc: cst.loc
             } as any
         } else {
             // import.meta
             return {
                 type: 'MetaProperty',
-                meta: SlimeCreateUtils.createIdentifier('import', first.loc),
-                property: SlimeCreateUtils.createIdentifier('meta', first.loc),
+                meta: SlimeJavascriptCreateUtils.createIdentifier('import', first.loc),
+                property: SlimeJavascriptCreateUtils.createIdentifier('meta', first.loc),
                 loc: cst.loc
             } as any
         }

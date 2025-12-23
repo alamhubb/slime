@@ -9,7 +9,7 @@ import {
     type SlimeJavascriptBlockStatement, type SlimeJavascriptClassDeclaration, type SlimeJavascriptDeclaration,
     type SlimeJavascriptFunctionDeclaration, type SlimeJavascriptFunctionExpression,
     type SlimeJavascriptFunctionParam,
-    type SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, type SlimeJavascriptPropertyDefinition,
+    type SlimeJavascriptIdentifier, SlimeAstTypeName, type SlimeJavascriptPropertyDefinition,
     SlimeJavascriptTokenCreateUtils, type SlimeJavascriptVariableDeclaration, type SlimeJavascriptVariableDeclarator,
     SlimeJavascriptCreateUtils, type SlimeJavascriptPattern, type SlimeJavascriptExpression, SlimeDeclaration,
     SlimeVariableDeclarator, SlimeTokenCreateUtils, SlimeAstCreateUtils, SlimeAstTypeName, SlimeVariableDeclaration,
@@ -100,7 +100,7 @@ export class SlimeJavascriptVariableCstToAstSingle {
 
         // children[0]可能是BindingIdentifier或BindingPattern（解构）
         const firstChild = cst.children[0]
-        let id: SlimeIdentifier | SlimeJavascriptPattern
+        let id: SlimeIdentifier | SlimePattern
 
         if (firstChild.name === SlimeParser.prototype.BindingIdentifier?.name) {
             id = SlimeCstToAstUtil.createBindingIdentifierAst(firstChild)

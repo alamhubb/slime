@@ -11,11 +11,11 @@ import {
     type SlimeJavascriptIdentifier,
     SlimeJavascriptLiteral,
     SlimeJavascriptMethodDefinition,
-    SlimeJavascriptAstTypeName,
+    SlimeAstTypeName,
     SlimeJavascriptPattern,
     SlimeJavascriptTokenCreateUtils,
     SlimeMethodDefinition, SlimeTokenCreateUtils, SlimeFunctionParam, SlimeBlockStatement, SlimeAstCreateUtils,
-    SlimeFunctionExpression, SlimeAstTypeName
+    SlimeFunctionExpression, SlimeAstTypeName, SlimeIdentifier, SlimeLiteral, SlimeExpression
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 
@@ -339,7 +339,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
 
         // 第一个子节点是方法名（可能是 IdentifierNameTok, IdentifierName, PropertyName, LiteralPropertyName�?
         const firstChild = children[i++]
-        let key: SlimeIdentifier | SlimeJavascriptLiteral | SlimeJavascriptExpression
+        let key: SlimeIdentifier | SlimeLiteral | SlimeExpression
 
         if (firstChild.name === 'IdentifierName') {
             // 直接�?token

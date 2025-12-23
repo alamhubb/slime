@@ -4,7 +4,7 @@
 import {SubhutiCst} from "subhuti";
 
 import SlimeParser from "../../SlimeParser.ts";
-import {SlimeJavascriptCreateUtils, SlimeJavascriptExpression, SlimeJavascriptAstTypeName, SlimeJavascriptTokenCreateUtils} from "slime-ast";
+import {SlimeJavascriptCreateUtils, SlimeJavascriptExpression, SlimeAstTypeName, SlimeJavascriptTokenCreateUtils} from "slime-ast";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";

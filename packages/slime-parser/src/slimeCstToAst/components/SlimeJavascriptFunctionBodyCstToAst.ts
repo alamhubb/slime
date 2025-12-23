@@ -76,7 +76,7 @@ export class SlimeJavascriptFunctionBodyCstToAstSingle {
     /**
      * 创建箭头函数�?AST
      */
-    createConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeJavascriptExpression {
+    createConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
         // 防御性检�?
         if (!cst) {
             throw new Error('createConciseBodyAst: cst is null or undefined')
@@ -134,7 +134,7 @@ export class SlimeJavascriptFunctionBodyCstToAstSingle {
     /**
      * AsyncConciseBody CST �?AST
      */
-    createAsyncConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeJavascriptExpression {
+    createAsyncConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
         return SlimeCstToAstUtil.createConciseBodyAst(cst)
     }
 

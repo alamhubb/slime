@@ -6,7 +6,7 @@ import { SubhutiCst } from "subhuti";
 import SlimeParser from "../../SlimeParser.ts";
 import {
     SlimeJavascriptCreateUtils,
-    SlimeJavascriptAstTypeName,
+    SlimeAstTypeName,
     SlimeJavascriptTokenCreateUtils,
     type SlimeJavascriptVariableDeclaration,
     type SlimeJavascriptVariableDeclarator
