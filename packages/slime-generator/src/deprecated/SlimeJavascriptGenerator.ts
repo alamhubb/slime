@@ -819,46 +819,6 @@ export class SlimeJavascriptGeneratorUtil {
             value: identifierName
         }
         this.addCodeAndMappings(identifier, node.loc)
-
-        // [TypeScript] 输出类型注解
-        if ((node as any).typeAnnotation) {
-            this.generatorTSTypeAnnotation((node as any).typeAnnotation)
-        }
-    }
-
-    /**
-     * [TypeScript] 生成类型注解：: number
-     */
-    generatorTSTypeAnnotation(node: any) {
-        // 输出冒号
-        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Colon, node.colonToken?.loc)
-        this.addSpacing()
-        // 输出类型
-        this.generatorTSType(node.typeAnnotation)
-    }
-
-    /**
-     * [TypeScript] 生成类型
-     */
-    generatorTSType(node: any) {
-        if (node.type === 'TSNumberKeyword') {
-            this.generatorTSNumberKeyword(node)
-        } else {
-            throw new Error(`Unknown TSType: ${node.type}`)
-        }
-    }
-
-    /**
-     * [TypeScript] 生成 number 类型关键字
-     */
-    generatorTSNumberKeyword(node: any) {
-        // number 是上下文关键字，作为标识符输出
-        const numberKeyword = {
-            type: SlimeJavascriptTokenType.IdentifierName,
-            name: SlimeJavascriptTokenType.IdentifierName,
-            value: 'number'
-        }
-        this.addCodeAndMappings(numberKeyword, node.loc)
     }
 
     generatorFunctionDeclaration(node: any) {
