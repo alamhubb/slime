@@ -3,7 +3,6 @@ export * from './deprecated/SlimeJavascript/SlimeJavascriptAstTypeName.ts'
 export * from './SlimeAstNode.ts'
 export * from './SlimeAstTypeName.ts'
 
-
 export { default as SlimeJavascriptCreateUtils } from './deprecated/SlimeJavascript/SlimeJavascriptAstCreateUtils.ts'
 export { default as SlimeJavascriptTokenCreateUtils } from './deprecated/SlimeJavascript/SlimeJavascriptTokenCreateUtils.ts'
 

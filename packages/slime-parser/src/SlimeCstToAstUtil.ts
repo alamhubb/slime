@@ -28,7 +28,7 @@ import { SlimeJavascriptPrimaryExpressionCstToAst } from './deprecated/slimeJava
  *
  * ## 两层架构设计
  *
- * ### 第一层：AST 工厂类 (SlimeAstCreateUtils.ts / SlimeAstUtil)
+ * ### 第一层：AST 工厂类 (SlimeAstCreateUtils.ts / SlimeAstCreateUtils)
  * - 与 ESTree AST 节点类型一一对应的纯粹创建方法
  * - 不依赖 CST 结构，只接收参数创建节点
  * - 示例：createIdentifier(name, loc) -> SlimeIdentifier
@@ -50,7 +50,7 @@ import { SlimeJavascriptPrimaryExpressionCstToAst } from './deprecated/slimeJava
  * ## 方法命名规范
  *
  * 所有 CST 转换方法命名为 createXxxAst，其中 Xxx 与 CST 规则名一致。
- * 内部调用 SlimeNodeCreate / SlimeAstUtil 中与 AST 类型名一致的工厂方法。
+ * 内部调用 SlimeNodeCreate / SlimeAstCreateUtils 中与 AST 类型名一致的工厂方法。
  *
  * 例如：
  * - createArrayLiteralAst (CST 规则名) -> 内部调用 createArrayExpression (AST 类型名)
