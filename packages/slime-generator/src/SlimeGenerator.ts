@@ -11,6 +11,19 @@ import { SlimeJavascriptTokenType } from "slime-token";
 export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
 
     /**
+     * [TypeScript] 重写 generatorIdentifier 以支持类型注解
+     */
+    override generatorIdentifier(node: any) {
+        // 调用父类方法生成标识符名称
+        super.generatorIdentifier(node)
+        
+        // [TypeScript] 如果有类型注解，生成类型注解
+        if (node.typeAnnotation) {
+            this.generatorTSTypeAnnotation(node.typeAnnotation)
+        }
+    }
+
+    /**
      * [TypeScript] 生成类型注解：: Type
      */
     generatorTSTypeAnnotation(node: any) {
