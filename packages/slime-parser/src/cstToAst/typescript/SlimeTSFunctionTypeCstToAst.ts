@@ -24,11 +24,11 @@ export class SlimeTSFunctionTypeCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'TSTypeParameterDeclaration') {
-                typeParameters = this.createTSTypeParameterDeclarationAst(child)
+                typeParameters = SlimeCstToAstUtil.createTSTypeParameterDeclarationAst(child)
             } else if (child.name === 'TSParameterList') {
-                parameters = this.createTSParameterListAst(child)
+                parameters = SlimeCstToAstUtil.createTSParameterListAst(child)
             } else if (child.name === 'TSType') {
-                returnType = this.createTSTypeAst(child)
+                returnType = SlimeCstToAstUtil.createTSTypeAst(child)
             }
         }
 
@@ -53,11 +53,11 @@ export class SlimeTSFunctionTypeCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'TSTypeParameterDeclaration') {
-                typeParameters = this.createTSTypeParameterDeclarationAst(child)
+                typeParameters = SlimeCstToAstUtil.createTSTypeParameterDeclarationAst(child)
             } else if (child.name === 'TSParameterList') {
-                parameters = this.createTSParameterListAst(child)
+                parameters = SlimeCstToAstUtil.createTSParameterListAst(child)
             } else if (child.name === 'TSType') {
-                returnType = this.createTSTypeAst(child)
+                returnType = SlimeCstToAstUtil.createTSTypeAst(child)
             }
         }
 
@@ -79,7 +79,7 @@ export class SlimeTSFunctionTypeCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'TSTypeParameter') {
-                params.push(this.createTSTypeParameterAst(child))
+                params.push(SlimeCstToAstUtil.createTSTypeParameterAst(child))
             }
         }
 
@@ -112,12 +112,12 @@ export class SlimeTSFunctionTypeCstToAstSingle {
             } else if (child.name === 'Extends' || child.value === 'extends') {
                 // 下一个是约束类型
                 if (children[i + 1]?.name === 'TSType') {
-                    constraint = this.createTSTypeAst(children[i + 1])
+                    constraint = SlimeCstToAstUtil.createTSTypeAst(children[i + 1])
                 }
             } else if (child.name === 'Assign' || child.value === '=') {
                 // 下一个是默认类型
                 if (children[i + 1]?.name === 'TSType') {
-                    defaultType = this.createTSTypeAst(children[i + 1])
+                    defaultType = SlimeCstToAstUtil.createTSTypeAst(children[i + 1])
                 }
             }
         }

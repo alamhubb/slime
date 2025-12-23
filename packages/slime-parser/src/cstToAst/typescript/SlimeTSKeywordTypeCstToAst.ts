@@ -22,18 +22,18 @@ export class SlimeTSKeywordTypeCstToAstSingle {
         const name = child.name
 
         // 基础类型关键字
-        if (name === 'TSNumberKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNumberKeyword)
-        if (name === 'TSStringKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSStringKeyword)
-        if (name === 'TSBooleanKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSBooleanKeyword)
-        if (name === 'TSAnyKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSAnyKeyword)
-        if (name === 'TSUnknownKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSUnknownKeyword)
-        if (name === 'TSNeverKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNeverKeyword)
-        if (name === 'TSUndefinedKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSUndefinedKeyword)
-        if (name === 'TSNullKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNullKeyword)
-        if (name === 'TSVoidKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSVoidKeyword)
-        if (name === 'TSObjectKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSObjectKeyword)
-        if (name === 'TSSymbolKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSSymbolKeyword)
-        if (name === 'TSBigIntKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSBigIntKeyword)
+        if (name === 'TSNumberKeyword') return SlimeCstToAstUtil.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNumberKeyword)
+        if (name === 'TSStringKeyword') return SlimeCstToAstUtil.createTSKeywordTypeAst(child, SlimeAstTypeName.TSStringKeyword)
+        if (name === 'TSBooleanKeyword') return SlimeCstToAstUtil.createTSKeywordTypeAst(child, SlimeAstTypeName.TSBooleanKeyword)
+        if (name === 'TSAnyKeyword') return SlimeCstToAstUtil.createTSKeywordTypeAst(child, SlimeAstTypeName.TSAnyKeyword)
+        if (name === 'TSUnknownKeyword') return SlimeCstToAstUtil.createTSKeywordTypeAst(child, SlimeAstTypeName.TSUnknownKeyword)
+        if (name === 'TSNeverKeyword') return SlimeCstToAstUtil.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNeverKeyword)
+        if (name === 'TSUndefinedKeyword') return SlimeCstToAstUtil.createTSKeywordTypeAst(child, SlimeAstTypeName.TSUndefinedKeyword)
+        if (name === 'TSNullKeyword') return SlimeCstToAstUtil.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNullKeyword)
+        if (name === 'TSVoidKeyword') return SlimeCstToAstUtil.createTSKeywordTypeAst(child, SlimeAstTypeName.TSVoidKeyword)
+        if (name === 'TSObjectKeyword') return SlimeCstToAstUtil.createTSKeywordTypeAst(child, SlimeAstTypeName.TSObjectKeyword)
+        if (name === 'TSSymbolKeyword') return SlimeCstToAstUtil.createTSKeywordTypeAst(child, SlimeAstTypeName.TSSymbolKeyword)
+        if (name === 'TSBigIntKeyword') return SlimeCstToAstUtil.createTSKeywordTypeAst(child, SlimeAstTypeName.TSBigIntKeyword)
 
         throw new Error(`Unknown TSKeywordType child: ${name}`)
     }

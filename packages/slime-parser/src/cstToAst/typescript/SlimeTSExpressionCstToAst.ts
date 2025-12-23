@@ -21,7 +21,7 @@ export class SlimeTSExpressionCstToAstSingle {
         return {
             type: SlimeAstTypeName.TSAsExpression,
             expression,
-            typeAnnotation: this.createTSTypeAst(typeCst),
+            typeAnnotation: SlimeCstToAstUtil.createTSTypeAst(typeCst),
             loc,
         }
     }
@@ -34,7 +34,7 @@ export class SlimeTSExpressionCstToAstSingle {
         return {
             type: SlimeAstTypeName.TSSatisfiesExpression,
             expression,
-            typeAnnotation: this.createTSTypeAst(typeCst),
+            typeAnnotation: SlimeCstToAstUtil.createTSTypeAst(typeCst),
             loc,
         }
     }
@@ -69,7 +69,7 @@ export class SlimeTSExpressionCstToAstSingle {
 
         return {
             type: SlimeAstTypeName.TSTypeAssertion,
-            typeAnnotation: this.createTSTypeAst(typeCst),
+            typeAnnotation: SlimeCstToAstUtil.createTSTypeAst(typeCst),
             expression: SlimeJavascriptCstToAstUtil.createUnaryExpressionAst(exprCst),
             loc: cst.loc,
         }
@@ -102,7 +102,7 @@ export class SlimeTSExpressionCstToAstSingle {
                     loc: tokenCst.loc,
                 }
             } else if (child.name === 'TSType') {
-                typeAnnotation = this.createTSTypeAst(child)
+                typeAnnotation = SlimeCstToAstUtil.createTSTypeAst(child)
             }
         }
 

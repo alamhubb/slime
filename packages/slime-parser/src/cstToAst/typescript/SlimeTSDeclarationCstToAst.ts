@@ -11,6 +11,7 @@
 import {SubhutiCst} from "subhuti";
 import {SlimeAstTypeName} from "slime-ast";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
+import {SlimeJavascriptCstToAstUtil} from "../../index.ts";
 
 export class SlimeTSDeclarationCstToAstSingle {
 
@@ -34,11 +35,11 @@ export class SlimeTSDeclarationCstToAstSingle {
                     loc: tokenCst.loc,
                 }
             } else if (child.name === 'TSTypeParameterDeclaration') {
-                typeParameters = this.createTSTypeParameterDeclarationAst(child)
+                typeParameters = SlimeCstToAstUtil.createTSTypeParameterDeclarationAst(child)
             } else if (child.name === 'TSInterfaceExtends') {
-                extendsClause = this.createTSInterfaceExtendsAst(child)
+                extendsClause = SlimeCstToAstUtil.createTSInterfaceExtendsAst(child)
             } else if (child.name === 'TSInterfaceBody') {
-                body = this.createTSInterfaceBodyAst(child)
+                body = SlimeCstToAstUtil.createTSInterfaceBodyAst(child)
             }
         }
 
@@ -61,7 +62,7 @@ export class SlimeTSDeclarationCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'TSExpressionWithTypeArguments') {
-                result.push(this.createTSExpressionWithTypeArgumentsAst(child))
+                result.push(SlimeCstToAstUtil.createTSExpressionWithTypeArgumentsAst(child))
             }
         }
 
@@ -86,7 +87,7 @@ export class SlimeTSDeclarationCstToAstSingle {
                     loc: tokenCst.loc,
                 }
             } else if (child.name === 'TSTypeParameterInstantiation') {
-                typeParameters = this.createTSTypeParameterInstantiationAst(child)
+                typeParameters = SlimeCstToAstUtil.createTSTypeParameterInstantiationAst(child)
             }
         }
 
@@ -107,7 +108,7 @@ export class SlimeTSDeclarationCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'TSTypeMember') {
-                body.push(this.createTSTypeMemberAst(child))
+                body.push(SlimeCstToAstUtil.createTSTypeMemberAst(child))
             }
         }
 
@@ -137,9 +138,9 @@ export class SlimeTSDeclarationCstToAstSingle {
                     loc: tokenCst.loc,
                 }
             } else if (child.name === 'TSTypeParameterDeclaration') {
-                typeParameters = this.createTSTypeParameterDeclarationAst(child)
+                typeParameters = SlimeCstToAstUtil.createTSTypeParameterDeclarationAst(child)
             } else if (child.name === 'TSType') {
-                typeAnnotation = this.createTSTypeAst(child)
+                typeAnnotation = SlimeCstToAstUtil.createTSTypeAst(child)
             }
         }
 
@@ -173,7 +174,7 @@ export class SlimeTSDeclarationCstToAstSingle {
                     loc: tokenCst.loc,
                 }
             } else if (child.name === 'TSEnumMember') {
-                members.push(this.createTSEnumMemberAst(child))
+                members.push(SlimeCstToAstUtil.createTSEnumMemberAst(child))
             }
         }
 

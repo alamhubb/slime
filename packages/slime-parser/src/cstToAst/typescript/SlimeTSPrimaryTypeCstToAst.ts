@@ -26,27 +26,27 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
         const name = child.name
 
         // 映射类型
-        if (name === 'TSMappedType') return this.createTSMappedTypeAst(child)
+        if (name === 'TSMappedType') return SlimeCstToAstUtil.createTSMappedTypeAst(child)
 
         // TSKeywordType 包装规则
         if (name === 'TSKeywordType') {
-            return this.createTSKeywordTypeWrapperAst(child)
+            return SlimeCstToAstUtil.createTSKeywordTypeWrapperAst(child)
         }
 
         // 字面量类型
-        if (name === 'TSLiteralType') return this.createTSLiteralTypeAst(child)
+        if (name === 'TSLiteralType') return SlimeCstToAstUtil.createTSLiteralTypeAst(child)
 
         // 类型引用
-        if (name === 'TSTypeReference') return this.createTSTypeReferenceAst(child)
+        if (name === 'TSTypeReference') return SlimeCstToAstUtil.createTSTypeReferenceAst(child)
 
         // 元组类型
-        if (name === 'TSTupleType') return this.createTSTupleTypeAst(child)
+        if (name === 'TSTupleType') return SlimeCstToAstUtil.createTSTupleTypeAst(child)
 
         // 对象类型字面量
-        if (name === 'TSTypeLiteral') return this.createTSTypeLiteralAst(child)
+        if (name === 'TSTypeLiteral') return SlimeCstToAstUtil.createTSTypeLiteralAst(child)
 
         // 括号类型
-        if (name === 'TSParenthesizedType') return this.createTSParenthesizedTypeAst(child)
+        if (name === 'TSParenthesizedType') return SlimeCstToAstUtil.createTSParenthesizedTypeAst(child)
 
         throw new Error(`Unknown TSPrimaryType child: ${name}`)
     }
@@ -63,9 +63,9 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'TSTypeName') {
-                typeName = this.createTSTypeNameAst(child)
+                typeName = SlimeCstToAstUtil.createTSTypeNameAst(child)
             } else if (child.name === 'TSTypeParameterInstantiation') {
-                typeArguments = this.createTSTypeParameterInstantiationAst(child)
+                typeArguments = SlimeCstToAstUtil.createTSTypeParameterInstantiationAst(child)
             }
         }
 
@@ -81,7 +81,7 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
                 }
             }
             if (nameParts.length > 0) {
-                typeName = this.buildQualifiedName(nameParts, cst.loc)
+                typeName = SlimeCstToAstUtil.buildQualifiedName(nameParts, cst.loc)
             }
         }
 
@@ -122,7 +122,7 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
             throw new Error('TSTypeName: no identifier found')
         }
 
-        return this.buildQualifiedName(nameParts, cst.loc)
+        return SlimeCstToAstUtil.buildQualifiedName(nameParts, cst.loc)
     }
 
     /**
@@ -172,7 +172,7 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'TSType') {
-                params.push(this.createTSTypeAst(child))
+                params.push(SlimeCstToAstUtil.createTSTypeAst(child))
             }
         }
 
@@ -192,7 +192,7 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'TSTupleElement' || child.name === 'TSTupleElementType') {
-                elementTypes.push(this.createTSTupleElementAst(child))
+                elementTypes.push(SlimeCstToAstUtil.createTSTupleElementAst(child))
             }
         }
 
@@ -212,13 +212,13 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
         // 检查是否是剩余元素 TSRestType
         const restCst = children.find(c => c.name === 'TSRestType')
         if (restCst) {
-            return this.createTSRestTypeAst(restCst)
+            return SlimeCstToAstUtil.createTSRestTypeAst(restCst)
         }
 
         // 检查是否是命名元组 TSNamedTupleMember
         const namedCst = children.find(c => c.name === 'TSNamedTupleMember')
         if (namedCst) {
-            return this.createTSNamedTupleMemberAst(namedCst)
+            return SlimeCstToAstUtil.createTSNamedTupleMemberAst(namedCst)
         }
 
         // 检查是否有 Ellipsis（旧格式）
@@ -227,7 +227,7 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
             const typeCst = children.find(c => c.name === 'TSType')
             return {
                 type: SlimeAstTypeName.TSRestType,
-                typeAnnotation: typeCst ? this.createTSTypeAst(typeCst) : undefined,
+                typeAnnotation: typeCst ? SlimeCstToAstUtil.createTSTypeAst(typeCst) : undefined,
                 loc: cst.loc,
             }
         }
@@ -237,7 +237,7 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
         const hasQuestion = children.some(c => c.name === 'Question' || c.value === '?')
 
         if (typeCst) {
-            const typeAst = this.createTSTypeAst(typeCst)
+            const typeAst = SlimeCstToAstUtil.createTSTypeAst(typeCst)
             if (hasQuestion) {
                 return {
                     type: SlimeAstTypeName.TSOptionalType,
@@ -254,10 +254,10 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
         if (firstChild && firstChild.name) {
             // 可能是 TSConditionalType 或其他类型
             if (firstChild.name === 'TSConditionalType') {
-                return this.createTSConditionalTypeAst(firstChild)
+                return SlimeCstToAstUtil.createTSConditionalTypeAst(firstChild)
             }
             if (firstChild.name === 'TSUnionOrIntersectionType') {
-                return this.createTSUnionOrIntersectionTypeAst(firstChild)
+                return SlimeCstToAstUtil.createTSUnionOrIntersectionTypeAst(firstChild)
             }
         }
 
@@ -273,7 +273,7 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
 
         return {
             type: SlimeAstTypeName.TSRestType,
-            typeAnnotation: typeCst ? this.createTSTypeAst(typeCst) : undefined,
+            typeAnnotation: typeCst ? SlimeCstToAstUtil.createTSTypeAst(typeCst) : undefined,
             loc: cst.loc,
         }
     }
@@ -297,7 +297,7 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
                     loc: tokenCst.loc,
                 }
             } else if (child.name === 'TSType') {
-                elementType = this.createTSTypeAst(child)
+                elementType = SlimeCstToAstUtil.createTSTypeAst(child)
             } else if (child.name === 'Question' || child.value === '?') {
                 optional = true
             }
@@ -345,20 +345,20 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
         if (identifierCst) {
             typeParameter = {
                 type: SlimeAstTypeName.TSTypeParameter,
-                name: this.createIdentifierAst(identifierCst),
+                name: SlimeCstToAstUtil.createIdentifierAst(identifierCst),
                 loc: identifierCst.loc,
             }
 
             // 找到 in 后面的约束类型
             const tsTypes = children.filter(c => c.name === 'TSType')
             if (tsTypes.length > 0) {
-                typeParameter.constraint = this.createTSTypeAst(tsTypes[0])
+                typeParameter.constraint = SlimeCstToAstUtil.createTSTypeAst(tsTypes[0])
             }
 
             // 找到 as 后面的 nameType
             const asIndex = children.findIndex(c => c.value === 'as')
             if (asIndex !== -1 && tsTypes.length > 1) {
-                nameType = this.createTSTypeAst(tsTypes[1])
+                nameType = SlimeCstToAstUtil.createTSTypeAst(tsTypes[1])
             }
         }
 
@@ -384,7 +384,7 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
         if (colonIndex !== -1) {
             const tsTypesAfterColon = children.slice(colonIndex + 1).filter(c => c.name === 'TSType')
             if (tsTypesAfterColon.length > 0) {
-                typeAnnotation = this.createTSTypeAst(tsTypesAfterColon[0])
+                typeAnnotation = SlimeCstToAstUtil.createTSTypeAst(tsTypesAfterColon[0])
             }
         }
 
@@ -409,7 +409,7 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
         if (typeCst) {
             return {
                 type: SlimeAstTypeName.TSParenthesizedType,
-                typeAnnotation: this.createTSTypeAst(typeCst),
+                typeAnnotation: SlimeCstToAstUtil.createTSTypeAst(typeCst),
                 loc: cst.loc,
             }
         }

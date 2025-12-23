@@ -25,7 +25,7 @@ export class SlimeTSTypeLiteralCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'TSTypeMember') {
-                members.push(this.createTSTypeMemberAst(child))
+                members.push(SlimeCstToAstUtil.createTSTypeMemberAst(child))
             }
         }
 
@@ -48,23 +48,23 @@ export class SlimeTSTypeLiteralCstToAstSingle {
         const name = child.name
 
         if (name === 'TSPropertySignature') {
-            return this.createTSPropertySignatureAst(child)
+            return SlimeCstToAstUtil.createTSPropertySignatureAst(child)
         }
         if (name === 'TSMethodSignature') {
-            return this.createTSMethodSignatureAst(child)
+            return SlimeCstToAstUtil.createTSMethodSignatureAst(child)
         }
         if (name === 'TSIndexSignature') {
-            return this.createTSIndexSignatureAst(child)
+            return SlimeCstToAstUtil.createTSIndexSignatureAst(child)
         }
         if (name === 'TSCallSignatureDeclaration') {
-            return this.createTSCallSignatureDeclarationAst(child)
+            return SlimeCstToAstUtil.createTSCallSignatureDeclarationAst(child)
         }
         if (name === 'TSConstructSignatureDeclaration') {
-            return this.createTSConstructSignatureDeclarationAst(child)
+            return SlimeCstToAstUtil.createTSConstructSignatureDeclarationAst(child)
         }
         // 处理 TSPropertyOrMethodSignature（合并的属性/方法签名）
         if (name === 'TSPropertyOrMethodSignature') {
-            return this.createTSPropertyOrMethodSignatureAst(child)
+            return SlimeCstToAstUtil.createTSPropertyOrMethodSignatureAst(child)
         }
 
         throw new Error(`Unknown TSTypeMember child: ${name}`)
@@ -90,7 +90,7 @@ export class SlimeTSTypeLiteralCstToAstSingle {
             } else if (child.name === 'PropertyName') {
                 // PropertyName -> LiteralPropertyName -> IdentifierName -> IdentifierName (token)
                 // 或 PropertyName -> ComputedPropertyName -> ...
-                key = this.extractPropertyNameKey(child)
+                key = SlimeCstToAstUtil.extractPropertyNameKey(child)
             } else if (child.name === 'Identifier' || child.name === 'IdentifierName') {
                 const tokenCst = child.children?.[0] || child
                 key = {
@@ -102,9 +102,9 @@ export class SlimeTSTypeLiteralCstToAstSingle {
                 optional = true
             } else if (child.name === 'TSParameterList' || child.name === 'FormalParameters') {
                 hasParams = true
-                parameters = this.createTSParameterListAst(child)
+                parameters = SlimeCstToAstUtil.createTSParameterListAst(child)
             } else if (child.name === 'TSTypeAnnotation') {
-                typeAnnotation = this.createTSTypeAnnotationAst(child)
+                typeAnnotation = SlimeCstToAstUtil.createTSTypeAnnotationAst(child)
             }
         }
 
@@ -227,7 +227,7 @@ export class SlimeTSTypeLiteralCstToAstSingle {
             } else if (child.name === 'Question' || child.value === '?') {
                 optional = true
             } else if (child.name === 'TSTypeAnnotation') {
-                typeAnnotation = this.createTSTypeAnnotationAst(child)
+                typeAnnotation = SlimeCstToAstUtil.createTSTypeAnnotationAst(child)
             }
         }
 
@@ -264,9 +264,9 @@ export class SlimeTSTypeLiteralCstToAstSingle {
             } else if (child.name === 'Question' || child.value === '?') {
                 optional = true
             } else if (child.name === 'TSParameterList') {
-                parameters = this.createTSParameterListAst(child)
+                parameters = SlimeCstToAstUtil.createTSParameterListAst(child)
             } else if (child.name === 'TSTypeAnnotation') {
-                typeAnnotation = this.createTSTypeAnnotationAst(child)
+                typeAnnotation = SlimeCstToAstUtil.createTSTypeAnnotationAst(child)
             }
         }
 
@@ -305,7 +305,7 @@ export class SlimeTSTypeLiteralCstToAstSingle {
                         name: tokenCst.value,
                         typeAnnotation: {
                             type: SlimeAstTypeName.TSTypeAnnotation,
-                            typeAnnotation: this.createTSTypeAst(children[colonIdx + 1]),
+                            typeAnnotation: SlimeCstToAstUtil.createTSTypeAst(children[colonIdx + 1]),
                         },
                         loc: tokenCst.loc,
                     })
@@ -316,7 +316,7 @@ export class SlimeTSTypeLiteralCstToAstSingle {
                 // 返回类型
                 typeAnnotation = {
                     type: SlimeAstTypeName.TSTypeAnnotation,
-                    typeAnnotation: this.createTSTypeAst(child),
+                    typeAnnotation: SlimeCstToAstUtil.createTSTypeAst(child),
                 }
             }
         }
@@ -341,9 +341,9 @@ export class SlimeTSTypeLiteralCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'TSParameterList') {
-                parameters = this.createTSParameterListAst(child)
+                parameters = SlimeCstToAstUtil.createTSParameterListAst(child)
             } else if (child.name === 'TSTypeAnnotation') {
-                typeAnnotation = this.createTSTypeAnnotationAst(child)
+                typeAnnotation = SlimeCstToAstUtil.createTSTypeAnnotationAst(child)
             }
         }
 
@@ -366,9 +366,9 @@ export class SlimeTSTypeLiteralCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'TSParameterList') {
-                parameters = this.createTSParameterListAst(child)
+                parameters = SlimeCstToAstUtil.createTSParameterListAst(child)
             } else if (child.name === 'TSTypeAnnotation') {
-                typeAnnotation = this.createTSTypeAnnotationAst(child)
+                typeAnnotation = SlimeCstToAstUtil.createTSTypeAnnotationAst(child)
             }
         }
 
@@ -389,7 +389,7 @@ export class SlimeTSTypeLiteralCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'TSParameter') {
-                params.push(this.createTSParameterAst(child))
+                params.push(SlimeCstToAstUtil.createTSParameterAst(child))
             }
         }
 
@@ -420,7 +420,7 @@ export class SlimeTSTypeLiteralCstToAstSingle {
             } else if (child.name === 'Question' || child.value === '?') {
                 optional = true
             } else if (child.name === 'TSTypeAnnotation') {
-                typeAnnotation = this.createTSTypeAnnotationAst(child)
+                typeAnnotation = SlimeCstToAstUtil.createTSTypeAnnotationAst(child)
             }
         }
 

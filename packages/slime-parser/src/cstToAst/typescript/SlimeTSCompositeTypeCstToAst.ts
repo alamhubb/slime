@@ -27,7 +27,7 @@ export class SlimeTSCompositeTypeCstToAstSingle {
         const intersectionTypes: any[] = []
         for (const child of children) {
             if (child.name === 'TSIntersectionType') {
-                intersectionTypes.push(this.createTSIntersectionTypeAst(child))
+                intersectionTypes.push(SlimeCstToAstUtil.createTSIntersectionTypeAst(child))
             }
         }
 
@@ -59,7 +59,7 @@ export class SlimeTSCompositeTypeCstToAstSingle {
         if (!checkTypeCst) {
             throw new Error('TSConditionalType missing checkType')
         }
-        const checkType = this.createTSUnionOrIntersectionTypeAst(checkTypeCst)
+        const checkType = SlimeCstToAstUtil.createTSUnionOrIntersectionTypeAst(checkTypeCst)
 
         // 检查是否有条件部分 (extends ... ? ... : ...)
         const extendsToken = children.find(c => c.name === 'Extends')
@@ -73,15 +73,15 @@ export class SlimeTSCompositeTypeCstToAstSingle {
         if (unionTypes.length < 2) {
             throw new Error('TSConditionalType missing extendsType')
         }
-        const extendsType = this.createTSUnionOrIntersectionTypeAst(unionTypes[1])
+        const extendsType = SlimeCstToAstUtil.createTSUnionOrIntersectionTypeAst(unionTypes[1])
 
         // 找到所有 TSType，第一个是 trueType，第二个是 falseType
         const tsTypes = children.filter(c => c.name === 'TSType')
         if (tsTypes.length < 2) {
             throw new Error('TSConditionalType missing trueType or falseType')
         }
-        const trueType = this.createTSTypeAst(tsTypes[0])
-        const falseType = this.createTSTypeAst(tsTypes[1])
+        const trueType = SlimeCstToAstUtil.createTSTypeAst(tsTypes[0])
+        const falseType = SlimeCstToAstUtil.createTSTypeAst(tsTypes[1])
 
         return {
             type: SlimeAstTypeName.TSConditionalType,
@@ -104,7 +104,7 @@ export class SlimeTSCompositeTypeCstToAstSingle {
         const operandTypes: any[] = []
         for (const child of children) {
             if (child.name === 'TSTypeOperand') {
-                operandTypes.push(this.createTSTypeOperandAst(child))
+                operandTypes.push(SlimeCstToAstUtil.createTSTypeOperandAst(child))
             }
         }
 
@@ -136,10 +136,10 @@ export class SlimeTSCompositeTypeCstToAstSingle {
             if (!primaryCst) {
                 throw new Error('TSTypeOperand: TSPrefixTypeOrPrimary or TSPrimaryType not found')
             }
-            return this.createTSPrimaryTypeAst(primaryCst)
+            return SlimeCstToAstUtil.createTSPrimaryTypeAst(primaryCst)
         }
 
-        let result = this.createTSPrefixTypeOrPrimaryAst(prefixOrPrimaryCst)
+        let result = SlimeCstToAstUtil.createTSPrefixTypeOrPrimaryAst(prefixOrPrimaryCst)
 
         // 检查是否有数组后缀 []
         let i = children.indexOf(prefixOrPrimaryCst) + 1
@@ -161,7 +161,7 @@ export class SlimeTSCompositeTypeCstToAstSingle {
                     result = {
                         type: SlimeAstTypeName.TSIndexedAccessType,
                         objectType: result,
-                        indexType: this.createTSTypeAst(next),
+                        indexType: SlimeCstToAstUtil.createTSTypeAst(next),
                         loc: cst.loc,
                     }
                     i += 3 // skip TSType and RBracket
@@ -190,22 +190,22 @@ export class SlimeTSCompositeTypeCstToAstSingle {
 
         // 类型查询 typeof x
         if (name === 'TSTypeQuery') {
-            return this.createTSTypeQueryAst(child)
+            return SlimeCstToAstUtil.createTSTypeQueryAst(child)
         }
 
         // 类型操作符 keyof, readonly, unique
         if (name === 'TSTypeOperator') {
-            return this.createTSTypeOperatorAst(child)
+            return SlimeCstToAstUtil.createTSTypeOperatorAst(child)
         }
 
         // 推断类型 infer R
         if (name === 'TSInferType') {
-            return this.createTSInferTypeAst(child)
+            return SlimeCstToAstUtil.createTSInferTypeAst(child)
         }
 
         // 基础类型
         if (name === 'TSPrimaryType') {
-            return this.createTSPrimaryTypeAst(child)
+            return SlimeCstToAstUtil.createTSPrimaryTypeAst(child)
         }
 
         throw new Error(`Unknown TSPrefixTypeOrPrimary child: ${name}`)
@@ -223,11 +223,11 @@ export class SlimeTSCompositeTypeCstToAstSingle {
             throw new Error('TSTypeQuery: TSTypeName not found')
         }
 
-        const exprName = this.createTSTypeNameAst(typeNameCst)
+        const exprName = SlimeCstToAstUtil.createTSTypeNameAst(typeNameCst)
 
         // 可选的类型参数
         const typeParamsCst = children.find(c => c.name === 'TSTypeParameterInstantiation')
-        const typeParameters = typeParamsCst ? this.createTSTypeParameterInstantiationAst(typeParamsCst) : undefined
+        const typeParameters = typeParamsCst ? SlimeCstToAstUtil.createTSTypeParameterInstantiationAst(typeParamsCst) : undefined
 
         return {
             type: SlimeAstTypeName.TSTypeQuery,
@@ -259,14 +259,14 @@ export class SlimeTSCompositeTypeCstToAstSingle {
             if (!operandCst) {
                 throw new Error('TSTypeOperator keyof: TSTypeOperand not found')
             }
-            typeAnnotation = this.createTSTypeOperandAst(operandCst)
+            typeAnnotation = SlimeCstToAstUtil.createTSTypeOperandAst(operandCst)
         } else if (firstChild.value === 'readonly' || firstChild.name?.includes('Readonly')) {
             operator = 'readonly'
             const operandCst = children.find(c => c.name === 'TSTypeOperand')
             if (!operandCst) {
                 throw new Error('TSTypeOperator readonly: TSTypeOperand not found')
             }
-            typeAnnotation = this.createTSTypeOperandAst(operandCst)
+            typeAnnotation = SlimeCstToAstUtil.createTSTypeOperandAst(operandCst)
         } else if (firstChild.value === 'unique' || firstChild.name?.includes('Unique')) {
             operator = 'unique'
             // unique symbol - 找到 TSSymbolKeyword
@@ -274,7 +274,7 @@ export class SlimeTSCompositeTypeCstToAstSingle {
             if (!symbolCst) {
                 throw new Error('TSTypeOperator unique: TSSymbolKeyword not found')
             }
-            typeAnnotation = this.createTSKeywordTypeAst(symbolCst, SlimeAstTypeName.TSSymbolKeyword)
+            typeAnnotation = SlimeCstToAstUtil.createTSKeywordTypeAst(symbolCst, SlimeAstTypeName.TSSymbolKeyword)
         } else {
             throw new Error(`Unknown TSTypeOperator: ${firstChild.value || firstChild.name}`)
         }
@@ -301,7 +301,7 @@ export class SlimeTSCompositeTypeCstToAstSingle {
 
         const typeParameter: any = {
             type: SlimeAstTypeName.TSTypeParameter,
-            name: this.createIdentifierAst(identifierCst),
+            name: SlimeCstToAstUtil.createIdentifierAst(identifierCst),
             loc: identifierCst.loc,
         }
 
@@ -310,7 +310,7 @@ export class SlimeTSCompositeTypeCstToAstSingle {
         if (extendsCst) {
             const constraintCst = children.find(c => c.name === 'TSType')
             if (constraintCst) {
-                typeParameter.constraint = this.createTSTypeAst(constraintCst)
+                typeParameter.constraint = SlimeCstToAstUtil.createTSTypeAst(constraintCst)
             }
         }
 

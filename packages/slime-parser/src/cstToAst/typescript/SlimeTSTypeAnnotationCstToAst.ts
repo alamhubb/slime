@@ -23,7 +23,7 @@ export class SlimeTSTypeAnnotationCstToAstSingle {
         const colonToken = SlimeTokenCreateUtils.createColonToken(colonCst.loc)
 
         const typeCst = children[1]
-        const typeAnnotation = this.createTSTypeAst(typeCst)
+        const typeAnnotation = SlimeCstToAstUtil.createTSTypeAst(typeCst)
 
         return {
             type: SlimeAstTypeName.TSTypeAnnotation,
@@ -47,20 +47,20 @@ export class SlimeTSTypeAnnotationCstToAstSingle {
 
         // 函数类型
         if (name === 'TSFunctionType') {
-            return this.createTSFunctionTypeAst(child)
+            return SlimeCstToAstUtil.createTSFunctionTypeAst(child)
         }
         if (name === 'TSConstructorType') {
-            return this.createTSConstructorTypeAst(child)
+            return SlimeCstToAstUtil.createTSConstructorTypeAst(child)
         }
 
         // 条件类型（包含联合/交叉类型）
         if (name === 'TSConditionalType') {
-            return this.createTSConditionalTypeAst(child)
+            return SlimeCstToAstUtil.createTSConditionalTypeAst(child)
         }
 
         // 联合/交叉类型（兼容旧代码）
         if (name === 'TSUnionOrIntersectionType') {
-            return this.createTSUnionOrIntersectionTypeAst(child)
+            return SlimeCstToAstUtil.createTSUnionOrIntersectionTypeAst(child)
         }
 
         throw new Error(`Unknown TSType child: ${name}`)
