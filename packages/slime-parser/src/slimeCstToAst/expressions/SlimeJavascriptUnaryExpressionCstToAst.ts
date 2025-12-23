@@ -1,5 +1,5 @@
 /**
- * UnaryExpressionCstToAst - 一�?更新表达式转�?
+ * UnaryExpressionCstToAst - 一�?更新表达式转�?
  */
 import {SubhutiCst} from "subhuti";
 import {
@@ -10,7 +10,7 @@ import {
     type SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
 
-import SlimeJavascriptParser from "../../deprecated/SlimeJavascriptParser.ts";
+import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
@@ -18,9 +18,9 @@ import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascri
 export class SlimeJavascriptUnaryExpressionCstToAstSingle {
 
     createUnaryExpressionAst(cst: SubhutiCst): SlimeExpression {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.UnaryExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.UnaryExpression?.name);
 
-        // 防御性检查：如果没有children，抛出更详细的错�?
+        // 防御性检查：如果没有children，抛出更详细的错�?
         if (!cst.children || cst.children.length === 0) {
             console.error('UnaryExpression CST没有children:', JSON.stringify(cst, null, 2))
             throw new Error(`UnaryExpression CST没有children，可能是Parser生成的CST不完整`)
@@ -30,9 +30,9 @@ export class SlimeJavascriptUnaryExpressionCstToAstSingle {
         if (cst.children.length === 1) {
             const child = cst.children[0]
 
-            // 检查是否是token（token有value属性但没有children�?
+            // 检查是否是token（token有value属性但没有children�?
             if (child.value !== undefined && !child.children) {
-                // 这是一个token，说明Parser层生成的CST不完�?
+                // 这是一个token，说明Parser层生成的CST不完�?
                 // UnaryExpression应该有运算符+操作数两个子节点，或者直接是PostfixExpression
                 throw new Error(
                     `UnaryExpression CST不完整：只有运算符token '${child.name}' (${child.value})，缺少操作数。` +
@@ -44,13 +44,13 @@ export class SlimeJavascriptUnaryExpressionCstToAstSingle {
             return SlimeCstToAstUtil.createExpressionAst(child)
         }
 
-        // 如果有两个子节点，是一元运算符表达�?
-        // children[0]: 运算�?token (!, +, -, ~, typeof, void, delete�?
-        // children[1]: UnaryExpression（操作数�?
+        // 如果有两个子节点，是一元运算符表达�?
+        // children[0]: 运算�?token (!, +, -, ~, typeof, void, delete�?
+        // children[1]: UnaryExpression（操作数�?
         const operatorToken = cst.children[0]
         const argumentCst = cst.children[1]
 
-        // 获取运算符类�?
+        // 获取运算符类�?
         const operatorMap: { [key: string]: string } = {
             'Exclamation': '!',
             'Plus': '+',
@@ -65,14 +65,14 @@ export class SlimeJavascriptUnaryExpressionCstToAstSingle {
 
         const operator = operatorMap[operatorToken.name] || operatorToken.value
 
-        // 递归处理操作�?
+        // 递归处理操作�?
         const argument = SlimeCstToAstUtil.createExpressionAst(argumentCst)
 
         // 创建 UnaryExpression AST
         return {
             type: SlimeAstTypeName.UnaryExpression,
             operator: operator,
-            prefix: true,  // 前缀运算�?
+            prefix: true,  // 前缀运算�?
             argument: argument,
             loc: cst.loc
         } as any
@@ -152,7 +152,7 @@ export class SlimeJavascriptUnaryExpressionCstToAstSingle {
 
     createAwaitExpressionAst(cst: SubhutiCst): any {
         // await UnaryExpression
-        SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.AwaitExpression?.name);
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.AwaitExpression?.name);
 
         let awaitToken: any = undefined
 
