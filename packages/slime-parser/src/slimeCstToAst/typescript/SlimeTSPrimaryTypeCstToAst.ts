@@ -1,7 +1,8 @@
 import {SubhutiCst} from "subhuti";
-import {SlimeAstTypeName, SlimeJavascriptAstTypeName} from "slime-ast";
+import {SlimeJavascriptAstTypeName, SlimeJavascriptAstTypeName} from "SlimeJavascript-ast";
+import {SlimeJavascriptTSObjectTypeCstToAstSingle} from "./SlimeTSObjectTypeCstToAst.ts";
 
-export default class SlimeTSPrimaryTypeCstToAst{
+export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
 
     /**
      * [TypeScript] 转换 TSPrimaryType CST 为 AST
@@ -55,18 +56,18 @@ export default class SlimeTSPrimaryTypeCstToAst{
         const name = child.name
 
         // 基础类型关键字
-        if (name === 'TSNumberKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNumberKeyword)
-        if (name === 'TSStringKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSStringKeyword)
-        if (name === 'TSBooleanKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSBooleanKeyword)
-        if (name === 'TSAnyKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSAnyKeyword)
-        if (name === 'TSUnknownKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSUnknownKeyword)
-        if (name === 'TSNeverKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNeverKeyword)
-        if (name === 'TSUndefinedKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSUndefinedKeyword)
-        if (name === 'TSNullKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNullKeyword)
-        if (name === 'TSVoidKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSVoidKeyword)
-        if (name === 'TSObjectKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSObjectKeyword)
-        if (name === 'TSSymbolKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSSymbolKeyword)
-        if (name === 'TSBigIntKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSBigIntKeyword)
+        if (name === 'TSNumberKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSNumberKeyword)
+        if (name === 'TSStringKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSStringKeyword)
+        if (name === 'TSBooleanKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSBooleanKeyword)
+        if (name === 'TSAnyKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSAnyKeyword)
+        if (name === 'TSUnknownKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSUnknownKeyword)
+        if (name === 'TSNeverKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSNeverKeyword)
+        if (name === 'TSUndefinedKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSUndefinedKeyword)
+        if (name === 'TSNullKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSNullKeyword)
+        if (name === 'TSVoidKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSVoidKeyword)
+        if (name === 'TSObjectKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSObjectKeyword)
+        if (name === 'TSSymbolKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSSymbolKeyword)
+        if (name === 'TSBigIntKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSBigIntKeyword)
 
         throw new Error(`Unknown TSKeywordType child: ${name}`)
     }
@@ -138,7 +139,7 @@ export default class SlimeTSPrimaryTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSLiteralType,
+            type: SlimeJavascriptAstTypeName.TSLiteralType,
             literal,
             loc: cst.loc,
         }
@@ -294,3 +295,5 @@ export default class SlimeTSPrimaryTypeCstToAst{
 
 
 }
+
+export const SlimeJavascriptTSPrimaryTypeCstToAst = new SlimeJavascriptTSPrimaryTypeCstToAstSingle()

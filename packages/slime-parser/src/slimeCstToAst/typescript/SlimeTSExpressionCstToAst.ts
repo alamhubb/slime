@@ -1,20 +1,21 @@
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeAstCreateUtils,
-    SlimeAstTypeName,
-    SlimeClassDeclaration, SlimeClassExpression, SlimeExpression,
-    SlimeIdentifier,
-    SlimeTokenCreateUtils
-} from "slime-ast";
+    SlimeJavascriptAstCreateUtils,
+    SlimeJavascriptAstTypeName,
+    SlimeJavascriptClassDeclaration, SlimeJavascriptClassExpression, SlimeJavascriptExpression,
+    SlimeJavascriptIdentifier,
+    SlimeJavascriptTokenCreateUtils
+} from "SlimeJavascript-ast";
+import {SlimeJavascriptTSDeclarationCstToAstSingle} from "./SlimeTSDeclarationCstToAst.ts";
 
-export default class SlimeTSExpressionCstToAst {
+export class SlimeJavascriptTSExpressionCstToAstSingle {
     /**
      * [TypeScript] 转换 TSAsExpression CST 为 AST
      * expression as Type
      */
     createTSAsExpressionAst(expression: any, typeCst: SubhutiCst, loc: any): any {
         return {
-            type: SlimeAstTypeName.TSAsExpression,
+            type: SlimeJavascriptAstTypeName.TSAsExpression,
             expression,
             typeAnnotation: this.createTSTypeAst(typeCst),
             loc,
@@ -28,7 +29,7 @@ export default class SlimeTSExpressionCstToAst {
      */
     createTSSatisfiesExpressionAst(expression: any, typeCst: SubhutiCst, loc: any): any {
         return {
-            type: SlimeAstTypeName.TSSatisfiesExpression,
+            type: SlimeJavascriptAstTypeName.TSSatisfiesExpression,
             expression,
             typeAnnotation: this.createTSTypeAst(typeCst),
             loc,
@@ -42,7 +43,7 @@ export default class SlimeTSExpressionCstToAst {
      */
     createTSNonNullExpressionAst(expression: any, loc: any): any {
         return {
-            type: SlimeAstTypeName.TSNonNullExpression,
+            type: SlimeJavascriptAstTypeName.TSNonNullExpression,
             expression,
             loc,
         }
@@ -66,7 +67,7 @@ export default class SlimeTSExpressionCstToAst {
         }
 
         return {
-            type: SlimeAstTypeName.TSTypeAssertion,
+            type: SlimeJavascriptAstTypeName.TSTypeAssertion,
             typeAnnotation: this.createTSTypeAst(typeCst),
             expression: SlimeJavascriptCstToAstUtil.createUnaryExpressionAst(exprCst),
             loc: cst.loc,
@@ -106,7 +107,7 @@ export default class SlimeTSExpressionCstToAst {
         }
 
         return {
-            type: SlimeAstTypeName.TSTypePredicate,
+            type: SlimeJavascriptAstTypeName.TSTypePredicate,
             asserts,
             parameterName,
             typeAnnotation,
@@ -114,3 +115,5 @@ export default class SlimeTSExpressionCstToAst {
         }
     }
 }
+
+export const SlimeJavascriptTSExpressionCstToAst = new SlimeJavascriptTSExpressionCstToAstSingle()

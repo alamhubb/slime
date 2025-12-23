@@ -1,11 +1,12 @@
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeAstCreateUtils,
-    SlimeAstTypeName, type SlimeBlockStatement, type SlimeFunctionDeclaration,
-    type SlimeFunctionParam, SlimeIdentifier, SlimeJavascriptAstTypeName, SlimeTokenCreateUtils
-} from "slime-ast";
+    SlimeJavascriptAstCreateUtils,
+    SlimeJavascriptAstTypeName, type SlimeJavascriptBlockStatement, type SlimeJavascriptFunctionDeclaration,
+    type SlimeJavascriptFunctionParam, SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, SlimeJavascriptTokenCreateUtils
+} from "SlimeJavascript-ast";
+import {SlimeJavascriptTSExpressionCstToAstSingle} from "./SlimeTSExpressionCstToAst.ts";
 
-export default class SlimeTSFunctionTypeCstToAst{
+export class SlimeJavascriptTSFunctionTypeCstToAstSingle {
 
     /**
      * [TypeScript] 转换 TSFunctionType CST 为 AST
@@ -28,7 +29,7 @@ export default class SlimeTSFunctionTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSFunctionType,
+            type: SlimeJavascriptAstTypeName.TSFunctionType,
             typeParameters,
             parameters,
             returnType,
@@ -58,7 +59,7 @@ export default class SlimeTSFunctionTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSConstructorType,
+            type: SlimeJavascriptAstTypeName.TSConstructorType,
             typeParameters,
             parameters,
             returnType,
@@ -146,7 +147,7 @@ export default class SlimeTSFunctionTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSTypeParameterDeclaration,
+            type: SlimeJavascriptAstTypeName.TSTypeParameterDeclaration,
             params,
             loc: cst.loc,
         }
@@ -185,7 +186,7 @@ export default class SlimeTSFunctionTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSTypeParameter,
+            type: SlimeJavascriptAstTypeName.TSTypeParameter,
             name,
             constraint,
             default: defaultType,
@@ -199,3 +200,5 @@ export default class SlimeTSFunctionTypeCstToAst{
 
 
 }
+
+export const SlimeJavascriptTSFunctionTypeCstToAst = new SlimeJavascriptTSFunctionTypeCstToAstSingle()

@@ -3,8 +3,8 @@
  */
 import { SubhutiCst } from "subhuti";
 
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
-import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
+import SlimeJavascriptParser from "../../deprecated/SlimeJavascriptParser.ts";
+import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import {
     type SlimeJavascriptBlockStatement, type SlimeJavascriptClassDeclaration, type SlimeJavascriptDeclaration,
     type SlimeJavascriptFunctionDeclaration, type SlimeJavascriptFunctionExpression,
@@ -15,7 +15,7 @@ import {
     SlimeVariableDeclarator, SlimeTokenCreateUtils, SlimeAstCreateUtils
 } from "slime-ast";
 import { SlimeJavascriptClassDeclarationCstToAstSingle } from "../class/SlimeJavascriptClassDeclarationCstToAst.ts";
-import { SlimeIdentifierCstToAst } from "../../../cstToAst";
+// SlimeIdentifierCstToAst functions are accessed through SlimeCstToAstUtil
 
 
 
@@ -322,19 +322,19 @@ export class SlimeJavascriptVariableCstToAstSingle {
 
         // TypeScript 声明
         if (name === 'TSInterfaceDeclaration') {
-            return SlimeIdentifierCstToAst.createTSInterfaceDeclarationAst(first)
+            return SlimeCstToAstUtil.createTSInterfaceDeclarationAst(first)
         }
         if (name === 'TSTypeAliasDeclaration') {
-            return SlimeIdentifierCstToAst.createTSTypeAliasDeclarationAst(first)
+            return SlimeCstToAstUtil.createTSTypeAliasDeclarationAst(first)
         }
         if (name === 'TSEnumDeclaration') {
-            return SlimeIdentifierCstToAst.createTSEnumDeclarationAst(first)
+            return SlimeCstToAstUtil.createTSEnumDeclarationAst(first)
         }
         if (name === 'TSModuleDeclaration') {
-            return SlimeIdentifierCstToAst.createTSModuleDeclarationAst(first)
+            return SlimeCstToAstUtil.createTSModuleDeclarationAst(first)
         }
         if (name === 'TSDeclareStatement') {
-            return SlimeIdentifierCstToAst.createTSDeclareStatementAst(first)
+            return SlimeCstToAstUtil.createTSDeclareStatementAst(first)
         }
 
 

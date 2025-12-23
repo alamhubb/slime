@@ -1,13 +1,15 @@
 import {
-    SlimeAstCreateUtils,
-    SlimeBlockStatement, SlimeClassDeclaration, SlimeClassExpression,
-    SlimeExpression, SlimeFunctionExpression,
-    SlimeFunctionParam, SlimeIdentifier, SlimeMethodDefinition, SlimePropertyDefinition,
-    SlimeTokenCreateUtils
-} from "slime-ast";
-import {SubhutiCst} from "subhuti";
+    SlimeJavascriptAstCreateUtils,
+    SlimeJavascriptBlockStatement, SlimeJavascriptClassDeclaration, SlimeJavascriptClassExpression,
+    SlimeJavascriptExpression, SlimeJavascriptFunctionExpression,
+    SlimeJavascriptFunctionParam, SlimeJavascriptIdentifier, SlimeJavascriptMethodDefinition, SlimeJavascriptPropertyDefinition,
+    SlimeJavascriptTokenCreateUtils
+} from "SlimeJavascript-ast";
+import {SubhutiCst, SubhutiSourceLocation} from "subhuti";
+import {SlimeJavascriptAstTypeName} from "slime-ast";
+import {SlimeJavascriptTSTupleTypeCstToAstSingle} from "./SlimeTSTupleTypeCstToAst.ts";
 
-export default class SlimeTSTypeAnnotationCstToAst {
+export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
 
 
     /**
@@ -20,13 +22,13 @@ export default class SlimeTSTypeAnnotationCstToAst {
         }
 
         const colonCst = children[0]
-        const colonToken = SlimeTokenCreateUtils.createColonToken(colonCst.loc)
+        const colonToken = SlimeJavascriptTokenCreateUtils.createColonToken(colonCst.loc)
 
         const typeCst = children[1]
         const typeAnnotation = this.createTSTypeAst(typeCst)
 
         return {
-            type: SlimeAstTypeName.TSTypeAnnotation,
+            type: SlimeJavascriptAstTypeName.TSTypeAnnotation,
             colonToken,
             typeAnnotation,
             loc: cst.loc,
@@ -85,7 +87,7 @@ export default class SlimeTSTypeAnnotationCstToAst {
         const typeParameters = typeParamsCst ? this.createTSTypeParameterInstantiationAst(typeParamsCst) : undefined
 
         return {
-            type: SlimeAstTypeName.TSTypeQuery,
+            type: SlimeJavascriptAstTypeName.TSTypeQuery,
             exprName,
             typeParameters,
             loc: cst.loc,
@@ -129,13 +131,13 @@ export default class SlimeTSTypeAnnotationCstToAst {
             if (!symbolCst) {
                 throw new Error('TSTypeOperator unique: TSSymbolKeyword not found')
             }
-            typeAnnotation = this.createTSKeywordTypeAst(symbolCst, SlimeAstTypeName.TSSymbolKeyword)
+            typeAnnotation = this.createTSKeywordTypeAst(symbolCst, SlimeJavascriptAstTypeName.TSSymbolKeyword)
         } else {
             throw new Error(`Unknown TSTypeOperator: ${firstChild.value || firstChild.name}`)
         }
 
         return {
-            type: SlimeAstTypeName.TSTypeOperator,
+            type: SlimeJavascriptAstTypeName.TSTypeOperator,
             operator,
             typeAnnotation,
             loc: cst.loc,
@@ -155,7 +157,7 @@ export default class SlimeTSTypeAnnotationCstToAst {
         }
 
         const typeParameter: any = {
-            type: SlimeAstTypeName.TSTypeParameter,
+            type: SlimeJavascriptAstTypeName.TSTypeParameter,
             name: this.createIdentifierAst(identifierCst),
             loc: identifierCst.loc,
         }
@@ -170,7 +172,7 @@ export default class SlimeTSTypeAnnotationCstToAst {
         }
 
         return {
-            type: SlimeAstTypeName.TSInferType,
+            type: SlimeJavascriptAstTypeName.TSInferType,
             typeParameter,
             loc: cst.loc,
         }
@@ -226,18 +228,18 @@ export default class SlimeTSTypeAnnotationCstToAst {
         const name = child.name
 
         // 基础类型关键字
-        if (name === 'TSNumberKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNumberKeyword)
-        if (name === 'TSStringKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSStringKeyword)
-        if (name === 'TSBooleanKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSBooleanKeyword)
-        if (name === 'TSAnyKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSAnyKeyword)
-        if (name === 'TSUnknownKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSUnknownKeyword)
-        if (name === 'TSNeverKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNeverKeyword)
-        if (name === 'TSUndefinedKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSUndefinedKeyword)
-        if (name === 'TSNullKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNullKeyword)
-        if (name === 'TSVoidKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSVoidKeyword)
-        if (name === 'TSObjectKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSObjectKeyword)
-        if (name === 'TSSymbolKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSSymbolKeyword)
-        if (name === 'TSBigIntKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSBigIntKeyword)
+        if (name === 'TSNumberKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSNumberKeyword)
+        if (name === 'TSStringKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSStringKeyword)
+        if (name === 'TSBooleanKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSBooleanKeyword)
+        if (name === 'TSAnyKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSAnyKeyword)
+        if (name === 'TSUnknownKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSUnknownKeyword)
+        if (name === 'TSNeverKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSNeverKeyword)
+        if (name === 'TSUndefinedKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSUndefinedKeyword)
+        if (name === 'TSNullKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSNullKeyword)
+        if (name === 'TSVoidKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSVoidKeyword)
+        if (name === 'TSObjectKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSObjectKeyword)
+        if (name === 'TSSymbolKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSSymbolKeyword)
+        if (name === 'TSBigIntKeyword') return this.createTSKeywordTypeAst(child, SlimeJavascriptAstTypeName.TSBigIntKeyword)
 
         throw new Error(`Unknown TSKeywordType child: ${name}`)
     }
@@ -305,7 +307,7 @@ export default class SlimeTSTypeAnnotationCstToAst {
         }
 
         return {
-            type: SlimeAstTypeName.TSLiteralType,
+            type: SlimeJavascriptAstTypeName.TSLiteralType,
             literal,
             loc: cst.loc,
         }
@@ -350,7 +352,7 @@ export default class SlimeTSTypeAnnotationCstToAst {
         }
 
         const result: any = {
-            type: SlimeAstTypeName.TSTypeReference,
+            type: SlimeJavascriptAstTypeName.TSTypeReference,
             typeName,
             loc: cst.loc,
         }
@@ -409,7 +411,7 @@ export default class SlimeTSTypeAnnotationCstToAst {
 
         for (let i = 1; i < parts.length; i++) {
             result = {
-                type: SlimeAstTypeName.TSQualifiedName,
+                type: SlimeJavascriptAstTypeName.TSQualifiedName,
                 left: result,
                 right: {
                     type: 'Identifier',
@@ -437,7 +439,7 @@ export default class SlimeTSTypeAnnotationCstToAst {
         }
 
         return {
-            type: SlimeAstTypeName.TSTypeParameterInstantiation,
+            type: SlimeJavascriptAstTypeName.TSTypeParameterInstantiation,
             params,
             loc: cst.loc,
         }
@@ -516,7 +518,7 @@ export default class SlimeTSTypeAnnotationCstToAst {
 
         if (typeCst) {
             return {
-                type: SlimeAstTypeName.TSParenthesizedType,
+                type: SlimeJavascriptAstTypeName.TSParenthesizedType,
                 typeAnnotation: this.createTSTypeAst(typeCst),
                 loc: cst.loc,
             }
@@ -537,3 +539,5 @@ export default class SlimeTSTypeAnnotationCstToAst {
 
 
 }
+
+export const SlimeJavascriptTSTypeAnnotationCstToAst = new SlimeJavascriptTSTypeAnnotationCstToAstSingle()

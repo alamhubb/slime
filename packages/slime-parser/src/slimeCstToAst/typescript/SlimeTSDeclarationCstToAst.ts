@@ -1,7 +1,8 @@
 import {SubhutiCst} from "subhuti";
-import {SlimeAstTypeName} from "slime-ast";
+import {SlimeJavascriptAstTypeName} from "SlimeJavascript-ast";
+import {SlimeJavascriptTSCompositeTypeCstToAstSingle} from "./SlimeTSCompositeTypeCstToAst.ts";
 
-export default class SlimeTSDeclarationCstToAst{
+export class SlimeJavascriptTSDeclarationCstToAstSingle {
 
     // ============================================
     // TypeScript 声明转换 (Phase 4)
@@ -36,7 +37,7 @@ export default class SlimeTSDeclarationCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSInterfaceDeclaration,
+            type: SlimeJavascriptAstTypeName.TSInterfaceDeclaration,
             id,
             typeParameters,
             extends: extendsClause.length > 0 ? extendsClause : undefined,
@@ -87,7 +88,7 @@ export default class SlimeTSDeclarationCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSInterfaceHeritage,
+            type: SlimeJavascriptAstTypeName.TSInterfaceHeritage,
             expression,
             typeParameters,
             loc: cst.loc,
@@ -111,7 +112,7 @@ export default class SlimeTSDeclarationCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSInterfaceBody,
+            type: SlimeJavascriptAstTypeName.TSInterfaceBody,
             body,
             loc: cst.loc,
         }
@@ -144,7 +145,7 @@ export default class SlimeTSDeclarationCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSEnumDeclaration,
+            type: SlimeJavascriptAstTypeName.TSEnumDeclaration,
             id,
             members,
             const: isConst,
@@ -186,13 +187,13 @@ export default class SlimeTSDeclarationCstToAst{
                 }
             } else if (child.name === 'AssignmentExpression') {
                 // 初始化表达式 - 使用 SlimeJavascriptCstToAstUtil 的方法
-                // 注意：这里调用的是单例的方法，会被 SlimeCstToAstUtil 的拦截机制处理
+                // 注意：这里调用的是单例的方法，会被 SlimeJavascriptCstToAstUtil 的拦截机制处理
                 initializer = SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(child)
             }
         }
 
         return {
-            type: SlimeAstTypeName.TSEnumMember,
+            type: SlimeJavascriptAstTypeName.TSEnumMember,
             id,
             initializer,
             loc: cst.loc,
@@ -226,7 +227,7 @@ export default class SlimeTSDeclarationCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSTypeAliasDeclaration,
+            type: SlimeJavascriptAstTypeName.TSTypeAliasDeclaration,
             id,
             typeParameters,
             typeAnnotation,
@@ -236,3 +237,5 @@ export default class SlimeTSDeclarationCstToAst{
 
 
 }
+
+export const SlimeJavascriptTSDeclarationCstToAst = new SlimeJavascriptTSDeclarationCstToAstSingle()

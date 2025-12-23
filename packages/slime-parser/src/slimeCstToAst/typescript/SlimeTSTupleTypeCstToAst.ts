@@ -1,7 +1,8 @@
 import {SubhutiCst} from "subhuti";
-import {SlimeAstTypeName, SlimeJavascriptAstTypeName} from "slime-ast";
+import {SlimeJavascriptAstTypeName, SlimeJavascriptAstTypeName} from "SlimeJavascript-ast";
+import {SlimeJavascriptTSPrimaryTypeCstToAstSingle} from "./SlimeTSPrimaryTypeCstToAst.ts";
 
-export default class SlimeTSTupleTypeCstToAst{
+export class SlimeJavascriptTSTupleTypeCstToAstSingle {
     /**
      * [TypeScript] 转换 TSTupleType CST 为 AST
      */
@@ -16,7 +17,7 @@ export default class SlimeTSTupleTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSTupleType,
+            type: SlimeJavascriptAstTypeName.TSTupleType,
             elementTypes,
             loc: cst.loc,
         }
@@ -86,7 +87,7 @@ export default class SlimeTSTupleTypeCstToAst{
         const typeCst = children.find(c => c.name === 'TSType')
 
         return {
-            type: SlimeAstTypeName.TSRestType,
+            type: SlimeJavascriptAstTypeName.TSRestType,
             typeAnnotation: typeCst ? this.createTSTypeAst(typeCst) : undefined,
             loc: cst.loc,
         }
@@ -118,7 +119,7 @@ export default class SlimeTSTupleTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSNamedTupleMember,
+            type: SlimeJavascriptAstTypeName.TSNamedTupleMember,
             label,
             elementType,
             optional,
@@ -126,3 +127,5 @@ export default class SlimeTSTupleTypeCstToAst{
         }
     }
 }
+
+export const SlimeJavascriptTSTupleTypeCstToAst = new SlimeJavascriptTSTupleTypeCstToAstSingle()

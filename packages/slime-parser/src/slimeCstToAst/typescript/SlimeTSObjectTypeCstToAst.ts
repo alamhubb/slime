@@ -1,7 +1,8 @@
 import {SubhutiCst} from "subhuti";
-import {SlimeAstTypeName, SlimeJavascriptAstTypeName} from "slime-ast";
+import {SlimeJavascriptAstTypeName, SlimeJavascriptAstTypeName} from "SlimeJavascript-ast";
+import {SlimeJavascriptTSCompositeTypeCstToAstSingle} from "./SlimeTSCompositeTypeCstToAst.ts";
 
-export default class SlimeTSObjectTypeCstToAst{
+export class SlimeJavascriptTSObjectTypeCstToAstSingle {
     /**
      * [TypeScript] 转换 TSTypeLiteral CST 为 AST
      */
@@ -216,7 +217,7 @@ export default class SlimeTSObjectTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSPropertySignature,
+            type: SlimeJavascriptAstTypeName.TSPropertySignature,
             key,
             typeAnnotation,
             readonly,
@@ -256,7 +257,7 @@ export default class SlimeTSObjectTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSMethodSignature,
+            type: SlimeJavascriptAstTypeName.TSMethodSignature,
             key,
             parameters,
             typeAnnotation,
@@ -284,7 +285,7 @@ export default class SlimeTSObjectTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSCallSignatureDeclaration,
+            type: SlimeJavascriptAstTypeName.TSCallSignatureDeclaration,
             parameters,
             typeAnnotation,
             loc: cst.loc,
@@ -311,7 +312,7 @@ export default class SlimeTSObjectTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSConstructSignatureDeclaration,
+            type: SlimeJavascriptAstTypeName.TSConstructSignatureDeclaration,
             parameters,
             typeAnnotation,
             loc: cst.loc,
@@ -350,7 +351,7 @@ export default class SlimeTSObjectTypeCstToAst{
         const identifierCst = children.find(c => c.name === 'Identifier')
         if (identifierCst) {
             typeParameter = {
-                type: SlimeAstTypeName.TSTypeParameter,
+                type: SlimeJavascriptAstTypeName.TSTypeParameter,
                 name: this.createIdentifierAst(identifierCst),
                 loc: identifierCst.loc,
             }
@@ -395,7 +396,7 @@ export default class SlimeTSObjectTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSMappedType,
+            type: SlimeJavascriptAstTypeName.TSMappedType,
             typeParameter,
             nameType,
             typeAnnotation,
@@ -431,7 +432,7 @@ export default class SlimeTSObjectTypeCstToAst{
                         type: 'Identifier',
                         name: tokenCst.value,
                         typeAnnotation: {
-                            type: SlimeAstTypeName.TSTypeAnnotation,
+                            type: SlimeJavascriptAstTypeName.TSTypeAnnotation,
                             typeAnnotation: this.createTSTypeAst(children[colonIdx + 1]),
                         },
                         loc: tokenCst.loc,
@@ -442,14 +443,14 @@ export default class SlimeTSObjectTypeCstToAst{
             } else if (child.name === 'TSType' && parameters.length) {
                 // 返回类型
                 typeAnnotation = {
-                    type: SlimeAstTypeName.TSTypeAnnotation,
+                    type: SlimeJavascriptAstTypeName.TSTypeAnnotation,
                     typeAnnotation: this.createTSTypeAst(child),
                 }
             }
         }
 
         return {
-            type: SlimeAstTypeName.TSIndexSignature,
+            type: SlimeJavascriptAstTypeName.TSIndexSignature,
             parameters,
             typeAnnotation,
             readonly,
@@ -508,10 +509,13 @@ export default class SlimeTSObjectTypeCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSTypeLiteral,
+            type: SlimeJavascriptAstTypeName.TSTypeLiteral,
             members,
             loc: cst.loc,
         }
     }
 
 }
+
+
+export const SlimeJavascriptTSObjectTypeCstToAst = new SlimeJavascriptTSObjectTypeCstToAstSingle()

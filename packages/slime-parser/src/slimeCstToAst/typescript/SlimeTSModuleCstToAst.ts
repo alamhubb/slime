@@ -1,14 +1,15 @@
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeAstCreateUtils,
-    SlimeAstTypeName,
+    SlimeJavascriptAstCreateUtils,
+    SlimeJavascriptAstTypeName,
     SlimeJavascriptCreateUtils,
-    SlimeProgram,
-    SlimeTokenCreateUtils
-} from "slime-ast";
+    SlimeJavascriptProgram,
+    SlimeJavascriptTokenCreateUtils
+} from "SlimeJavascript-ast";
 import {SlimeJavascriptExportCstToAst} from "../module/SlimeJavascriptExportCstToAst.ts";
+import {SlimeJavascriptTSFunctionTypeCstToAstSingle} from "./SlimeTSFunctionTypeCstToAst.ts";
 
-export default class SlimeTSModuleCstToAst{
+export class SlimeJavascriptTSModuleCstToAstSingle {
 
     /**
      * [TypeScript] 转换 TSModuleDeclaration CST 为 AST
@@ -51,7 +52,7 @@ export default class SlimeTSModuleCstToAst{
         }
 
         return {
-            type: SlimeAstTypeName.TSModuleDeclaration,
+            type: SlimeJavascriptAstTypeName.TSModuleDeclaration,
             id,
             body,
             declare,
@@ -69,12 +70,12 @@ export default class SlimeTSModuleCstToAst{
 
         for (const child of children) {
             if (child.name === 'ModuleItem') {
-                body.push(SlimeCstToAstUtil.createModuleItemAst(child))
+                body.push(SlimeJavascriptCstToAstUtil.createModuleItemAst(child))
             }
         }
 
         return {
-            type: SlimeAstTypeName.TSModuleBlock,
+            type: SlimeJavascriptAstTypeName.TSModuleBlock,
             body,
             loc: cst.loc,
         }
@@ -173,7 +174,7 @@ export default class SlimeTSModuleCstToAst{
             return {
                 type: 'TSDeclareFunction',
                 id,
-                params: formalParamsCst ? SlimeCstToAstUtil.createFormalParametersAst(formalParamsCst) : [],
+                params: formalParamsCst ? SlimeJavascriptCstToAstUtil.createFormalParametersAst(formalParamsCst) : [],
                 typeParameters: typeParamsCst ? this.createTSTypeParameterDeclarationAst(typeParamsCst) : undefined,
                 returnType: returnTypeCst ? this.createTSTypeAnnotationAst(returnTypeCst) : undefined,
                 declare: true,
@@ -201,7 +202,7 @@ export default class SlimeTSModuleCstToAst{
                 type: 'ClassDeclaration',
                 id,
                 typeParameters: typeParamsCst ? this.createTSTypeParameterDeclarationAst(typeParamsCst) : undefined,
-                body: classTailCst ? SlimeCstToAstUtil.createClassTailAst(classTailCst) : { type: 'ClassBody', body: [] },
+                body: classTailCst ? SlimeJavascriptCstToAstUtil.createClassTailAst(classTailCst) : { type: 'ClassBody', body: [] },
                 declare: true,
                 loc: cst.loc,
             }
@@ -221,7 +222,7 @@ export default class SlimeTSModuleCstToAst{
             // declare global { }
             const moduleBlockCst = children.find(c => c.name === 'TSModuleBlock')
             return {
-                type: SlimeAstTypeName.TSModuleDeclaration,
+                type: SlimeJavascriptAstTypeName.TSModuleDeclaration,
                 id: { type: 'Identifier', name: 'global', loc: cst.loc },
                 body: moduleBlockCst ? this.createTSModuleBlockAst(moduleBlockCst) : undefined,
                 declare: true,
@@ -268,7 +269,7 @@ export default class SlimeTSModuleCstToAst{
 
         // 获取 import token
         const importTokenCst = children.find(c => c.name === 'Import' || c.value === 'import')
-        const importToken = importTokenCst ? SlimeTokenCreateUtils.createImportToken(importTokenCst.loc) : undefined
+        const importToken = importTokenCst ? SlimeJavascriptTokenCreateUtils.createImportToken(importTokenCst.loc) : undefined
 
         // 获取 ImportClause
         const importClauseCst = children.find(c => c.name === 'ImportClause')
@@ -566,7 +567,7 @@ export default class SlimeTSModuleCstToAst{
 
         // 获取 export token
         const exportTokenCst = children.find(c => c.name === 'Export' || c.value === 'export')
-        const exportToken = exportTokenCst ? SlimeTokenCreateUtils.createExportToken(exportTokenCst.loc) : undefined
+        const exportToken = exportTokenCst ? SlimeJavascriptTokenCreateUtils.createExportToken(exportTokenCst.loc) : undefined
 
         // 获取 NamedExports
         const namedExportsCst = children.find(c => c.name === 'NamedExports')
@@ -656,3 +657,5 @@ export default class SlimeTSModuleCstToAst{
     }
 
 }
+
+export const SlimeJavascriptTSModuleCstToAst = new SlimeJavascriptTSModuleCstToAstSingle()

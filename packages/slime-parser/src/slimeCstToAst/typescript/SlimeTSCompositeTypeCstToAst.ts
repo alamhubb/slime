@@ -1,7 +1,8 @@
 import {SubhutiCst} from "subhuti";
-import {SlimeAstTypeName, SlimeJavascriptAstTypeName} from "slime-ast";
+import {SlimeJavascriptAstTypeName} from "slime-ast";
+import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
-export default class SlimeTSCompositeTypeCstToAst {
+export class SlimeJavascriptTSCompositeTypeCstToAstSingle {
 
     /**
      * [TypeScript] 转换 TSConditionalType CST 为 AST
@@ -171,3 +172,5 @@ export default class SlimeTSCompositeTypeCstToAst {
     }
 
 }
+
+export const SlimeJavascriptTSCompositeTypeCstToAst = new SlimeJavascriptTSCompositeTypeCstToAstSingle()
