@@ -1,7 +1,7 @@
 /**
  * ClassDeclarationCstToAst - class body/element 转换
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import {
     SlimeJavascriptCreateUtils,
@@ -10,8 +10,8 @@ import {
     SlimeJavascriptMethodDefinition, SlimeAstTypeName,
     SlimeJavascriptPropertyDefinition, SlimeJavascriptStatement,
     SlimeJavascriptTokenCreateUtils, SlimeClassBody, SlimeClassDeclaration, SlimeIdentifier, SlimeTokenCreateUtils,
-    SlimeAstCreateUtils, SlimeClassExpression, SlimeExpression, SlimePropertyDefinition, SlimeAstTypeName,
-    SlimeStatement
+    SlimeAstCreateUtils, SlimeClassExpression, SlimeExpression, SlimePropertyDefinition,
+    SlimeStatement, SlimeLiteral
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
@@ -19,57 +19,65 @@ import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
 export class SlimeJavascriptClassDeclarationCstToAstSingle {
 
+    /**
+     * 创建 ClassDeclaration AST
+     * 支持泛型参数和 implements（TypeScript 扩展）
+     */
     createClassDeclarationAst(cst: SubhutiCst): SlimeClassDeclaration {
-        // 检�?CST 节点名称是否�?ClassDeclaration
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassDeclaration?.name);
 
-        // Token fields
         let classToken: any = undefined
         let id: SlimeIdentifier | null = null
         let classTailCst: SubhutiCst | null = null
 
-        // 遍历子节点，提取 class token、标识符�?ClassTail
         for (const child of cst.children) {
             const name = child.name
             if (name === 'Class' || child.value === 'class') {
-                classToken = SlimeJavascriptTokenCreateUtils.createClassToken(child.loc)
+                classToken = SlimeTokenCreateUtils.createClassToken(child.loc)
             } else if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
+                id = SlimeCstToAstUtil.createBindingIdentifierAst(child)
+            } else if (name === SlimeParser.prototype.ClassTail?.name || name === 'ClassTail') {
+                classTailCst = child
+            }
+            // TSTypeParameterDeclaration 当前忽略（ESTree 不支持泛型参数）
+        }
+
+        if (!classTailCst) {
+            throw new Error('ClassDeclaration missing ClassTail')
+        }
+
+        const classTailResult = SlimeCstToAstUtil.createClassTailAst(classTailCst)
+
+        return SlimeAstCreateUtils.createClassDeclaration(
+            id, classTailResult.body, classTailResult.superClass, cst.loc,
+            classToken, classTailResult.extendsToken
+        )
+    }
+
+    /**
+     * 创建 ClassExpression AST
+     */
+    createClassExpressionAst(cst: SubhutiCst): SlimeClassExpression {
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassExpression?.name);
+
+        let id: SlimeIdentifier | null = null
+        let classTailCst: SubhutiCst | null = null
+
+        for (const child of cst.children) {
+            const name = child.name
+            if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
                 id = SlimeCstToAstUtil.createBindingIdentifierAst(child)
             } else if (name === SlimeParser.prototype.ClassTail?.name || name === 'ClassTail') {
                 classTailCst = child
             }
         }
 
-        // ClassTail 是必须的
         if (!classTailCst) {
-            throw new Error('ClassDeclaration missing ClassTail')
+            throw new Error('ClassExpression missing ClassTail')
         }
 
-        // 解析 ClassTail，获取类体和父类信息
-        const classTailResult = SlimeCstToAstUtil.createClassTailAst(classTailCst)
-
-        // 创建类声�?AST 节点（id 可能�?null，用于匿名类�?
-        const ast = SlimeJavascriptCreateUtils.createClassDeclaration(
-            id, classTailResult.body, classTailResult.superClass, cst.loc,
-            classToken, classTailResult.extendsToken
-        )
-
-        return ast
-    }
-
-    createClassExpressionAst(cst: SubhutiCst): SlimeClassExpression {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassExpression?.name);
-
-        let id: SlimeIdentifier | null = null // class 表达式可选的标识�?
-        let tailStartIndex = 1 // 默认 ClassTail 位于索引 1
-        const nextChild = cst.children[1]
-        if (nextChild && nextChild.name === SlimeParser.prototype.BindingIdentifier?.name) {
-            id = SlimeCstToAstUtil.createBindingIdentifierAst(nextChild) // 若存在标识符则解�?
-            tailStartIndex = 2 // ClassTail 的位置后�?
-        }
-        const classTail = SlimeCstToAstUtil.createClassTailAst(cst.children[tailStartIndex]) // 统一解析 ClassTail
-
-        return SlimeJavascriptCreateUtils.createClassExpression(id, classTail.superClass, classTail.body, cst.loc) // 生成 ClassExpression AST
+        const classTail = SlimeCstToAstUtil.createClassTailAst(classTailCst)
+        return SlimeAstCreateUtils.createClassExpression(id, classTail.superClass, classTail.body, cst.loc)
     }
 
     createClassBodyAst(cst: SubhutiCst): SlimeClassBody {
@@ -291,7 +299,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
         }
 
         const superClass = SlimeCstToAstUtil.createLeftHandSideExpressionAst(cst.children[1])
-        return {superClass, extendsToken}
+        return { superClass, extendsToken }
     }
 
 
@@ -304,7 +312,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
     } {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ClassTail?.name);
         let superClass: SlimeExpression | null = null // 超类默认�?null
-        let body: SlimeClassBody = {type: SlimeAstTypeName.ClassBody as any, body: [], loc: cst.loc} // 默认空类�?
+        let body: SlimeClassBody = { type: SlimeAstTypeName.ClassBody as any, body: [], loc: cst.loc } // 默认空类�?
         let extendsToken: any = undefined
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined
@@ -331,7 +339,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
             body.rBraceToken = rBraceToken
         }
 
-        return {superClass, body, extendsToken, lBraceToken, rBraceToken}
+        return { superClass, body, extendsToken, lBraceToken, rBraceToken }
     }
 
 
@@ -470,7 +478,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
         rBraceToken?: any;
     } {
         let superClass: SlimeExpression | null = null
-        let body: SlimeClassBody = {type: SlimeAstTypeName.ClassBody as any, body: [], loc: cst.loc}
+        let body: SlimeClassBody = { type: SlimeAstTypeName.ClassBody as any, body: [], loc: cst.loc }
         let extendsToken: any = undefined
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined
@@ -498,7 +506,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
             body.rBraceToken = rBraceToken
         }
 
-        return {superClass, body, extendsToken, lBraceToken, rBraceToken}
+        return { superClass, body, extendsToken, lBraceToken, rBraceToken }
     }
 
     /**
@@ -517,15 +525,17 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
             const childName = child.name
             if (childName === 'Extends' || child.value === 'extends') {
                 extendsToken = SlimeTokenCreateUtils.createExtendsToken(child.loc)
+            } else if (childName === 'LeftHandSideExpression' ||
+                childName === SlimeParser.prototype.LeftHandSideExpression?.name) {
+                superClass = SlimeCstToAstUtil.createLeftHandSideExpressionAst(child)
             }
-            // todo  不完�?
         }
 
-        return {superClass, extendsToken}
+        return { superClass: superClass!, extendsToken }
     }
 
     /**
-     * [TypeScript] 重写 createFieldDefinitionAst 以支持类型注�?
+     * [TypeScript] 重写 createFieldDefinitionAst 以支持类型注?
      *
      * FieldDefinition: ClassElementName TSTypeAnnotation_opt Initializer_opt
      */
