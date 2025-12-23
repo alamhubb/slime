@@ -8,7 +8,7 @@ import {
      type SlimeClassExpression,
     type SlimeExpression, type SlimeFunctionParam, type SlimeIdentifier, SlimeLiteral,
     SlimeAstTypeName, SlimeNumericLiteral, type SlimeSpreadElement,
-    SlimeStringLiteral, SlimeTokenCreateUtils
+    SlimeStringLiteral, SlimeTokenCreateUtils, SlimeAstCreateUtils
 } from "slime-ast";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 

@@ -51,7 +51,7 @@ const PRIVATE_IDENTIFIER_PATTERN = new RegExp(
     'u'
 )
 
-export const SlimeTokensObj = {
+export const SlimeJavascriptTokensObj = {
 
     // ============================================
     // A.1.2 注释 (Comments)
@@ -336,4 +336,4 @@ export const SlimeTokensObj = {
     IdentifierName: createEmptyValueRegToken(SlimeTokenType.IdentifierName, IDENTIFIER_NAME_PATTERN),
 }
 
-export const SlimeTokens: SubhutiCreateToken[] = Object.values(SlimeTokensObj)
+export const slimeJavascriptTokens: SubhutiCreateToken[] = Object.values(SlimeJavascriptTokensObj)

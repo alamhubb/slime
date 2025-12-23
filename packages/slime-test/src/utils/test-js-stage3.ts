@@ -2,9 +2,8 @@
  * JS Stage 3: 代码生成测试 (SlimeJavascriptParser + SlimeJavascriptCstToAst + SlimeJavascriptGenerator)
  */
 import {runTests, testStage3} from "./test-framework.ts";
-import SlimeJavascriptParser from "../../../slime-parser/src/deprecated/SlimeJavascriptParser.ts";
-import { SlimeJavascriptCstToAst } from "slime-parser";
-import SlimeJavascriptGenerator from "../../../slime-generator/src/deprecated/SlimeJavascriptGenerator.ts";
+import { SlimeJavascriptParser, SlimeCstToAst } from "slime-parser";
+import { SlimeJavascriptGenerator } from "slime-generator";
 
 runTests(testStage3, {
     stageName: '阶段3: 代码生成测试 (SlimeJavascriptParser)',
@@ -12,6 +11,6 @@ runTests(testStage3, {
     startFrom: 1,
     stopOnFail: true,
     ParserClass: SlimeJavascriptParser,
-    CstToAstClass: SlimeJavascriptCstToAst,
+    CstToAstClass: SlimeCstToAst,
     Generator: SlimeJavascriptGenerator
 })

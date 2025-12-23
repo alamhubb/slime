@@ -26,8 +26,8 @@ import {
     SlimeReservedWordTokenTypes,
     SlimeTokenType
 } from "slime-token";
-import SlimeTokenConsumer from "./SlimeTokenConsumer.ts";
-import {SlimeTokens} from "./SlimeTokens.ts";
+import SlimeTokenConsumer from "./SlimeJavascriptTokenConsumer.ts";
+import {slimeJavascriptTokens} from "./SlimeJavascriptTokens.ts";
 
 // ============================================
 // 保留字集合（用于 Identifier 验证）
@@ -58,7 +58,7 @@ import {SlimeTokens} from "./SlimeTokens.ts";
 
 
 export const ReservedWords = new Set(
-    SlimeTokens
+    slimeJavascriptTokens
         .filter(token => token.isKeyword)  // 过滤出所有硬关键字 token
         .map(token => token.value!)        // 提取 value（'await', 'break' 等）
 )
@@ -219,7 +219,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
         const defaultTokenConsumer = SlimeTokenConsumer as unknown as SubhutiTokenConsumerConstructor<T>
         super(sourceCode, {
             tokenConsumer: options?.tokenConsumer ?? defaultTokenConsumer,
-            tokenDefinitions: options?.tokenDefinitions ?? SlimeTokens
+            tokenDefinitions: options?.tokenDefinitions ?? slimeJavascriptTokens
         })
     }
 

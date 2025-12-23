@@ -181,6 +181,10 @@ export class SlimeClassDeclarationCstToAstSingle {
     }
 
 
+    /**
+     * [TypeScript] createFieldDefinitionAst 支持类型注解
+     * FieldDefinition: ClassElementName TSTypeAnnotation_opt Initializer_opt
+     */
     createFieldDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimePropertyDefinition {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.FieldDefinition?.name);
 
@@ -189,23 +193,37 @@ export class SlimeClassDeclarationCstToAstSingle {
         const elementNameCst = cst.children[0]
         const key = SlimeCstToAstUtil.createClassElementNameAst(elementNameCst)
 
-        // 检查是否是计算属�?
+        // 检查是否是计算属性
         const isComputed = SlimeCstToAstUtil.isComputedPropertyName(elementNameCst)
 
-        // 检查是否有初始化器
+        // [TypeScript] 检查是否有类型注解
+        let typeAnnotation: any = undefined
         let value: SlimeExpression | null = null
-        if (cst.children.length > 1) {
-            const initializerCst = cst.children[1]
-            if (initializerCst && initializerCst.name === SlimeParser.prototype.Initializer?.name) {
-                value = SlimeCstToAstUtil.createInitializerAst(initializerCst)
+
+        for (let i = 1; i < cst.children.length; i++) {
+            const child = cst.children[i]
+            const childName = child.name
+            
+            if (childName === 'TSTypeAnnotation') {
+                typeAnnotation = SlimeCstToAstUtil.createTSTypeAnnotationAst(child)
+            } else if (childName === 'Initializer' || 
+                       childName === SlimeParser.prototype.Initializer?.name) {
+                value = SlimeCstToAstUtil.createInitializerAst(child)
             }
         }
 
-        // 检查是否有 修饰�?
+        // 检查是否有 static 修饰符
         const isStatic = SlimeCstToAstUtil.isStaticModifier(staticCst)
 
-        // 注意参数顺序�?key, value, computed, isStatic, loc)
-        return SlimeAstCreateUtils.createPropertyDefinition(key, value, isComputed, isStatic || false, cst.loc)
+        // 注意参数顺序：(key, value, computed, isStatic, loc)
+        const ast = SlimeAstCreateUtils.createPropertyDefinition(key, value, isComputed, isStatic || false, cst.loc)
+        
+        // [TypeScript] 添加类型注解
+        if (typeAnnotation) {
+            (ast as any).typeAnnotation = typeAnnotation
+        }
+
+        return ast
     }
 
 

@@ -7,7 +7,7 @@ import {
     SlimeIdentifier, type SlimeImportDeclaration, SlimeImportDefaultSpecifier, SlimeImportNamespaceSpecifier,
     SlimeImportSpecifier, SlimeImportSpecifierItem, SlimeLiteral,
     type SlimeModuleDeclaration, SlimeAstTypeName, SlimePattern, type SlimeStatement,
-    SlimeStringLiteral, SlimeTokenCreateUtils, SlimeVariableDeclarator
+    SlimeStringLiteral, SlimeTokenCreateUtils, SlimeVariableDeclarator, SlimeAstCreateUtils
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 
@@ -26,9 +26,27 @@ export class SlimeImportCstToAstSingle {
         let importToken: any = undefined
         let semicolonToken: any = undefined
 
+        // [TypeScript] 检查是否是 import type
+        let importKind: 'type' | 'value' = 'value'
+
         // 提取 import token
         if (first && (first.name === 'Import' || first.value === 'import')) {
             importToken = SlimeTokenCreateUtils.createImportToken(first.loc)
+        }
+
+        // [TypeScript] 查找 type 关键字（在 import 之后）
+        for (let i = 1; i < cst.children.length; i++) {
+            const child = cst.children[i]
+            if (child.value === 'type' && child.name !== 'ImportClause') {
+                // 确保 type 在 import 之后，且不是 ImportClause 内部的 type
+                importKind = 'type'
+                break
+            }
+            // 如果遇到 ImportClause 或 ModuleSpecifier，停止查找
+            if (child.name === SlimeParser.prototype.ImportClause?.name ||
+                child.name === SlimeParser.prototype.ModuleSpecifier?.name) {
+                break
+            }
         }
 
         // 查找 semicolon
@@ -49,7 +67,39 @@ export class SlimeImportCstToAstSingle {
             withToken = parsed.withToken
         }
 
-        if (first1.name === SlimeParser.prototype.ImportClause?.name) {
+        // 查找 ImportClause（可能在 type 关键字之后）
+        const importClauseCst = cst.children.find(ch =>
+            ch.name === SlimeParser.prototype.ImportClause?.name || ch.name === 'ImportClause'
+        )
+        // 查找 FromClause
+        const fromClauseCst = cst.children.find(ch =>
+            ch.name === SlimeParser.prototype.FromClause?.name || ch.name === 'FromClause'
+        )
+        // 查找 ModuleSpecifier (for side-effect imports)
+        const moduleSpecifierCst = cst.children.find(ch =>
+            ch.name === SlimeParser.prototype.ModuleSpecifier?.name || ch.name === 'ModuleSpecifier'
+        )
+
+        if (importClauseCst && fromClauseCst) {
+            const clauseResult = SlimeCstToAstUtil.createImportClauseAst(importClauseCst)
+            const fromClause = SlimeCstToAstUtil.createFromClauseAst(fromClauseCst)
+            importDeclaration = SlimeAstCreateUtils.createImportDeclaration(
+                clauseResult.specifiers, fromClause.source, cst.loc,
+                importToken, fromClause.fromToken,
+                clauseResult.lBraceToken, clauseResult.rBraceToken,
+                semicolonToken, attributes, withToken
+            )
+        } else if (moduleSpecifierCst) {
+            // import 'module' (side effect import) 或 import 'module' with {...}
+            const source = SlimeCstToAstUtil.createModuleSpecifierAst(moduleSpecifierCst)
+            importDeclaration = SlimeAstCreateUtils.createImportDeclaration(
+                [], source, cst.loc,
+                importToken, undefined,
+                undefined, undefined,
+                semicolonToken, attributes, withToken
+            )
+        } else if (first1.name === SlimeParser.prototype.ImportClause?.name) {
+            // 兼容旧的处理方式
             const clauseResult = SlimeCstToAstUtil.createImportClauseAst(first1)
             const fromClause = SlimeCstToAstUtil.createFromClauseAst(cst.children[2])
             importDeclaration = SlimeAstCreateUtils.createImportDeclaration(
@@ -59,7 +109,7 @@ export class SlimeImportCstToAstSingle {
                 semicolonToken, attributes, withToken
             )
         } else if (first1.name === SlimeParser.prototype.ModuleSpecifier?.name) {
-            // import 'module' (side effect import) �?import 'module' with {...}
+            // import 'module' (side effect import)
             const source = SlimeCstToAstUtil.createModuleSpecifierAst(first1)
             importDeclaration = SlimeAstCreateUtils.createImportDeclaration(
                 [], source, cst.loc,
@@ -68,6 +118,12 @@ export class SlimeImportCstToAstSingle {
                 semicolonToken, attributes, withToken
             )
         }
+
+        // [TypeScript] 添加 importKind 属性
+        if (importKind === 'type') {
+            (importDeclaration as any).importKind = 'type'
+        }
+
         return importDeclaration
     }
 

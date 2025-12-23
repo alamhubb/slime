@@ -9,7 +9,8 @@ import {
     SlimeAstTypeName,
     SlimeTokenCreateUtils,
     type SlimeVariableDeclaration,
-    type SlimeVariableDeclarator
+    type SlimeVariableDeclarator,
+    SlimeAstCreateUtils
 } from "slime-ast";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import {SlimeVariableCstToAstSingle} from "./SlimeVariableCstToAst.ts";

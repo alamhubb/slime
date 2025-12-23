@@ -7,7 +7,7 @@ import {
     SlimeExpression,
     type SlimeIdentifier, SlimeAstTypeName, type SlimePattern, SlimeSpreadElement, type SlimeSuper,
     SlimeTokenCreateUtils,
-    type SlimeVariableDeclarator
+    type SlimeVariableDeclarator, SlimeAstCreateUtils
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
@@ -212,11 +212,21 @@ export class SlimeMemberCallCstToAstSingle {
 
 
     /**
-     * CallMemberExpression CST �?AST
+     * CallMemberExpression CST 转 AST
      * CallMemberExpression -> MemberExpression Arguments
      */
     createCallMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
-        return SlimeCstToAstUtil.createCallExpressionAst(cst)
+        return this.createCallExpressionAst(cst)
+    }
+
+    /**
+     * CallExpression CST 转 AST
+     * CallExpression -> CoverCallExpressionAndAsyncArrowHead | SuperCall | ImportCall | CallExpression Arguments | CallExpression [Expression] | CallExpression . IdentifierName | CallExpression TemplateLiteral
+     */
+    createCallExpressionAst(cst: SubhutiCst): SlimeExpression {
+        // CallExpression 的结构类似于 MemberExpression，但以函数调用开始
+        // 复用 MemberExpression 的处理逻辑
+        return this.createMemberExpressionAst(cst)
     }
 
 
@@ -318,11 +328,11 @@ export class SlimeMemberCallCstToAstSingle {
 
 
     /**
-     * CoverCallExpressionAndAsyncArrowHead CST �?AST
-     * 这是一�?cover grammar，通常作为 CallExpression 处理
+     * CoverCallExpressionAndAsyncArrowHead CST 转 AST
+     * 这是一个 cover grammar，通常作为 CallExpression 处理
      */
     createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeExpression {
-        return SlimeCstToAstUtil.createCallExpressionAst(cst)
+        return this.createCallExpressionAst(cst)
     }
 
 

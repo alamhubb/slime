@@ -70,7 +70,7 @@ export class SlimeTSExpressionCstToAstSingle {
         return {
             type: SlimeAstTypeName.TSTypeAssertion,
             typeAnnotation: SlimeCstToAstUtil.createTSTypeAst(typeCst),
-            expression: SlimeJavascriptCstToAstUtil.createUnaryExpressionAst(exprCst),
+            expression: SlimeCstToAstUtil.createUnaryExpressionAst(exprCst),
             loc: cst.loc,
         }
     }

@@ -102,6 +102,19 @@ import {
     SlimeClassDeclarationCstToAst,
 } from "./cstToAst";
 
+// 函数调用表达式转换
+import { SlimeCallExpressionCstToAst } from "./cstToAst/expressions/SlimeCallExpressionCstToAst.ts";
+
+// TypeScript 类型转换
+import { SlimeTSTypeAnnotationCstToAst } from "./cstToAst/typescript/SlimeTSTypeAnnotationCstToAst.ts";
+import { SlimeTSCompositeTypeCstToAst } from "./cstToAst/typescript/SlimeTSCompositeTypeCstToAst.ts";
+import { SlimeTSFunctionTypeCstToAst } from "./cstToAst/typescript/SlimeTSFunctionTypeCstToAst.ts";
+import { SlimeTSKeywordTypeCstToAst } from "./cstToAst/typescript/SlimeTSKeywordTypeCstToAst.ts";
+import { SlimeTSPrimaryTypeCstToAst } from "./cstToAst/typescript/SlimeTSPrimaryTypeCstToAst.ts";
+import { SlimeTSTypeLiteralCstToAst } from "./cstToAst/typescript/SlimeTSTypeLiteralCstToAst.ts";
+import { SlimeTSDeclarationCstToAst } from "./cstToAst/typescript/SlimeTSDeclarationCstToAst.ts";
+import { SlimeTSExpressionCstToAst } from "./cstToAst/typescript/SlimeTSExpressionCstToAst.ts";
+
 
 
 // ============================================
@@ -569,15 +582,15 @@ export class SlimeCstToAst {
     }
 
     createArgumentsAst(cst: SubhutiCst): Array<SlimeCallArgument> {
-        return SlimeMemberCallCstToAst.createArgumentsAst(cst)
+        return SlimeCallExpressionCstToAst.createArgumentsAst(cst)
     }
 
     createArgumentListAst(cst: SubhutiCst): Array<SlimeCallArgument> {
-        return SlimeMemberCallCstToAst.createArgumentListAst(cst)
+        return SlimeCallExpressionCstToAst.createArgumentListAst(cst)
     }
 
     createCallExpressionAst(cst: SubhutiCst): SlimeExpression {
-        return SlimeMemberCallCstToAst.createCallExpressionAst(cst)
+        return SlimeCallExpressionCstToAst.createCallExpressionAst(cst)
     }
 
     createCallMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
@@ -585,11 +598,11 @@ export class SlimeCstToAst {
     }
 
     createNewExpressionAst(cst: SubhutiCst): any {
-        return SlimeMemberCallCstToAst.createNewExpressionAst(cst)
+        return SlimeCallExpressionCstToAst.createNewExpressionAst(cst)
     }
 
     createSuperCallAst(cst: SubhutiCst): SlimeExpression {
-        return SlimeMemberCallCstToAst.createSuperCallAst(cst)
+        return SlimeCallExpressionCstToAst.createSuperCallAst(cst)
     }
 
     createSuperPropertyAst(cst: SubhutiCst): SlimeExpression {
@@ -1250,8 +1263,216 @@ export class SlimeCstToAst {
         return SlimeModuleCstToAst.createModuleItemListAst(cst)
     }
 
+    // ============================================
+    // TypeScript 类型转换方法 - 委托到 typescript/ 目录
+    // ============================================
+
+    createTSTypeAst(cst: SubhutiCst): any {
+        return SlimeTSTypeAnnotationCstToAst.createTSTypeAst(cst)
+    }
+
+    createTSTypeAnnotationAst(cst: SubhutiCst): any {
+        return SlimeTSTypeAnnotationCstToAst.createTSTypeAnnotationAst(cst)
+    }
+
+    createTSUnionOrIntersectionTypeAst(cst: SubhutiCst): any {
+        return SlimeTSCompositeTypeCstToAst.createTSUnionOrIntersectionTypeAst(cst)
+    }
+
+    createTSIntersectionTypeAst(cst: SubhutiCst): any {
+        return SlimeTSCompositeTypeCstToAst.createTSIntersectionTypeAst(cst)
+    }
+
+    createTSConditionalTypeAst(cst: SubhutiCst): any {
+        return SlimeTSCompositeTypeCstToAst.createTSConditionalTypeAst(cst)
+    }
+
+    createTSTypeOperandAst(cst: SubhutiCst): any {
+        return SlimeTSCompositeTypeCstToAst.createTSTypeOperandAst(cst)
+    }
+
+    createTSPrefixTypeOrPrimaryAst(cst: SubhutiCst): any {
+        return SlimeTSCompositeTypeCstToAst.createTSPrefixTypeOrPrimaryAst(cst)
+    }
+
+    createTSTypeQueryAst(cst: SubhutiCst): any {
+        return SlimeTSCompositeTypeCstToAst.createTSTypeQueryAst(cst)
+    }
+
+    createTSTypeOperatorAst(cst: SubhutiCst): any {
+        return SlimeTSCompositeTypeCstToAst.createTSTypeOperatorAst(cst)
+    }
+
+    createTSInferTypeAst(cst: SubhutiCst): any {
+        return SlimeTSCompositeTypeCstToAst.createTSInferTypeAst(cst)
+    }
+
+    createTSFunctionTypeAst(cst: SubhutiCst): any {
+        return SlimeTSFunctionTypeCstToAst.createTSFunctionTypeAst(cst)
+    }
+
+    createTSConstructorTypeAst(cst: SubhutiCst): any {
+        return SlimeTSFunctionTypeCstToAst.createTSConstructorTypeAst(cst)
+    }
+
+    createTSTypeParameterDeclarationAst(cst: SubhutiCst): any {
+        return SlimeTSFunctionTypeCstToAst.createTSTypeParameterDeclarationAst(cst)
+    }
+
+    createTSTypeParameterAst(cst: SubhutiCst): any {
+        return SlimeTSFunctionTypeCstToAst.createTSTypeParameterAst(cst)
+    }
+
+    createTSKeywordTypeWrapperAst(cst: SubhutiCst): any {
+        return SlimeTSKeywordTypeCstToAst.createTSKeywordTypeWrapperAst(cst)
+    }
+
+    createTSKeywordTypeAst(cst: SubhutiCst, typeName: string): any {
+        return SlimeTSKeywordTypeCstToAst.createTSKeywordTypeAst(cst, typeName)
+    }
+
+    createTSLiteralTypeAst(cst: SubhutiCst): any {
+        return SlimeTSKeywordTypeCstToAst.createTSLiteralTypeAst(cst)
+    }
+
+    createTSPrimaryTypeAst(cst: SubhutiCst): any {
+        return SlimeTSPrimaryTypeCstToAst.createTSPrimaryTypeAst(cst)
+    }
+
+    createTSTypeReferenceAst(cst: SubhutiCst): any {
+        return SlimeTSPrimaryTypeCstToAst.createTSTypeReferenceAst(cst)
+    }
+
+    createTSTypeNameAst(cst: SubhutiCst): any {
+        return SlimeTSPrimaryTypeCstToAst.createTSTypeNameAst(cst)
+    }
+
+    buildQualifiedName(parts: string[], loc: SubhutiSourceLocation): any {
+        return SlimeTSPrimaryTypeCstToAst.buildQualifiedName(parts, loc)
+    }
+
+    createTSTypeParameterInstantiationAst(cst: SubhutiCst): any {
+        return SlimeTSPrimaryTypeCstToAst.createTSTypeParameterInstantiationAst(cst)
+    }
+
+    createTSTupleTypeAst(cst: SubhutiCst): any {
+        return SlimeTSPrimaryTypeCstToAst.createTSTupleTypeAst(cst)
+    }
+
+    createTSTupleElementAst(cst: SubhutiCst): any {
+        return SlimeTSPrimaryTypeCstToAst.createTSTupleElementAst(cst)
+    }
+
+    createTSRestTypeAst(cst: SubhutiCst): any {
+        return SlimeTSPrimaryTypeCstToAst.createTSRestTypeAst(cst)
+    }
+
+    createTSNamedTupleMemberAst(cst: SubhutiCst): any {
+        return SlimeTSPrimaryTypeCstToAst.createTSNamedTupleMemberAst(cst)
+    }
+
+    createTSMappedTypeAst(cst: SubhutiCst): any {
+        return SlimeTSPrimaryTypeCstToAst.createTSMappedTypeAst(cst)
+    }
+
+    createTSParenthesizedTypeAst(cst: SubhutiCst): any {
+        return SlimeTSPrimaryTypeCstToAst.createTSParenthesizedTypeAst(cst)
+    }
+
+    createTSTypeLiteralAst(cst: SubhutiCst): any {
+        return SlimeTSTypeLiteralCstToAst.createTSTypeLiteralAst(cst)
+    }
+
+    createTSTypeMemberAst(cst: SubhutiCst): any {
+        return SlimeTSTypeLiteralCstToAst.createTSTypeMemberAst(cst)
+    }
+
+    createTSPropertyOrMethodSignatureAst(cst: SubhutiCst): any {
+        return SlimeTSTypeLiteralCstToAst.createTSPropertyOrMethodSignatureAst(cst)
+    }
+
+    extractPropertyNameKey(cst: SubhutiCst): any {
+        return SlimeTSTypeLiteralCstToAst.extractPropertyNameKey(cst)
+    }
+
+    createTSPropertySignatureAst(cst: SubhutiCst): any {
+        return SlimeTSTypeLiteralCstToAst.createTSPropertySignatureAst(cst)
+    }
+
+    createTSMethodSignatureAst(cst: SubhutiCst): any {
+        return SlimeTSTypeLiteralCstToAst.createTSMethodSignatureAst(cst)
+    }
+
+    createTSIndexSignatureAst(cst: SubhutiCst): any {
+        return SlimeTSTypeLiteralCstToAst.createTSIndexSignatureAst(cst)
+    }
+
+    createTSCallSignatureDeclarationAst(cst: SubhutiCst): any {
+        return SlimeTSTypeLiteralCstToAst.createTSCallSignatureDeclarationAst(cst)
+    }
+
+    createTSConstructSignatureDeclarationAst(cst: SubhutiCst): any {
+        return SlimeTSTypeLiteralCstToAst.createTSConstructSignatureDeclarationAst(cst)
+    }
+
+    createTSParameterListAst(cst: SubhutiCst): any[] {
+        return SlimeTSTypeLiteralCstToAst.createTSParameterListAst(cst)
+    }
+
+    createTSParameterAst(cst: SubhutiCst): any {
+        return SlimeTSTypeLiteralCstToAst.createTSParameterAst(cst)
+    }
+
+    createTSInterfaceDeclarationAst(cst: SubhutiCst): any {
+        return SlimeTSDeclarationCstToAst.createTSInterfaceDeclarationAst(cst)
+    }
+
+    createTSInterfaceExtendsAst(cst: SubhutiCst): any[] {
+        return SlimeTSDeclarationCstToAst.createTSInterfaceExtendsAst(cst)
+    }
+
+    createTSExpressionWithTypeArgumentsAst(cst: SubhutiCst): any {
+        return SlimeTSDeclarationCstToAst.createTSExpressionWithTypeArgumentsAst(cst)
+    }
+
+    createTSInterfaceBodyAst(cst: SubhutiCst): any {
+        return SlimeTSDeclarationCstToAst.createTSInterfaceBodyAst(cst)
+    }
+
+    createTSTypeAliasDeclarationAst(cst: SubhutiCst): any {
+        return SlimeTSDeclarationCstToAst.createTSTypeAliasDeclarationAst(cst)
+    }
+
+    createTSEnumDeclarationAst(cst: SubhutiCst): any {
+        return SlimeTSDeclarationCstToAst.createTSEnumDeclarationAst(cst)
+    }
+
+    createTSEnumMemberAst(cst: SubhutiCst): any {
+        return SlimeTSDeclarationCstToAst.createTSEnumMemberAst(cst)
+    }
+
+    createTSAsExpressionAst(expression: any, typeCst: SubhutiCst, loc: any): any {
+        return SlimeTSExpressionCstToAst.createTSAsExpressionAst(expression, typeCst, loc)
+    }
+
+    createTSSatisfiesExpressionAst(expression: any, typeCst: SubhutiCst, loc: any): any {
+        return SlimeTSExpressionCstToAst.createTSSatisfiesExpressionAst(expression, typeCst, loc)
+    }
+
+    createTSNonNullExpressionAst(expression: any, loc: any): any {
+        return SlimeTSExpressionCstToAst.createTSNonNullExpressionAst(expression, loc)
+    }
+
+    createTSTypeAssertionAst(cst: SubhutiCst): any {
+        return SlimeTSExpressionCstToAst.createTSTypeAssertionAst(cst)
+    }
+
+    createTSTypePredicateAst(cst: SubhutiCst): any {
+        return SlimeTSExpressionCstToAst.createTSTypePredicateAst(cst)
+    }
+
 }
 
-const SlimeCstToAstUtil = new SlimeCstToAst()
+const slimeCstToAstUtil = new SlimeCstToAst()
 
-export default SlimeCstToAstUtil
+export default slimeCstToAstUtil

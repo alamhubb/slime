@@ -8,6 +8,7 @@
  */
 import {SubhutiCst} from "subhuti";
 import {SlimeAstTypeName} from "slime-ast";
+import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
 export class SlimeTSKeywordTypeCstToAstSingle {
     /**

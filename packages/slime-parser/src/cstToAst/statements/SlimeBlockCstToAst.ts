@@ -6,7 +6,7 @@ import {
     type SlimeExportDefaultDeclaration,
     type SlimeExportNamedDeclaration, SlimeExpressionStatement,
     SlimeFunctionDeclaration, SlimeFunctionExpression, SlimeAstTypeName, SlimeStatement,
-    SlimeTokenCreateUtils
+    SlimeTokenCreateUtils, SlimeAstCreateUtils
 } from "slime-ast";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";

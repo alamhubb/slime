@@ -7,6 +7,7 @@
  */
 import {SubhutiCst} from "subhuti";
 import {SlimeAstTypeName, SlimeTokenCreateUtils} from "slime-ast";
+import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
 export class SlimeTSTypeAnnotationCstToAstSingle {
 

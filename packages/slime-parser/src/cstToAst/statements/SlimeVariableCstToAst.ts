@@ -11,9 +11,10 @@ import {
     type SlimeFunctionParam,
     type SlimeIdentifier, SlimeAstTypeName, type SlimePropertyDefinition,
     SlimeTokenCreateUtils, type SlimeVariableDeclaration, type SlimeVariableDeclarator,
-     type SlimePattern, type SlimeExpression
+    SlimeAstCreateUtils, type SlimePattern, type SlimeExpression
 } from "slime-ast";
 import {SlimeClassDeclarationCstToAstSingle} from "../class/SlimeClassDeclarationCstToAst.ts";
+import {SlimeIdentifierCstToAst} from "../identifier/SlimeIdentifierCstToAst.ts";
 
 
 
@@ -310,6 +311,9 @@ export class SlimeVariableCstToAstSingle {
     }
 
 
+    /**
+     * [TypeScript] createDeclarationAst 支持 TypeScript 声明
+     */
     createDeclarationAst(cst: SubhutiCst): SlimeDeclaration {
         // Support both Declaration wrapper and direct types
         const first = cst.name === SlimeParser.prototype.Declaration?.name || cst.name === 'Declaration'
@@ -318,6 +322,24 @@ export class SlimeVariableCstToAstSingle {
 
         const name = first.name
 
+        // TypeScript 声明
+        if (name === 'TSInterfaceDeclaration') {
+            return SlimeCstToAstUtil.createTSInterfaceDeclarationAst(first)
+        }
+        if (name === 'TSTypeAliasDeclaration') {
+            return SlimeCstToAstUtil.createTSTypeAliasDeclarationAst(first)
+        }
+        if (name === 'TSEnumDeclaration') {
+            return SlimeCstToAstUtil.createTSEnumDeclarationAst(first)
+        }
+        if (name === 'TSModuleDeclaration') {
+            return SlimeIdentifierCstToAst.createTSModuleDeclarationAst(first)
+        }
+        if (name === 'TSDeclareStatement') {
+            return SlimeIdentifierCstToAst.createTSDeclareStatementAst(first)
+        }
+
+        // JavaScript 声明
         if (name === SlimeParser.prototype.VariableDeclaration?.name || name === 'VariableDeclaration') {
             return SlimeCstToAstUtil.createVariableDeclarationAst(first);
         } else if (name === SlimeParser.prototype.LexicalDeclaration?.name || name === 'LexicalDeclaration') {

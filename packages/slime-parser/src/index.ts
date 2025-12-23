@@ -3,7 +3,8 @@ export * from './SlimeParser.ts'
 export * from './SlimeTokenConsumer.ts'
 export * from './SlimeTokens.ts'
 
-export { default as SlimeCstToAstUtil } from './SlimeCstToAstUtil.ts'
+export { SlimeCstToAst } from './SlimeCstToAstUtil.ts'
+export { default as slimeCstToAstUtil } from './SlimeCstToAstUtil.ts'
 export { default as SlimeParser } from './SlimeParser.ts'
 export { default as SlimeTokenConsumer } from './SlimeTokenConsumer.ts'
 export { default as slimeTokens } from './SlimeTokens.ts'
@@ -14,7 +15,9 @@ export * from './cstToAst/index.ts'
 // 导出 deprecated 模块
 export * from './SlimeCstToAstUtil.ts'
 export * from './deprecated/SlimeJavascriptTokens.ts'
+export * from './deprecated/SlimeJavascriptParser.ts'
 
 export { default as SlimeJavascriptCstToAstUtil } from './SlimeCstToAstUtil.ts'
+export { default as SlimeJavascriptParser } from './deprecated/SlimeJavascriptParser.ts'
 
 

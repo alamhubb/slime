@@ -11,7 +11,6 @@
 import {SubhutiCst} from "subhuti";
 import {SlimeAstTypeName} from "slime-ast";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
-import {SlimeJavascriptCstToAstUtil} from "../../index.ts";
 
 export class SlimeTSDeclarationCstToAstSingle {
 
@@ -220,9 +219,8 @@ export class SlimeTSDeclarationCstToAstSingle {
                     loc: child.loc,
                 }
             } else if (child.name === 'AssignmentExpression') {
-                // 初始化表达式 - 使用 SlimeJavascriptCstToAstUtil 的方法
-                // 注意：这里调用的是单例的方法，会被 SlimeCstToAstUtil 的拦截机制处理
-                initializer = SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(child)
+                // 初始化表达式
+                initializer = SlimeCstToAstUtil.createAssignmentExpressionAst(child)
             }
         }
 

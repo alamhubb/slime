@@ -9,7 +9,7 @@ import {
     SlimeExportNamedDeclaration, SlimeExportSpecifier, SlimeExportSpecifierItem, SlimeFunctionParam, SlimeIdentifier,
     SlimeLiteral,
     SlimeModuleDeclaration, SlimePattern,
-    SlimeStatement, SlimeTokenCreateUtils
+    SlimeStatement, SlimeTokenCreateUtils, SlimeAstCreateUtils
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 
@@ -30,7 +30,10 @@ export class SlimeExportCstToAstSingle {
         let semicolonToken: any = undefined
         let asToken: any = undefined
 
-        // 遍历子节点提取信�?
+        // [TypeScript] 检查是否是 export type
+        let exportKind: 'type' | 'value' = 'value'
+
+        // 遍历子节点提取信息
         let exportFromClause: SubhutiCst | null = null
         let fromClause: SubhutiCst | null = null
         let namedExports: SubhutiCst | null = null
@@ -42,7 +45,8 @@ export class SlimeExportCstToAstSingle {
         let withClauseCst: SubhutiCst | null = null
         let isDefault = false
 
-        for (const child of children) {
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i]
             const name = child.name
             if (name === SlimeTokenConsumer.prototype.Export?.name || child.value === 'export') {
                 exportToken = SlimeTokenCreateUtils.createExportToken(child.loc)
@@ -55,6 +59,12 @@ export class SlimeExportCstToAstSingle {
                 semicolonToken = SlimeTokenCreateUtils.createSemicolonToken(child.loc)
             } else if (name === SlimeTokenConsumer.prototype.As?.name || child.value === 'as') {
                 asToken = SlimeTokenCreateUtils.createAsToken(child.loc)
+            } else if (child.value === 'type' && i > 0) {
+                // [TypeScript] 查找 type 关键字（在 export 之后）
+                const prevChild = children[i - 1]
+                if (prevChild.name === SlimeTokenConsumer.prototype.Export?.name || prevChild.value === 'export') {
+                    exportKind = 'type'
+                }
             } else if (name === SlimeParser.prototype.ExportFromClause?.name) {
                 exportFromClause = child
             } else if (name === SlimeParser.prototype.FromClause?.name) {
@@ -118,15 +128,19 @@ export class SlimeExportCstToAstSingle {
                     fromClauseResult.source, exported, cst.loc,
                     exportToken, asteriskToken, asToken, fromClauseResult.fromToken, semicolonToken
                 ) as any
-                // 添加 attributes（如果有 withToken，即�?attributes 为空也要添加�?
+                // 添加 attributes（如果有 withToken，即使 attributes 为空也要添加）
                 if (withToken) {
                     result.attributes = attributes
                     result.withToken = withToken
                 }
+                // [TypeScript] 添加 exportKind
+                if (exportKind === 'type') {
+                    result.exportKind = 'type'
+                }
                 return result
             } else {
                 // export { ... } from ...
-                // exportFromClause 的结构是 [NamedExports]，需要从中提�?NamedExports
+                // exportFromClause 的结构是 [NamedExports]，需要从中提取 NamedExports
                 const namedExportsCst = exportFromClause.children?.find((ch: any) =>
                     ch.name === SlimeParser.prototype.NamedExports?.name || ch.name === 'NamedExports'
                 )
@@ -137,10 +151,14 @@ export class SlimeExportCstToAstSingle {
                     null, specifiers, fromClauseResult.source, cst.loc,
                     exportToken, fromClauseResult.fromToken, semicolonToken
                 )
-                // 添加 attributes（如果有 withToken，即�?attributes 为空也要添加�?
+                // 添加 attributes（如果有 withToken，即使 attributes 为空也要添加）
                 if (withToken) {
                     (result as any).attributes = attributes;
                     (result as any).withToken = withToken
+                }
+                // [TypeScript] 添加 exportKind
+                if (exportKind === 'type') {
+                    (result as any).exportKind = 'type'
                 }
                 return result
             }
@@ -149,9 +167,14 @@ export class SlimeExportCstToAstSingle {
         // export NamedExports ; (export { ... })
         if (namedExports) {
             const specifiers = SlimeCstToAstUtil.createNamedExportsAst(namedExports)
-            return SlimeAstCreateUtils.createExportNamedDeclaration(
+            const result = SlimeAstCreateUtils.createExportNamedDeclaration(
                 null, specifiers, null, cst.loc, exportToken, undefined, semicolonToken
             )
+            // [TypeScript] 添加 exportKind
+            if (exportKind === 'type') {
+                (result as any).exportKind = 'type'
+            }
+            return result
         }
 
         // export VariableStatement

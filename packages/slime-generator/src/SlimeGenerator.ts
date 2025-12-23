@@ -3,6 +3,7 @@ import {
     SlimeJavascriptGeneratorUtil
 } from "./deprecated/SlimeJavascriptGenerator.ts";
 import { SlimeJavascriptTokenType } from "slime-token";
+import { SlimeJavascriptAstTypeName } from "slime-ast";
 
 /**
  * SlimeGenerator - 支持 TypeScript 的代码生成器
@@ -1131,22 +1132,31 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
      */
     generatorTSExportSpecifier(node: any) {
         if (node.local && node.exported) {
-            const localName = node.local.name
-            const exportedName = node.exported.name
+            // ES2022: local 和 exported 可以是 Identifier 或 Literal（字符串字面量）
+            // 获取比较值：Identifier 用 name，Literal 用 value
+            const localValue = node.local.type === SlimeJavascriptAstTypeName.Literal
+                ? node.local.value
+                : node.local.name
+            const exportedValue = node.exported.type === SlimeJavascriptAstTypeName.Literal
+                ? node.exported.value
+                : node.exported.name
             
-            if (localName !== exportedName) {
-                this.generatorIdentifier(node.local)
+            // 比较值而不是对象引用
+            if (localValue !== exportedValue) {
+                // export {name as userName} 或 export {"string" as "alias"}
+                this.generatorNode(node.local)
                 this.addSpacing()
-                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.AsTok, null)
+                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.AsTok, node.asToken?.loc)
                 this.addSpacing()
-                this.generatorIdentifier(node.exported)
+                this.generatorNode(node.exported)
             } else {
-                this.generatorIdentifier(node.local)
+                // export {name} - 简写形式，只输出一次
+                this.generatorNode(node.local)
             }
         } else if (node.local) {
-            this.generatorIdentifier(node.local)
+            this.generatorNode(node.local)
         } else if (node.exported) {
-            this.generatorIdentifier(node.exported)
+            this.generatorNode(node.exported)
         }
     }
 
