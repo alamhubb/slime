@@ -1,6 +1,6 @@
 {
   "name": "slime-parser",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -26,12 +26,12 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "slime-ast": "^0.2.6",
-    "slime-token": "^0.2.6",
+    "slime-ast": "^0.2.7",
+    "slime-token": "^0.2.7",
     "subhuti": "^0.2.6"
   },
   "devDependencies": {
     "tsdown": "0.17.0-beta.6"
   },
-  "gitHead": "fe097b71b4e3829e0106a7fc67c01e01c639ae52"
+  "gitHead": "f30908e91de454bc56ffb824ef1e194e8b678789"
 }
