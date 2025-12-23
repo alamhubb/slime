@@ -10,7 +10,7 @@
  */
 import {runTests, testStage2} from "./test-framework.ts";
 import SlimeJavascriptParser from "../../../slime-parser/src/deprecated/SlimeJavascriptParser.ts";
-import { SlimeJavascriptCstToAst } from "../../../slime-parser/src/deprecated/SlimeJavascriptCstToAstUtil.ts";
+import { SlimeJavascriptCstToAst } from "slime-parser";
 
 // 运行测试 - 使用 SlimeParser (TypeScript)
 runTests(testStage2, {

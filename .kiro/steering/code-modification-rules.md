@@ -16,14 +16,14 @@ deprecated 包包含 JavaScript ES2025 的基础实现，是稳定的基础代�
 
 | deprecated 文件 | 扩展文件 |
 |----------------|---------|
-| `SlimeJavascriptCstToAstUtil.ts` | `SlimeCstToAstUtil.ts` |
+| `SlimeCstToAstUtil.ts` | `SlimeCstToAstUtil.ts` |
 | `slimeJavascriptCstToAst/expressions/` | `cstToAst/` 目录下对应文件 |
 
 ### 示例：添加 TypeScript 表达式支持
 
 ```typescript
 // 在 SlimeCstToAstUtil.ts 的 _setupMethodInterception() 中添加：
-; (SlimeJavascriptCstToAstUtil as any).createExpressionAstUncached = 
+; (SlimeCstToAstUtil as any).createExpressionAstUncached = 
     this.createExpressionAstUncached.bind(this)
 
 // 然后重写 createExpressionAstUncached 方法

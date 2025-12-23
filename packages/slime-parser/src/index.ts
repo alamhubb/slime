@@ -12,10 +12,10 @@ export { default as slimeTokens } from './SlimeTokens.ts'
 export * from './cstToAst/index.ts'
 
 // 导出 deprecated 模块
-export * from './deprecated/SlimeJavascriptCstToAstUtil.ts'
+export * from './SlimeCstToAstUtil.ts'
 export * from './deprecated/SlimeJavascriptTokens.ts'
 export * from './deprecated/SlimeJavascriptParser.ts'
 
-export { default as SlimeJavascriptCstToAstUtil } from './deprecated/SlimeJavascriptCstToAstUtil.ts'
+export { default as SlimeJavascriptCstToAstUtil } from './SlimeCstToAstUtil.ts'
 
 

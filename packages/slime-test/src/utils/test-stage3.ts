@@ -11,7 +11,7 @@
  */
 import {runTests, testStage3} from "./test-framework.ts";
 import SlimeJavascriptParser from "../../../slime-parser/src/deprecated/SlimeJavascriptParser.ts";
-import { SlimeJavascriptCstToAst } from "../../../slime-parser/src/deprecated/SlimeJavascriptCstToAstUtil.ts";
+import { SlimeJavascriptCstToAst } from "slime-parser";
 import SlimeJavascriptGenerator from "../../../slime-generator/src/deprecated/SlimeJavascriptGenerator.ts";
 
 // 运行测试 - 使用 SlimeJavascriptParser + SlimeJavascriptGenerator (deprecated stack)

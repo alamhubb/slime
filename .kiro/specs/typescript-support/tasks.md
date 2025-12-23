@@ -28,7 +28,7 @@ Stage 1 (CST生成) → Stage 2 (AST生成) → Stage 3 (代码生成)
 |---------|---------|
 | JS Stage 1 失败 | `deprecated/SlimeJavascriptParser.ts` (基础解析器) |
 | TS Stage 1 失败，JS通过 | `SlimeParser.ts` (TypeScript扩展) |
-| JS Stage 2 失败 | `deprecated/SlimeJavascriptCstToAstUtil.ts` (基础CST→AST) |
+| JS Stage 2 失败 | `deprecated/SlimeCstToAstUtil.ts` (基础CST→AST) |
 | TS Stage 2 失败，JS通过 | `SlimeCstToAstUtil.ts` 或 `cstToAst/` 目录 |
 | JS Stage 3 失败 | `SlimeGenerator.ts` (代码生成) |
 | TS Stage 3 失败，JS通过 | `SlimeGenerator.ts` (TypeScript节点生成) |

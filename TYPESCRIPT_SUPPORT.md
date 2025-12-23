@@ -102,9 +102,9 @@
 
 ## 方法拦截机制
 
-由于 deprecated 包中的代码硬编码调用 `SlimeJavascriptCstToAstUtil.xxx()`，无法通过类继承重写来拦截。
+由于 deprecated 包中的代码硬编码调用 `SlimeCstToAstUtil.xxx()`，无法通过类继承重写来拦截。
 
-解决方案：在 `SlimeCstToAstUtil` 构造函数中，运行时替换 `SlimeJavascriptCstToAstUtil` 单例的方法引用。
+解决方案：在 `SlimeCstToAstUtil` 构造函数中，运行时替换 `SlimeCstToAstUtil` 单例的方法引用。
 
 ```typescript
 // SlimeCstToAstUtil.ts
@@ -115,7 +115,7 @@ constructor() {
 
 private _setupMethodInterception() {
     // 替换方法引用，指向支持 TypeScript 的新实现
-    SlimeJavascriptCstToAstUtil.createClassDeclarationAst = 
+    SlimeCstToAstUtil.createClassDeclarationAst = 
         SlimeClassDeclarationCstToAst.createClassDeclarationAst.bind(SlimeClassDeclarationCstToAst)
     // ... 更多拦截
 }

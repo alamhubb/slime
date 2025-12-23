@@ -80,7 +80,7 @@ npx tsx packages/slime-test/src/utils/test-ts-stage3.ts 2271
 |---------|---------|
 | JS Stage 1 失败 | `deprecated/SlimeJavascriptParser.ts` (基础解析器) |
 | TS Stage 1 失败，JS通过 | `SlimeParser.ts` (TypeScript扩展) |
-| JS Stage 2 失败 | `deprecated/SlimeJavascriptCstToAstUtil.ts` (基础CST→AST) |
+| JS Stage 2 失败 | `deprecated/SlimeCstToAstUtil.ts` (基础CST→AST) |
 | TS Stage 2 失败，JS通过 | `SlimeCstToAstUtil.ts` 或 `cstToAst/` 目录 |
 | JS Stage 3 失败 | `deprecated/SlimeJavascriptGenerator.ts` (基础代码生成) |
 | TS Stage 3 失败，JS通过 | `SlimeGenerator.ts` (TypeScript代码生成) |
@@ -152,7 +152,7 @@ RangeError: Maximum call stack size exceeded
 **常见原因:**
 
 1. **方法拦截导致的循环调用**
-   - deprecated 包中的方法调用 `SlimeJavascriptCstToAstUtil.xxx()`
+   - deprecated 包中的方法调用 `SlimeCstToAstUtil.xxx()`
    - 该方法被拦截后指向新实现，新实现又调用原始方法，形成循环
 
 2. **super 调用导致的循环**
@@ -161,8 +161,8 @@ RangeError: Maximum call stack size exceeded
 **解决方案:**
 ```typescript
 // 正确做法：保存原始方法引用
-const originalMethod = SlimeJavascriptCstToAstUtil.someMethod.bind(SlimeJavascriptCstToAstUtil)
-;(SlimeJavascriptCstToAstUtil as any).someMethod = (cst: SubhutiCst) => {
+const originalMethod = SlimeCstToAstUtil.someMethod.bind(SlimeCstToAstUtil)
+;(SlimeCstToAstUtil as any).someMethod = (cst: SubhutiCst) => {
     if (cst.name === 'TSSpecificType') {
         return handleTSType(cst)  // 处理 TypeScript 特有类型
     }
