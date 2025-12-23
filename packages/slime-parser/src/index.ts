@@ -9,7 +9,7 @@ export { default as SlimeTokenConsumer } from './SlimeTokenConsumer.ts'
 export { default as slimeTokens } from './SlimeTokens.ts'
 
 // 导出 cstToAst 模块
-export * from './cstToAst/index.ts'
+export * from './slimeCstToAst/index.ts'
 
 // 导出 deprecated 模块
 export * from './SlimeCstToAstUtil.ts'

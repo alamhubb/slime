@@ -17,21 +17,17 @@ import {
     SlimeJavascriptClassBody,
     SlimeJavascriptClassDeclaration,
     SlimeJavascriptConditionalExpression,
-    SlimeJavascriptDeclaration,
     SlimeJavascriptExportDefaultDeclaration,
     SlimeJavascriptExportNamedDeclaration,
     SlimeJavascriptExpression,
     SlimeJavascriptExpressionStatement,
     SlimeJavascriptFunctionExpression,
-    SlimeJavascriptIdentifier,
     SlimeJavascriptLiteral,
     SlimeJavascriptModuleDeclaration,
     SlimeJavascriptPattern,
-    SlimeJavascriptProgram,
     SlimeJavascriptStatement,
     SlimeJavascriptStringLiteral,
     SlimeJavascriptVariableDeclaration,
-    SlimeJavascriptVariableDeclarator,
     SlimeJavascriptReturnStatement,
     SlimeJavascriptSpreadElement,
     SlimeJavascriptMethodDefinition,
@@ -82,8 +78,6 @@ import {
     SlimeAstTypeName,
 } from "slime-ast";
 import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
-import SlimeJavascriptParser from "./deprecated/SlimeJavascriptParser.ts";
-import { SlimeJavascriptCreateUtils, SlimeJavascriptTokenCreateUtils, SlimeJavascriptAstTypeName } from "slime-ast";
 import {
     SlimeJavascriptArrowFunctionCstToAst,
     SlimeJavascriptAssignmentPatternCstToAst,
@@ -291,29 +285,6 @@ export class SlimeJavascriptCstToAst {
             }
     }
 
-    // ============================================
-    // [TypeScript] 重写的方法 - 支持类型注解
-    // ============================================
-
-    /** 支持 TypeScript 类型注解的标识符转换 */
-    override createBindingIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
-        return SlimeJavascriptIdentifierCstToAst.createBindingIdentifierAst(cst)
-    }
-
-    /** 支持 TypeScript 类型注解的变量声明转换 */
-    override createLexicalBindingAst(cst: SubhutiCst): SlimeJavascriptVariableDeclarator {
-        return SlimeJavascriptVariableCstToAst.createLexicalBindingAst(cst)
-    }
-
-    /** 支持 TypeScript 声明 (interface, type, enum) */
-    override createDeclarationAst(cst: SubhutiCst): SlimeJavascriptDeclaration {
-        return SlimeJavascriptVariableCstToAst.createDeclarationAst(cst)
-    }
-
-    // ============================================
-    // [TypeScript] 表达式扩展 - 类型断言
-    // ============================================
-
     /**
      * 重写表达式转换，支持 TypeScript 类型断言表达式
      * - TSTypeAssertion: <Type>expression
@@ -420,20 +391,6 @@ export class SlimeJavascriptCstToAst {
 
         // 其他情况交给父类处理
         return super.createModuleItemAst(cst)
-    }
-
-    /**
-     * 重写 ImportDeclaration 转换，支持 import type
-     */
-    override createImportDeclarationAst(cst: SubhutiCst): any {
-        return SlimeJavascriptModuleCstToAst.createImportDeclarationAst(cst)
-    }
-
-    /**
-     * 重写 ExportDeclaration 转换，支持 export type
-     */
-    override createExportDeclarationAst(cst: SubhutiCst): any {
-        return SlimeJavascriptModuleCstToAst.createExportDeclarationAst(cst)
     }
 
     // === identifier / IdentifierCstToAst ===
@@ -1490,10 +1447,6 @@ export class SlimeJavascriptCstToAst {
 
     createModuleItemAst(item: SubhutiCst): SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration | SlimeJavascriptStatement[] | undefined {
         return SlimeJavascriptModuleCstToAst.createModuleItemAst(item)
-    }
-
-    toProgram(cst: SubhutiCst): SlimeJavascriptProgram {
-        return SlimeJavascriptModuleCstToAst.toProgram(cst)
     }
 
     createModuleItemListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration> {

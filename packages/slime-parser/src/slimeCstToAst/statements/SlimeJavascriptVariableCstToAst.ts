@@ -1,7 +1,7 @@
 /**
  * VariableCstToAst - var/let/const 声明转换
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
@@ -14,8 +14,8 @@ import {
     SlimeJavascriptCreateUtils, type SlimeJavascriptPattern, type SlimeJavascriptExpression, SlimeDeclaration,
     SlimeVariableDeclarator, SlimeTokenCreateUtils, SlimeAstCreateUtils
 } from "slime-ast";
-import {SlimeJavascriptClassDeclarationCstToAstSingle} from "../class/SlimeJavascriptClassDeclarationCstToAst.ts";
-import {SlimeIdentifierCstToAst} from "../../../cstToAst";
+import { SlimeJavascriptClassDeclarationCstToAstSingle } from "../class/SlimeJavascriptClassDeclarationCstToAst.ts";
+import { SlimeIdentifierCstToAst } from "../../../cstToAst";
 
 
 
@@ -314,13 +314,6 @@ export class SlimeJavascriptVariableCstToAstSingle {
     createDeclarationAst(cst: SubhutiCst): SlimeJavascriptDeclaration {
 
         // Support both Declaration wrapper and direct types
-        const first = cst.name === SlimeParser.prototype.Declaration?.name || cst.name === 'Declaration'
-            ? cst.children[0]
-            : cst
-
-        const name = first.name
-
-        // Support both Declaration wrapper and direct types
         const first = cst.name === SlimeJavascriptParser.prototype.Declaration?.name || cst.name === 'Declaration'
             ? cst.children[0]
             : cst
@@ -406,7 +399,7 @@ export class SlimeJavascriptVariableCstToAstSingle {
                 init: null,
                 loc: forBinding?.loc
             }],
-            kind: {type: 'VariableDeclarationKind', value: kind, loc: letOrConst?.loc},
+            kind: { type: 'VariableDeclarationKind', value: kind, loc: letOrConst?.loc },
             loc: cst.loc
         }
     }
