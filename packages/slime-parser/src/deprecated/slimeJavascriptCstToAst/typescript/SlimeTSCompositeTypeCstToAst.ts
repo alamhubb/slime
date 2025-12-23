@@ -1,7 +1,7 @@
 import {SubhutiCst} from "subhuti";
 import {SlimeAstTypeName, SlimeJavascriptAstTypeName} from "slime-ast";
 
-export default class SlimeTSCompositeTypeCstToAst{
+export default class SlimeTSCompositeTypeCstToAst {
 
     /**
      * [TypeScript] 转换 TSConditionalType CST 为 AST
@@ -172,78 +172,6 @@ export default class SlimeTSCompositeTypeCstToAst{
 
 
     /**
-     * [TypeScript] 转换 TSTupleElement CST 为 AST
-     */
-    createTSTupleElementAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-
-        const restCst = children.find(c => c.name === 'TSRestType')
-        if (restCst) {
-            return this.createTSRestTypeAst(restCst)
-        }
-
-        const namedCst = children.find(c => c.name === 'TSNamedTupleMember')
-        if (namedCst) {
-            return this.createTSNamedTupleMemberAst(namedCst)
-        }
-
-        const hasEllipsis = children.some(c => c.name === 'Ellipsis' || c.value === '...')
-        if (hasEllipsis) {
-            const typeCst = children.find(c => c.name === 'TSType')
-            return {
-                type: SlimeJavascriptAstTypeName.TSRestType,
-                typeAnnotation: typeCst ? this.createTSTypeAst(typeCst) : undefined,
-                loc: cst.loc,
-            }
-        }
-
-        const typeCst = children.find(c => c.name === 'TSType')
-        const hasQuestion = children.some(c => c.name === 'Question' || c.value === '?')
-
-        if (typeCst) {
-            const typeAst = this.createTSTypeAst(typeCst)
-            if (hasQuestion) {
-                return {
-                    type: SlimeJavascriptAstTypeName.TSOptionalType,
-                    typeAnnotation: typeAst,
-                    loc: cst.loc,
-                }
-            }
-            return typeAst
-        }
-
-        const firstChild = children[0]
-        if (firstChild && firstChild.name) {
-            if (firstChild.name === 'TSConditionalType') {
-                return this.createTSConditionalTypeAst(firstChild)
-            }
-            if (firstChild.name === 'TSUnionOrIntersectionType') {
-                return this.createTSUnionOrIntersectionTypeAst(firstChild)
-            }
-        }
-
-        throw new Error(`TSTupleElement: no type found, children: ${children.map(c => c.name).join(', ')}`)
-    }
-
-
-
-    /**
-     * [TypeScript] 转换 TSRestType CST 为 AST
-     */
-    createTSRestTypeAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        const typeCst = children.find(c => c.name === 'TSType')
-
-        return {
-            type: SlimeJavascriptAstTypeName.TSRestType,
-            typeAnnotation: typeCst ? this.createTSTypeAst(typeCst) : undefined,
-            loc: cst.loc,
-        }
-    }
-
-
-
-    /**
      * [TypeScript] 转换 TSNamedTupleMember CST 为 AST
      */
     createTSNamedTupleMemberAst(cst: SubhutiCst): any {
@@ -276,8 +204,6 @@ export default class SlimeTSCompositeTypeCstToAst{
             loc: cst.loc,
         }
     }
-
-
 
 
     /**
@@ -356,8 +282,6 @@ export default class SlimeTSCompositeTypeCstToAst{
             loc: cst.loc,
         }
     }
-
-
 
 
 }

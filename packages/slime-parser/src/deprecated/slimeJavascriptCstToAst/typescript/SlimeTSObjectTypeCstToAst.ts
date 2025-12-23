@@ -317,4 +317,201 @@ export default class SlimeTSObjectTypeCstToAst{
             loc: cst.loc,
         }
     }
+
+
+    /**
+     * [TypeScript] 转换 TSMappedType CST 为 AST
+     * { [K in keyof T]: T[K] }
+     */
+    createTSMappedTypeAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+
+        let readonly: '+' | '-' | true | undefined = undefined
+        let optional: '+' | '-' | true | undefined = undefined
+        let typeParameter: any = undefined
+        let nameType: any = undefined
+        let typeAnnotation: any = undefined
+
+        // 解析 readonly 修饰符
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i]
+            if (child.value === '+' && children[i + 1]?.value === 'readonly') {
+                readonly = '+'
+                i++
+            } else if (child.value === '-' && children[i + 1]?.value === 'readonly') {
+                readonly = '-'
+                i++
+            } else if (child.value === 'readonly') {
+                readonly = true
+            }
+        }
+
+        // 找到类型参数 [K in T]
+        const identifierCst = children.find(c => c.name === 'Identifier')
+        if (identifierCst) {
+            typeParameter = {
+                type: SlimeAstTypeName.TSTypeParameter,
+                name: this.createIdentifierAst(identifierCst),
+                loc: identifierCst.loc,
+            }
+
+            // 找到 in 后面的约束类型
+            const tsTypes = children.filter(c => c.name === 'TSType')
+            if (tsTypes.length > 0) {
+                typeParameter.constraint = this.createTSTypeAst(tsTypes[0])
+            }
+
+            // 找到 as 后面的 nameType
+            const asIndex = children.findIndex(c => c.value === 'as')
+            if (asIndex !== -1 && tsTypes.length > 1) {
+                nameType = this.createTSTypeAst(tsTypes[1])
+            }
+        }
+
+        // 解析 optional 修饰符 (?, +?, -?)
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i]
+            // 跳过 LBracket 内的 ?
+            if (child.value === ']') {
+                // 检查 ] 后面的 ?
+                const next = children[i + 1]
+                if (next?.value === '?') {
+                    optional = true
+                } else if (next?.value === '+' && children[i + 2]?.value === '?') {
+                    optional = '+'
+                } else if (next?.value === '-' && children[i + 2]?.value === '?') {
+                    optional = '-'
+                }
+            }
+        }
+
+        // 找到值类型（冒号后面的 TSType）
+        const colonIndex = children.findIndex(c => c.value === ':')
+        if (colonIndex !== -1) {
+            const tsTypesAfterColon = children.slice(colonIndex + 1).filter(c => c.name === 'TSType')
+            if (tsTypesAfterColon.length > 0) {
+                typeAnnotation = this.createTSTypeAst(tsTypesAfterColon[0])
+            }
+        }
+
+        return {
+            type: SlimeAstTypeName.TSMappedType,
+            typeParameter,
+            nameType,
+            typeAnnotation,
+            readonly,
+            optional,
+            loc: cst.loc,
+        }
+    }
+
+
+
+    /**
+     * [TypeScript] 转换 TSIndexSignature CST 为 AST
+     */
+    createTSIndexSignatureAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+
+        let parameters: any[] = []
+        let typeAnnotation: any = undefined
+        let readonly = false
+
+        for (const child of children) {
+            if (child.name === 'TSReadonly' || child.value === 'readonly') {
+                readonly = true
+            } else if (child.name === 'Identifier' || child.name === 'IdentifierName') {
+                // 索引参数名
+                const tokenCst = child.children?.[0] || child
+                // 查找后面的类型注解
+                const idx = children.indexOf(child)
+                const colonIdx = children.findIndex((c, i) => i > idx && (c.name === 'Colon' || c.value === ':'))
+                if (colonIdx !== -1 && children[colonIdx + 1]?.name === 'TSType') {
+                    parameters.push({
+                        type: 'Identifier',
+                        name: tokenCst.value,
+                        typeAnnotation: {
+                            type: SlimeAstTypeName.TSTypeAnnotation,
+                            typeAnnotation: this.createTSTypeAst(children[colonIdx + 1]),
+                        },
+                        loc: tokenCst.loc,
+                    })
+                }
+            } else if (child.name === 'TSType' && !parameters.length) {
+                // 跳过索引参数的类型，已在上面处理
+            } else if (child.name === 'TSType' && parameters.length) {
+                // 返回类型
+                typeAnnotation = {
+                    type: SlimeAstTypeName.TSTypeAnnotation,
+                    typeAnnotation: this.createTSTypeAst(child),
+                }
+            }
+        }
+
+        return {
+            type: SlimeAstTypeName.TSIndexSignature,
+            parameters,
+            typeAnnotation,
+            readonly,
+            loc: cst.loc,
+        }
+    }
+
+
+
+    /**
+     * [TypeScript] 转换 TSTypeMember CST 为 AST
+     */
+    createTSTypeMemberAst(cst: SubhutiCst): any {
+        const child = cst.children?.[0]
+        if (!child) {
+            throw new Error('TSTypeMember has no children')
+        }
+
+        const name = child.name
+
+        if (name === 'TSPropertySignature') {
+            return this.createTSPropertySignatureAst(child)
+        }
+        if (name === 'TSMethodSignature') {
+            return this.createTSMethodSignatureAst(child)
+        }
+        if (name === 'TSIndexSignature') {
+            return this.createTSIndexSignatureAst(child)
+        }
+        if (name === 'TSCallSignatureDeclaration') {
+            return this.createTSCallSignatureDeclarationAst(child)
+        }
+        if (name === 'TSConstructSignatureDeclaration') {
+            return this.createTSConstructSignatureDeclarationAst(child)
+        }
+        // 处理 TSPropertyOrMethodSignature（合并的属性/方法签名）
+        if (name === 'TSPropertyOrMethodSignature') {
+            return this.createTSPropertyOrMethodSignatureAst(child)
+        }
+
+        throw new Error(`Unknown TSTypeMember child: ${name}`)
+    }
+
+
+    /**
+     * [TypeScript] 转换 TSTypeLiteral CST 为 AST
+     */
+    createTSTypeLiteralAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+        const members: any[] = []
+
+        for (const child of children) {
+            if (child.name === 'TSTypeMember') {
+                members.push(this.createTSTypeMemberAst(child))
+            }
+        }
+
+        return {
+            type: SlimeAstTypeName.TSTypeLiteral,
+            members,
+            loc: cst.loc,
+        }
+    }
+
 }

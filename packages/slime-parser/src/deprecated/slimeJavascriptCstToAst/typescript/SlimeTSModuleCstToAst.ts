@@ -1,5 +1,12 @@
 import {SubhutiCst} from "subhuti";
-import {SlimeAstTypeName} from "slime-ast";
+import {
+    SlimeAstCreateUtils,
+    SlimeAstTypeName,
+    SlimeJavascriptCreateUtils,
+    SlimeProgram,
+    SlimeTokenCreateUtils
+} from "slime-ast";
+import {SlimeJavascriptExportCstToAst} from "../module/SlimeJavascriptExportCstToAst.ts";
 
 export default class SlimeTSModuleCstToAst{
 
@@ -714,6 +721,106 @@ export default class SlimeTSModuleCstToAst{
             type: 'ExportSpecifier',
             local,
             exported,
+            loc: cst.loc,
+        }
+    }
+
+    /**
+     * [TypeScript] 转换 TSModuleDeclaration CST 为 AST
+     * namespace A.B.C { } / module "name" { }
+     */
+    createTSModuleDeclarationAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+
+        let id: any = undefined
+        let body: any = undefined
+        let declare = false
+        let global = false
+
+        // 检查是否是 namespace 或 module
+        const isNamespace = children.some(c => c.value === 'namespace')
+        const isModule = children.some(c => c.value === 'module')
+
+        // 找到模块标识符
+        const moduleIdCst = children.find(c => c.name === 'TSModuleIdentifier')
+        if (moduleIdCst) {
+            id = this.createTSModuleIdentifierAst(moduleIdCst)
+        } else {
+            // 可能是字符串字面量模块名 module "name"
+            const stringCst = children.find(c => c.name === 'StringLiteral')
+            if (stringCst) {
+                const tokenCst = stringCst.children?.[0] || stringCst
+                id = {
+                    type: 'Literal',
+                    value: tokenCst.value,
+                    raw: tokenCst.value,
+                    loc: tokenCst.loc,
+                }
+            }
+        }
+
+        // 找到模块体
+        const moduleBlockCst = children.find(c => c.name === 'TSModuleBlock')
+        if (moduleBlockCst) {
+            body = this.createTSModuleBlockAst(moduleBlockCst)
+        }
+
+        return {
+            type: SlimeAstTypeName.TSModuleDeclaration,
+            id,
+            body,
+            declare,
+            global,
+            loc: cst.loc,
+        }
+    }
+
+    /**
+     * [TypeScript] 转换 TSModuleIdentifier CST 为 AST
+     * 支持点分隔的嵌套命名空间 A.B.C
+     */
+    createTSModuleIdentifierAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+        const nameParts: string[] = []
+
+        for (const child of children) {
+            if (child.name === 'Identifier' || child.name === 'IdentifierName') {
+                const tokenCst = child.children?.[0] || child
+                if (tokenCst.value) {
+                    nameParts.push(tokenCst.value)
+                }
+            }
+        }
+
+        if (nameParts.length === 0) {
+            throw new Error('TSModuleIdentifier: no identifier found')
+        }
+
+        // 对于嵌套命名空间 A.B.C，返回第一个标识符
+        // 嵌套部分会在 body 中递归处理
+        return {
+            type: 'Identifier',
+            name: nameParts.join('.'),
+            loc: cst.loc,
+        }
+    }
+
+    /**
+     * [TypeScript] 转换 TSModuleBlock CST 为 AST
+     */
+    createTSModuleBlockAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+        const body: any[] = []
+
+        for (const child of children) {
+            if (child.name === 'ModuleItem') {
+                body.push(SlimeCstToAstUtil.createModuleItemAst(child))
+            }
+        }
+
+        return {
+            type: SlimeAstTypeName.TSModuleBlock,
+            body,
             loc: cst.loc,
         }
     }

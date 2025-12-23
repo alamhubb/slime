@@ -292,57 +292,5 @@ export default class SlimeTSPrimaryTypeCstToAst{
 
 
 
-    /**
-     * [TypeScript] 转换 TSInferType CST 为 AST (infer R)
-     */
-    createTSInferTypeAst(cst: SubhutiCst): any {
-        const children = cst.children || []
 
-        const identifierCst = children.find(c => c.name === 'Identifier')
-        if (!identifierCst) {
-            throw new Error('TSInferType: Identifier not found')
-        }
-
-        const typeParameter: any = {
-            type: SlimeJavascriptAstTypeName.TSTypeParameter,
-            name: this.createIdentifierAst(identifierCst),
-            loc: identifierCst.loc,
-        }
-
-        const extendsCst = children.find(c => c.name === 'Extends')
-        if (extendsCst) {
-            const constraintCst = children.find(c => c.name === 'TSType')
-            if (constraintCst) {
-                typeParameter.constraint = this.createTSTypeAst(constraintCst)
-            }
-        }
-
-        return {
-            type: SlimeJavascriptAstTypeName.TSInferType,
-            typeParameter,
-            loc: cst.loc,
-        }
-    }
-
-
-
-    /**
-     * [TypeScript] 转换 TSTupleType CST 为 AST
-     */
-    createTSTupleTypeAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        const elementTypes: any[] = []
-
-        for (const child of children) {
-            if (child.name === 'TSTupleElement' || child.name === 'TSTupleElementType') {
-                elementTypes.push(this.createTSTupleElementAst(child))
-            }
-        }
-
-        return {
-            type: SlimeJavascriptAstTypeName.TSTupleType,
-            elementTypes,
-            loc: cst.loc,
-        }
-    }
 }
