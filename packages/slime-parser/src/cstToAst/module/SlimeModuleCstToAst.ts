@@ -151,7 +151,6 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
         }
         
         const result = SlimeJavascriptCreateUtils.createImportDeclaration(
-            importToken,
             specifiers,
             source,
             cst.loc,
@@ -255,28 +254,26 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
             }
         }
         
-        // 找到标识符
-        const identifiers = children.filter(c => 
-            c.name === 'ImportedBinding' || 
-            c.name === 'ModuleExportName' ||
-            c.name === 'Identifier' ||
-            c.name === 'IdentifierName'
-        )
+        // 找到 ModuleExportName 和 ImportedBinding
+        // CST 结构: ModuleExportName [as ImportedBinding]
+        // 或者: ImportedBinding (没有 as)
+        const moduleExportNameCst = children.find(c => c.name === 'ModuleExportName')
+        const importedBindingCst = children.find(c => c.name === 'ImportedBinding')
         
         let imported: any = undefined
         let local: any = undefined
         
-        if (identifiers.length >= 2) {
+        if (moduleExportNameCst && importedBindingCst) {
             // ModuleExportName as ImportedBinding
-            const importedCst = identifiers[0]
-            const localCst = identifiers[1]
-            
-            imported = this.extractIdentifier(importedCst)
-            local = this.extractIdentifier(localCst)
-        } else if (identifiers.length === 1) {
-            // ImportedBinding only
-            const bindingCst = identifiers[0]
-            imported = this.extractIdentifier(bindingCst)
+            imported = this.extractIdentifier(moduleExportNameCst)
+            local = this.extractIdentifier(importedBindingCst)
+        } else if (importedBindingCst) {
+            // ImportedBinding only (没有 as)
+            imported = this.extractIdentifier(importedBindingCst)
+            local = { ...imported }
+        } else if (moduleExportNameCst) {
+            // ModuleExportName only (没有 as)
+            imported = this.extractIdentifier(moduleExportNameCst)
             local = { ...imported }
         }
         

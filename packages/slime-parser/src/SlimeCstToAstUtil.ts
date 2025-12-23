@@ -14,6 +14,9 @@ import {
 } from "./cstToAst";
 import { SlimeJavascriptCstToAst } from "./deprecated/SlimeJavascriptCstToAstUtil.ts";
 import SlimeJavascriptCstToAstUtil from './deprecated/SlimeJavascriptCstToAstUtil.ts'
+// 导入原始的表达式转换器，用于避免方法拦截导致的无限递归
+import { SlimeJavascriptExpressionCstToAst } from './deprecated/slimeJavascriptCstToAst/expressions/SlimeJavascriptExpressionCstToAst.ts'
+import { SlimeJavascriptUnaryExpressionCstToAst } from './deprecated/slimeJavascriptCstToAst/expressions/SlimeJavascriptUnaryExpressionCstToAst.ts'
 
 
 // ============================================
@@ -65,6 +68,9 @@ import SlimeJavascriptCstToAstUtil from './deprecated/SlimeJavascriptCstToAstUti
  */
 export class SlimeCstToAst extends SlimeJavascriptCstToAst {
 
+    // 静态标志：防止方法拦截被多次执行
+    private static _intercepted = false
+
     /**
      * 构造函数 - 初始化方法拦截
      * 
@@ -73,7 +79,11 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
      */
     constructor() {
         super()
-        this._setupMethodInterception()
+        // 只在第一次创建实例时执行方法拦截
+        if (!SlimeCstToAst._intercepted) {
+            this._setupMethodInterception()
+            SlimeCstToAst._intercepted = true
+        }
     }
 
     /**
@@ -138,11 +148,56 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
         ; (SlimeJavascriptCstToAstUtil as any).createMethodDefinitionGetterMethodAst = 
             SlimeMethodDefinitionCstToAst.createMethodDefinitionGetterMethodAst.bind(SlimeMethodDefinitionCstToAst)
         
-        // TypeScript 表达式 - 支持类型断言 (<Type>x, x as Type, x!, x satisfies Type)
-        ; (SlimeJavascriptCstToAstUtil as any).createExpressionAstUncached = 
-            this.createExpressionAstUncached.bind(this)
-        ; (SlimeJavascriptCstToAstUtil as any).createUpdateExpressionAst = 
-            this.createUpdateExpressionAst.bind(this)
+        // TypeScript 表达式 - 类型断言 (<Type>expr, expr as Type, expr!)
+        // 保存原始方法引用，用于非 TypeScript 表达式的处理
+        const originalCreateExpressionAstUncached = SlimeJavascriptCstToAstUtil.createExpressionAstUncached.bind(SlimeJavascriptCstToAstUtil)
+        ; (SlimeJavascriptCstToAstUtil as any).createExpressionAstUncached = (cst: SubhutiCst) => {
+            const astName = cst.name
+            // 只处理 TypeScript 特有的表达式类型
+            if (astName === 'TSTypeAssertion') {
+                return SlimeIdentifierCstToAst.createTSTypeAssertionAst(cst)
+            }
+            // 其他类型使用原始实现
+            return originalCreateExpressionAstUncached(cst)
+        }
+        
+        // TypeScript 后缀表达式 - as Type, !, satisfies Type
+        const originalCreateUpdateExpressionAst = SlimeJavascriptCstToAstUtil.createUpdateExpressionAst.bind(SlimeJavascriptCstToAstUtil)
+        ; (SlimeJavascriptCstToAstUtil as any).createUpdateExpressionAst = (cst: SubhutiCst) => {
+            const children = cst.children || []
+            
+            // 检查是否有 TypeScript 后缀表达式
+            for (let i = 0; i < children.length; i++) {
+                const child = children[i]
+                
+                // TSAsExpressionTail: as Type
+                if (child.name === 'TSAsExpressionTail') {
+                    const expression = SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(children[0])
+                    const typeCst = child.children?.find((c: SubhutiCst) => c.name === 'TSType')
+                    if (typeCst) {
+                        return SlimeIdentifierCstToAst.createTSAsExpressionAst(expression, typeCst, cst.loc)
+                    }
+                }
+                
+                // TSSatisfiesExpressionTail: satisfies Type
+                if (child.name === 'TSSatisfiesExpressionTail') {
+                    const expression = SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(children[0])
+                    const typeCst = child.children?.find((c: SubhutiCst) => c.name === 'TSType')
+                    if (typeCst) {
+                        return SlimeIdentifierCstToAst.createTSSatisfiesExpressionAst(expression, typeCst, cst.loc)
+                    }
+                }
+                
+                // TSNonNullExpressionTail: !
+                if (child.name === 'TSNonNullExpressionTail') {
+                    const expression = SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(children[0])
+                    return SlimeIdentifierCstToAst.createTSNonNullExpressionAst(expression, cst.loc)
+                }
+            }
+            
+            // 没有 TypeScript 后缀：使用原始实现
+            return originalCreateUpdateExpressionAst(cst)
+        }
         
         // TypeScript 模块 - 支持 import type, export type, namespace
         ; (SlimeJavascriptCstToAstUtil as any).createModuleItemAst = 
@@ -182,6 +237,12 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
      * - TSAsExpression: expression as Type (在 UpdateExpression 中处理)
      * - TSNonNullExpression: expression! (在 UpdateExpression 中处理)
      * - TSSatisfiesExpression: expression satisfies Type (在 UpdateExpression 中处理)
+     * 
+     * 重要：这个方法不能简单地调用 SlimeJavascriptExpressionCstToAst.createExpressionAstUncached，
+     * 因为那个方法内部会调用 SlimeJavascriptCstToAstUtil.createXxxAst，而 SlimeJavascriptCstToAstUtil
+     * 实际上是 SlimeCstToAst 的实例，会导致 this.createExpressionAstUncached 被调用，形成无限递归。
+     * 
+     * 解决方案：只处理 TypeScript 特有的表达式类型，其他类型调用父类的原始实现。
      */
     override createExpressionAstUncached(cst: SubhutiCst): any {
         const astName = cst.name
@@ -191,8 +252,11 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
             return SlimeIdentifierCstToAst.createTSTypeAssertionAst(cst)
         }
 
-        // 其他表达式类型交给父类处理
-        return super.createExpressionAstUncached(cst)
+        // 其他表达式类型：调用父类的原始实现
+        // 父类的 createExpressionAstUncached 直接调用 SlimeJavascriptExpressionCstToAst.createExpressionAstUncached
+        // 但由于 createExpressionAst 使用 this.createExpressionAstUncached，会导致递归
+        // 所以我们需要直接调用静态方法，绕过 this
+        return SlimeJavascriptExpressionCstToAst.createExpressionAstUncached(cst)
     }
 
     /**
@@ -234,8 +298,8 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
             }
         }
         
-        // 没有 TypeScript 后缀，交给父类处理
-        return super.createUpdateExpressionAst(cst)
+        // 没有 TypeScript 后缀：直接调用原始实现，避免无限递归
+        return SlimeJavascriptUnaryExpressionCstToAst.createUpdateExpressionAst(cst)
     }
 
     // ============================================

@@ -976,13 +976,29 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
 
     /**
      * [TypeScript] 重写 ImportDeclaration 生成，支持 import type
+     * 
+     * 如果不是 TypeScript 的 type import，直接调用父类实现
      */
     override generatorImportDeclaration(node: any) {
-        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ImportTok, node.loc)
+        // 检查是否有 TypeScript 特有的 importKind 或内联 type specifier
+        const hasTypeImport = node.importKind === 'type'
+        const specifiers = Array.isArray(node.specifiers) ? node.specifiers : []
+        const hasInlineTypeSpecifier = specifiers.some((s: any) => {
+            const spec = s.specifier || s
+            return spec.importKind === 'type'
+        })
+
+        // 如果没有 TypeScript 特性，直接调用父类实现
+        if (!hasTypeImport && !hasInlineTypeSpecifier) {
+            return super.generatorImportDeclaration(node)
+        }
+
+        // TypeScript import type 处理
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ImportTok, node.importToken?.loc || node.loc)
         this.addSpacing()
 
         // [TypeScript] 添加 type 关键字
-        if (node.importKind === 'type') {
+        if (hasTypeImport) {
             this.generatorTSKeyword(node, 'type')
             this.addSpacing()
         }
@@ -1024,13 +1040,13 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
             }
 
             this.addSpacing()
-            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.FromTok, node.loc)
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.FromTok, node.fromToken?.loc)
             this.addSpacing()
         } else if (hasEmptyNamedImport) {
             this.addLBrace()
             this.addRBrace()
             this.addSpacing()
-            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.FromTok, node.loc)
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.FromTok, node.fromToken?.loc)
             this.addSpacing()
         }
 
