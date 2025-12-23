@@ -14,7 +14,6 @@ import {
 } from "./cstToAst";
 import { SlimeJavascriptCstToAst } from "./deprecated/SlimeJavascriptCstToAstUtil.ts";
 import SlimeJavascriptCstToAstUtil from './deprecated/SlimeJavascriptCstToAstUtil.ts'
-import { SlimeJavascriptPrimaryExpressionCstToAst } from './deprecated/slimeJavascriptCstToAst/expressions/SlimeJavascriptPrimaryExpressionCstToAst.ts'
 
 
 // ============================================
@@ -144,12 +143,6 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
             this.createExpressionAstUncached.bind(this)
         ; (SlimeJavascriptCstToAstUtil as any).createUpdateExpressionAst = 
             this.createUpdateExpressionAst.bind(this)
-        
-        // PrimaryExpression - 支持子类扩展（如 cssts 的 css {} 语法）
-        ; (SlimeJavascriptCstToAstUtil as any).createPrimaryExpressionAst = 
-            this.createPrimaryExpressionAst.bind(this)
-        ; (SlimeJavascriptPrimaryExpressionCstToAst as any).createPrimaryExpressionAst = 
-            this.createPrimaryExpressionAst.bind(this)
     }
 
     // ============================================
@@ -209,7 +202,8 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
             
             // TSAsExpressionTail: as Type
             if (child.name === 'TSAsExpressionTail') {
-                const expression = SlimeJavascriptCstToAstUtil.createExpressionAst(children[0])
+                // 直接处理 LeftHandSideExpression，避免递归
+                const expression = SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(children[0])
                 const typeCst = child.children?.find((c: SubhutiCst) => c.name === 'TSType')
                 if (typeCst) {
                     return SlimeIdentifierCstToAst.createTSAsExpressionAst(expression, typeCst, cst.loc)
@@ -218,7 +212,7 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
             
             // TSSatisfiesExpressionTail: satisfies Type
             if (child.name === 'TSSatisfiesExpressionTail') {
-                const expression = SlimeJavascriptCstToAstUtil.createExpressionAst(children[0])
+                const expression = SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(children[0])
                 const typeCst = child.children?.find((c: SubhutiCst) => c.name === 'TSType')
                 if (typeCst) {
                     return SlimeIdentifierCstToAst.createTSSatisfiesExpressionAst(expression, typeCst, cst.loc)
@@ -227,7 +221,7 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
             
             // TSNonNullExpressionTail: !
             if (child.name === 'TSNonNullExpressionTail') {
-                const expression = SlimeJavascriptCstToAstUtil.createExpressionAst(children[0])
+                const expression = SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(children[0])
                 return SlimeIdentifierCstToAst.createTSNonNullExpressionAst(expression, cst.loc)
             }
         }
