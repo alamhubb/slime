@@ -32,6 +32,40 @@ export class SlimeTSTypeAnnotationCstToAstSingle {
             loc: cst.loc,
         }
     }
+
+    /**
+     * [TypeScript] 转换 TSType CST 为 AST
+     * 支持所有已实现的 TypeScript 类型
+     */
+    createTSTypeAst(cst: SubhutiCst): any {
+        const child = cst.children?.[0]
+        if (!child) {
+            throw new Error('TSType has no children')
+        }
+
+        const name = child.name
+
+        // 函数类型
+        if (name === 'TSFunctionType') {
+            return this.createTSFunctionTypeAst(child)
+        }
+        if (name === 'TSConstructorType') {
+            return this.createTSConstructorTypeAst(child)
+        }
+
+        // 条件类型（包含联合/交叉类型）
+        if (name === 'TSConditionalType') {
+            return this.createTSConditionalTypeAst(child)
+        }
+
+        // 联合/交叉类型（兼容旧代码）
+        if (name === 'TSUnionOrIntersectionType') {
+            return this.createTSUnionOrIntersectionTypeAst(child)
+        }
+
+        throw new Error(`Unknown TSType child: ${name}`)
+    }
+
 }
 
 export const SlimeTSTypeAnnotationCstToAst = new SlimeTSTypeAnnotationCstToAstSingle()
