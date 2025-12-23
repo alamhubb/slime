@@ -1,6 +1,6 @@
 {
   "name": "slime-token",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -31,5 +31,5 @@
   "devDependencies": {
     "tsdown": "0.17.0-beta.6"
   },
-  "gitHead": "f30908e91de454bc56ffb824ef1e194e8b678789"
+  "gitHead": "92d3260e10861bdd70401b2dee23cbb8de613900"
 }
