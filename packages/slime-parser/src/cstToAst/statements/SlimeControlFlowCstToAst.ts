@@ -5,9 +5,9 @@ import {SubhutiCst} from "subhuti";
 
 import SlimeParser from "../../SlimeParser.ts";
 import {
-    SlimeAstUtil,
+    SlimeAstCreateUtils,
     SlimeAstTypeName,
-    SlimeTokenCreate,
+    SlimeTokenCreateUtils,
     type SlimeVariableDeclaration,
     type SlimeVariableDeclarator
 } from "slime-ast";

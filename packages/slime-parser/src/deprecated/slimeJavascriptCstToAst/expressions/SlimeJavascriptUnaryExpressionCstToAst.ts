@@ -3,11 +3,11 @@
  */
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeJavascriptAstUtil, type SlimeJavascriptBlockStatement,
+    SlimeJavascriptCreateUtils, type SlimeJavascriptBlockStatement,
     SlimeJavascriptExpression,
     type SlimeJavascriptFunctionExpression,
     type SlimeJavascriptFunctionParam,
-    type SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, SlimeJavascriptTokenCreate
+    type SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
@@ -134,11 +134,11 @@ export class SlimeJavascriptUnaryExpressionCstToAstSingle {
 
         // 提取 yield token
         if (cst.children[0] && (cst.children[0].name === 'Yield' || cst.children[0].value === 'yield')) {
-            yieldToken = SlimeJavascriptTokenCreate.createYieldToken(cst.children[0].loc)
+            yieldToken = SlimeJavascriptTokenCreateUtils.createYieldToken(cst.children[0].loc)
         }
 
         if (cst.children[1] && cst.children[1].name === SlimeJavascriptTokenConsumer.prototype.Asterisk?.name) {
-            asteriskToken = SlimeJavascriptTokenCreate.createAsteriskToken(cst.children[1].loc)
+            asteriskToken = SlimeJavascriptTokenCreateUtils.createAsteriskToken(cst.children[1].loc)
             delegate = true
             startIndex = 2
         }
@@ -147,7 +147,7 @@ export class SlimeJavascriptUnaryExpressionCstToAstSingle {
             argument = SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(cst.children[startIndex])
         }
 
-        return SlimeJavascriptAstUtil.createYieldExpression(argument, delegate, cst.loc, yieldToken, asteriskToken)
+        return SlimeJavascriptCreateUtils.createYieldExpression(argument, delegate, cst.loc, yieldToken, asteriskToken)
     }
 
     createAwaitExpressionAst(cst: SubhutiCst): any {
@@ -158,13 +158,13 @@ export class SlimeJavascriptUnaryExpressionCstToAstSingle {
 
         // 提取 await token
         if (cst.children[0] && (cst.children[0].name === 'Await' || cst.children[0].value === 'await')) {
-            awaitToken = SlimeJavascriptTokenCreate.createAwaitToken(cst.children[0].loc)
+            awaitToken = SlimeJavascriptTokenCreateUtils.createAwaitToken(cst.children[0].loc)
         }
 
         const argumentCst = cst.children[1]
         const argument = SlimeJavascriptCstToAstUtil.createExpressionAst(argumentCst)
 
-        return SlimeJavascriptAstUtil.createAwaitExpression(argument, cst.loc, awaitToken)
+        return SlimeJavascriptCreateUtils.createAwaitExpression(argument, cst.loc, awaitToken)
     }
 
 

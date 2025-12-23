@@ -1,11 +1,11 @@
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeJavascriptAstUtil,
+    SlimeJavascriptCreateUtils,
     type SlimeJavascriptBlockStatement,
     SlimeJavascriptFunctionExpression, type SlimeJavascriptFunctionParam,
     SlimeJavascriptIdentifier, type SlimeJavascriptMethodDefinition, SlimeJavascriptAstTypeName,
     SlimeJavascriptPattern, SlimeJavascriptRestElement, type SlimeJavascriptReturnStatement,
-    SlimeJavascriptStatement, SlimeJavascriptTokenCreate,
+    SlimeJavascriptStatement, SlimeJavascriptTokenCreateUtils,
     SlimeJavascriptVariableDeclarator
 } from "slime-ast";
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
@@ -97,8 +97,8 @@ export class SlimeJavascriptFunctionParameterCstToAstSingle {
             // Handle comma - pair with previous param
             if (child.value === ',' || name === 'Comma') {
                 if (hasParam) {
-                    const commaToken = SlimeJavascriptTokenCreate.createCommaToken(child.loc)
-                    params.push(SlimeJavascriptAstUtil.createFunctionParam(currentParam!, commaToken))
+                    const commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
+                    params.push(SlimeJavascriptCreateUtils.createFunctionParam(currentParam!, commaToken))
                     hasParam = false
                     currentParam = null
                 }
@@ -109,7 +109,7 @@ export class SlimeJavascriptFunctionParameterCstToAstSingle {
             if (name === SlimeJavascriptParser.prototype.FormalParameterList?.name || name === 'FormalParameterList') {
                 // 如果之前有参数没处理，先推入
                 if (hasParam) {
-                    params.push(SlimeJavascriptAstUtil.createFunctionParam(currentParam!, undefined))
+                    params.push(SlimeJavascriptCreateUtils.createFunctionParam(currentParam!, undefined))
                     hasParam = false
                     currentParam = null
                 }
@@ -120,7 +120,7 @@ export class SlimeJavascriptFunctionParameterCstToAstSingle {
             // FunctionRestParameter
             if (name === SlimeJavascriptParser.prototype.FunctionRestParameter?.name || name === 'FunctionRestParameter') {
                 if (hasParam) {
-                    params.push(SlimeJavascriptAstUtil.createFunctionParam(currentParam!, undefined))
+                    params.push(SlimeJavascriptCreateUtils.createFunctionParam(currentParam!, undefined))
                 }
                 currentParam = SlimeJavascriptCstToAstUtil.createFunctionRestParameterAst(child)
                 hasParam = true
@@ -130,7 +130,7 @@ export class SlimeJavascriptFunctionParameterCstToAstSingle {
             // Direct FormalParameter（ES2025 结构�?
             if (name === SlimeJavascriptParser.prototype.FormalParameter?.name || name === 'FormalParameter') {
                 if (hasParam) {
-                    params.push(SlimeJavascriptAstUtil.createFunctionParam(currentParam!, undefined))
+                    params.push(SlimeJavascriptCreateUtils.createFunctionParam(currentParam!, undefined))
                 }
                 currentParam = SlimeJavascriptCstToAstUtil.createFormalParameterAst(child)
                 hasParam = true
@@ -140,7 +140,7 @@ export class SlimeJavascriptFunctionParameterCstToAstSingle {
             // Direct BindingElement or BindingIdentifier
             if (name === SlimeJavascriptParser.prototype.BindingElement?.name || name === 'BindingElement') {
                 if (hasParam) {
-                    params.push(SlimeJavascriptAstUtil.createFunctionParam(currentParam!, undefined))
+                    params.push(SlimeJavascriptCreateUtils.createFunctionParam(currentParam!, undefined))
                 }
                 currentParam = SlimeJavascriptCstToAstUtil.createBindingElementAst(child)
                 hasParam = true
@@ -149,7 +149,7 @@ export class SlimeJavascriptFunctionParameterCstToAstSingle {
 
             if (name === SlimeJavascriptParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
                 if (hasParam) {
-                    params.push(SlimeJavascriptAstUtil.createFunctionParam(currentParam!, undefined))
+                    params.push(SlimeJavascriptCreateUtils.createFunctionParam(currentParam!, undefined))
                 }
                 currentParam = SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(child)
                 hasParam = true
@@ -159,7 +159,7 @@ export class SlimeJavascriptFunctionParameterCstToAstSingle {
 
         // 处理最后一个参数（没有尾随逗号�?
         if (hasParam) {
-            params.push(SlimeJavascriptAstUtil.createFunctionParam(currentParam!, undefined))
+            params.push(SlimeJavascriptCreateUtils.createFunctionParam(currentParam!, undefined))
         }
 
         return params
@@ -221,24 +221,24 @@ export class SlimeJavascriptFunctionParameterCstToAstSingle {
         for (const child of cst.children || []) {
             if (child.name === SlimeJavascriptParser.prototype.FormalParameter?.name) {
                 if (lastParam) {
-                    params.push(SlimeJavascriptAstUtil.createFunctionParam(lastParam))
+                    params.push(SlimeJavascriptCreateUtils.createFunctionParam(lastParam))
                 }
                 lastParam = SlimeJavascriptCstToAstUtil.createFormalParameterAst(child)
             } else if (child.name === SlimeJavascriptParser.prototype.FunctionRestParameter?.name) {
                 if (lastParam) {
-                    params.push(SlimeJavascriptAstUtil.createFunctionParam(lastParam))
+                    params.push(SlimeJavascriptCreateUtils.createFunctionParam(lastParam))
                 }
                 lastParam = SlimeJavascriptCstToAstUtil.createFunctionRestParameterAst(child)
             } else if (child.name === SlimeJavascriptTokenConsumer.prototype.Comma?.name || child.value === ',') {
                 if (lastParam) {
-                    params.push(SlimeJavascriptAstUtil.createFunctionParam(lastParam, SlimeJavascriptTokenCreate.createCommaToken(child.loc)))
+                    params.push(SlimeJavascriptCreateUtils.createFunctionParam(lastParam, SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)))
                     lastParam = null
                 }
             }
         }
 
         if (lastParam) {
-            params.push(SlimeJavascriptAstUtil.createFunctionParam(lastParam))
+            params.push(SlimeJavascriptCreateUtils.createFunctionParam(lastParam))
         }
 
         return params
@@ -264,8 +264,8 @@ export class SlimeJavascriptFunctionParameterCstToAstSingle {
             // Handle comma - pair with previous param
             if (child.value === ',' || name === 'Comma') {
                 if (hasParam) {
-                    const commaToken = SlimeJavascriptTokenCreate.createCommaToken(child.loc)
-                    params.push(SlimeJavascriptAstUtil.createFunctionParam(currentParam!, commaToken))
+                    const commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
+                    params.push(SlimeJavascriptCreateUtils.createFunctionParam(currentParam!, commaToken))
                     hasParam = false
                     currentParam = null
                 }
@@ -275,7 +275,7 @@ export class SlimeJavascriptFunctionParameterCstToAstSingle {
             // FormalParameter -> BindingElement
             if (name === SlimeJavascriptParser.prototype.FormalParameter?.name || name === 'FormalParameter') {
                 if (hasParam) {
-                    params.push(SlimeJavascriptAstUtil.createFunctionParam(currentParam!, undefined))
+                    params.push(SlimeJavascriptCreateUtils.createFunctionParam(currentParam!, undefined))
                 }
                 currentParam = SlimeJavascriptCstToAstUtil.createFormalParameterAst(child)
                 hasParam = true
@@ -284,7 +284,7 @@ export class SlimeJavascriptFunctionParameterCstToAstSingle {
 
         // 处理最后一个参�?
         if (hasParam) {
-            params.push(SlimeJavascriptAstUtil.createFunctionParam(currentParam!, undefined))
+            params.push(SlimeJavascriptCreateUtils.createFunctionParam(currentParam!, undefined))
         }
 
         return params

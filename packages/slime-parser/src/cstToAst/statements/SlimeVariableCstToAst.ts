@@ -10,8 +10,8 @@ import {
     type SlimeFunctionDeclaration, type SlimeFunctionExpression,
     type SlimeFunctionParam,
     type SlimeIdentifier, SlimeAstTypeName, type SlimePropertyDefinition,
-    SlimeTokenCreate, type SlimeVariableDeclaration, type SlimeVariableDeclarator,
-    SlimeAstUtil, type SlimePattern, type SlimeExpression
+    SlimeTokenCreateUtils, type SlimeVariableDeclaration, type SlimeVariableDeclarator,
+    SlimeAstCreateUtils, type SlimePattern, type SlimeExpression
 } from "slime-ast";
 import { SlimeClassDeclarationCstToAstSingle } from "../class/SlimeClassDeclarationCstToAst.ts";
 import {
@@ -72,13 +72,13 @@ export class SlimeVariableCstToAstSingle extends SlimeJavascriptVariableCstToAst
             } else if (name === SlimeParser.prototype.Initializer?.name || name === 'Initializer') {
                 if (child.children && child.children[0]) {
                     const assignCst = child.children[0]
-                    assignToken = SlimeTokenCreate.createAssignToken(assignCst.loc)
+                    assignToken = SlimeTokenCreateUtils.createAssignToken(assignCst.loc)
                 }
                 init = SlimeCstToAstUtil.createInitializerAst(child)
             }
         }
 
-        return SlimeAstUtil.createVariableDeclarator(id, assignToken, init, cst.loc)
+        return SlimeAstCreateUtils.createVariableDeclarator(id, assignToken, init, cst.loc)
     }
 }
 

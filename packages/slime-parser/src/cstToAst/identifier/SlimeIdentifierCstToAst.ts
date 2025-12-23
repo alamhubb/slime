@@ -3,14 +3,14 @@
  */
 import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
 import {
-    SlimeAstUtil,
+    SlimeAstCreateUtils,
     SlimeClassBody, SlimeFunctionParam,
     SlimeIdentifier,
     SlimeMethodDefinition, SlimePattern,
     SlimePropertyDefinition,
     SlimeStatement,
     SlimeAstTypeName,
-    SlimeTokenCreate,
+    SlimeTokenCreateUtils,
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
@@ -19,7 +19,7 @@ import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import { SlimeVariableCstToAstSingle } from "../statements/SlimeVariableCstToAst.ts";
 import { SlimeJavascriptIdentifierCstToAstSingle } from "../../deprecated/slimeJavascriptCstToAst";
 import SlimeJavascriptCstToAstUtil from "../../deprecated/SlimeJavascriptCstToAstUtil.ts";
-import { SlimeJavascriptAstUtil } from "slime-ast";
+import { SlimeJavascriptCreateUtils } from "slime-ast";
 
 export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstToAstSingle {
 
@@ -35,12 +35,12 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
         if (first.name === 'Identifier' || first.name === SlimeParser.prototype.Identifier?.name) {
             const tokenCst = first.children?.[0]
             if (tokenCst && tokenCst.value !== undefined) {
-                identifier = SlimeJavascriptAstUtil.createIdentifier(tokenCst.value, tokenCst.loc)
+                identifier = SlimeJavascriptCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
             } else {
                 throw new Error(`createBindingIdentifierAst: Cannot extract value from Identifier`)
             }
         } else if (first.value !== undefined) {
-            identifier = SlimeJavascriptAstUtil.createIdentifier(first.value, first.loc)
+            identifier = SlimeJavascriptCreateUtils.createIdentifier(first.value, first.loc)
         } else {
             throw new Error(`createBindingIdentifierAst: Cannot extract identifier value from ${first.name}`)
         }
@@ -67,7 +67,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
         }
 
         const colonCst = children[0]
-        const colonToken = SlimeTokenCreate.createColonToken(colonCst.loc)
+        const colonToken = SlimeTokenCreateUtils.createColonToken(colonCst.loc)
 
         const typeCst = children[1]
         const typeAnnotation = this.createTSTypeAst(typeCst)

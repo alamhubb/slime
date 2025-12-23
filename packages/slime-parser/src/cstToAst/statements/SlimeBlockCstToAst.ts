@@ -2,11 +2,11 @@ import {SubhutiCst} from "subhuti";
 
 import SlimeParser from "../../SlimeParser.ts";
 import {
-    SlimeAstUtil, SlimeBlockStatement, type SlimeExportAllDeclaration,
+    SlimeAstCreateUtils, SlimeBlockStatement, type SlimeExportAllDeclaration,
     type SlimeExportDefaultDeclaration,
     type SlimeExportNamedDeclaration, SlimeExpressionStatement,
     SlimeFunctionDeclaration, SlimeFunctionExpression, SlimeAstTypeName, SlimeStatement,
-    SlimeTokenCreate
+    SlimeTokenCreateUtils
 } from "slime-ast";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";

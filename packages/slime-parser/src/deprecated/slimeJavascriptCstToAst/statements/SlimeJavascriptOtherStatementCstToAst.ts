@@ -1,11 +1,11 @@
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeJavascriptAstUtil,
+    SlimeJavascriptCreateUtils,
     SlimeJavascriptBlockStatement, SlimeJavascriptExpressionStatement,
     SlimeJavascriptFunctionDeclaration,
     SlimeJavascriptFunctionParam,
     SlimeJavascriptIdentifier,
-    SlimeJavascriptAstTypeName, type SlimeJavascriptPattern, SlimeJavascriptReturnStatement, SlimeJavascriptTokenCreate, type SlimeJavascriptVariableDeclarator
+    SlimeJavascriptAstTypeName, type SlimeJavascriptPattern, SlimeJavascriptReturnStatement, SlimeJavascriptTokenCreateUtils, type SlimeJavascriptVariableDeclarator
 } from "slime-ast";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
@@ -31,7 +31,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
         // 提取 return token
         const returnCst = cst.children[0]
         if (returnCst && (returnCst.name === 'Return' || returnCst.value === 'return')) {
-            returnToken = SlimeJavascriptTokenCreate.createReturnToken(returnCst.loc)
+            returnToken = SlimeJavascriptTokenCreateUtils.createReturnToken(returnCst.loc)
         }
 
         if (cst.children.length > 1) {
@@ -40,14 +40,14 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
                 // 跳过分号相关节点
                 if (child.name === 'Semicolon' || child.name === 'SemicolonASI' ||
                     child.name === 'Semicolon' || child.value === ';') {
-                    semicolonToken = SlimeJavascriptTokenCreate.createSemicolonToken(child.loc)
+                    semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(child.loc)
                 } else if (!argument) {
                     argument = SlimeJavascriptCstToAstUtil.createExpressionAst(child)
                 }
             }
         }
 
-        return SlimeJavascriptAstUtil.createReturnStatement(argument, cst.loc, returnToken, semicolonToken)
+        return SlimeJavascriptCreateUtils.createReturnStatement(argument, cst.loc, returnToken, semicolonToken)
     }
 
 
@@ -64,9 +64,9 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
 
         for (const child of cst.children || []) {
             if (child.name === 'Break' || child.value === 'break') {
-                breakToken = SlimeJavascriptTokenCreate.createBreakToken(child.loc)
+                breakToken = SlimeJavascriptTokenCreateUtils.createBreakToken(child.loc)
             } else if (child.name === 'Semicolon' || child.value === ';') {
-                semicolonToken = SlimeJavascriptTokenCreate.createSemicolonToken(child.loc)
+                semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(child.loc)
             } else if (child.name === SlimeJavascriptParser.prototype.LabelIdentifier?.name || child.name === 'LabelIdentifier') {
                 label = SlimeJavascriptCstToAstUtil.createLabelIdentifierAst(child)
             } else if (child.name === SlimeJavascriptParser.prototype.IdentifierName?.name) {
@@ -76,7 +76,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
             }
         }
 
-        return SlimeJavascriptAstUtil.createBreakStatement(label, cst.loc, breakToken, semicolonToken)
+        return SlimeJavascriptCreateUtils.createBreakStatement(label, cst.loc, breakToken, semicolonToken)
     }
 
 
@@ -93,9 +93,9 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
 
         for (const child of cst.children || []) {
             if (child.name === 'Continue' || child.value === 'continue') {
-                continueToken = SlimeJavascriptTokenCreate.createContinueToken(child.loc)
+                continueToken = SlimeJavascriptTokenCreateUtils.createContinueToken(child.loc)
             } else if (child.name === 'Semicolon' || child.value === ';') {
-                semicolonToken = SlimeJavascriptTokenCreate.createSemicolonToken(child.loc)
+                semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(child.loc)
             } else if (child.name === SlimeJavascriptParser.prototype.LabelIdentifier?.name || child.name === 'LabelIdentifier') {
                 label = SlimeJavascriptCstToAstUtil.createLabelIdentifierAst(child)
             } else if (child.name === SlimeJavascriptParser.prototype.IdentifierName?.name) {
@@ -105,7 +105,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
             }
         }
 
-        return SlimeJavascriptAstUtil.createContinueStatement(label, cst.loc, continueToken, semicolonToken)
+        return SlimeJavascriptCreateUtils.createContinueStatement(label, cst.loc, continueToken, semicolonToken)
     }
 
 
@@ -122,9 +122,9 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
         for (const child of cst.children) {
             if (!child) continue
             if (child.name === 'Try' || child.value === 'try') {
-                tryToken = SlimeJavascriptTokenCreate.createTryToken(child.loc)
+                tryToken = SlimeJavascriptTokenCreateUtils.createTryToken(child.loc)
             } else if (child.name === 'Finally' || child.value === 'finally') {
-                finallyToken = SlimeJavascriptTokenCreate.createFinallyToken(child.loc)
+                finallyToken = SlimeJavascriptTokenCreateUtils.createFinallyToken(child.loc)
             }
         }
 
@@ -136,7 +136,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
         const handler = catchCst ? SlimeJavascriptCstToAstUtil.createCatchAst(catchCst) : null
         const finalizer = finallyCst ? SlimeJavascriptCstToAstUtil.createFinallyAst(finallyCst) : null
 
-        return SlimeJavascriptAstUtil.createTryStatement(block, handler, finalizer, cst.loc, tryToken, finallyToken)
+        return SlimeJavascriptCreateUtils.createTryStatement(block, handler, finalizer, cst.loc, tryToken, finallyToken)
     }
 
 
@@ -155,11 +155,11 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
         for (const child of cst.children) {
             if (!child) continue
             if (child.name === 'Catch' || child.value === 'catch') {
-                catchToken = SlimeJavascriptTokenCreate.createCatchToken(child.loc)
+                catchToken = SlimeJavascriptTokenCreateUtils.createCatchToken(child.loc)
             } else if (child.name === 'LParen' || child.value === '(') {
-                lParenToken = SlimeJavascriptTokenCreate.createLParenToken(child.loc)
+                lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(child.loc)
             } else if (child.name === 'RParen' || child.value === ')') {
-                rParenToken = SlimeJavascriptTokenCreate.createRParenToken(child.loc)
+                rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(child.loc)
             }
         }
 
@@ -167,9 +167,9 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
         const blockCst = cst.children.find(ch => ch.name === SlimeJavascriptParser.prototype.Block?.name)
 
         const param = paramCst ? SlimeJavascriptCstToAstUtil.createCatchParameterAst(paramCst) : null
-        const body = blockCst ? SlimeJavascriptCstToAstUtil.createBlockAst(blockCst) : SlimeJavascriptAstUtil.createBlockStatement([])
+        const body = blockCst ? SlimeJavascriptCstToAstUtil.createBlockAst(blockCst) : SlimeJavascriptCreateUtils.createBlockStatement([])
 
-        return SlimeJavascriptAstUtil.createCatchClause(body, param, cst.loc, catchToken, lParenToken, rParenToken)
+        return SlimeJavascriptCreateUtils.createCatchClause(body, param, cst.loc, catchToken, lParenToken, rParenToken)
     }
 
 
@@ -216,15 +216,15 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
 
         for (const child of cst.children || []) {
             if (child.name === 'Throw' || child.value === 'throw') {
-                throwToken = SlimeJavascriptTokenCreate.createThrowToken(child.loc)
+                throwToken = SlimeJavascriptTokenCreateUtils.createThrowToken(child.loc)
             } else if (child.name === 'Semicolon' || child.value === ';') {
-                semicolonToken = SlimeJavascriptTokenCreate.createSemicolonToken(child.loc)
+                semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(child.loc)
             } else if (child.name === SlimeJavascriptParser.prototype.Expression?.name || child.name === 'Expression') {
                 argument = SlimeJavascriptCstToAstUtil.createExpressionAst(child)
             }
         }
 
-        return SlimeJavascriptAstUtil.createThrowStatement(argument, cst.loc, throwToken, semicolonToken)
+        return SlimeJavascriptCreateUtils.createThrowStatement(argument, cst.loc, throwToken, semicolonToken)
     }
 
 
@@ -236,7 +236,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
 
         for (const child of cst.children || []) {
             if (child.name === 'Semicolon' || child.value === ';') {
-                semicolonToken = SlimeJavascriptTokenCreate.createSemicolonToken(child.loc)
+                semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(child.loc)
             } else if (child.name === SlimeJavascriptParser.prototype.Expression?.name ||
                 child.name === 'Expression' ||
                 !expression) {
@@ -244,7 +244,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
             }
         }
 
-        return SlimeJavascriptAstUtil.createExpressionStatement(expression, cst.loc, semicolonToken)
+        return SlimeJavascriptCreateUtils.createExpressionStatement(expression, cst.loc, semicolonToken)
     }
 
 
@@ -259,16 +259,16 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
 
         // EmptyStatement 可能直接�?Semicolon token
         if (cst.value === ';' || cst.name === SlimeJavascriptTokenConsumer.prototype.Semicolon?.name) {
-            semicolonToken = SlimeJavascriptTokenCreate.createSemicolonToken(cst.loc)
+            semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(cst.loc)
         } else {
             // �?semicolon token
             const semicolonCst = cst.children?.find(ch => ch.name === 'Semicolon' || ch.value === ';')
             if (semicolonCst) {
-                semicolonToken = SlimeJavascriptTokenCreate.createSemicolonToken(semicolonCst.loc)
+                semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(semicolonCst.loc)
             }
         }
 
-        return SlimeJavascriptAstUtil.createEmptyStatement(cst.loc, semicolonToken)
+        return SlimeJavascriptCreateUtils.createEmptyStatement(cst.loc, semicolonToken)
     }
 
 
@@ -293,13 +293,13 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
 
         for (const child of cst.children || []) {
             if (child.name === 'Debugger' || child.value === 'debugger') {
-                debuggerToken = SlimeJavascriptTokenCreate.createDebuggerToken(child.loc)
+                debuggerToken = SlimeJavascriptTokenCreateUtils.createDebuggerToken(child.loc)
             } else if (child.name === 'Semicolon' || child.value === ';') {
-                semicolonToken = SlimeJavascriptTokenCreate.createSemicolonToken(child.loc)
+                semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(child.loc)
             }
         }
 
-        return SlimeJavascriptAstUtil.createDebuggerStatement(cst.loc, debuggerToken, semicolonToken)
+        return SlimeJavascriptCreateUtils.createDebuggerStatement(cst.loc, debuggerToken, semicolonToken)
     }
 
 

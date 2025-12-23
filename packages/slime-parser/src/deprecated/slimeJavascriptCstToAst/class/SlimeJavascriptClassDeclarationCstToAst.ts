@@ -4,12 +4,12 @@
 import {SubhutiCst} from "subhuti";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 import {
-    SlimeJavascriptAstUtil,
+    SlimeJavascriptCreateUtils,
     SlimeJavascriptClassBody, SlimeJavascriptClassDeclaration, SlimeJavascriptClassExpression,
     SlimeJavascriptExpression, SlimeJavascriptIdentifier, SlimeJavascriptLiteral,
     SlimeJavascriptMethodDefinition, SlimeJavascriptAstTypeName,
     SlimeJavascriptPropertyDefinition, SlimeJavascriptStatement,
-    SlimeJavascriptTokenCreate
+    SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
@@ -30,7 +30,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
         for (const child of cst.children) {
             const name = child.name
             if (name === 'Class' || child.value === 'class') {
-                classToken = SlimeJavascriptTokenCreate.createClassToken(child.loc)
+                classToken = SlimeJavascriptTokenCreateUtils.createClassToken(child.loc)
             } else if (name === SlimeJavascriptParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
                 id = SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(child)
             } else if (name === SlimeJavascriptParser.prototype.ClassTail?.name || name === 'ClassTail') {
@@ -47,7 +47,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
         const classTailResult = SlimeJavascriptCstToAstUtil.createClassTailAst(classTailCst)
 
         // 创建类声�?AST 节点（id 可能�?null，用于匿名类�?
-        const ast = SlimeJavascriptAstUtil.createClassDeclaration(
+        const ast = SlimeJavascriptCreateUtils.createClassDeclaration(
             id, classTailResult.body, classTailResult.superClass, cst.loc,
             classToken, classTailResult.extendsToken
         )
@@ -67,7 +67,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
         }
         const classTail = SlimeJavascriptCstToAstUtil.createClassTailAst(cst.children[tailStartIndex]) // 统一解析 ClassTail
 
-        return SlimeJavascriptAstUtil.createClassExpression(id, classTail.superClass, classTail.body, cst.loc) // 生成 ClassExpression AST
+        return SlimeJavascriptCreateUtils.createClassExpression(id, classTail.superClass, classTail.body, cst.loc) // 生成 ClassExpression AST
     }
 
     createClassBodyAst(cst: SubhutiCst): SlimeJavascriptClassBody {
@@ -205,7 +205,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
         const isStatic = SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst)
 
         // 注意参数顺序�?key, value, computed, isStatic, loc)
-        return SlimeJavascriptAstUtil.createPropertyDefinition(key, value, isComputed, isStatic || false, cst.loc)
+        return SlimeJavascriptCreateUtils.createPropertyDefinition(key, value, isComputed, isStatic || false, cst.loc)
     }
 
 
@@ -221,9 +221,9 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
 
         for (const child of cst.children || []) {
             if (child.name === 'LBrace' || child.value === '{') {
-                lBraceToken = SlimeJavascriptTokenCreate.createLBraceToken(child.loc)
+                lBraceToken = SlimeJavascriptTokenCreateUtils.createLBraceToken(child.loc)
             } else if (child.name === 'RBrace' || child.value === '}') {
-                rBraceToken = SlimeJavascriptTokenCreate.createRBraceToken(child.loc)
+                rBraceToken = SlimeJavascriptTokenCreateUtils.createRBraceToken(child.loc)
             } else if (child.name === 'ClassStaticBlockBody') {
                 // ClassStaticBlockBody -> ClassStaticBlockStatementList -> StatementList
                 const stmtListCst = child.children?.find((c: any) =>
@@ -240,7 +240,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
             }
         }
 
-        return SlimeJavascriptAstUtil.createStaticBlock(bodyStatements, cst.loc, lBraceToken, rBraceToken)
+        return SlimeJavascriptCreateUtils.createStaticBlock(bodyStatements, cst.loc, lBraceToken, rBraceToken)
     }
 
 
@@ -285,7 +285,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
         // ClassHeritage: extends LeftHandSideExpression
         const extendsCst = cst.children.find(ch => ch.name === 'Extends' || ch.value === 'extends')
         if (extendsCst) {
-            extendsToken = SlimeJavascriptTokenCreate.createExtendsToken(extendsCst.loc)
+            extendsToken = SlimeJavascriptTokenCreateUtils.createExtendsToken(extendsCst.loc)
         }
 
         const superClass = SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(cst.children[1])
@@ -317,9 +317,9 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
             } else if (child.name === SlimeJavascriptParser.prototype.ClassBody?.name) {
                 body = SlimeJavascriptCstToAstUtil.createClassBodyAst(child)
             } else if (child.name === 'LBrace' || child.value === '{') {
-                lBraceToken = SlimeJavascriptTokenCreate.createLBraceToken(child.loc)
+                lBraceToken = SlimeJavascriptTokenCreateUtils.createLBraceToken(child.loc)
             } else if (child.name === 'RBrace' || child.value === '}') {
-                rBraceToken = SlimeJavascriptTokenCreate.createRBraceToken(child.loc)
+                rBraceToken = SlimeJavascriptTokenCreateUtils.createRBraceToken(child.loc)
             }
         }
 

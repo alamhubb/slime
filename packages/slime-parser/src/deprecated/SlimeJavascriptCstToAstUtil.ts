@@ -78,7 +78,7 @@ import {
 } from "slime-ast";
 import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
 import SlimeJavascriptParser from "./SlimeJavascriptParser.ts";
-import { SlimeJavascriptAstUtil, SlimeJavascriptTokenCreate, SlimeJavascriptAstTypeName } from "slime-ast";
+import { SlimeJavascriptCreateUtils, SlimeJavascriptTokenCreateUtils, SlimeJavascriptAstTypeName } from "slime-ast";
 import {
     SlimeJavascriptArrowFunctionCstToAst,
     SlimeJavascriptAssignmentPatternCstToAst,

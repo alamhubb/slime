@@ -1,6 +1,6 @@
 import { SubhutiCst } from "subhuti";
 import {
-    SlimeAstUtil,
+    SlimeAstCreateUtils,
     SlimeFunctionParam,
     SlimeModuleDeclaration,
     SlimePattern,
@@ -31,7 +31,7 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
         let hashbangComment: string | null = null
 
         if (!cst.children || cst.children.length === 0) {
-            return SlimeAstUtil.createProgram([], isModule ? 'module' : 'script')
+            return SlimeAstCreateUtils.createProgram([], isModule ? 'module' : 'script')
         }
 
         let bodyChild: SubhutiCst | null = null
@@ -50,31 +50,31 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
                 const moduleItemList = bodyChild.children?.[0]
                 if (moduleItemList && (moduleItemList.name === 'ModuleItemList' || moduleItemList.name === SlimeParser.prototype.ModuleItemList?.name)) {
                     const body = SlimeCstToAstUtil.createModuleItemListAst(moduleItemList)
-                    program = SlimeAstUtil.createProgram(body, 'module')
+                    program = SlimeAstCreateUtils.createProgram(body, 'module')
                 } else {
-                    program = SlimeAstUtil.createProgram([], 'module')
+                    program = SlimeAstCreateUtils.createProgram([], 'module')
                 }
             } else if (bodyChild.name === SlimeParser.prototype.ModuleItemList?.name || bodyChild.name === 'ModuleItemList') {
                 const body = SlimeCstToAstUtil.createModuleItemListAst(bodyChild)
-                program = SlimeAstUtil.createProgram(body, 'module')
+                program = SlimeAstCreateUtils.createProgram(body, 'module')
             } else if (bodyChild.name === 'ScriptBody') {
                 const statementList = bodyChild.children?.[0]
                 if (statementList && (statementList.name === 'StatementList' || statementList.name === SlimeParser.prototype.StatementList?.name)) {
                     // [TypeScript] 使用 SlimeCstToAstUtil 以支持 TypeScript 语法
                     const body = SlimeCstToAstUtil.createStatementListAst(statementList)
-                    program = SlimeAstUtil.createProgram(body, 'script')
+                    program = SlimeAstCreateUtils.createProgram(body, 'script')
                 } else {
-                    program = SlimeAstUtil.createProgram([], 'script')
+                    program = SlimeAstCreateUtils.createProgram([], 'script')
                 }
             } else if (bodyChild.name === SlimeParser.prototype.StatementList?.name || bodyChild.name === 'StatementList') {
                 // [TypeScript] 使用 SlimeCstToAstUtil 以支持 TypeScript 语法
                 const body = SlimeCstToAstUtil.createStatementListAst(bodyChild)
-                program = SlimeAstUtil.createProgram(body, 'script')
+                program = SlimeAstCreateUtils.createProgram(body, 'script')
             } else {
                 throw new Error(`Unexpected body child: ${bodyChild.name}`)
             }
         } else {
-            program = SlimeAstUtil.createProgram([], isModule ? 'module' : 'script')
+            program = SlimeAstCreateUtils.createProgram([], isModule ? 'module' : 'script')
         }
 
         if (hashbangComment) {

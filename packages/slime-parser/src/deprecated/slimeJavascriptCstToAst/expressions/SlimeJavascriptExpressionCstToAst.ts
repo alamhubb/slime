@@ -4,7 +4,7 @@
 import {SubhutiCst} from "subhuti";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
-import {SlimeJavascriptAstUtil, SlimeJavascriptExpression, SlimeJavascriptAstTypeName, SlimeJavascriptTokenCreate} from "slime-ast";
+import {SlimeJavascriptCreateUtils, SlimeJavascriptExpression, SlimeJavascriptAstTypeName, SlimeJavascriptTokenCreateUtils} from "slime-ast";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
@@ -210,17 +210,17 @@ export class SlimeJavascriptExpressionCstToAstSingle {
             const colonCst = cst.children[3]
 
             if (questionCst && (questionCst.name === 'Question' || questionCst.value === '?')) {
-                questionToken = SlimeJavascriptTokenCreate.createQuestionToken(questionCst.loc)
+                questionToken = SlimeJavascriptTokenCreateUtils.createQuestionToken(questionCst.loc)
             }
             if (colonCst && (colonCst.name === 'Colon' || colonCst.value === ':')) {
-                colonToken = SlimeJavascriptTokenCreate.createColonToken(colonCst.loc)
+                colonToken = SlimeJavascriptTokenCreateUtils.createColonToken(colonCst.loc)
             }
 
             consequent = SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(cst.children[2])
             alternate = SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(cst.children[4])
         }
 
-        return SlimeJavascriptAstUtil.createConditionalExpression(test, consequent, alternate, cst.loc, questionToken, colonToken)
+        return SlimeJavascriptCreateUtils.createConditionalExpression(test, consequent, alternate, cst.loc, questionToken, colonToken)
     }
 
 

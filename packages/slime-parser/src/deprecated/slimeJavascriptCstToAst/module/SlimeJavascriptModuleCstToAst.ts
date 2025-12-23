@@ -1,6 +1,6 @@
 import { SubhutiCst } from "subhuti";
 import {
-    SlimeJavascriptAstUtil,
+    SlimeJavascriptCreateUtils,
     SlimeJavascriptFunctionParam,
     SlimeJavascriptModuleDeclaration,
     SlimeJavascriptPattern,
@@ -37,7 +37,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
 
         // If children is empty, return empty program
         if (!cst.children || cst.children.length === 0) {
-            return SlimeJavascriptAstUtil.createProgram([], isModule ? 'module' : 'script')
+            return SlimeJavascriptCreateUtils.createProgram([], isModule ? 'module' : 'script')
         }
 
         // 遍历子节点，处理 HashbangComment 和主体内?
@@ -59,30 +59,30 @@ export class SlimeJavascriptModuleCstToAstSingle {
                 const moduleItemList = bodyChild.children?.[0]
                 if (moduleItemList && (moduleItemList.name === 'ModuleItemList' || moduleItemList.name === SlimeJavascriptParser.prototype.ModuleItemList?.name)) {
                     const body = SlimeJavascriptCstToAstUtil.createModuleItemListAst(moduleItemList)
-                    program = SlimeJavascriptAstUtil.createProgram(body, 'module')
+                    program = SlimeJavascriptCreateUtils.createProgram(body, 'module')
                 } else {
-                    program = SlimeJavascriptAstUtil.createProgram([], 'module')
+                    program = SlimeJavascriptCreateUtils.createProgram([], 'module')
                 }
             } else if (bodyChild.name === SlimeJavascriptParser.prototype.ModuleItemList?.name || bodyChild.name === 'ModuleItemList') {
                 const body = SlimeJavascriptCstToAstUtil.createModuleItemListAst(bodyChild)
-                program = SlimeJavascriptAstUtil.createProgram(body, 'module')
+                program = SlimeJavascriptCreateUtils.createProgram(body, 'module')
             } else if (bodyChild.name === 'ScriptBody') {
                 const statementList = bodyChild.children?.[0]
                 if (statementList && (statementList.name === 'StatementList' || statementList.name === SlimeJavascriptParser.prototype.StatementList?.name)) {
                     const body = SlimeJavascriptCstToAstUtil.createStatementListAst(statementList)
-                    program = SlimeJavascriptAstUtil.createProgram(body, 'script')
+                    program = SlimeJavascriptCreateUtils.createProgram(body, 'script')
                 } else {
-                    program = SlimeJavascriptAstUtil.createProgram([], 'script')
+                    program = SlimeJavascriptCreateUtils.createProgram([], 'script')
                 }
             } else if (bodyChild.name === SlimeJavascriptParser.prototype.StatementList?.name || bodyChild.name === 'StatementList') {
                 const body = SlimeJavascriptCstToAstUtil.createStatementListAst(bodyChild)
-                program = SlimeJavascriptAstUtil.createProgram(body, 'script')
+                program = SlimeJavascriptCreateUtils.createProgram(body, 'script')
             } else {
                 throw new Error(`Unexpected body child: ${bodyChild.name}`)
             }
         } else {
             // 没有主体内容（可能只?HashbangComment?
-            program = SlimeJavascriptAstUtil.createProgram([], isModule ? 'module' : 'script')
+            program = SlimeJavascriptCreateUtils.createProgram([], isModule ? 'module' : 'script')
         }
 
         // 设置 hashbang 注释（如果存在）
@@ -123,7 +123,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
         if (moduleBody) {
             return SlimeJavascriptCstToAstUtil.createModuleBodyAst(moduleBody)
         }
-        return SlimeJavascriptAstUtil.createProgram([], 'module')
+        return SlimeJavascriptCreateUtils.createProgram([], 'module')
     }
 
     /**
@@ -136,7 +136,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
         if (scriptBody) {
             return SlimeJavascriptCstToAstUtil.createScriptBodyAst(scriptBody)
         }
-        return SlimeJavascriptAstUtil.createProgram([], 'script')
+        return SlimeJavascriptCreateUtils.createProgram([], 'script')
     }
 
     /**
@@ -148,9 +148,9 @@ export class SlimeJavascriptModuleCstToAstSingle {
         )
         if (moduleItemList) {
             const body = SlimeJavascriptCstToAstUtil.createModuleItemListAst(moduleItemList)
-            return SlimeJavascriptAstUtil.createProgram(body, 'module')
+            return SlimeJavascriptCreateUtils.createProgram(body, 'module')
         }
-        return SlimeJavascriptAstUtil.createProgram([], 'module')
+        return SlimeJavascriptCreateUtils.createProgram([], 'module')
     }
 
     /**
@@ -162,9 +162,9 @@ export class SlimeJavascriptModuleCstToAstSingle {
         )
         if (stmtList) {
             const body = SlimeJavascriptCstToAstUtil.createStatementListAst(stmtList)
-            return SlimeJavascriptAstUtil.createProgram(body, 'script')
+            return SlimeJavascriptCreateUtils.createProgram(body, 'script')
         }
-        return SlimeJavascriptAstUtil.createProgram([], 'script')
+        return SlimeJavascriptCreateUtils.createProgram([], 'script')
     }
 
     createModuleItemListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration> {

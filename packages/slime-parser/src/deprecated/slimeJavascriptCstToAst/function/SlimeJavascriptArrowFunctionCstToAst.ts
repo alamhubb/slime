@@ -3,13 +3,13 @@
  */
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeJavascriptAstUtil,
+    SlimeJavascriptCreateUtils,
     SlimeJavascriptBlockStatement,
     SlimeJavascriptExpression,
     type SlimeJavascriptFunctionParam,
     SlimeJavascriptMethodDefinition,
     SlimeJavascriptPattern,
-    SlimeJavascriptTokenCreate,
+    SlimeJavascriptTokenCreateUtils,
     SlimeJavascriptAstTypeName, SlimeJavascriptArrowFunctionExpression, SlimeJavascriptIdentifier
 } from "slime-ast";
 
@@ -43,7 +43,7 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
         let offset = 0;
         let isAsync = false;
         if (cst.children[0] && cst.children[0].name === 'Async') {
-            asyncToken = SlimeJavascriptTokenCreate.createAsyncToken(cst.children[0].loc)
+            asyncToken = SlimeJavascriptTokenCreateUtils.createAsyncToken(cst.children[0].loc)
             isAsync = true;
             offset = 1;
         }
@@ -59,7 +59,7 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
 
         // 提取箭头 token
         if (arrowCst && (arrowCst.name === 'Arrow' || arrowCst.value === '=>')) {
-            arrowToken = SlimeJavascriptTokenCreate.createArrowToken(arrowCst.loc)
+            arrowToken = SlimeJavascriptTokenCreateUtils.createArrowToken(arrowCst.loc)
         }
 
         // 解析参数 - 根据节点类型分别处理
@@ -73,11 +73,11 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
             // 提取括号 tokens
             for (const child of arrowParametersCst.children || []) {
                 if (child.name === 'LParen' || child.value === '(') {
-                    lParenToken = SlimeJavascriptTokenCreate.createLParenToken(child.loc)
+                    lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(child.loc)
                 } else if (child.name === 'RParen' || child.value === ')') {
-                    rParenToken = SlimeJavascriptTokenCreate.createRParenToken(child.loc)
+                    rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(child.loc)
                 } else if (child.name === 'Comma' || child.value === ',') {
-                    commaTokens.push(SlimeJavascriptTokenCreate.createCommaToken(child.loc))
+                    commaTokens.push(SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc))
                 }
             }
             // �?SlimeJavascriptPattern[] 转换�?SlimeJavascriptFunctionParam[]
@@ -93,11 +93,11 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
                 // �?CoverParenthesizedExpressionAndArrowParameterList 提取括号 tokens
                 for (const child of firstChild.children || []) {
                     if (child.name === 'LParen' || child.value === '(') {
-                        lParenToken = SlimeJavascriptTokenCreate.createLParenToken(child.loc)
+                        lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(child.loc)
                     } else if (child.name === 'RParen' || child.value === ')') {
-                        rParenToken = SlimeJavascriptTokenCreate.createRParenToken(child.loc)
+                        rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(child.loc)
                     } else if (child.name === 'Comma' || child.value === ',') {
-                        commaTokens.push(SlimeJavascriptTokenCreate.createCommaToken(child.loc))
+                        commaTokens.push(SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc))
                     }
                 }
             }
@@ -115,7 +115,7 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
 
         // 注意：createArrowFunctionExpression 参数顺序�?(body, params, expression, async, loc, arrowToken, asyncToken, lParenToken, rParenToken)
         // commaTokens 目前函数签名不支持，暂时忽略
-        return SlimeJavascriptAstUtil.createArrowFunctionExpression(
+        return SlimeJavascriptCreateUtils.createArrowFunctionExpression(
             body, params, body.type !== SlimeJavascriptAstTypeName.BlockStatement, isAsync, cst.loc,
             arrowToken, asyncToken, lParenToken, rParenToken
         )
@@ -142,7 +142,7 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
         // 找到 Arrow token 的位�?
         for (let i = 0; i < cst.children.length; i++) {
             if (cst.children[i].name === 'Arrow' || cst.children[i].value === '=>') {
-                arrowToken = SlimeJavascriptTokenCreate.createArrowToken(cst.children[i].loc)
+                arrowToken = SlimeJavascriptTokenCreateUtils.createArrowToken(cst.children[i].loc)
                 arrowIndex = i
                 break
             }
@@ -167,7 +167,7 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
                 type: SlimeJavascriptAstTypeName.ArrowFunctionExpression,
                 id: null,
                 params: params,
-                body: SlimeJavascriptAstUtil.createBlockStatement([]),
+                body: SlimeJavascriptCreateUtils.createBlockStatement([]),
                 generator: false,
                 async: true,
                 expression: false,
@@ -179,7 +179,7 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
         for (let i = 0; i < arrowIndex; i++) {
             const child = cst.children[i]
             if (child.name === 'Async' || (child.name === 'IdentifierName' && child.value === 'async')) {
-                asyncToken = SlimeJavascriptTokenCreate.createAsyncToken(child.loc)
+                asyncToken = SlimeJavascriptTokenCreateUtils.createAsyncToken(child.loc)
                 continue // 跳过 async 关键�?
             }
             if (child.name === SlimeJavascriptParser.prototype.BindingIdentifier?.name || child.name === 'BindingIdentifier') {
@@ -200,9 +200,9 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
                     if (subChild.name === 'Arguments' || subChild.name === SlimeJavascriptParser.prototype.Arguments?.name) {
                         for (const argChild of subChild.children || []) {
                             if (argChild.name === 'LParen' || argChild.value === '(') {
-                                lParenToken = SlimeJavascriptTokenCreate.createLParenToken(argChild.loc)
+                                lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(argChild.loc)
                             } else if (argChild.name === 'RParen' || argChild.value === ')') {
-                                rParenToken = SlimeJavascriptTokenCreate.createRParenToken(argChild.loc)
+                                rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(argChild.loc)
                             }
                         }
                     }
@@ -212,9 +212,9 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
                 // 提取括号 tokens
                 for (const subChild of child.children || []) {
                     if (subChild.name === 'LParen' || subChild.value === '(') {
-                        lParenToken = SlimeJavascriptTokenCreate.createLParenToken(subChild.loc)
+                        lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(subChild.loc)
                     } else if (subChild.name === 'RParen' || subChild.value === ')') {
-                        rParenToken = SlimeJavascriptTokenCreate.createRParenToken(subChild.loc)
+                        rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(subChild.loc)
                     }
                 }
             }
@@ -230,7 +230,7 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
                 body = SlimeJavascriptCstToAstUtil.createExpressionAst(bodyCst)
             }
         } else {
-            body = SlimeJavascriptAstUtil.createBlockStatement([])
+            body = SlimeJavascriptCreateUtils.createBlockStatement([])
         }
 
         return {

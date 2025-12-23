@@ -1,9 +1,11 @@
 export * from './deprecated/SlimeJavascript/SlimeJavascriptAstNode.ts'
-export { default as SlimeJavascriptAstUtil } from './deprecated/SlimeJavascript/SlimeJavascriptAstCreateUtils.ts'
 export * from './deprecated/SlimeJavascript/SlimeJavascriptAstTypeName.ts'
-export { default as SlimeJavascriptTokenCreate } from './deprecated/SlimeJavascript/SlimeJavascriptTokenCreateUtils.ts'
-
 export * from './SlimeAstNode.ts'
-export { default as SlimeAstUtil } from './SlimeAstCreateUtils.ts'
 export * from './SlimeAstTypeName.ts'
-export { default as SlimeTokenCreate } from './SlimeTokenCreateUtils.ts'
+
+
+export { default as SlimeJavascriptCreateUtils } from './deprecated/SlimeJavascript/SlimeJavascriptAstCreateUtils.ts'
+export { default as SlimeJavascriptTokenCreateUtils } from './deprecated/SlimeJavascript/SlimeJavascriptTokenCreateUtils.ts'
+
+export { default as SlimeAstCreateUtils } from './SlimeAstCreateUtils.ts'
+export { default as SlimeTokenCreateUtils } from './SlimeTokenCreateUtils.ts'

@@ -2,11 +2,11 @@ import {SubhutiCst} from "subhuti";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import {
-    SlimeJavascriptAstUtil, SlimeJavascriptBlockStatement, type SlimeJavascriptExportAllDeclaration,
+    SlimeJavascriptCreateUtils, SlimeJavascriptBlockStatement, type SlimeJavascriptExportAllDeclaration,
     type SlimeJavascriptExportDefaultDeclaration,
     type SlimeJavascriptExportNamedDeclaration, SlimeJavascriptExpressionStatement,
     SlimeJavascriptFunctionDeclaration, SlimeJavascriptFunctionExpression, SlimeJavascriptAstTypeName, SlimeJavascriptStatement,
-    SlimeJavascriptTokenCreate
+    SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
@@ -27,9 +27,9 @@ export class SlimeJavascriptBlockCstToAstSingle {
         if (cst.children) {
             for (const child of cst.children) {
                 if (child.name === 'LBrace' || child.value === '{') {
-                    lBraceToken = SlimeJavascriptTokenCreate.createLBraceToken(child.loc)
+                    lBraceToken = SlimeJavascriptTokenCreateUtils.createLBraceToken(child.loc)
                 } else if (child.name === 'RBrace' || child.value === '}') {
-                    rBraceToken = SlimeJavascriptTokenCreate.createRBraceToken(child.loc)
+                    rBraceToken = SlimeJavascriptTokenCreateUtils.createRBraceToken(child.loc)
                 }
             }
         }
@@ -40,7 +40,7 @@ export class SlimeJavascriptBlockCstToAstSingle {
 
         const statements = statementListCst ? SlimeJavascriptCstToAstUtil.createStatementListAst(statementListCst) : []
 
-        return SlimeJavascriptAstUtil.createBlockStatement(statements, cst.loc, lBraceToken, rBraceToken)
+        return SlimeJavascriptCreateUtils.createBlockStatement(statements, cst.loc, lBraceToken, rBraceToken)
     }
 
 

@@ -4,12 +4,12 @@
 import { SubhutiCst } from "subhuti";
 import {
     type SlimeJavascriptArrayPattern,
-    SlimeJavascriptAstUtil, type SlimeJavascriptBlockStatement, type SlimeJavascriptExpressionStatement,
+    SlimeJavascriptCreateUtils, type SlimeJavascriptBlockStatement, type SlimeJavascriptExpressionStatement,
     type SlimeJavascriptFunctionExpression, type SlimeJavascriptFunctionParam,
     SlimeJavascriptIdentifier, type SlimeJavascriptObjectPattern,
     SlimeJavascriptPattern,
     SlimeJavascriptRestElement, type SlimeJavascriptReturnStatement,
-    type SlimeJavascriptStatement, SlimeJavascriptTokenCreate, SlimeJavascriptAstTypeName,
+    type SlimeJavascriptStatement, SlimeJavascriptTokenCreateUtils, SlimeJavascriptAstTypeName,
     type SlimeJavascriptArrayPatternElement, type SlimeJavascriptLBracketToken, type SlimeJavascriptRBracketToken,
     type SlimeJavascriptCommaToken, type SlimeJavascriptLBraceToken, type SlimeJavascriptRBraceToken,
     type SlimeJavascriptObjectPatternProperty, type SlimeJavascriptAssignmentProperty
@@ -90,7 +90,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
         )
         const id = argument ? SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(argument) : null
 
-        return SlimeJavascriptAstUtil.createRestElement(id as any)
+        return SlimeJavascriptCreateUtils.createRestElement(id as any)
     }
 
     /**
@@ -218,9 +218,9 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
         let rBracketToken: SlimeJavascriptRBracketToken | undefined
         for (const child of cst.children) {
             if (child.value === '[') {
-                lBracketToken = SlimeJavascriptTokenCreate.createLBracketToken(child.loc)
+                lBracketToken = SlimeJavascriptTokenCreateUtils.createLBracketToken(child.loc)
             } else if (child.value === ']') {
-                rBracketToken = SlimeJavascriptTokenCreate.createRBracketToken(child.loc)
+                rBracketToken = SlimeJavascriptTokenCreateUtils.createRBracketToken(child.loc)
             }
         }
 
@@ -234,9 +234,9 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
                 if (child.value === ',') {
                     // 如果有待处理的元素，将逗号关联到它
                     if (elements.length > 0 && !elements[elements.length - 1].commaToken) {
-                        elements[elements.length - 1].commaToken = SlimeJavascriptTokenCreate.createCommaToken(child.loc)
+                        elements[elements.length - 1].commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
                     } else {
-                        pendingCommaToken = SlimeJavascriptTokenCreate.createCommaToken(child.loc)
+                        pendingCommaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
                     }
                 } else if (child.name === SlimeJavascriptParser.prototype.BindingElisionElement?.name) {
                     // BindingElisionElement可能包含：Elision + BindingElement
@@ -249,7 +249,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
                             if (elisionChild.value === ',') {
                                 elements.push({
                                     element: null,
-                                    commaToken: SlimeJavascriptTokenCreate.createCommaToken(elisionChild.loc)
+                                    commaToken: SlimeJavascriptTokenCreateUtils.createCommaToken(elisionChild.loc)
                                 })
                             }
                         }
@@ -285,7 +285,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
             if (child.value === ',') {
                 // 将逗号关联到最后一个元�?
                 if (elements.length > 0 && !elements[elements.length - 1].commaToken) {
-                    elements[elements.length - 1].commaToken = SlimeJavascriptTokenCreate.createCommaToken(child.loc)
+                    elements[elements.length - 1].commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
                 }
             }
 
@@ -295,7 +295,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
                     if (elisionChild.value === ',') {
                         elements.push({
                             element: null,
-                            commaToken: SlimeJavascriptTokenCreate.createCommaToken(elisionChild.loc)
+                            commaToken: SlimeJavascriptTokenCreateUtils.createCommaToken(elisionChild.loc)
                         })
                     }
                 }
@@ -329,9 +329,9 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
         let rBraceToken: SlimeJavascriptRBraceToken | undefined
         for (const child of cst.children) {
             if (child.value === '{') {
-                lBraceToken = SlimeJavascriptTokenCreate.createLBraceToken(child.loc)
+                lBraceToken = SlimeJavascriptTokenCreateUtils.createLBraceToken(child.loc)
             } else if (child.value === '}') {
-                rBraceToken = SlimeJavascriptTokenCreate.createRBraceToken(child.loc)
+                rBraceToken = SlimeJavascriptTokenCreateUtils.createRBraceToken(child.loc)
             }
         }
 
@@ -344,7 +344,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
                 if (child.value === ',') {
                     // 将逗号关联到前一个属�?
                     if (properties.length > 0 && !properties[properties.length - 1].commaToken) {
-                        properties[properties.length - 1].commaToken = SlimeJavascriptTokenCreate.createCommaToken(child.loc)
+                        properties[properties.length - 1].commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
                     }
                 } else if (child.name === SlimeJavascriptParser.prototype.BindingProperty?.name) {
                     // BindingProperty -> SingleNameBinding (简�? �?PropertyName + BindingElement (完整)
@@ -405,7 +405,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
             if (child.value === ',') {
                 // 将逗号关联到最后一个属�?
                 if (properties.length > 0 && !properties[properties.length - 1].commaToken) {
-                    properties[properties.length - 1].commaToken = SlimeJavascriptTokenCreate.createCommaToken(child.loc)
+                    properties[properties.length - 1].commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
                 }
             }
         }
@@ -426,7 +426,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
                 const restId = SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(identifier)
                 // 提取 ellipsis token
                 const ellipsisCst = restElement.children.find((ch: any) => ch.value === '...')
-                const ellipsisToken = ellipsisCst ? SlimeJavascriptTokenCreate.createEllipsisToken(ellipsisCst.loc) : undefined
+                const ellipsisToken = ellipsisCst ? SlimeJavascriptTokenCreateUtils.createEllipsisToken(ellipsisCst.loc) : undefined
                 const restNode: SlimeJavascriptRestElement = {
                     type: SlimeJavascriptAstTypeName.RestElement,
                     argument: restId,

@@ -1,11 +1,11 @@
 import {
-    SlimeJavascriptAstUtil,
+    SlimeJavascriptCreateUtils,
     type SlimeJavascriptBlockStatement,
     type SlimeJavascriptExpression,
     type SlimeJavascriptFunctionParam,
     SlimeJavascriptAstTypeName,
     type SlimeJavascriptPattern,
-    SlimeJavascriptTokenCreate,
+    SlimeJavascriptTokenCreateUtils,
     type SlimeJavascriptArrayPattern,
     type SlimeJavascriptArrayPatternElement,
     type SlimeJavascriptObjectPattern,
@@ -95,7 +95,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
             const idNode = inner.name === 'IdentifierReference' ? findInnerExpr(inner) : inner
             const identifierName = idNode.children?.[0]
             if (identifierName) {
-                return SlimeJavascriptAstUtil.createIdentifier(identifierName.value, identifierName.loc)
+                return SlimeJavascriptCreateUtils.createIdentifier(identifierName.value, identifierName.loc)
             }
         } else if (inner.name === 'BindingIdentifier') {
             return SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(inner)
@@ -155,7 +155,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
 
         // 4. 处理 rest 参数：根据调用方传入�?hasEllipsis 决定是否包装�?RestElement
         if (hasEllipsis) {
-            return SlimeJavascriptAstUtil.createRestElement(basePattern)
+            return SlimeJavascriptCreateUtils.createRestElement(basePattern)
         }
 
         return basePattern
@@ -172,15 +172,15 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
 
         for (const child of cst.children || []) {
             if (child.value === '{') {
-                lBraceToken = SlimeJavascriptTokenCreate.createLBraceToken(child.loc)
+                lBraceToken = SlimeJavascriptTokenCreateUtils.createLBraceToken(child.loc)
             } else if (child.value === '}') {
-                rBraceToken = SlimeJavascriptTokenCreate.createRBraceToken(child.loc)
+                rBraceToken = SlimeJavascriptTokenCreateUtils.createRBraceToken(child.loc)
             } else if (child.name === 'PropertyDefinitionList') {
                 for (const prop of child.children || []) {
                     if (prop.value === ',') {
                         // 将逗号关联到前一个属�?
                         if (properties.length > 0 && !properties[properties.length - 1].commaToken) {
-                            properties[properties.length - 1].commaToken = SlimeJavascriptTokenCreate.createCommaToken(prop.loc)
+                            properties[properties.length - 1].commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(prop.loc)
                         }
                         continue
                     }
@@ -198,7 +198,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
                                     const restNode: SlimeJavascriptRestElement = {
                                         type: SlimeJavascriptAstTypeName.RestElement,
                                         argument: restId,
-                                        ellipsisToken: SlimeJavascriptTokenCreate.createEllipsisToken(ellipsis.loc),
+                                        ellipsisToken: SlimeJavascriptTokenCreateUtils.createEllipsisToken(ellipsis.loc),
                                         loc: prop.loc
                                     }
                                     properties.push({ property: restNode })
@@ -235,7 +235,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
             // 简写形�? { id } -> { id: id }
             const idNode = first.children?.[0]?.children?.[0]
             if (idNode) {
-                const id = SlimeJavascriptAstUtil.createIdentifier(idNode.value, idNode.loc)
+                const id = SlimeJavascriptCreateUtils.createIdentifier(idNode.value, idNode.loc)
                 return {
                     type: SlimeJavascriptAstTypeName.Property,
                     key: id,
@@ -253,7 +253,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
             if (idRef) {
                 const idNode = idRef.children?.[0]?.children?.[0]
                 if (idNode) {
-                    const id = SlimeJavascriptAstUtil.createIdentifier(idNode.value, idNode.loc)
+                    const id = SlimeJavascriptCreateUtils.createIdentifier(idNode.value, idNode.loc)
                     let value: any = id
                     if (initializer) {
                         const init = SlimeJavascriptCstToAstUtil.createInitializerAst(initializer)
@@ -385,7 +385,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
                 if (elisionChild.value === ',') {
                     // 将逗号关联到前一个元素（如果有）
                     if (elements.length > 0 && !elements[elements.length - 1].commaToken) {
-                        elements[elements.length - 1].commaToken = SlimeJavascriptTokenCreate.createCommaToken(elisionChild.loc)
+                        elements[elements.length - 1].commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(elisionChild.loc)
                     }
                     // 添加一个省略元�?
                     elements.push({ element: null })
@@ -395,9 +395,9 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
 
         for (const child of cst.children || []) {
             if (child.value === '[') {
-                lBracketToken = SlimeJavascriptTokenCreate.createLBracketToken(child.loc)
+                lBracketToken = SlimeJavascriptTokenCreateUtils.createLBracketToken(child.loc)
             } else if (child.value === ']') {
-                rBracketToken = SlimeJavascriptTokenCreate.createRBracketToken(child.loc)
+                rBracketToken = SlimeJavascriptTokenCreateUtils.createRBracketToken(child.loc)
             } else if (child.name === 'Elision') {
                 // 直接�?ArrayLiteral 下的 Elision（如 [,,]�?
                 processElision(child)
@@ -408,7 +408,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
                     if (elem.value === ',') {
                         // 将逗号关联到前一个元�?
                         if (elements.length > 0 && !elements[elements.length - 1].commaToken) {
-                            elements[elements.length - 1].commaToken = SlimeJavascriptTokenCreate.createCommaToken(elem.loc)
+                            elements[elements.length - 1].commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(elem.loc)
                         }
                     } else if (elem.name === 'Elision') {
                         // ElementList 内的 Elision
@@ -566,7 +566,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
             throw new Error(`BindingRestElement: 不支持的类型 ${argumentCst.name}`)
         }
 
-        return SlimeJavascriptAstUtil.createRestElement(argument)
+        return SlimeJavascriptCreateUtils.createRestElement(argument)
     }
 }
 

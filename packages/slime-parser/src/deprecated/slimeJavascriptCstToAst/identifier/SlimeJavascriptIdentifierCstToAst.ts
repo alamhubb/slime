@@ -3,7 +3,7 @@
  */
 import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
 import {
-    SlimeJavascriptAstUtil,
+    SlimeJavascriptCreateUtils,
     SlimeJavascriptClassBody, SlimeJavascriptFunctionParam,
     SlimeJavascriptIdentifier,
     SlimeJavascriptMethodDefinition, SlimeJavascriptPattern,
@@ -26,7 +26,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
         // 如果直接�?value，使用它
         if (cst.value !== undefined) {
             const decodedName = SlimeJavascriptCstToAstUtil.decodeUnicodeEscapes(cst.value as string)
-            return SlimeJavascriptAstUtil.createIdentifier(decodedName, cst.loc)
+            return SlimeJavascriptCreateUtils.createIdentifier(decodedName, cst.loc)
         }
 
         // 否则递归查找 value
@@ -37,7 +37,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
 
         if (current.value !== undefined) {
             const decodedName = SlimeJavascriptCstToAstUtil.decodeUnicodeEscapes(current.value as string)
-            return SlimeJavascriptAstUtil.createIdentifier(decodedName, current.loc || cst.loc)
+            return SlimeJavascriptCreateUtils.createIdentifier(decodedName, current.loc || cst.loc)
         }
 
         throw new Error(`createIdentifierNameAst: Cannot extract value from IdentifierName`)
@@ -56,13 +56,13 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
             // Identifier 规则内部包含 IdentifierNameTok
             const tokenCst = first.children?.[0]
             if (tokenCst && tokenCst.value !== undefined) {
-                return SlimeJavascriptAstUtil.createIdentifier(tokenCst.value, tokenCst.loc)
+                return SlimeJavascriptCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
             }
         }
 
         // 直接�?token 的情况（YieldTok, AwaitTok, 或旧版直接的 token�?
         if (first.value !== undefined) {
-            return SlimeJavascriptAstUtil.createIdentifier(first.value, first.loc)
+            return SlimeJavascriptCreateUtils.createIdentifier(first.value, first.loc)
         }
 
         throw new Error(`createBindingIdentifierAst: Cannot extract identifier value from ${first.name}`)
@@ -87,7 +87,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
             // 保存原始值和解码后的�?
             const name = decodedName.startsWith('#') ? decodedName : '#' + decodedName
             const raw = rawName.startsWith('#') ? rawName : '#' + rawName
-            const identifier = SlimeJavascriptAstUtil.createIdentifier(name, cst.loc)
+            const identifier = SlimeJavascriptCreateUtils.createIdentifier(name, cst.loc)
             // 如果原始值与解码值不同，保存 raw 以便生成器使�?
             if (raw !== name) {
                 (identifier as any).raw = raw
@@ -101,7 +101,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
             const identifierCst = identifierNameCst.children[0]
             const rawName = identifierCst.value as string
             const decodedName = SlimeJavascriptCstToAstUtil.decodeUnicodeEscapes(rawName)
-            const identifier = SlimeJavascriptAstUtil.createIdentifier('#' + decodedName)
+            const identifier = SlimeJavascriptCreateUtils.createIdentifier('#' + decodedName)
             // 保存原始�?
             if (rawName !== decodedName) {
                 (identifier as any).raw = '#' + rawName
@@ -115,7 +115,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
             if (child.value) {
                 const rawName = child.value as string
                 const decodedName = SlimeJavascriptCstToAstUtil.decodeUnicodeEscapes(rawName)
-                const identifier = SlimeJavascriptAstUtil.createIdentifier('#' + decodedName)
+                const identifier = SlimeJavascriptCreateUtils.createIdentifier('#' + decodedName)
                 if (rawName !== decodedName) {
                     (identifier as any).raw = '#' + rawName
                 }
@@ -230,7 +230,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
         // 解码 Unicode 转义序列（如 \u0061 -> a�?
         const decodedName = SlimeJavascriptCstToAstUtil.decodeUnicodeEscapes(value)
         // 使用 token �?loc（包含原始值），而不是规则的 loc
-        const identifier = SlimeJavascriptAstUtil.createIdentifier(decodedName, tokenLoc || cst.loc)
+        const identifier = SlimeJavascriptCreateUtils.createIdentifier(decodedName, tokenLoc || cst.loc)
         return identifier
     }
 }

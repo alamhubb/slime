@@ -3,7 +3,7 @@
  */
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeAstUtil,
+    SlimeAstCreateUtils,
     SlimeBlockStatement,
     SlimeExpression,
     SlimeFunctionExpression,

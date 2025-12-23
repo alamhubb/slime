@@ -1,10 +1,10 @@
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeAstUtil, type SlimeBlockStatement, type SlimeClassBody, type SlimeClassDeclaration,
+    SlimeAstCreateUtils, type SlimeBlockStatement, type SlimeClassBody, type SlimeClassDeclaration,
     SlimeClassExpression, type SlimeExpression,
     type SlimeFunctionDeclaration,
     type SlimeFunctionParam,
-    SlimeIdentifier, SlimeMethodDefinition, SlimeAstTypeName, SlimeStatement, SlimeTokenCreate
+    SlimeIdentifier, SlimeMethodDefinition, SlimeAstTypeName, SlimeStatement, SlimeTokenCreateUtils
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
@@ -48,32 +48,32 @@ export class SlimeFunctionDeclarationCstToAstSingle extends SlimeJavascriptFunct
 
             // Collect tokens
             if (name === 'Function' || value === 'function') {
-                functionToken = SlimeTokenCreate.createFunctionToken(child.loc)
+                functionToken = SlimeTokenCreateUtils.createFunctionToken(child.loc)
                 continue
             }
             if (name === 'LParen' || value === '(') {
-                lParenToken = SlimeTokenCreate.createLParenToken(child.loc)
+                lParenToken = SlimeTokenCreateUtils.createLParenToken(child.loc)
                 continue
             }
             if (name === 'RParen' || value === ')') {
-                rParenToken = SlimeTokenCreate.createRParenToken(child.loc)
+                rParenToken = SlimeTokenCreateUtils.createRParenToken(child.loc)
                 continue
             }
             if (name === 'LBrace' || value === '{') {
-                lBraceToken = SlimeTokenCreate.createLBraceToken(child.loc)
+                lBraceToken = SlimeTokenCreateUtils.createLBraceToken(child.loc)
                 continue
             }
             if (name === 'RBrace' || value === '}') {
-                rBraceToken = SlimeTokenCreate.createRBraceToken(child.loc)
+                rBraceToken = SlimeTokenCreateUtils.createRBraceToken(child.loc)
                 continue
             }
             if (name === 'Async' || value === 'async') {
-                asyncToken = SlimeTokenCreate.createAsyncToken(child.loc)
+                asyncToken = SlimeTokenCreateUtils.createAsyncToken(child.loc)
                 isAsync = true
                 continue
             }
             if (name === 'Asterisk' || value === '*') {
-                asteriskToken = SlimeTokenCreate.createAsteriskToken(child.loc)
+                asteriskToken = SlimeTokenCreateUtils.createAsteriskToken(child.loc)
                 isGenerator = true
                 continue
             }
@@ -99,17 +99,17 @@ export class SlimeFunctionDeclarationCstToAstSingle extends SlimeJavascriptFunct
             // FunctionBody - function body
             if (name === SlimeParser.prototype.FunctionBody?.name || name === 'FunctionBody') {
                 const statements = SlimeCstToAstUtil.createFunctionBodyAst(child)
-                body = SlimeAstUtil.createBlockStatement(statements, child.loc)
+                body = SlimeAstCreateUtils.createBlockStatement(statements, child.loc)
                 continue
             }
         }
 
         // Create default empty body if not found
         if (!body) {
-            body = SlimeAstUtil.createBlockStatement([])
+            body = SlimeAstCreateUtils.createBlockStatement([])
         }
 
-        const result = SlimeAstUtil.createFunctionDeclaration(
+        const result = SlimeAstCreateUtils.createFunctionDeclaration(
             functionName, params, body, isGenerator, isAsync, cst.loc,
             functionToken, asyncToken, asteriskToken, lParenToken, rParenToken,
             lBraceToken, rBraceToken

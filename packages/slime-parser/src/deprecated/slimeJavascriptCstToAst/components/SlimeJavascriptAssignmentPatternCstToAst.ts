@@ -5,7 +5,7 @@ import {
     SlimeJavascriptFunctionExpression,
     SlimeJavascriptFunctionParam,
     SlimeJavascriptIdentifier, SlimeJavascriptObjectPattern,
-    SlimeJavascriptTokenCreate
+    SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";

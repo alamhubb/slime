@@ -3,13 +3,13 @@
  */
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeJavascriptAstUtil,
+    SlimeJavascriptCreateUtils,
     SlimeJavascriptExportAllDeclaration,
     SlimeJavascriptExportDefaultDeclaration,
     SlimeJavascriptExportNamedDeclaration, SlimeJavascriptExportSpecifier, SlimeJavascriptExportSpecifierItem, SlimeJavascriptFunctionParam, SlimeJavascriptIdentifier,
     SlimeJavascriptLiteral,
     SlimeJavascriptModuleDeclaration, SlimeJavascriptPattern,
-    SlimeJavascriptStatement, SlimeJavascriptTokenCreate
+    SlimeJavascriptStatement, SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 
@@ -45,16 +45,16 @@ export class SlimeJavascriptExportCstToAstSingle {
         for (const child of children) {
             const name = child.name
             if (name === SlimeJavascriptTokenConsumer.prototype.Export?.name || child.value === 'export') {
-                exportToken = SlimeJavascriptTokenCreate.createExportToken(child.loc)
+                exportToken = SlimeJavascriptTokenCreateUtils.createExportToken(child.loc)
             } else if (name === SlimeJavascriptTokenConsumer.prototype.Default?.name || child.value === 'default') {
-                defaultToken = SlimeJavascriptTokenCreate.createDefaultToken(child.loc)
+                defaultToken = SlimeJavascriptTokenCreateUtils.createDefaultToken(child.loc)
                 isDefault = true
             } else if (name === SlimeJavascriptTokenConsumer.prototype.Asterisk?.name || child.value === '*') {
-                asteriskToken = SlimeJavascriptTokenCreate.createAsteriskToken(child.loc)
+                asteriskToken = SlimeJavascriptTokenCreateUtils.createAsteriskToken(child.loc)
             } else if (name === SlimeJavascriptTokenConsumer.prototype.Semicolon?.name || child.value === ';') {
-                semicolonToken = SlimeJavascriptTokenCreate.createSemicolonToken(child.loc)
+                semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(child.loc)
             } else if (name === SlimeJavascriptTokenConsumer.prototype.As?.name || child.value === 'as') {
-                asToken = SlimeJavascriptTokenCreate.createAsToken(child.loc)
+                asToken = SlimeJavascriptTokenCreateUtils.createAsToken(child.loc)
             } else if (name === SlimeJavascriptParser.prototype.ExportFromClause?.name) {
                 exportFromClause = child
             } else if (name === SlimeJavascriptParser.prototype.FromClause?.name) {
@@ -95,7 +95,7 @@ export class SlimeJavascriptExportCstToAstSingle {
             } else if (assignmentExpression) {
                 decl = SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(assignmentExpression)
             }
-            return SlimeJavascriptAstUtil.createExportDefaultDeclaration(decl, cst.loc, exportToken, defaultToken)
+            return SlimeJavascriptCreateUtils.createExportDefaultDeclaration(decl, cst.loc, exportToken, defaultToken)
         }
 
         // export ExportFromClause FromClause ; (export * from ... or export { } from ...)
@@ -114,7 +114,7 @@ export class SlimeJavascriptExportCstToAstSingle {
                 if (moduleExportName) {
                     exported = SlimeJavascriptCstToAstUtil.createModuleExportNameAst(moduleExportName)
                 }
-                const result = SlimeJavascriptAstUtil.createExportAllDeclaration(
+                const result = SlimeJavascriptCreateUtils.createExportAllDeclaration(
                     fromClauseResult.source, exported, cst.loc,
                     exportToken, asteriskToken, asToken, fromClauseResult.fromToken, semicolonToken
                 ) as any
@@ -133,7 +133,7 @@ export class SlimeJavascriptExportCstToAstSingle {
                 const specifiers = namedExportsCst
                     ? SlimeJavascriptCstToAstUtil.createNamedExportsAst(namedExportsCst)
                     : []
-                const result = SlimeJavascriptAstUtil.createExportNamedDeclaration(
+                const result = SlimeJavascriptCreateUtils.createExportNamedDeclaration(
                     null, specifiers, fromClauseResult.source, cst.loc,
                     exportToken, fromClauseResult.fromToken, semicolonToken
                 )
@@ -149,7 +149,7 @@ export class SlimeJavascriptExportCstToAstSingle {
         // export NamedExports ; (export { ... })
         if (namedExports) {
             const specifiers = SlimeJavascriptCstToAstUtil.createNamedExportsAst(namedExports)
-            return SlimeJavascriptAstUtil.createExportNamedDeclaration(
+            return SlimeJavascriptCreateUtils.createExportNamedDeclaration(
                 null, specifiers, null, cst.loc, exportToken, undefined, semicolonToken
             )
         }
@@ -157,7 +157,7 @@ export class SlimeJavascriptExportCstToAstSingle {
         // export VariableStatement
         if (variableStatement) {
             const decl = SlimeJavascriptCstToAstUtil.createVariableStatementAst(variableStatement)
-            return SlimeJavascriptAstUtil.createExportNamedDeclaration(
+            return SlimeJavascriptCreateUtils.createExportNamedDeclaration(
                 decl, [], null, cst.loc, exportToken
             )
         }
@@ -165,7 +165,7 @@ export class SlimeJavascriptExportCstToAstSingle {
         // export Declaration
         if (declaration) {
             const decl = SlimeJavascriptCstToAstUtil.createDeclarationAst(declaration)
-            return SlimeJavascriptAstUtil.createExportNamedDeclaration(
+            return SlimeJavascriptCreateUtils.createExportNamedDeclaration(
                 decl, [], null, cst.loc, exportToken
             )
         }
@@ -253,7 +253,7 @@ export class SlimeJavascriptExportCstToAstSingle {
                 if (lastSpecifier) {
                     specifiers.push({
                         specifier: lastSpecifier,
-                        commaToken: SlimeJavascriptTokenCreate.createCommaToken(child.loc)
+                        commaToken: SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
                     })
                     lastSpecifier = null
                 }
@@ -286,7 +286,7 @@ export class SlimeJavascriptExportCstToAstSingle {
                     exported = SlimeJavascriptCstToAstUtil.createModuleExportNameAst(child)
                 }
             } else if (child.name === SlimeJavascriptTokenConsumer.prototype.As?.name || child.value === 'as') {
-                asToken = SlimeJavascriptTokenCreate.createAsToken(child.loc)
+                asToken = SlimeJavascriptTokenCreateUtils.createAsToken(child.loc)
             }
         }
 
@@ -295,7 +295,7 @@ export class SlimeJavascriptExportCstToAstSingle {
             exported = local
         }
 
-        return SlimeJavascriptAstUtil.createExportSpecifier(local, exported, cst.loc, asToken)
+        return SlimeJavascriptCreateUtils.createExportSpecifier(local, exported, cst.loc, asToken)
     }
 
     /**
@@ -310,10 +310,10 @@ export class SlimeJavascriptExportCstToAstSingle {
         if (first.name === SlimeJavascriptParser.prototype.IdentifierName?.name) {
             return SlimeJavascriptCstToAstUtil.createIdentifierNameAst(first)
         } else if (first.name === SlimeJavascriptTokenConsumer.prototype.StringLiteral?.name) {
-            return SlimeJavascriptAstUtil.createStringLiteral(first.value, first.loc)
+            return SlimeJavascriptCreateUtils.createStringLiteral(first.value, first.loc)
         } else {
             // Direct token
-            return SlimeJavascriptAstUtil.createIdentifier(first.value, first.loc)
+            return SlimeJavascriptCreateUtils.createIdentifier(first.value, first.loc)
         }
     }
 

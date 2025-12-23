@@ -1,12 +1,12 @@
 import {SubhutiCst} from "subhuti";
 import {SlimeJavascriptClassDeclarationCstToAstSingle} from "../../deprecated/slimeJavascriptCstToAst";
 import {
-    SlimeAstUtil,
+    SlimeAstCreateUtils,
     SlimeClassBody, SlimeClassDeclaration, SlimeClassExpression,
     SlimeExpression, SlimeIdentifier,
     SlimeMethodDefinition, SlimeAstTypeName,
     SlimePropertyDefinition, SlimeStatement,
-    SlimeTokenCreate
+    SlimeTokenCreateUtils
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
@@ -36,7 +36,7 @@ export class SlimeClassDeclarationCstToAstSingle extends SlimeJavascriptClassDec
         for (const child of cst.children) {
             const name = child.name
             if (name === 'Class' || child.value === 'class') {
-                classToken = SlimeTokenCreate.createClassToken(child.loc)
+                classToken = SlimeTokenCreateUtils.createClassToken(child.loc)
             } else if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
                 id = SlimeCstToAstUtil.createBindingIdentifierAst(child)
             } else if (name === SlimeParser.prototype.ClassTail?.name || name === 'ClassTail') {
@@ -51,7 +51,7 @@ export class SlimeClassDeclarationCstToAstSingle extends SlimeJavascriptClassDec
 
         const classTailResult = this.createClassTailAst(classTailCst)
 
-        return SlimeAstUtil.createClassDeclaration(
+        return SlimeAstCreateUtils.createClassDeclaration(
             id, classTailResult.body, classTailResult.superClass, cst.loc,
             classToken, classTailResult.extendsToken
         )
@@ -78,7 +78,7 @@ export class SlimeClassDeclarationCstToAstSingle extends SlimeJavascriptClassDec
         }
 
         const classTail = this.createClassTailAst(classTailCst)
-        return SlimeAstUtil.createClassExpression(id, classTail.superClass, classTail.body, cst.loc)
+        return SlimeAstCreateUtils.createClassExpression(id, classTail.superClass, classTail.body, cst.loc)
     }
 
     /**
@@ -115,9 +115,9 @@ export class SlimeClassDeclarationCstToAstSingle extends SlimeJavascriptClassDec
             } else if (childName === 'ClassBody' || childName === SlimeParser.prototype.ClassBody?.name) {
                 body = SlimeJavascriptCstToAstUtil.createClassBodyAst(child)
             } else if (childName === 'LBrace' || child.value === '{') {
-                lBraceToken = SlimeTokenCreate.createLBraceToken(child.loc)
+                lBraceToken = SlimeTokenCreateUtils.createLBraceToken(child.loc)
             } else if (childName === 'RBrace' || child.value === '}') {
-                rBraceToken = SlimeTokenCreate.createRBraceToken(child.loc)
+                rBraceToken = SlimeTokenCreateUtils.createRBraceToken(child.loc)
             }
         }
 
@@ -144,7 +144,7 @@ export class SlimeClassDeclarationCstToAstSingle extends SlimeJavascriptClassDec
         for (const child of cst.children) {
             const childName = child.name
             if (childName === 'Extends' || child.value === 'extends') {
-                extendsToken = SlimeTokenCreate.createExtendsToken(child.loc)
+                extendsToken = SlimeTokenCreateUtils.createExtendsToken(child.loc)
             } else if (childName === 'LeftHandSideExpression' || 
                        childName === SlimeParser.prototype.LeftHandSideExpression?.name) {
                 superClass = SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(child)
@@ -185,7 +185,7 @@ export class SlimeClassDeclarationCstToAstSingle extends SlimeJavascriptClassDec
         }
 
         const isStatic = SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst)
-        const ast = SlimeAstUtil.createPropertyDefinition(key, value, isComputed, isStatic || false, cst.loc)
+        const ast = SlimeAstCreateUtils.createPropertyDefinition(key, value, isComputed, isStatic || false, cst.loc)
         
         if (typeAnnotation) {
             (ast as any).typeAnnotation = typeAnnotation

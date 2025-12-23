@@ -1,5 +1,5 @@
 import {SubhutiCst} from "subhuti";
-import {SlimeAstUtil, SlimeBlockStatement, SlimeExpression, SlimeMethodDefinition, SlimeStatement} from "slime-ast";
+import {SlimeAstCreateUtils, SlimeBlockStatement, SlimeExpression, SlimeMethodDefinition, SlimeStatement} from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";

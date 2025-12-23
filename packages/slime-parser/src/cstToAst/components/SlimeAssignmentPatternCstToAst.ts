@@ -5,7 +5,7 @@ import {
     SlimeFunctionExpression,
     SlimeFunctionParam,
     SlimeIdentifier, SlimeObjectPattern,
-    SlimeTokenCreate
+    SlimeTokenCreateUtils
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";

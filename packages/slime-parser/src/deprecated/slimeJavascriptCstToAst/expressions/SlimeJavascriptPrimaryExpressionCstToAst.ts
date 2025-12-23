@@ -3,7 +3,7 @@
  */
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeJavascriptAstUtil,
+    SlimeJavascriptCreateUtils,
     SlimeJavascriptBlockStatement,
     SlimeJavascriptExpression,
     SlimeJavascriptFunctionExpression,
@@ -35,7 +35,7 @@ export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
             return SlimeJavascriptCstToAstUtil.createClassExpressionAst(first) as SlimeJavascriptExpression
         } else if (first.name === SlimeJavascriptTokenConsumer.prototype.This?.name) {
             // 处理 this 关键�?
-            return SlimeJavascriptAstUtil.createThisExpression(first.loc)
+            return SlimeJavascriptCreateUtils.createThisExpression(first.loc)
         } else if (first.name === SlimeJavascriptTokenConsumer.prototype.RegularExpressionLiteral?.name) {
             // 处理正则表达式字面量
             return SlimeJavascriptCstToAstUtil.createRegExpLiteralAst(first)
@@ -55,55 +55,55 @@ export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
 
             // Empty parentheses: ()
             if (!first.children || first.children.length === 0) {
-                return SlimeJavascriptAstUtil.createIdentifier('undefined', first.loc)
+                return SlimeJavascriptCreateUtils.createIdentifier('undefined', first.loc)
             }
 
             // Only 2 children (empty parens): LParen, RParen
             if (first.children.length === 2) {
-                return SlimeJavascriptAstUtil.createIdentifier('undefined', first.loc)
+                return SlimeJavascriptCreateUtils.createIdentifier('undefined', first.loc)
             }
 
             // Find the content (skip LParen at start, RParen at end)
             const middleCst = first.children[1]
             if (!middleCst) {
-                return SlimeJavascriptAstUtil.createIdentifier('undefined', first.loc)
+                return SlimeJavascriptCreateUtils.createIdentifier('undefined', first.loc)
             }
 
             // If it's an Expression, process it directly
             if (middleCst.name === SlimeJavascriptParser.prototype.Expression?.name || middleCst.name === 'Expression') {
                 const innerExpr = SlimeJavascriptCstToAstUtil.createExpressionAst(middleCst)
-                return SlimeJavascriptAstUtil.createParenthesizedExpression(innerExpr, first.loc)
+                return SlimeJavascriptCreateUtils.createParenthesizedExpression(innerExpr, first.loc)
             }
 
             // If it's AssignmentExpression, process it
             if (middleCst.name === SlimeJavascriptParser.prototype.AssignmentExpression?.name || middleCst.name === 'AssignmentExpression') {
                 const innerExpr = SlimeJavascriptCstToAstUtil.createExpressionAst(middleCst)
-                return SlimeJavascriptAstUtil.createParenthesizedExpression(innerExpr, first.loc)
+                return SlimeJavascriptCreateUtils.createParenthesizedExpression(innerExpr, first.loc)
             }
 
             // If it's FormalParameterList, convert to expression
             if (middleCst.name === SlimeJavascriptParser.prototype.FormalParameterList?.name || middleCst.name === 'FormalParameterList') {
                 const params = SlimeJavascriptCstToAstUtil.createFormalParameterListAst(middleCst)
                 if (params.length === 1 && params[0].type === SlimeJavascriptAstTypeName.Identifier) {
-                    return SlimeJavascriptAstUtil.createParenthesizedExpression(params[0] as any, first.loc)
+                    return SlimeJavascriptCreateUtils.createParenthesizedExpression(params[0] as any, first.loc)
                 }
                 if (params.length > 1) {
                     const expressions = params.map(p => p as any)
-                    return SlimeJavascriptAstUtil.createParenthesizedExpression({
+                    return SlimeJavascriptCreateUtils.createParenthesizedExpression({
                         type: 'SequenceExpression',
                         expressions: expressions
                     } as any, first.loc)
                 }
-                return SlimeJavascriptAstUtil.createIdentifier('undefined', first.loc)
+                return SlimeJavascriptCreateUtils.createIdentifier('undefined', first.loc)
             }
 
             // Try to process the middle content as an expression
             try {
                 const innerExpr = SlimeJavascriptCstToAstUtil.createExpressionAst(middleCst)
-                return SlimeJavascriptAstUtil.createParenthesizedExpression(innerExpr, first.loc)
+                return SlimeJavascriptCreateUtils.createParenthesizedExpression(innerExpr, first.loc)
             } catch (e) {
                 // Fallback: return the first child as identifier
-                return SlimeJavascriptAstUtil.createIdentifier('undefined', first.loc)
+                return SlimeJavascriptCreateUtils.createIdentifier('undefined', first.loc)
             }
         } else if (first.name === SlimeJavascriptParser.prototype.TemplateLiteral?.name) {
             // 处理模板字符�?
@@ -113,7 +113,7 @@ export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
             // children[0]=LParen, children[1]=Expression, children[2]=RParen
             const expressionCst = first.children[1]
             const innerExpression = SlimeJavascriptCstToAstUtil.createExpressionAst(expressionCst)
-            return SlimeJavascriptAstUtil.createParenthesizedExpression(innerExpression, first.loc)
+            return SlimeJavascriptCreateUtils.createParenthesizedExpression(innerExpression, first.loc)
         } else if (first.name === 'RegularExpressionLiteral' || first.name === 'RegularExpressionLiteral') {
             // 处理正则表达式字面量
             return SlimeJavascriptCstToAstUtil.createRegExpLiteralAst(first)

@@ -10,8 +10,8 @@ import {
     type SlimeJavascriptFunctionDeclaration, type SlimeJavascriptFunctionExpression,
     type SlimeJavascriptFunctionParam,
     type SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, type SlimeJavascriptPropertyDefinition,
-    SlimeJavascriptTokenCreate, type SlimeJavascriptVariableDeclaration, type SlimeJavascriptVariableDeclarator,
-    SlimeJavascriptAstUtil, type SlimeJavascriptPattern, type SlimeJavascriptExpression
+    SlimeJavascriptTokenCreateUtils, type SlimeJavascriptVariableDeclaration, type SlimeJavascriptVariableDeclarator,
+    SlimeJavascriptCreateUtils, type SlimeJavascriptPattern, type SlimeJavascriptExpression
 } from "slime-ast";
 import {SlimeJavascriptClassDeclarationCstToAstSingle} from "../class/SlimeJavascriptClassDeclarationCstToAst.ts";
 
@@ -63,18 +63,18 @@ export class SlimeJavascriptVariableCstToAstSingle {
         let kindToken: any = undefined
         const kindValue = kindCst.value as string
         if (kindValue === 'var') {
-            kindToken = SlimeJavascriptTokenCreate.createVarToken(kindCst.loc)
+            kindToken = SlimeJavascriptTokenCreateUtils.createVarToken(kindCst.loc)
         } else if (kindValue === 'let') {
-            kindToken = SlimeJavascriptTokenCreate.createLetToken(kindCst.loc)
+            kindToken = SlimeJavascriptTokenCreateUtils.createLetToken(kindCst.loc)
         } else if (kindValue === 'const') {
-            kindToken = SlimeJavascriptTokenCreate.createConstToken(kindCst.loc)
+            kindToken = SlimeJavascriptTokenCreateUtils.createConstToken(kindCst.loc)
         }
 
         let declarations: SlimeJavascriptVariableDeclarator[] = []
         if (cst.children[1]) {
             declarations = SlimeJavascriptCstToAstUtil.createVariableDeclarationListAst(cst.children[1])
         }
-        return SlimeJavascriptAstUtil.createVariableDeclaration(kindToken, declarations, cst.loc)
+        return SlimeJavascriptCreateUtils.createVariableDeclaration(kindToken, declarations, cst.loc)
     }
 
 
@@ -113,23 +113,23 @@ export class SlimeJavascriptVariableCstToAstSingle {
         const varCst = cst.children[1]
         if (varCst) {
             const eqCst = varCst.children[0]
-            const eqAst = SlimeJavascriptTokenCreate.createAssignToken(eqCst.loc)
+            const eqAst = SlimeJavascriptTokenCreateUtils.createAssignToken(eqCst.loc)
             const initCst = varCst.children[1]
             if (initCst) {
                 // 检查initCst是否是AssignmentExpression
                 if (initCst.name === SlimeJavascriptParser.prototype.AssignmentExpression?.name) {
                     const init = SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(initCst)
-                    variableDeclarator = SlimeJavascriptAstUtil.createVariableDeclarator(id, eqAst, init)
+                    variableDeclarator = SlimeJavascriptCreateUtils.createVariableDeclarator(id, eqAst, init)
                 } else {
                     // 如果不是AssignmentExpression，直接作为表达式处理
                     const init = SlimeJavascriptCstToAstUtil.createExpressionAst(initCst)
-                    variableDeclarator = SlimeJavascriptAstUtil.createVariableDeclarator(id, eqAst, init)
+                    variableDeclarator = SlimeJavascriptCreateUtils.createVariableDeclarator(id, eqAst, init)
                 }
             } else {
-                variableDeclarator = SlimeJavascriptAstUtil.createVariableDeclarator(id, eqAst)
+                variableDeclarator = SlimeJavascriptCreateUtils.createVariableDeclarator(id, eqAst)
             }
         } else {
-            variableDeclarator = SlimeJavascriptAstUtil.createVariableDeclarator(id)
+            variableDeclarator = SlimeJavascriptCreateUtils.createVariableDeclarator(id)
         }
         variableDeclarator.loc = cst.loc
         return variableDeclarator
@@ -282,13 +282,13 @@ export class SlimeJavascriptVariableCstToAstSingle {
                 // children[0] �?Assign token，children[1] �?AssignmentExpression
                 if (child.children && child.children[0]) {
                     const assignCst = child.children[0]
-                    assignToken = SlimeJavascriptTokenCreate.createAssignToken(assignCst.loc)
+                    assignToken = SlimeJavascriptTokenCreateUtils.createAssignToken(assignCst.loc)
                 }
                 init = SlimeJavascriptCstToAstUtil.createInitializerAst(child)
             }
         }
 
-        return SlimeJavascriptAstUtil.createVariableDeclarator(id, assignToken, init, cst.loc)
+        return SlimeJavascriptCreateUtils.createVariableDeclarator(id, assignToken, init, cst.loc)
     }
 
 

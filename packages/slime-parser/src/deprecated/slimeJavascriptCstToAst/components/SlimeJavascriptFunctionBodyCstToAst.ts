@@ -1,5 +1,5 @@
 import {SubhutiCst} from "subhuti";
-import {SlimeJavascriptAstUtil, SlimeJavascriptBlockStatement, SlimeJavascriptExpression, SlimeJavascriptMethodDefinition, SlimeJavascriptStatement} from "slime-ast";
+import {SlimeJavascriptCreateUtils, SlimeJavascriptBlockStatement, SlimeJavascriptExpression, SlimeJavascriptMethodDefinition, SlimeJavascriptStatement} from "slime-ast";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
@@ -97,10 +97,10 @@ export class SlimeJavascriptFunctionBodyCstToAstSingle {
             )
             if (functionBodyCst) {
                 const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(functionBodyCst)
-                return SlimeJavascriptAstUtil.createBlockStatement(bodyStatements, cst.loc)
+                return SlimeJavascriptCreateUtils.createBlockStatement(bodyStatements, cst.loc)
             }
             // 空函数体
-            return SlimeJavascriptAstUtil.createBlockStatement([], cst.loc)
+            return SlimeJavascriptCreateUtils.createBlockStatement([], cst.loc)
         }
 
         // 否则是表达式，解析为表达�?

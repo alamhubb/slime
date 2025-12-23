@@ -3,11 +3,11 @@
  */
 import { SubhutiCst } from "subhuti";
 import {
-    SlimeJavascriptAstUtil, SlimeJavascriptBlockStatement,
+    SlimeJavascriptCreateUtils, SlimeJavascriptBlockStatement,
     SlimeJavascriptClassExpression,
     SlimeJavascriptFunctionExpression,
     SlimeJavascriptFunctionParam,
-    SlimeJavascriptIdentifier, SlimeJavascriptTokenCreate
+    SlimeJavascriptIdentifier, SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
@@ -43,33 +43,33 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
             const value = child.value
 
             if (name === 'Function' || value === 'function') {
-                functionToken = SlimeJavascriptTokenCreate.createFunctionToken(child.loc)
+                functionToken = SlimeJavascriptTokenCreateUtils.createFunctionToken(child.loc)
                 continue
             }
             if (name === 'Async' || value === 'async') {
-                asyncToken = SlimeJavascriptTokenCreate.createAsyncToken(child.loc)
+                asyncToken = SlimeJavascriptTokenCreateUtils.createAsyncToken(child.loc)
                 isAsync = true
                 continue
             }
             if (name === 'Asterisk' || value === '*') {
-                asteriskToken = SlimeJavascriptTokenCreate.createAsteriskToken(child.loc)
+                asteriskToken = SlimeJavascriptTokenCreateUtils.createAsteriskToken(child.loc)
                 isGenerator = true
                 continue
             }
             if (name === 'LParen' || value === '(') {
-                lParenToken = SlimeJavascriptTokenCreate.createLParenToken(child.loc)
+                lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(child.loc)
                 continue
             }
             if (name === 'RParen' || value === ')') {
-                rParenToken = SlimeJavascriptTokenCreate.createRParenToken(child.loc)
+                rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(child.loc)
                 continue
             }
             if (name === 'LBrace' || value === '{') {
-                lBraceToken = SlimeJavascriptTokenCreate.createLBraceToken(child.loc)
+                lBraceToken = SlimeJavascriptTokenCreateUtils.createLBraceToken(child.loc)
                 continue
             }
             if (name === 'RBrace' || value === '}') {
-                rBraceToken = SlimeJavascriptTokenCreate.createRBraceToken(child.loc)
+                rBraceToken = SlimeJavascriptTokenCreateUtils.createRBraceToken(child.loc)
                 continue
             }
 
@@ -88,17 +88,17 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
             // FunctionBody
             if (name === SlimeJavascriptParser.prototype.FunctionBody?.name || name === 'FunctionBody') {
                 const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(child)
-                body = SlimeJavascriptAstUtil.createBlockStatement(bodyStatements, child.loc)
+                body = SlimeJavascriptCreateUtils.createBlockStatement(bodyStatements, child.loc)
                 continue
             }
         }
 
         // 空函数体
         if (!body!) {
-            body = SlimeJavascriptAstUtil.createBlockStatement([])
+            body = SlimeJavascriptCreateUtils.createBlockStatement([])
         }
 
-        return SlimeJavascriptAstUtil.createFunctionExpression(
+        return SlimeJavascriptCreateUtils.createFunctionExpression(
             body, functionId, params, isGenerator, isAsync, cst.loc,
             functionToken, asyncToken, asteriskToken, lParenToken, rParenToken,
             lBraceToken, rBraceToken
@@ -141,12 +141,12 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
             ch.name === 'FunctionBody' || ch.name === SlimeJavascriptParser.prototype.FunctionBody?.name)
         if (bodyNode) {
             const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(bodyNode)
-            body = SlimeJavascriptAstUtil.createBlockStatement(bodyStatements, bodyNode.loc)
+            body = SlimeJavascriptCreateUtils.createBlockStatement(bodyStatements, bodyNode.loc)
         } else {
-            body = SlimeJavascriptAstUtil.createBlockStatement([])
+            body = SlimeJavascriptCreateUtils.createBlockStatement([])
         }
 
-        const func = SlimeJavascriptAstUtil.createFunctionExpression(body, id, params, true, false, cst.loc)
+        const func = SlimeJavascriptCreateUtils.createFunctionExpression(body, id, params, true, false, cst.loc)
         return func
     }
 
@@ -184,12 +184,12 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
             ch.name === 'FunctionBody' || ch.name === SlimeJavascriptParser.prototype.FunctionBody?.name)
         if (bodyNode) {
             const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(bodyNode)
-            body = SlimeJavascriptAstUtil.createBlockStatement(bodyStatements, bodyNode.loc)
+            body = SlimeJavascriptCreateUtils.createBlockStatement(bodyStatements, bodyNode.loc)
         } else {
-            body = SlimeJavascriptAstUtil.createBlockStatement([])
+            body = SlimeJavascriptCreateUtils.createBlockStatement([])
         }
 
-        const func = SlimeJavascriptAstUtil.createFunctionExpression(body, id, params, false, true, cst.loc)
+        const func = SlimeJavascriptCreateUtils.createFunctionExpression(body, id, params, false, true, cst.loc)
         return func
     }
 
@@ -227,12 +227,12 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
             ch.name === 'FunctionBody' || ch.name === SlimeJavascriptParser.prototype.FunctionBody?.name)
         if (bodyNode) {
             const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(bodyNode)
-            body = SlimeJavascriptAstUtil.createBlockStatement(bodyStatements, bodyNode.loc)
+            body = SlimeJavascriptCreateUtils.createBlockStatement(bodyStatements, bodyNode.loc)
         } else {
-            body = SlimeJavascriptAstUtil.createBlockStatement([])
+            body = SlimeJavascriptCreateUtils.createBlockStatement([])
         }
 
-        const func = SlimeJavascriptAstUtil.createFunctionExpression(body, id, params, true, true, cst.loc)
+        const func = SlimeJavascriptCreateUtils.createFunctionExpression(body, id, params, true, true, cst.loc)
         return func
     }
 

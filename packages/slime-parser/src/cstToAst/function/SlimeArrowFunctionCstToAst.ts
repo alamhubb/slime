@@ -3,13 +3,13 @@
  */
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeAstUtil,
+    SlimeAstCreateUtils,
     SlimeBlockStatement,
     SlimeExpression,
     type SlimeFunctionParam,
     SlimeMethodDefinition,
     SlimePattern,
-    SlimeTokenCreate,
+    SlimeTokenCreateUtils,
     SlimeAstTypeName, SlimeArrowFunctionExpression, SlimeIdentifier
 } from "slime-ast";
 

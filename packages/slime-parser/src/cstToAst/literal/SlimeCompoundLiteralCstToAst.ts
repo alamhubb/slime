@@ -6,7 +6,7 @@ import {
     type SlimeArrayElement,
     type SlimeArrayExpression, type SlimeArrowFunctionExpression,
     type SlimeAssignmentExpression,
-    SlimeAstUtil,
+    SlimeAstCreateUtils,
     type SlimeClassBody,
     type SlimeExpression, type SlimeFunctionParam,
     SlimeIdentifier,
@@ -17,7 +17,7 @@ import {
     type SlimePropertyDefinition,
     type SlimeSpreadElement,
     type SlimeStatement,
-    SlimeTokenCreate
+    SlimeTokenCreateUtils
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 

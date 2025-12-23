@@ -1,5 +1,5 @@
 import {
-    SlimeJavascriptAstUtil,
+    SlimeJavascriptCreateUtils,
     SlimeJavascriptExpression,
     type SlimeJavascriptFunctionExpression,
     type SlimeJavascriptIdentifier,
@@ -64,7 +64,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
                 let property: SlimeJavascriptIdentifier
                 // IdentifierName 内部包含一�?Identifier 或关键字 token
                 const tokenCst = child.children[0]
-                property = SlimeJavascriptAstUtil.createIdentifier(tokenCst.value, tokenCst.loc)
+                property = SlimeJavascriptCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
                 result = {
                     type: SlimeJavascriptAstTypeName.OptionalMemberExpression,
                     object: result,

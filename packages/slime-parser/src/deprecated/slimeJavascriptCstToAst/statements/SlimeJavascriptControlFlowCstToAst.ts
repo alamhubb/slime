@@ -5,9 +5,9 @@ import { SubhutiCst } from "subhuti";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import {
-    SlimeJavascriptAstUtil,
+    SlimeJavascriptCreateUtils,
     SlimeJavascriptAstTypeName,
-    SlimeJavascriptTokenCreate,
+    SlimeJavascriptTokenCreateUtils,
     type SlimeJavascriptVariableDeclaration,
     type SlimeJavascriptVariableDeclarator
 } from "slime-ast";
@@ -69,23 +69,23 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
 
             // if token
             if (name === 'If' || child.value === 'if') {
-                ifToken = SlimeJavascriptTokenCreate.createIfToken(child.loc)
+                ifToken = SlimeJavascriptTokenCreateUtils.createIfToken(child.loc)
                 continue
             }
             // LParen token
             if (name === 'LParen' || child.value === '(') {
-                lParenToken = SlimeJavascriptTokenCreate.createLParenToken(child.loc)
+                lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(child.loc)
                 continue
             }
             // RParen token
             if (name === 'RParen' || child.value === ')') {
-                rParenToken = SlimeJavascriptTokenCreate.createRParenToken(child.loc)
+                rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(child.loc)
                 continue
             }
 
             // else token
             if (name === 'Else' || child.value === 'else') {
-                elseToken = SlimeJavascriptTokenCreate.createElseToken(child.loc)
+                elseToken = SlimeJavascriptTokenCreateUtils.createElseToken(child.loc)
                 foundElse = true
                 continue
             }
@@ -120,7 +120,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
             }
         }
 
-        return SlimeJavascriptAstUtil.createIfStatement(test, consequent, alternate, cst.loc, ifToken, elseToken, lParenToken, rParenToken)
+        return SlimeJavascriptCreateUtils.createIfStatement(test, consequent, alternate, cst.loc, ifToken, elseToken, lParenToken, rParenToken)
     }
 
     /**
@@ -182,24 +182,24 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
 
             // for token
             if (name === 'For' || child.value === 'for') {
-                forToken = SlimeJavascriptTokenCreate.createForToken(child.loc)
+                forToken = SlimeJavascriptTokenCreateUtils.createForToken(child.loc)
                 continue
             }
             // LParen token
             if (name === 'LParen' || child.value === '(') {
-                lParenToken = SlimeJavascriptTokenCreate.createLParenToken(child.loc)
+                lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(child.loc)
                 continue
             }
             // RParen token
             if (name === 'RParen' || child.value === ')') {
-                rParenToken = SlimeJavascriptTokenCreate.createRParenToken(child.loc)
+                rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(child.loc)
                 continue
             }
             // var token - skip (kind handled separately)
             if (name === 'Var' || child.value === 'var') continue
             // Semicolon token
             if (name === 'Semicolon' || child.value === ';' || child.loc?.type === 'Semicolon') {
-                semicolonTokens.push(SlimeJavascriptTokenCreate.createSemicolonToken(child.loc))
+                semicolonTokens.push(SlimeJavascriptTokenCreateUtils.createSemicolonToken(child.loc))
                 continue
             }
 
@@ -255,7 +255,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
             if (expressions.length >= 3) update = expressions[2]
         }
 
-        return SlimeJavascriptAstUtil.createForStatement(
+        return SlimeJavascriptCreateUtils.createForStatement(
             body, init, test, update, cst.loc,
             forToken, lParenToken, rParenToken,
             semicolonTokens[0], semicolonTokens[1]
@@ -450,11 +450,11 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
         for (const child of cst.children) {
             if (!child) continue
             if (child.name === 'While' || child.value === 'while') {
-                whileToken = SlimeJavascriptTokenCreate.createWhileToken(child.loc)
+                whileToken = SlimeJavascriptTokenCreateUtils.createWhileToken(child.loc)
             } else if (child.name === 'LParen' || child.value === '(') {
-                lParenToken = SlimeJavascriptTokenCreate.createLParenToken(child.loc)
+                lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(child.loc)
             } else if (child.name === 'RParen' || child.value === ')') {
-                rParenToken = SlimeJavascriptTokenCreate.createRParenToken(child.loc)
+                rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(child.loc)
             }
         }
 
@@ -466,7 +466,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
         const bodyArray = statement ? SlimeJavascriptCstToAstUtil.createStatementAst(statement) : []
         const body = bodyArray.length > 0 ? bodyArray[0] : null
 
-        return SlimeJavascriptAstUtil.createWhileStatement(test, body, cst.loc, whileToken, lParenToken, rParenToken)
+        return SlimeJavascriptCreateUtils.createWhileStatement(test, body, cst.loc, whileToken, lParenToken, rParenToken)
     }
 
     /**
@@ -489,15 +489,15 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
             const name = child.name
 
             if (name === 'Do' || child.value === 'do') {
-                doToken = SlimeJavascriptTokenCreate.createDoToken(child.loc)
+                doToken = SlimeJavascriptTokenCreateUtils.createDoToken(child.loc)
             } else if (name === 'While' || child.value === 'while') {
-                whileToken = SlimeJavascriptTokenCreate.createWhileToken(child.loc)
+                whileToken = SlimeJavascriptTokenCreateUtils.createWhileToken(child.loc)
             } else if (name === 'LParen' || child.value === '(') {
-                lParenToken = SlimeJavascriptTokenCreate.createLParenToken(child.loc)
+                lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(child.loc)
             } else if (name === 'RParen' || child.value === ')') {
-                rParenToken = SlimeJavascriptTokenCreate.createRParenToken(child.loc)
+                rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(child.loc)
             } else if (name === 'Semicolon' || child.value === ';') {
-                semicolonToken = SlimeJavascriptTokenCreate.createSemicolonToken(child.loc)
+                semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(child.loc)
             } else if (name === SlimeJavascriptParser.prototype.Statement?.name || name === 'Statement') {
                 const bodyArray = SlimeJavascriptCstToAstUtil.createStatementAst(child)
                 body = bodyArray.length > 0 ? bodyArray[0] : null
@@ -506,7 +506,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
             }
         }
 
-        return SlimeJavascriptAstUtil.createDoWhileStatement(body, test, cst.loc, doToken, whileToken, lParenToken, rParenToken, semicolonToken)
+        return SlimeJavascriptCreateUtils.createDoWhileStatement(body, test, cst.loc, doToken, whileToken, lParenToken, rParenToken, semicolonToken)
     }
 
 
@@ -526,11 +526,11 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
         for (const child of cst.children) {
             if (!child) continue
             if (child.name === 'Switch' || child.value === 'switch') {
-                switchToken = SlimeJavascriptTokenCreate.createSwitchToken(child.loc)
+                switchToken = SlimeJavascriptTokenCreateUtils.createSwitchToken(child.loc)
             } else if (child.name === 'LParen' || child.value === '(') {
-                lParenToken = SlimeJavascriptTokenCreate.createLParenToken(child.loc)
+                lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(child.loc)
             } else if (child.name === 'RParen' || child.value === ')') {
-                rParenToken = SlimeJavascriptTokenCreate.createRParenToken(child.loc)
+                rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(child.loc)
             }
         }
 
@@ -546,11 +546,11 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
         if (caseBlockCst && caseBlockCst.children) {
             const lBraceCst = caseBlockCst.children.find(ch => ch.name === 'LBrace' || ch.value === '{')
             const rBraceCst = caseBlockCst.children.find(ch => ch.name === 'RBrace' || ch.value === '}')
-            if (lBraceCst) lBraceToken = SlimeJavascriptTokenCreate.createLBraceToken(lBraceCst.loc)
-            if (rBraceCst) rBraceToken = SlimeJavascriptTokenCreate.createRBraceToken(rBraceCst.loc)
+            if (lBraceCst) lBraceToken = SlimeJavascriptTokenCreateUtils.createLBraceToken(lBraceCst.loc)
+            if (rBraceCst) rBraceToken = SlimeJavascriptTokenCreateUtils.createRBraceToken(rBraceCst.loc)
         }
 
-        return SlimeJavascriptAstUtil.createSwitchStatement(
+        return SlimeJavascriptCreateUtils.createSwitchStatement(
             discriminant, cases, cst.loc,
             switchToken, lParenToken, rParenToken, lBraceToken, rBraceToken
         )
@@ -622,9 +622,9 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
 
             for (const child of cst.children || []) {
                 if (child.name === 'Case' || child.value === 'case') {
-                    caseToken = SlimeJavascriptTokenCreate.createCaseToken(child.loc)
+                    caseToken = SlimeJavascriptTokenCreateUtils.createCaseToken(child.loc)
                 } else if (child.name === 'Colon' || child.value === ':') {
-                    colonToken = SlimeJavascriptTokenCreate.createColonToken(child.loc)
+                    colonToken = SlimeJavascriptTokenCreateUtils.createColonToken(child.loc)
                 }
             }
 
@@ -641,9 +641,9 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
 
             for (const child of cst.children || []) {
                 if (child.name === 'Default' || child.value === 'default') {
-                    defaultToken = SlimeJavascriptTokenCreate.createDefaultToken(child.loc)
+                    defaultToken = SlimeJavascriptTokenCreateUtils.createDefaultToken(child.loc)
                 } else if (child.name === 'Colon' || child.value === ':') {
-                    colonToken = SlimeJavascriptTokenCreate.createColonToken(child.loc)
+                    colonToken = SlimeJavascriptTokenCreateUtils.createColonToken(child.loc)
                 }
             }
 
@@ -653,7 +653,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
             consequent = stmtListCst ? SlimeJavascriptCstToAstUtil.createStatementListAst(stmtListCst) : []
         }
 
-        return SlimeJavascriptAstUtil.createSwitchCase(consequent, test, cst.loc, caseToken, defaultToken, colonToken)
+        return SlimeJavascriptCreateUtils.createSwitchCase(consequent, test, cst.loc, caseToken, defaultToken, colonToken)
     }
 
 
