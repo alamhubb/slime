@@ -1,14 +1,136 @@
-### What is slime?
+# Slime
 
-A suitable for editor scenarios, Slime is a highly fault-tolerant js/ts parser and generator, just like the children's toy slime,Support js code containing various errors as much as possible
+A highly fault-tolerant JavaScript/TypeScript parser and generator suitable for editor scenarios. Just like the children's toy slime, it can support JS/TS code containing various errors as much as possible.
 
-### Why use slime instead of babel, recast, espree, esprima, typescript
+## Why Slime?
 
-* babel, recast, espree and esprima do not support fault tolerance
+| Feature | Slime | Babel | ESPrima | TypeScript |
+|---------|-------|-------|---------|------------|
+| Fault-tolerant parsing | ✅ | ❌ | ❌ | ✅ |
+| ESTree compatible | ✅ | ✅ | ✅ | ❌ |
+| Code generation | ✅ | ✅ | ❌ | ✅ |
+| Editor-friendly | ✅ | ❌ | ❌ | ✅ |
 
-parser `let a =` will cause an error
+Other parsers like babel, recast, espree, and esprima will throw errors when parsing incomplete code like `let a =`. Slime handles this gracefully.
 
-* typescript
+## Architecture
 
-ast is not an extension of estree
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Slime Project Structure                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐     │
+│  │ slime-token │───▶│slime-parser │───▶│  slime-ast  │     │
+│  │  (Lexer)    │    │  (Parser)   │    │ (AST Types) │     │
+│  └─────────────┘    └─────────────┘    └─────────────┘     │
+│                            │                  │             │
+│                            ▼                  ▼             │
+│                                        ┌─────────────┐     │
+│                                        │slime-generat│     │
+│                                        │ (Generator) │     │
+│                                        └─────────────┘     │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 
+### Packages
+
+| Package | Description |
+|---------|-------------|
+| `slime-token` | Token type definitions and lexical rules |
+| `slime-parser` | CST parser and CST→AST conversion |
+| `slime-ast` | ESTree-compatible AST type definitions and factory methods |
+| `slime-generator` | AST→Code generator |
+
+## CST to AST Two-Layer Architecture
+
+Slime uses a two-layer architecture to convert CST (Concrete Syntax Tree) to AST (Abstract Syntax Tree):
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                    Layer 1: AST Factory                     │
+│                   (SlimeAstCreateUtils.ts)                  │
+├────────────────────────────────────────────────────────────┤
+│  - Method names match ESTree AST type names                 │
+│  - Pure node creation, no CST dependency                    │
+│  - Example: createArrayExpression(), createCatchClause()    │
+└────────────────────────────────────────────────────────────┘
+                              ▲
+                              │ calls
+┌────────────────────────────────────────────────────────────┐
+│                    Layer 2: CST Conversion                  │
+│                   (SlimeCstToAstUtil.ts)                    │
+├────────────────────────────────────────────────────────────┤
+│  - Method names match CST rule names                        │
+│  - Parses CST structure, extracts info, calls AST factory   │
+│  - Example: createArrayLiteralAst(), createCatchAst()       │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Naming Convention
+
+| Layer | Method Naming | Example |
+|-------|---------------|---------|
+| CST Conversion | `createXxxAst` (Xxx = CST rule name) | `createArrayLiteralAst` |
+| AST Factory | `createXxx` (Xxx = AST type name) | `createArrayExpression` |
+
+## Usage
+
+### Parsing Code
+
+```typescript
+import { SlimeParser, SlimeCstToAst } from 'slime-parser'
+
+// 1. Parse code to CST
+const parser = new SlimeParser(code)
+const cst = parser.Program('module')
+
+// 2. Convert CST to AST
+const cstToAst = new SlimeCstToAst()
+const ast = cstToAst.toProgram(cst)
+```
+
+### Generating Code
+
+```typescript
+import { SlimeGenerator } from 'slime-generator'
+
+const generator = new SlimeGenerator()
+const code = generator.generate(ast)
+```
+
+## TypeScript Support
+
+See [TYPESCRIPT_SUPPORT.md](./TYPESCRIPT_SUPPORT.md) for detailed TypeScript syntax support documentation.
+
+## File Structure
+
+```
+slime/
+├── packages/
+│   ├── slime-ast/          # AST type definitions and factory methods
+│   ├── slime-parser/       # CST parser and CST→AST conversion
+│   ├── slime-generator/    # AST→Code generator
+│   ├── slime-token/        # Token definitions
+│   └── slime-test/         # Test utilities
+└── README.md
+```
+
+## Contributing
+
+### Adding New CST Rule Conversion
+
+1. Add `createXxxAst` method in `SlimeCstToAstUtil.ts` (Xxx = CST rule name)
+2. Add corresponding if dispatch in `createAstFromCst`
+3. If new AST type needed, add factory method in `SlimeAstCreateUtils.ts`
+
+### Running Tests
+
+```bash
+npx tsx packages/slime-test/src/utils/test-stage4.ts
+```
+
+## License
+
+See [LICENSE](./LICENSE) file.

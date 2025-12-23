@@ -17,7 +17,8 @@ import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import { SlimeVariableCstToAstSingle } from "../statements/SlimeVariableCstToAst.ts";
-import { SlimeJavascriptIdentifierCstToAstSingle, SlimeJavascriptCstToAstUtil } from "../../deprecated/slimeJavascriptCstToAst";
+import { SlimeJavascriptIdentifierCstToAstSingle } from "../../deprecated/slimeJavascriptCstToAst";
+import SlimeJavascriptCstToAstUtil from "../../deprecated/SlimeJavascriptCstToAstUtil.ts";
 import { SlimeJavascriptAstUtil } from "slime-ast";
 
 export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstToAstSingle {
@@ -1671,8 +1672,9 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
                     loc: child.loc,
                 }
             } else if (child.name === 'AssignmentExpression') {
-                // 初始化表达式 - 使用通用的表达式转换
-                initializer = this.createExpressionAst(child)
+                // 初始化表达式 - 使用 SlimeJavascriptCstToAstUtil 的方法
+                // 注意：这里调用的是单例的方法，会被 SlimeCstToAstUtil 的拦截机制处理
+                initializer = SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(child)
             }
         }
 

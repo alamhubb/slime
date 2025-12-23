@@ -445,17 +445,32 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
 
     /**
      * 生成对象类型字面量 { name: string }
+     * 也用于生成接口体 TSInterfaceBody
+     * 
+     * 注意：TSTypeLiteral 使用 members 属性，TSInterfaceBody 使用 body 属性
+     * 分隔符：接口体使用分号，类型字面量使用逗号或分号
      */
     generatorTSTypeLiteral(node: any) {
         this.addLBrace()
-        if (node.members && node.members.length > 0) {
+        // 兼容 TSTypeLiteral (members) 和 TSInterfaceBody (body)
+        const members = node.members || node.body || []
+        // TSInterfaceBody 使用分号分隔，TSTypeLiteral 使用逗号
+        const isInterfaceBody = node.type === 'TSInterfaceBody'
+        const separator = isInterfaceBody ? ';' : ','
+        
+        if (members.length > 0) {
             this.addSpacing()
-            node.members.forEach((member: any, index: number) => {
+            members.forEach((member: any, index: number) => {
                 if (index > 0) {
-                    this.addComma()
                     this.addSpacing()
                 }
                 this.generatorTSTypeMember(member)
+                // 添加分隔符（最后一个成员也加，符合常见风格）
+                if (isInterfaceBody) {
+                    this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Semicolon, null)
+                } else if (index < members.length - 1) {
+                    this.addComma()
+                }
             })
             this.addSpacing()
         }
