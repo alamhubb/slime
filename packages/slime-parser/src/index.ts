@@ -16,6 +16,3 @@ export * from './SlimeCstToAstUtil.ts'
 export * from './deprecated/SlimeJavascriptTokens.ts'
 export * from './deprecated/SlimeJavascriptParser.ts'
 
-export { default as SlimeJavascriptCstToAstUtil } from './SlimeCstToAstUtil.ts'
-
-

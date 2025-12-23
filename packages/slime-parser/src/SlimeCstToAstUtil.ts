@@ -106,7 +106,6 @@ import {
     SlimeJavascriptVariableCstToAst,
     SlimeJavascriptClassDeclarationCstToAst,
 } from "./slimeCstToAst";
-import {SlimeCstToAstUtil} from "./index.ts";
 
 
 // ============================================
