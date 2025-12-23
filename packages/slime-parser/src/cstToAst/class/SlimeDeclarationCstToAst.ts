@@ -4,16 +4,16 @@
 import {SubhutiCst} from "subhuti";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import {
-    
+
     SlimeClassBody, SlimeClassDeclaration, SlimeClassExpression,
     SlimeExpression, SlimeIdentifier, SlimeLiteral,
     SlimeMethodDefinition, SlimeAstTypeName,
     SlimePropertyDefinition, SlimeStatement,
-    SlimeTokenCreateUtils
+    SlimeTokenCreateUtils, SlimeAstCreateUtils
 } from "slime-ast";
 
-import SlimeParser from "../../../SlimeParser.ts";
-import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
+import SlimeParser from "../../SlimeParser.ts";
+import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
 export class SlimeClassDeclarationCstToAstSingle {
 

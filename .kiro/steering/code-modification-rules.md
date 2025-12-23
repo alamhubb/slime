@@ -16,7 +16,7 @@ deprecated 包包含 JavaScript ES2025 的基础实现，是稳定的基础代�
 
 | deprecated 文件 | 扩展文件 |
 |----------------|---------|
-| `SlimeJavascriptCstToAstUtil.ts` | `SlimeCstToAstUtil.ts` |
+| `SlimeCstToAstUtil.ts` | `SlimeCstToAstUtil.ts` |
 | `slimeJavascriptCstToAst/expressions/` | `cstToAst/` 目录下对应文件 |
 
 ### 示例：添加 TypeScript 表达式支持

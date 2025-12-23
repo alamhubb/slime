@@ -1,28 +1,29 @@
 import { SubhutiCst } from "subhuti";
 import {
-    SlimeAstCreateUtils,
+    
     SlimeFunctionParam,
     SlimeModuleDeclaration,
     SlimePattern,
     SlimeProgram,
-    SlimeStatement,
-    SlimeAstTypeName,
-    SlimeTokenCreateUtils
+    SlimeStatement
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
-import { SlimeVariableCstToAstSingle } from "../statements/SlimeVariableCstToAst.ts";
-import { SlimeJavascriptModuleCstToAstSingle, SlimeJavascriptExportCstToAst } from "../../deprecated/slimeJavascriptCstToAst";
-import SlimeJavascriptCstToAstUtil from "../../deprecated/SlimeJavascriptCstToAstUtil.ts";
-import { SlimeJavascriptCreateUtils } from "slime-ast";
+import {SlimeVariableCstToAstSingle} from "../statements/SlimeVariableCstToAst.ts";
 
-export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSingle {
+export class SlimeModuleCstToAstSingle {
 
     /**
-     * [TypeScript] 重写 toProgram 以使用新的 SlimeCstToAstUtil
-     * 这确保了 TypeScript 类型注解能被正确处理
+     * 重置状态钩子方法
+     *
+     * [入口方法] 将顶层 CST 转换为 Program AST
+     *
+     * 存在必要性：这是外部调用的主入口，支持 Module、Script、Program 多种顶层 CST
+     *
+     * 注意：子类如需重置状态，应重写此方法，先调用自己的 resetState()，再调用 super.toProgram()
      */
-    override toProgram(cst: SubhutiCst): SlimeProgram {
+    toProgram(cst: SubhutiCst): SlimeProgram {
+        // Support both Module and Script entry points
         const isModule = cst.name === SlimeParser.prototype.Module?.name || cst.name === 'Module'
         const isScript = cst.name === SlimeParser.prototype.Script?.name || cst.name === 'Script'
         const isProgram = cst.name === SlimeParser.prototype.Program?.name || cst.name === 'Program'
@@ -34,13 +35,16 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
         let program: SlimeProgram
         let hashbangComment: string | null = null
 
+        // If children is empty, return empty program
         if (!cst.children || cst.children.length === 0) {
             return SlimeAstCreateUtils.createProgram([], isModule ? 'module' : 'script')
         }
 
+        // 遍历子节点，处理 HashbangComment 和主体内?
         let bodyChild: SubhutiCst | null = null
         for (const child of cst.children) {
             if (child.name === 'HashbangComment') {
+                // 提取 Hashbang 注释的?
                 hashbangComment = child.value || child.children?.[0]?.value || null
             } else if (child.name === 'ModuleBody' || child.name === 'ScriptBody' ||
                 child.name === 'ModuleItemList' || child.name === SlimeParser.prototype.ModuleItemList?.name ||
@@ -49,6 +53,7 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
             }
         }
 
+        // 处理主体内容
         if (bodyChild) {
             if (bodyChild.name === 'ModuleBody') {
                 const moduleItemList = bodyChild.children?.[0]
@@ -64,23 +69,23 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
             } else if (bodyChild.name === 'ScriptBody') {
                 const statementList = bodyChild.children?.[0]
                 if (statementList && (statementList.name === 'StatementList' || statementList.name === SlimeParser.prototype.StatementList?.name)) {
-                    // [TypeScript] 使用 SlimeCstToAstUtil 以支持 TypeScript 语法
                     const body = SlimeCstToAstUtil.createStatementListAst(statementList)
                     program = SlimeAstCreateUtils.createProgram(body, 'script')
                 } else {
                     program = SlimeAstCreateUtils.createProgram([], 'script')
                 }
             } else if (bodyChild.name === SlimeParser.prototype.StatementList?.name || bodyChild.name === 'StatementList') {
-                // [TypeScript] 使用 SlimeCstToAstUtil 以支持 TypeScript 语法
                 const body = SlimeCstToAstUtil.createStatementListAst(bodyChild)
                 program = SlimeAstCreateUtils.createProgram(body, 'script')
             } else {
                 throw new Error(`Unexpected body child: ${bodyChild.name}`)
             }
         } else {
+            // 没有主体内容（可能只?HashbangComment?
             program = SlimeAstCreateUtils.createProgram([], isModule ? 'module' : 'script')
         }
 
+        // 设置 hashbang 注释（如果存在）
         if (hashbangComment) {
             (program as any).hashbang = hashbangComment
         }
@@ -89,374 +94,107 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
         return program
     }
 
-    // ============================================
-    // [TypeScript] Phase 7 - 模块和命名空间
-    // ============================================
-
     /**
-     * [TypeScript] 重写 ImportDeclaration 转换，支持 import type
-     * 
-     * import type { User } from "./types"
-     * import { type Config, getValue } from "./config"
+     * Program CST ?AST
+     *
+     * 存在必要性：Program 是顶层入口规则，需要处?Script ?Module 两种情况?
      */
-    createImportDeclarationAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        // 检查是否是 import type
-        let importKind: 'type' | 'value' = 'value'
-        let hasTypeKeyword = false
-        
-        // 查找 type 关键字（在 import 之后）
-        for (let i = 0; i < children.length; i++) {
-            const child = children[i]
-            if (child.value === 'type' && i > 0) {
-                // 确保 type 在 import 之后，且不是 ImportClause 内部的 type
-                const prevChild = children[i - 1]
-                if (prevChild.name === 'Import' || prevChild.value === 'import') {
-                    importKind = 'type'
-                    hasTypeKeyword = true
-                    break
-                }
+    createProgramAst(cst: SubhutiCst): SlimeProgram {
+        // 处理 Program -> Script | Module
+        const firstChild = cst.children?.[0]
+        if (firstChild) {
+            if (firstChild.name === 'Script' || firstChild.name === SlimeParser.prototype.Script?.name) {
+                return SlimeCstToAstUtil.createScriptAst(firstChild)
+            } else if (firstChild.name === 'Module' || firstChild.name === SlimeParser.prototype.Module?.name) {
+                return SlimeCstToAstUtil.createModuleAst(firstChild)
             }
         }
-        
-        // 获取 import token
-        const importTokenCst = children.find(c => c.name === 'Import' || c.value === 'import')
-        const importToken = importTokenCst ? SlimeTokenCreateUtils.createImportToken(importTokenCst.loc) : undefined
-        
-        // 获取 ImportClause
-        const importClauseCst = children.find(c => c.name === 'ImportClause')
-        
-        // 获取 FromClause
-        const fromClauseCst = children.find(c => c.name === 'FromClause')
-        
-        // 获取 ModuleSpecifier (for side-effect imports)
-        const moduleSpecifierCst = children.find(c => c.name === 'ModuleSpecifier')
-        
-        let specifiers: any[] = []
-        let source: any = undefined
-        let fromToken: any = undefined
-        
-        if (importClauseCst && fromClauseCst) {
-            // import ... from "..."
-            const clauseResult = this.createImportClauseAst(importClauseCst, importKind)
-            specifiers = clauseResult.specifiers
-            
-            const fromResult = SlimeJavascriptCstToAstUtil.createFromClauseAst(fromClauseCst)
-            source = fromResult.source
-            fromToken = fromResult.fromToken
-        } else if (moduleSpecifierCst) {
-            // import "..." (side-effect import)
-            source = SlimeJavascriptCstToAstUtil.createModuleSpecifierAst(moduleSpecifierCst)
-        }
-        
-        const result = SlimeJavascriptCreateUtils.createImportDeclaration(
-            specifiers,
-            source,
-            cst.loc,
-            importToken,
-            fromToken
+        // 如果直接就是内容，调?toProgram
+        return SlimeCstToAstUtil.toProgram(cst)
+    }
+
+    /**
+     * Module CST ?AST
+     */
+    createModuleAst(cst: SubhutiCst): SlimeProgram {
+        const moduleBody = cst.children?.find(ch =>
+            ch.name === 'ModuleBody' || ch.name === SlimeParser.prototype.ModuleBody?.name
         )
-        
-        // 添加 importKind 属性
-        if (importKind === 'type') {
-            result.importKind = 'type'
+        if (moduleBody) {
+            return SlimeCstToAstUtil.createModuleBodyAst(moduleBody)
         }
-        
-        return result
+        return SlimeAstCreateUtils.createProgram([], 'module')
     }
 
     /**
-     * [TypeScript] 转换 ImportClause，支持内联 type 导入
+     * Script CST ?AST
      */
-    createImportClauseAst(cst: SubhutiCst, importKind: 'type' | 'value'): { specifiers: any[] } {
-        const children = cst.children || []
-        const specifiers: any[] = []
-        
-        for (const child of children) {
-            if (child.name === 'ImportedDefaultBinding') {
-                // default import
-                const binding = child.children?.[0]
-                if (binding) {
-                    const bindingId = SlimeJavascriptCstToAstUtil.createImportedBindingAst(binding)
-                    const spec: any = {
-                        type: 'ImportDefaultSpecifier',
-                        local: bindingId,
-                        loc: child.loc,
-                    }
-                    if (importKind === 'type') {
-                        spec.importKind = 'type'
-                    }
-                    specifiers.push({ specifier: spec })
-                }
-            } else if (child.name === 'NameSpaceImport') {
-                // * as name
-                const asBinding = child.children?.find((c: SubhutiCst) => c.name === 'ImportedBinding')
-                if (asBinding) {
-                    const bindingId = SlimeJavascriptCstToAstUtil.createImportedBindingAst(asBinding)
-                    const spec: any = {
-                        type: 'ImportNamespaceSpecifier',
-                        local: bindingId,
-                        loc: child.loc,
-                    }
-                    if (importKind === 'type') {
-                        spec.importKind = 'type'
-                    }
-                    specifiers.push({ specifier: spec })
-                }
-            } else if (child.name === 'NamedImports') {
-                // { a, b as c, type d }
-                const namedSpecs = this.createNamedImportsAst(child, importKind)
-                specifiers.push(...namedSpecs)
-            }
-        }
-        
-        return { specifiers }
-    }
-
-    /**
-     * [TypeScript] 转换 NamedImports，支持内联 type 导入
-     */
-    createNamedImportsAst(cst: SubhutiCst, importKind: 'type' | 'value'): any[] {
-        const children = cst.children || []
-        const specifiers: any[] = []
-        
-        // 找到 ImportsList
-        const importsListCst = children.find(c => c.name === 'ImportsList')
-        if (!importsListCst) return specifiers
-        
-        const importSpecifiers = importsListCst.children?.filter((c: SubhutiCst) => c.name === 'ImportSpecifier') || []
-        
-        for (const specCst of importSpecifiers) {
-            const spec = this.createImportSpecifierAst(specCst, importKind)
-            if (spec) {
-                specifiers.push({ specifier: spec })
-            }
-        }
-        
-        return specifiers
-    }
-
-    /**
-     * [TypeScript] 转换 ImportSpecifier，支持内联 type
-     * 
-     * import { type Config, getValue } from "./config"
-     */
-    createImportSpecifierAst(cst: SubhutiCst, parentImportKind: 'type' | 'value'): any {
-        const children = cst.children || []
-        
-        // 检查是否有内联 type 关键字
-        let hasInlineType = false
-        for (const child of children) {
-            if (child.value === 'type') {
-                hasInlineType = true
-                break
-            }
-        }
-        
-        // 找到 ModuleExportName 和 ImportedBinding
-        // CST 结构: ModuleExportName [as ImportedBinding]
-        // 或者: ImportedBinding (没有 as)
-        const moduleExportNameCst = children.find(c => c.name === 'ModuleExportName')
-        const importedBindingCst = children.find(c => c.name === 'ImportedBinding')
-        
-        let imported: any = undefined
-        let local: any = undefined
-        
-        if (moduleExportNameCst && importedBindingCst) {
-            // ModuleExportName as ImportedBinding
-            imported = this.extractIdentifier(moduleExportNameCst)
-            local = this.extractIdentifier(importedBindingCst)
-        } else if (importedBindingCst) {
-            // ImportedBinding only (没有 as)
-            imported = this.extractIdentifier(importedBindingCst)
-            local = { ...imported }
-        } else if (moduleExportNameCst) {
-            // ModuleExportName only (没有 as)
-            imported = this.extractIdentifier(moduleExportNameCst)
-            local = { ...imported }
-        }
-        
-        if (!imported || !local) return null
-        
-        const spec: any = {
-            type: 'ImportSpecifier',
-            imported,
-            local,
-            loc: cst.loc,
-        }
-        
-        // 设置 importKind
-        if (hasInlineType) {
-            spec.importKind = 'type'
-        } else if (parentImportKind === 'type') {
-            spec.importKind = 'type'
-        }
-        
-        return spec
-    }
-
-    /**
-     * 从 CST 节点提取标识符
-     */
-    extractIdentifier(cst: SubhutiCst): any {
-        if (cst.name === 'ImportedBinding') {
-            return SlimeJavascriptCstToAstUtil.createImportedBindingAst(cst)
-        }
-        if (cst.name === 'ModuleExportName') {
-            const inner = cst.children?.[0]
-            if (inner) {
-                return this.extractIdentifier(inner)
-            }
-        }
-        if (cst.name === 'Identifier' || cst.name === 'IdentifierName') {
-            const tokenCst = cst.children?.[0] || cst
-            return {
-                type: 'Identifier',
-                name: tokenCst.value,
-                loc: tokenCst.loc,
-            }
-        }
-        // 直接是 token
-        if (cst.value) {
-            return {
-                type: 'Identifier',
-                name: cst.value,
-                loc: cst.loc,
-            }
-        }
-        return null
-    }
-
-    /**
-     * [TypeScript] 重写 ExportDeclaration 转换，支持 export type
-     * 
-     * export type { User }
-     * export type { Config as AppConfig }
-     */
-    createExportDeclarationAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        // 检查是否是 export type
-        let exportKind: 'type' | 'value' = 'value'
-        
-        // 查找 type 关键字（在 export 之后）
-        for (let i = 0; i < children.length; i++) {
-            const child = children[i]
-            if (child.value === 'type' && i > 0) {
-                const prevChild = children[i - 1]
-                if (prevChild.name === 'Export' || prevChild.value === 'export') {
-                    exportKind = 'type'
-                    break
-                }
-            }
-        }
-        
-        // 如果是 export type，使用特殊处理
-        if (exportKind === 'type') {
-            return this.createExportTypeDeclarationAst(cst)
-        }
-        
-        // 否则直接调用原始实现（避免递归）
-        return SlimeJavascriptExportCstToAst.createExportDeclarationAst(cst)
-    }
-
-    /**
-     * [TypeScript] 转换 export type 声明
-     */
-    createExportTypeDeclarationAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        // 获取 export token
-        const exportTokenCst = children.find(c => c.name === 'Export' || c.value === 'export')
-        const exportToken = exportTokenCst ? SlimeTokenCreateUtils.createExportToken(exportTokenCst.loc) : undefined
-        
-        // 获取 NamedExports
-        const namedExportsCst = children.find(c => c.name === 'NamedExports')
-        
-        // 获取 FromClause (可选)
-        const fromClauseCst = children.find(c => c.name === 'FromClause')
-        
-        let specifiers: any[] = []
-        let source: any = undefined
-        
-        if (namedExportsCst) {
-            specifiers = this.createNamedExportsAst(namedExportsCst)
-        }
-        
-        if (fromClauseCst) {
-            const fromResult = SlimeJavascriptCstToAstUtil.createFromClauseAst(fromClauseCst)
-            source = fromResult.source
-        }
-        
-        return {
-            type: 'ExportNamedDeclaration',
-            declaration: null,
-            specifiers: specifiers.map(s => s.specifier || s),
-            source,
-            exportKind: 'type',
-            loc: cst.loc,
-        }
-    }
-
-    /**
-     * [TypeScript] 转换 NamedExports
-     */
-    createNamedExportsAst(cst: SubhutiCst): any[] {
-        const children = cst.children || []
-        const specifiers: any[] = []
-        
-        // 找到 ExportsList
-        const exportsListCst = children.find(c => c.name === 'ExportsList')
-        if (!exportsListCst) return specifiers
-        
-        const exportSpecifiers = exportsListCst.children?.filter((c: SubhutiCst) => c.name === 'ExportSpecifier') || []
-        
-        for (const specCst of exportSpecifiers) {
-            const spec = this.createExportSpecifierAst(specCst)
-            if (spec) {
-                specifiers.push({ specifier: spec })
-            }
-        }
-        
-        return specifiers
-    }
-
-    /**
-     * [TypeScript] 转换 ExportSpecifier
-     */
-    createExportSpecifierAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        // 找到标识符
-        const identifiers = children.filter(c => 
-            c.name === 'ModuleExportName' ||
-            c.name === 'Identifier' ||
-            c.name === 'IdentifierName'
+    createScriptAst(cst: SubhutiCst): SlimeProgram {
+        const scriptBody = cst.children?.find(ch =>
+            ch.name === 'ScriptBody' || ch.name === SlimeParser.prototype.ScriptBody?.name
         )
-        
-        let local: any = undefined
-        let exported: any = undefined
-        
-        if (identifiers.length >= 2) {
-            // local as exported
-            local = this.extractIdentifier(identifiers[0])
-            exported = this.extractIdentifier(identifiers[1])
-        } else if (identifiers.length === 1) {
-            // same name
-            local = this.extractIdentifier(identifiers[0])
-            exported = { ...local }
+        if (scriptBody) {
+            return SlimeCstToAstUtil.createScriptBodyAst(scriptBody)
         }
-        
-        if (!local || !exported) return null
-        
-        return {
-            type: 'ExportSpecifier',
-            local,
-            exported,
-            loc: cst.loc,
-        }
+        return SlimeAstCreateUtils.createProgram([], 'script')
     }
+
+    /**
+     * ModuleBody CST ?AST
+     */
+    createModuleBodyAst(cst: SubhutiCst): SlimeProgram {
+        const moduleItemList = cst.children?.find(ch =>
+            ch.name === 'ModuleItemList' || ch.name === SlimeParser.prototype.ModuleItemList?.name
+        )
+        if (moduleItemList) {
+            const body = SlimeCstToAstUtil.createModuleItemListAst(moduleItemList)
+            return SlimeAstCreateUtils.createProgram(body, 'module')
+        }
+        return SlimeAstCreateUtils.createProgram([], 'module')
+    }
+
+    /**
+     * ScriptBody CST ?AST
+     */
+    createScriptBodyAst(cst: SubhutiCst): SlimeProgram {
+        const stmtList = cst.children?.find(ch =>
+            ch.name === 'StatementList' || ch.name === SlimeParser.prototype.StatementList?.name
+        )
+        if (stmtList) {
+            const body = SlimeCstToAstUtil.createStatementListAst(stmtList)
+            return SlimeAstCreateUtils.createProgram(body, 'script')
+        }
+        return SlimeAstCreateUtils.createProgram([], 'script')
+    }
+
+    createModuleItemListAst(cst: SubhutiCst): Array<SlimeStatement | SlimeModuleDeclaration> {
+        const asts = cst.children.map(item => {
+            // Es2025Parser uses ModuleItem wrapper
+            if (item.name === SlimeParser.prototype.ModuleItem?.name || item.name === 'ModuleItem') {
+                const innerItem = item.children?.[0]
+                if (!innerItem) return undefined
+                return SlimeCstToAstUtil.createModuleItemAst(innerItem)
+            }
+            // Fallback: direct type
+            return SlimeCstToAstUtil.createModuleItemAst(item)
+        }).filter(ast => ast !== undefined)
+
+        return asts.flat()
+    }
+
+    createModuleItemAst(item: SubhutiCst): SlimeStatement | SlimeModuleDeclaration | SlimeStatement[] | undefined {
+        const name = item.name
+        if (name === SlimeParser.prototype.ExportDeclaration?.name || name === 'ExportDeclaration') {
+            return SlimeCstToAstUtil.createExportDeclarationAst(item)
+        } else if (name === SlimeParser.prototype.ImportDeclaration?.name || name === 'ImportDeclaration') {
+            return SlimeCstToAstUtil.createImportDeclarationAst(item)
+        } else if (name === SlimeParser.prototype.StatementListItem?.name || name === 'StatementListItem') {
+            return SlimeCstToAstUtil.createStatementListItemAst(item)
+        }
+        console.warn(`createModuleItemAst: Unknown item type: ${name}`)
+        return undefined
+    }
+
 }
 
 export const SlimeModuleCstToAst = new SlimeModuleCstToAstSingle()
