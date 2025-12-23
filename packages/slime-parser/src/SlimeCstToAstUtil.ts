@@ -81,6 +81,7 @@ import {
     SlimeBlockCstToAst,
     SlimeCompoundLiteralCstToAst,
     SlimeControlFlowCstToAst,
+    SlimeLoopCstToAst,
     SlimeExpressionCstToAst,
     SlimeExportCstToAst,
     SlimeFunctionBodyCstToAst,
@@ -92,6 +93,7 @@ import {
     SlimeLiteralCstToAst,
     SlimeMemberCallCstToAst,
     SlimeMethodDefinitionCstToAst,
+    SlimeAccessorCstToAst,
     SlimeModuleCstToAst,
     SlimeOptionalExpressionCstToAst,
     SlimeOtherStatementCstToAst,
@@ -924,11 +926,11 @@ export class SlimeCstToAst {
     }
 
     createMethodDefinitionGetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
-        return SlimeMethodDefinitionCstToAst.createMethodDefinitionGetterMethodAst(staticCst, cst)
+        return SlimeAccessorCstToAst.createMethodDefinitionGetterMethodAst(staticCst, cst)
     }
 
     createMethodDefinitionSetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
-        return SlimeMethodDefinitionCstToAst.createMethodDefinitionSetterMethodAst(staticCst, cst)
+        return SlimeAccessorCstToAst.createMethodDefinitionSetterMethodAst(staticCst, cst)
     }
 
     createMethodDefinitionGetterMethodFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
@@ -940,7 +942,7 @@ export class SlimeCstToAst {
     }
 
     createMethodDefinitionGeneratorMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
-        return SlimeMethodDefinitionCstToAst.createMethodDefinitionGeneratorMethodAst(staticCst, cst)
+        return SlimeAccessorCstToAst.createMethodDefinitionGeneratorMethodAst(staticCst, cst)
     }
 
     createMethodDefinitionGeneratorMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
@@ -948,7 +950,7 @@ export class SlimeCstToAst {
     }
 
     createMethodDefinitionAsyncMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
-        return SlimeMethodDefinitionCstToAst.createMethodDefinitionAsyncMethodAst(staticCst, cst)
+        return SlimeAccessorCstToAst.createMethodDefinitionAsyncMethodAst(staticCst, cst)
     }
 
     createMethodDefinitionAsyncMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
@@ -956,7 +958,7 @@ export class SlimeCstToAst {
     }
 
     createMethodDefinitionAsyncGeneratorMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
-        return SlimeMethodDefinitionCstToAst.createMethodDefinitionAsyncGeneratorMethodAst(staticCst, cst)
+        return SlimeAccessorCstToAst.createMethodDefinitionAsyncGeneratorMethodAst(staticCst, cst)
     }
 
     // === statement / BlockCstToAst ===
@@ -1004,19 +1006,19 @@ export class SlimeCstToAst {
     }
 
     createForStatementAst(cst: SubhutiCst): any {
-        return SlimeControlFlowCstToAst.createForStatementAst(cst)
+        return SlimeLoopCstToAst.createForStatementAst(cst)
     }
 
     createForInOfStatementAst(cst: SubhutiCst): any {
-        return SlimeControlFlowCstToAst.createForInOfStatementAst(cst)
+        return SlimeLoopCstToAst.createForInOfStatementAst(cst)
     }
 
     createWhileStatementAst(cst: SubhutiCst): any {
-        return SlimeControlFlowCstToAst.createWhileStatementAst(cst)
+        return SlimeLoopCstToAst.createWhileStatementAst(cst)
     }
 
     createDoWhileStatementAst(cst: SubhutiCst): any {
-        return SlimeControlFlowCstToAst.createDoWhileStatementAst(cst)
+        return SlimeLoopCstToAst.createDoWhileStatementAst(cst)
     }
 
     createSwitchStatementAst(cst: SubhutiCst): any {

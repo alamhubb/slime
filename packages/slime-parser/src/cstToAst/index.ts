@@ -7,6 +7,7 @@ export * from './module/SlimeModuleCstToAst.ts';
 
 // statements
 export * from './statements/SlimeControlFlowCstToAst.ts';
+export * from './statements/SlimeLoopCstToAst.ts';
 export * from './statements/SlimeVariableCstToAst.ts';
 export * from './statements/SlimeBlockCstToAst.ts';
 export * from './statements/SlimeOtherStatementCstToAst.ts';
@@ -16,6 +17,7 @@ export * from './expressions/SlimeExpressionCstToAst.ts';
 export * from './expressions/SlimeBinaryExpressionCstToAst.ts';
 export * from './expressions/SlimeUnaryExpressionCstToAst.ts';
 export * from './expressions/SlimeMemberCallCstToAst.ts';
+export * from './expressions/SlimeCallExpressionCstToAst.ts';
 export * from './expressions/SlimePrimaryExpressionCstToAst.ts';
 export * from './literal/SlimeCompoundLiteralCstToAst.ts';
 
@@ -27,6 +29,7 @@ export * from './function/SlimeArrowFunctionCstToAst.ts';
 // class
 export * from './class/SlimeClassDeclarationCstToAst.ts';
 export * from './class/SlimeMethodDefinitionCstToAst.ts';
+export * from './class/SlimeAccessorCstToAst.ts';
 
 // module
 export * from './module/SlimeImportCstToAst.ts';

@@ -8,7 +8,7 @@ import {
     SlimeExpression,
     SlimeFunctionExpression,
     SlimeFunctionParam,
-    SlimeIdentifier, SlimeAstTypeName, SlimePattern, SlimeRestElement
+    SlimeIdentifier, SlimeAstTypeName, SlimePattern, SlimeRestElement, SlimeAstCreateUtils
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";

@@ -17,7 +17,7 @@ import {
     type SlimePropertyDefinition,
     type SlimeSpreadElement,
     type SlimeStatement,
-    SlimeTokenCreateUtils
+    SlimeTokenCreateUtils, SlimeAstCreateUtils
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 
