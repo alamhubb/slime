@@ -61,41 +61,6 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
 
 
     /**
-     * [TypeScript] 转换 TSParenthesizedType CST 为 AST
-     */
-    createTSParenthesizedTypeAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        const typeCst = children.find(c => c.name === 'TSType')
-        
-        if (typeCst) {
-            return {
-                type: SlimeAstTypeName.TSParenthesizedType,
-                typeAnnotation: this.createTSTypeAst(typeCst),
-                loc: cst.loc,
-            }
-        }
-
-        throw new Error('TSParenthesizedType: no TSType found')
-    }
-
-
-
-    // ============================================
-    // TypeScript 声明转换 (Phase 4)
-    // ============================================
-
-
-    // ============================================
-    // TypeScript Phase 2: 类型断言和表达式扩展
-    // ============================================
-
-
-
-    // ============================================
-    // TypeScript: Phase 7 - 模块和命名空间
-    // ============================================
-
-    /**
      * [TypeScript] 转换 TSModuleDeclaration CST 为 AST
      * namespace A.B.C { } / module "name" { }
      */

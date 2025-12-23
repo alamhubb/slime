@@ -398,6 +398,24 @@ export class SlimeTSPrimaryTypeCstToAstSingle {
             loc: cst.loc,
         }
     }
+
+    /**
+     * [TypeScript] 转换 TSParenthesizedType CST 为 AST
+     */
+    createTSParenthesizedTypeAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+        const typeCst = children.find(c => c.name === 'TSType')
+
+        if (typeCst) {
+            return {
+                type: SlimeAstTypeName.TSParenthesizedType,
+                typeAnnotation: this.createTSTypeAst(typeCst),
+                loc: cst.loc,
+            }
+        }
+
+        throw new Error('TSParenthesizedType: no TSType found')
+    }
 }
 
 export const SlimeTSPrimaryTypeCstToAst = new SlimeTSPrimaryTypeCstToAstSingle()
