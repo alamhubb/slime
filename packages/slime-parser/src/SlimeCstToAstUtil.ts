@@ -203,6 +203,16 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
             SlimeFunctionDeclarationCstToAst.createAsyncFunctionDeclarationAst.bind(SlimeFunctionDeclarationCstToAst)
         ; (SlimeJavascriptCstToAstUtil as any).createAsyncGeneratorDeclarationAst = 
             SlimeFunctionDeclarationCstToAst.createAsyncGeneratorDeclarationAst.bind(SlimeFunctionDeclarationCstToAst)
+        
+        // 类声明 - 支持 TSClassTail (class Foo<T> implements Bar { })
+        ; (SlimeJavascriptCstToAstUtil as any).createClassDeclarationAst = 
+            SlimeClassDeclarationCstToAst.createClassDeclarationAst.bind(SlimeClassDeclarationCstToAst)
+        ; (SlimeJavascriptCstToAstUtil as any).createClassExpressionAst = 
+            SlimeClassDeclarationCstToAst.createClassExpressionAst.bind(SlimeClassDeclarationCstToAst)
+        ; (SlimeJavascriptCstToAstUtil as any).createClassTailAst = 
+            SlimeClassDeclarationCstToAst.createClassTailAst.bind(SlimeClassDeclarationCstToAst)
+        ; (SlimeJavascriptCstToAstUtil as any).createFieldDefinitionAst = 
+            SlimeClassDeclarationCstToAst.createFieldDefinitionAst.bind(SlimeClassDeclarationCstToAst)
     }
 
     // ============================================

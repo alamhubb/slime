@@ -1,30 +1,18 @@
 import { SlimeParser, SlimeCstToAst } from 'slime-parser';
-import { SlimeGeneratorUtil } from 'slime-generator';
+import * as fs from 'fs';
 
-const code = `function getNumber(): number {
-    return 42
+const code = `class Point {
+    x: number
 }`;
 console.log('Input:', code);
 
 try {
     const parser = new SlimeParser(code);
     const cst = parser.Program('module');
-    console.log('CST parsed successfully');
     
-    const converter = new SlimeCstToAst();
-    const ast = converter.toProgram(cst);
-    console.log('AST converted successfully');
-    
-    // 检查函数声明的结构
-    const funcDecl = ast.body[0];
-    console.log('Has returnType:', 'returnType' in funcDecl);
-    if ((funcDecl as any).returnType) {
-        console.log('ReturnType:', JSON.stringify((funcDecl as any).returnType, null, 2));
-    }
-    
-    const generator = new SlimeGeneratorUtil();
-    const result = generator.generator(ast);
-    console.log('Generated:', result.code);
+    // 写入文件
+    fs.writeFileSync('debug-cst.json', JSON.stringify(cst, null, 2));
+    console.log('CST written to debug-cst.json');
 } catch (e) {
     console.error('Error:', e);
 }

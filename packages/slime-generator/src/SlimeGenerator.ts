@@ -113,6 +113,106 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
     }
 
     /**
+     * [TypeScript] 重写 generatorPropertyDefinition 以支持类型注解
+     */
+    override generatorPropertyDefinition(node: any) {
+        // 处理 static 关键字
+        if (node.static) {
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.StaticTok, node.staticToken?.loc)
+            this.addSpacing()
+        }
+
+        // 处理 key（属性名）
+        if (node.key) {
+            // 对于计算属性，需要用方括号括起来
+            if (node.computed) {
+                this.addLBracket(node.lBracketToken?.loc)
+                this.generatorNode(node.key)
+                this.addRBracket(node.rBracketToken?.loc)
+            } else {
+                this.generatorNode(node.key)
+            }
+        }
+
+        // [TypeScript] 处理类型注解
+        if (node.typeAnnotation) {
+            this.generatorTSTypeAnnotation(node.typeAnnotation)
+        }
+
+        // 处理 value（属性值）
+        if (node.value) {
+            this.addSpacing()
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Eq, node.equalToken?.loc)
+            this.addSpacing()
+            this.generatorNode(node.value)
+        }
+
+        // 添加分号（如果没有值，也需要分号）
+        this.addCode(SlimeJavascriptGeneratorTokensObj.Semicolon)
+    }
+
+    /**
+     * [TypeScript] 重写 generatorMethodDefinition 以支持返回类型
+     */
+    override generatorMethodDefinition(node: any) {
+        // 处理 static 关键字
+        if (node.static) {
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.StaticTok, node.staticToken?.loc)
+            this.addSpacing()
+        }
+
+        // 处理 async 关键字
+        if (node.value?.async) {
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.AsyncTok, node.value.asyncToken?.loc)
+            this.addSpacing()
+        }
+
+        // 处理 generator 星号
+        if (node.value?.generator) {
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Asterisk, node.value.asteriskToken?.loc)
+        }
+
+        // 处理 getter/setter
+        if (node.kind === 'get') {
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.GetTok, node.getToken?.loc)
+            this.addSpacing()
+        } else if (node.kind === 'set') {
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.SetTok, node.setToken?.loc)
+            this.addSpacing()
+        }
+
+        // 处理 key（方法名）
+        if (node.key) {
+            if (node.computed) {
+                this.addLBracket(node.lBracketToken?.loc)
+                this.generatorNode(node.key)
+                this.addRBracket(node.rBracketToken?.loc)
+            } else {
+                this.generatorNode(node.key)
+            }
+        }
+
+        // 处理参数列表
+        if (node.value) {
+            this.generatorFunctionParams(
+                node.value.params,
+                node.value.lParenToken?.loc,
+                node.value.rParenToken?.loc
+            )
+
+            // [TypeScript] 处理返回类型
+            if (node.value.returnType) {
+                this.generatorTSTypeAnnotation(node.value.returnType)
+            }
+
+            // 处理函数体
+            if (node.value.body) {
+                this.generatorBlockStatement(node.value.body, true)
+            }
+        }
+    }
+
+    /**
      * [TypeScript] 生成类型注解：: Type
      */
     generatorTSTypeAnnotation(node: any) {

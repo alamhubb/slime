@@ -1575,7 +1575,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
                     this.BindingIdentifier(params)
                     // [TypeScript] 可选的泛型参数
                     this.Option(() => this.TSTypeParameterDeclaration())
-                    this.TSClassTail(params)
+                    this.ClassTail(params)
                 }
             },
             // [+Default] class<T> ClassTail
@@ -1584,7 +1584,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
                     this.tokenConsumer.Class()
                     // [TypeScript] 可选的泛型参数
                     this.Option(() => this.TSTypeParameterDeclaration())
-                    this.TSClassTail(params)
+                    this.ClassTail(params)
                 }
             }] : [])
         ])
@@ -1602,25 +1602,20 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
         this.Option(() => this.BindingIdentifier(params))
         // [TypeScript] 可选的泛型参数
         this.Option(() => this.TSTypeParameterDeclaration())
-        this.TSClassTail(params)
+        this.ClassTail(params)
     }
 
     /**
-     * [TypeScript] 类尾部（支持 extends 和 implements）
+     * [TypeScript] 重写 ClassTail 以支持 implements
      *
-     * TSClassTail[Yield, Await] :
-     *     TSClassHeritage_opt { ClassBody[?Yield, ?Await]_opt }
-     *
-     * TSClassHeritage :
-     *     extends LeftHandSideExpression TSTypeParameterInstantiation_opt
-     *     implements TSExpressionWithTypeArguments (, TSExpressionWithTypeArguments)*
-     *     extends LeftHandSideExpression TSTypeParameterInstantiation_opt implements TSExpressionWithTypeArguments (, TSExpressionWithTypeArguments)*
+     * ClassTail[Yield, Await] :
+     *     ClassHeritage_opt TSClassImplements_opt { ClassBody[?Yield, ?Await]_opt }
      */
     @SubhutiRule
-    TSClassTail(params: ExpressionParams = {}) {
-        // 可选的 extends 子句
-        this.Option(() => this.TSClassExtends(params))
-        // 可选的 implements 子句
+    override ClassTail(params: ExpressionParams = {}) {
+        // 可选的 extends 子句（使用重写的 ClassHeritage）
+        this.Option(() => this.ClassHeritage(params))
+        // [TypeScript] 可选的 implements 子句
         this.Option(() => this.TSClassImplements())
         this.tokenConsumer.LBrace()
         this.Option(() => this.ClassBody(params))
@@ -1628,13 +1623,13 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
     }
 
     /**
-     * [TypeScript] 类继承子句
+     * [TypeScript] 重写 ClassHeritage 以支持类型参数
      *
-     * TSClassExtends :
-     *     extends LeftHandSideExpression TSTypeParameterInstantiation_opt
+     * ClassHeritage[Yield, Await] :
+     *     extends LeftHandSideExpression[?Yield, ?Await] TSTypeParameterInstantiation_opt
      */
     @SubhutiRule
-    TSClassExtends(params: ExpressionParams = {}) {
+    override ClassHeritage(params: ExpressionParams = {}) {
         this.tokenConsumer.Extends()
         this.LeftHandSideExpression(params)
         // [TypeScript] 可选的类型参数
@@ -1646,6 +1641,9 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *
      * TSClassImplements :
      *     implements TSExpressionWithTypeArguments (, TSExpressionWithTypeArguments)*
+     * 
+     * 注意：这是 TypeScript 特有的语法，JavaScript 没有 implements，
+     * 所以这里使用新规则而不是 override
      */
     @SubhutiRule
     TSClassImplements() {
