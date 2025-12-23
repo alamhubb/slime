@@ -1,11 +1,14 @@
 import {
+    type SlimeDeclaration,
     type SlimeIdentifier,
     type SlimeProgram,
     type SlimeVariableDeclarator
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 import {
-    SlimeIdentifierCstToAst,
+    SlimeClassDeclarationCstToAst,
+    SlimeFunctionDeclarationCstToAst,
+    SlimeIdentifierCstToAst, SlimeMethodDefinitionCstToAst,
     SlimeModuleCstToAst,
     SlimeVariableCstToAst
 } from "./cstToAst";
