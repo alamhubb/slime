@@ -1,28 +1,13 @@
-/**
- * IdentifierCstToAst - 标识符相关转换
- */
-import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
+import {SubhutiCst} from "subhuti";
 import {
-    SlimeAstCreateUtils,
-    SlimeClassBody, SlimeFunctionParam,
-    SlimeIdentifier,
-    SlimeMethodDefinition, SlimePattern,
-    SlimePropertyDefinition,
-    SlimeStatement,
-    SlimeAstTypeName,
-    SlimeTokenCreateUtils,
+    SlimeAstCreateUtils, SlimeAstTypeName, SlimeBlockStatement, SlimeClassBody,
+    SlimeClassDeclaration,
+    SlimeClassExpression, SlimeExpression, SlimeFunctionExpression, SlimeFunctionParam,
+    SlimeIdentifier, SlimeMethodDefinition, SlimePropertyDefinition,
+    SlimeTokenCreateUtils
 } from "slime-ast";
 
-import SlimeParser from "../../SlimeParser.ts";
-import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
-import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
-import { SlimeVariableCstToAstSingle } from "../statements/SlimeVariableCstToAst.ts";
-import { SlimeJavascriptIdentifierCstToAstSingle } from "../../deprecated/slimeJavascriptCstToAst";
-import SlimeJavascriptCstToAstUtil from "../../deprecated/SlimeJavascriptCstToAstUtil.ts";
-import { SlimeJavascriptCreateUtils } from "slime-ast";
-
-export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstToAstSingle {
-
+export default class SlimeTsUnkoneTypeCstToAst{
     /**
      * [TypeScript] 重写 createBindingIdentifierAst 以支持可选的类型注解
      */
@@ -119,7 +104,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSConditionalTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         // 第一个子节点是 checkType (TSUnionOrIntersectionType)
         const checkTypeCst = children.find(c => c.name === 'TSUnionOrIntersectionType')
         if (!checkTypeCst) {
@@ -166,7 +151,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSUnionOrIntersectionTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         // 收集所有 TSIntersectionType
         const intersectionTypes: any[] = []
         for (const child of children) {
@@ -194,7 +179,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSIntersectionTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         // 收集所有 TSTypeOperand
         const operandTypes: any[] = []
         for (const child of children) {
@@ -222,7 +207,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSTypeOperandAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         // 第一个子节点是 TSPrefixTypeOrPrimary
         const prefixOrPrimaryCst = children.find(c => c.name === 'TSPrefixTypeOrPrimary')
         if (!prefixOrPrimaryCst) {
@@ -233,9 +218,9 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
             }
             return this.createTSPrimaryTypeAst(primaryCst)
         }
-        
+
         let result = this.createTSPrefixTypeOrPrimaryAst(prefixOrPrimaryCst)
-        
+
         // 检查是否有数组后缀 []
         let i = children.indexOf(prefixOrPrimaryCst) + 1
         while (i < children.length) {
@@ -267,7 +252,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
                 i++
             }
         }
-        
+
         return result
     }
 
@@ -311,15 +296,15 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSTypeQueryAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         // 找到 TSTypeName
         const typeNameCst = children.find(c => c.name === 'TSTypeName')
         if (!typeNameCst) {
             throw new Error('TSTypeQuery: TSTypeName not found')
         }
-        
+
         const exprName = this.createTSTypeNameAst(typeNameCst)
-        
+
         // 可选的类型参数
         const typeParamsCst = children.find(c => c.name === 'TSTypeParameterInstantiation')
         const typeParameters = typeParamsCst ? this.createTSTypeParameterInstantiationAst(typeParamsCst) : undefined
@@ -337,7 +322,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSTypeOperatorAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         // 确定操作符类型
         let operator: 'keyof' | 'readonly' | 'unique'
         let typeAnnotation: any
@@ -387,13 +372,13 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSInferTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         // 找到标识符
         const identifierCst = children.find(c => c.name === 'Identifier')
         if (!identifierCst) {
             throw new Error('TSInferType: Identifier not found')
         }
-        
+
         const typeParameter: any = {
             type: SlimeAstTypeName.TSTypeParameter,
             name: this.createIdentifierAst(identifierCst),
@@ -557,10 +542,10 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSTypeReferenceAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         let typeName: any = undefined
         let typeArguments: any = undefined
-        
+
         for (const child of children) {
             if (child.name === 'TSTypeName') {
                 typeName = this.createTSTypeNameAst(child)
@@ -608,7 +593,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
     createTSTypeNameAst(cst: SubhutiCst): any {
         const children = cst.children || []
         const nameParts: string[] = []
-        
+
         for (const child of children) {
             if (child.name === 'Identifier' || child.name === 'IdentifierName') {
                 const tokenCst = child.children?.[0] || child
@@ -639,14 +624,14 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
                 loc,
             }
         }
-        
+
         // 从左到右构建: A.B.C -> TSQualifiedName(TSQualifiedName(A, B), C)
         let result: any = {
             type: 'Identifier',
             name: parts[0],
             loc,
         }
-        
+
         for (let i = 1; i < parts.length; i++) {
             result = {
                 type: SlimeAstTypeName.TSQualifiedName,
@@ -659,7 +644,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
                 loc,
             }
         }
-        
+
         return result
     }
 
@@ -708,7 +693,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSTupleElementAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         // 检查是否是剩余元素 TSRestType
         const restCst = children.find(c => c.name === 'TSRestType')
         if (restCst) {
@@ -770,7 +755,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
     createTSRestTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
         const typeCst = children.find(c => c.name === 'TSType')
-        
+
         return {
             type: SlimeAstTypeName.TSRestType,
             typeAnnotation: typeCst ? this.createTSTypeAst(typeCst) : undefined,
@@ -783,7 +768,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSNamedTupleMemberAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         let label: any = undefined
         let elementType: any = undefined
         let optional = false
@@ -819,7 +804,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSMappedTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         let readonly: '+' | '-' | true | undefined = undefined
         let optional: '+' | '-' | true | undefined = undefined
         let typeParameter: any = undefined
@@ -848,13 +833,13 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
                 name: this.createIdentifierAst(identifierCst),
                 loc: identifierCst.loc,
             }
-            
+
             // 找到 in 后面的约束类型
             const tsTypes = children.filter(c => c.name === 'TSType')
             if (tsTypes.length > 0) {
                 typeParameter.constraint = this.createTSTypeAst(tsTypes[0])
             }
-            
+
             // 找到 as 后面的 nameType
             const asIndex = children.findIndex(c => c.value === 'as')
             if (asIndex !== -1 && tsTypes.length > 1) {
@@ -953,222 +938,15 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
         throw new Error(`Unknown TSTypeMember child: ${name}`)
     }
 
-    /**
-     * [TypeScript] 转换 TSPropertyOrMethodSignature CST 为 AST
-     * 这是一个合并的规则，需要根据内容判断是属性还是方法
-     */
-    createTSPropertyOrMethodSignatureAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        let key: any = undefined
-        let typeAnnotation: any = undefined
-        let readonly = false
-        let optional = false
-        let hasParams = false
-        let parameters: any[] = []
 
-        for (const child of children) {
-            if (child.name === 'TSReadonly' || child.value === 'readonly') {
-                readonly = true
-            } else if (child.name === 'PropertyName') {
-                // PropertyName -> LiteralPropertyName -> IdentifierName -> IdentifierName (token)
-                // 或 PropertyName -> ComputedPropertyName -> ...
-                key = this.extractPropertyNameKey(child)
-            } else if (child.name === 'Identifier' || child.name === 'IdentifierName') {
-                const tokenCst = child.children?.[0] || child
-                key = {
-                    type: 'Identifier',
-                    name: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
-            } else if (child.name === 'Question' || child.value === '?') {
-                optional = true
-            } else if (child.name === 'TSParameterList' || child.name === 'FormalParameters') {
-                hasParams = true
-                parameters = this.createTSParameterListAst(child)
-            } else if (child.name === 'TSTypeAnnotation') {
-                typeAnnotation = this.createTSTypeAnnotationAst(child)
-            }
-        }
 
-        if (hasParams) {
-            // 方法签名
-            return {
-                type: SlimeAstTypeName.TSMethodSignature,
-                key,
-                parameters,
-                typeAnnotation,
-                optional,
-                loc: cst.loc,
-            }
-        } else {
-            // 属性签名
-            return {
-                type: SlimeAstTypeName.TSPropertySignature,
-                key,
-                typeAnnotation,
-                readonly,
-                optional,
-                computed: false,
-                loc: cst.loc,
-            }
-        }
-    }
-
-    /**
-     * [TypeScript] 从 PropertyName CST 中提取 key
-     */
-    extractPropertyNameKey(cst: SubhutiCst): any {
-        const children = cst.children || []
-        const firstChild = children[0]
-        
-        if (!firstChild) {
-            throw new Error('PropertyName has no children')
-        }
-        
-        if (firstChild.name === 'LiteralPropertyName') {
-            // LiteralPropertyName -> IdentifierName | StringLiteral | NumericLiteral
-            const literalChild = firstChild.children?.[0]
-            if (!literalChild) {
-                throw new Error('LiteralPropertyName has no children')
-            }
-            
-            if (literalChild.name === 'IdentifierName') {
-                // IdentifierName -> IdentifierName (token)
-                const tokenCst = literalChild.children?.[0] || literalChild
-                return {
-                    type: 'Identifier',
-                    name: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
-            } else if (literalChild.name === 'StringLiteral') {
-                const tokenCst = literalChild.children?.[0] || literalChild
-                return {
-                    type: 'Literal',
-                    value: tokenCst.value,
-                    raw: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
-            } else if (literalChild.name === 'NumericLiteral') {
-                const tokenCst = literalChild.children?.[0] || literalChild
-                return {
-                    type: 'Literal',
-                    value: Number(tokenCst.value),
-                    raw: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
-            }
-        } else if (firstChild.name === 'ComputedPropertyName') {
-            // TODO: 处理计算属性名
-            throw new Error('ComputedPropertyName not yet supported in TSPropertyOrMethodSignature')
-        }
-        
-        // 回退：尝试直接从 children 中提取
-        const tokenCst = firstChild.children?.[0]?.children?.[0] || firstChild.children?.[0] || firstChild
-        return {
-            type: 'Identifier',
-            name: tokenCst.value,
-            loc: tokenCst.loc,
-        }
-    }
-
-    /**
-     * [TypeScript] 转换 TSPropertySignature CST 为 AST
-     */
-    createTSPropertySignatureAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        let key: any = undefined
-        let typeAnnotation: any = undefined
-        let readonly = false
-        let optional = false
-        let computed = false
-
-        for (const child of children) {
-            if (child.name === 'TSReadonly' || child.value === 'readonly') {
-                readonly = true
-            } else if (child.name === 'PropertyName') {
-                const propChild = child.children?.[0]
-                if (propChild?.name === 'ComputedPropertyName') {
-                    computed = true
-                    // TODO: 处理计算属性名
-                } else if (propChild?.name === 'LiteralPropertyName') {
-                    const tokenCst = propChild.children?.[0]
-                    key = {
-                        type: 'Identifier',
-                        name: tokenCst?.value,
-                        loc: tokenCst?.loc,
-                    }
-                }
-            } else if (child.name === 'Identifier' || child.name === 'IdentifierName') {
-                const tokenCst = child.children?.[0] || child
-                key = {
-                    type: 'Identifier',
-                    name: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
-            } else if (child.name === 'Question' || child.value === '?') {
-                optional = true
-            } else if (child.name === 'TSTypeAnnotation') {
-                typeAnnotation = this.createTSTypeAnnotationAst(child)
-            }
-        }
-
-        return {
-            type: SlimeAstTypeName.TSPropertySignature,
-            key,
-            typeAnnotation,
-            readonly,
-            optional,
-            computed,
-            loc: cst.loc,
-        }
-    }
-
-    /**
-     * [TypeScript] 转换 TSMethodSignature CST 为 AST
-     */
-    createTSMethodSignatureAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        let key: any = undefined
-        let parameters: any[] = []
-        let typeAnnotation: any = undefined
-        let optional = false
-
-        for (const child of children) {
-            if (child.name === 'PropertyName' || child.name === 'Identifier' || child.name === 'IdentifierName') {
-                const tokenCst = child.children?.[0] || child
-                key = {
-                    type: 'Identifier',
-                    name: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
-            } else if (child.name === 'Question' || child.value === '?') {
-                optional = true
-            } else if (child.name === 'TSParameterList') {
-                parameters = this.createTSParameterListAst(child)
-            } else if (child.name === 'TSTypeAnnotation') {
-                typeAnnotation = this.createTSTypeAnnotationAst(child)
-            }
-        }
-
-        return {
-            type: SlimeAstTypeName.TSMethodSignature,
-            key,
-            parameters,
-            typeAnnotation,
-            optional,
-            loc: cst.loc,
-        }
-    }
 
     /**
      * [TypeScript] 转换 TSIndexSignature CST 为 AST
      */
     createTSIndexSignatureAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         let parameters: any[] = []
         let typeAnnotation: any = undefined
         let readonly = false
@@ -1213,55 +991,6 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
         }
     }
 
-    /**
-     * [TypeScript] 转换 TSCallSignatureDeclaration CST 为 AST
-     */
-    createTSCallSignatureDeclarationAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        let parameters: any[] = []
-        let typeAnnotation: any = undefined
-
-        for (const child of children) {
-            if (child.name === 'TSParameterList') {
-                parameters = this.createTSParameterListAst(child)
-            } else if (child.name === 'TSTypeAnnotation') {
-                typeAnnotation = this.createTSTypeAnnotationAst(child)
-            }
-        }
-
-        return {
-            type: SlimeAstTypeName.TSCallSignatureDeclaration,
-            parameters,
-            typeAnnotation,
-            loc: cst.loc,
-        }
-    }
-
-    /**
-     * [TypeScript] 转换 TSConstructSignatureDeclaration CST 为 AST
-     */
-    createTSConstructSignatureDeclarationAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        let parameters: any[] = []
-        let typeAnnotation: any = undefined
-
-        for (const child of children) {
-            if (child.name === 'TSParameterList') {
-                parameters = this.createTSParameterListAst(child)
-            } else if (child.name === 'TSTypeAnnotation') {
-                typeAnnotation = this.createTSTypeAnnotationAst(child)
-            }
-        }
-
-        return {
-            type: SlimeAstTypeName.TSConstructSignatureDeclaration,
-            parameters,
-            typeAnnotation,
-            loc: cst.loc,
-        }
-    }
 
     /**
      * [TypeScript] 转换 TSParameterList CST 为 AST
@@ -1284,7 +1013,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSParameterAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         let name: any = undefined
         let typeAnnotation: any = undefined
         let optional = false
@@ -1332,7 +1061,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
     createTSParenthesizedTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
         const typeCst = children.find(c => c.name === 'TSType')
-        
+
         if (typeCst) {
             return {
                 type: SlimeAstTypeName.TSParenthesizedType,
@@ -1349,7 +1078,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSFunctionTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         let typeParameters: any = undefined
         let parameters: any[] = []
         let returnType: any = undefined
@@ -1378,7 +1107,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSConstructorTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         let typeParameters: any = undefined
         let parameters: any[] = []
         let returnType: any = undefined
@@ -1427,7 +1156,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSTypeParameterAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         let name: any = undefined
         let constraint: any = undefined
         let defaultType: any = undefined
@@ -1463,228 +1192,9 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
         }
     }
 
-    // ============================================
-    // TypeScript 声明转换 (Phase 4)
-    // ============================================
 
-    /**
-     * [TypeScript] 转换 TSInterfaceDeclaration CST 为 AST
-     */
-    createTSInterfaceDeclarationAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        let id: any = undefined
-        let typeParameters: any = undefined
-        let extendsClause: any[] = []
-        let body: any = undefined
 
-        for (const child of children) {
-            if (child.name === 'Identifier' || child.name === 'IdentifierName') {
-                const tokenCst = child.children?.[0] || child
-                id = {
-                    type: 'Identifier',
-                    name: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
-            } else if (child.name === 'TSTypeParameterDeclaration') {
-                typeParameters = this.createTSTypeParameterDeclarationAst(child)
-            } else if (child.name === 'TSInterfaceExtends') {
-                extendsClause = this.createTSInterfaceExtendsAst(child)
-            } else if (child.name === 'TSInterfaceBody') {
-                body = this.createTSInterfaceBodyAst(child)
-            }
-        }
 
-        return {
-            type: SlimeAstTypeName.TSInterfaceDeclaration,
-            id,
-            typeParameters,
-            extends: extendsClause.length > 0 ? extendsClause : undefined,
-            body,
-            loc: cst.loc,
-        }
-    }
-
-    /**
-     * [TypeScript] 转换 TSInterfaceExtends CST 为 AST
-     */
-    createTSInterfaceExtendsAst(cst: SubhutiCst): any[] {
-        const children = cst.children || []
-        const result: any[] = []
-
-        for (const child of children) {
-            if (child.name === 'TSExpressionWithTypeArguments') {
-                result.push(this.createTSExpressionWithTypeArgumentsAst(child))
-            }
-        }
-
-        return result
-    }
-
-    /**
-     * [TypeScript] 转换 TSExpressionWithTypeArguments CST 为 AST
-     */
-    createTSExpressionWithTypeArgumentsAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        let expression: any = undefined
-        let typeParameters: any = undefined
-
-        for (const child of children) {
-            if (child.name === 'Identifier' || child.name === 'IdentifierName') {
-                const tokenCst = child.children?.[0] || child
-                expression = {
-                    type: 'Identifier',
-                    name: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
-            } else if (child.name === 'TSTypeParameterInstantiation') {
-                typeParameters = this.createTSTypeParameterInstantiationAst(child)
-            }
-        }
-
-        return {
-            type: SlimeAstTypeName.TSInterfaceHeritage,
-            expression,
-            typeParameters,
-            loc: cst.loc,
-        }
-    }
-
-    /**
-     * [TypeScript] 转换 TSInterfaceBody CST 为 AST
-     */
-    createTSInterfaceBodyAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        const body: any[] = []
-
-        for (const child of children) {
-            if (child.name === 'TSTypeMember') {
-                body.push(this.createTSTypeMemberAst(child))
-            }
-        }
-
-        return {
-            type: SlimeAstTypeName.TSInterfaceBody,
-            body,
-            loc: cst.loc,
-        }
-    }
-
-    /**
-     * [TypeScript] 转换 TSTypeAliasDeclaration CST 为 AST
-     */
-    createTSTypeAliasDeclarationAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        let id: any = undefined
-        let typeParameters: any = undefined
-        let typeAnnotation: any = undefined
-
-        for (const child of children) {
-            if (child.name === 'Identifier' || child.name === 'IdentifierName') {
-                const tokenCst = child.children?.[0] || child
-                id = {
-                    type: 'Identifier',
-                    name: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
-            } else if (child.name === 'TSTypeParameterDeclaration') {
-                typeParameters = this.createTSTypeParameterDeclarationAst(child)
-            } else if (child.name === 'TSType') {
-                typeAnnotation = this.createTSTypeAst(child)
-            }
-        }
-
-        return {
-            type: SlimeAstTypeName.TSTypeAliasDeclaration,
-            id,
-            typeParameters,
-            typeAnnotation,
-            loc: cst.loc,
-        }
-    }
-
-    /**
-     * [TypeScript] 转换 TSEnumDeclaration CST 为 AST
-     */
-    createTSEnumDeclarationAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        let id: any = undefined
-        let members: any[] = []
-        let isConst = false
-
-        for (const child of children) {
-            if (child.name === 'Const' || child.value === 'const') {
-                isConst = true
-            } else if (child.name === 'Identifier' || child.name === 'IdentifierName') {
-                const tokenCst = child.children?.[0] || child
-                id = {
-                    type: 'Identifier',
-                    name: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
-            } else if (child.name === 'TSEnumMember') {
-                members.push(this.createTSEnumMemberAst(child))
-            }
-        }
-
-        return {
-            type: SlimeAstTypeName.TSEnumDeclaration,
-            id,
-            members,
-            const: isConst,
-            loc: cst.loc,
-        }
-    }
-
-    /**
-     * [TypeScript] 转换 TSEnumMember CST 为 AST
-     * 
-     * CST 结构:
-     * TSEnumMember
-     *   - Identifier (成员名)
-     *   - Assign (可选的 = 符号)
-     *   - AssignmentExpression (可选的初始化表达式)
-     */
-    createTSEnumMemberAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        let id: any = undefined
-        let initializer: any = undefined
-
-        for (const child of children) {
-            if (child.name === 'Identifier') {
-                // 枚举成员名
-                const tokenCst = child.children?.[0] || child
-                id = {
-                    type: 'Identifier',
-                    name: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
-            } else if (child.name === 'StringLiteral') {
-                // 字符串字面量作为成员名
-                id = {
-                    type: 'Literal',
-                    value: child.value?.slice(1, -1),
-                    raw: child.value,
-                    loc: child.loc,
-                }
-            } else if (child.name === 'AssignmentExpression') {
-                // 初始化表达式 - 使用 SlimeJavascriptCstToAstUtil 的方法
-                // 注意：这里调用的是单例的方法，会被 SlimeCstToAstUtil 的拦截机制处理
-                initializer = SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(child)
-            }
-        }
-
-        return {
-            type: SlimeAstTypeName.TSEnumMember,
-            id,
-            initializer,
-            loc: cst.loc,
-        }
-    }
 
     // ============================================
     // TypeScript Phase 2: 类型断言和表达式扩展
@@ -1734,12 +1244,12 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSTypeAssertionAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         // 找到 TSType
         const typeCst = children.find(c => c.name === 'TSType')
         // 找到 UnaryExpression
         const exprCst = children.find(c => c.name === 'UnaryExpression')
-        
+
         if (!typeCst || !exprCst) {
             throw new Error('TSTypeAssertion: missing TSType or UnaryExpression')
         }
@@ -1758,7 +1268,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSTypePredicateAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         let asserts = false
         let parameterName: any = undefined
         let typeAnnotation: any = undefined
@@ -1802,7 +1312,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
      */
     createTSModuleDeclarationAst(cst: SubhutiCst): any {
         const children = cst.children || []
-        
+
         let id: any = undefined
         let body: any = undefined
         let declare = false
@@ -1896,126 +1406,344 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
         }
     }
 
+
     /**
-     * [TypeScript] 转换 TSDeclareStatement CST 为 AST
-     * declare const/let/var/function/class/namespace/module/global
+     * [TypeScript] 重写 createClassDeclarationAst
+     * 支持泛型参数和 implements（通过重写的 ClassTail）
      */
-    createTSDeclareStatementAst(cst: SubhutiCst): any {
-        const children = cst.children || []
-        
-        // 检查声明类型
-        const hasConst = children.some(c => c.name === 'Const' || c.value === 'const')
-        const hasLet = children.some(c => c.name === 'Let' || c.value === 'let')
-        const hasVar = children.some(c => c.name === 'Var' || c.value === 'var')
-        const hasFunction = children.some(c => c.name === 'Function' || c.value === 'function')
-        const hasClass = children.some(c => c.name === 'Class' || c.value === 'class')
-        const hasNamespace = children.some(c => c.name === 'TSModuleDeclaration')
-        const hasGlobal = children.some(c => c.value === 'global')
+    override createClassDeclarationAst(cst: SubhutiCst): SlimeClassDeclaration {
+        let classToken: any = undefined
+        let id: SlimeIdentifier | null = null
+        let classTailCst: SubhutiCst | null = null
 
-        if (hasConst || hasLet || hasVar) {
-            // declare const/let/var x: Type
-            const kind = hasConst ? 'const' : hasLet ? 'let' : 'var'
-            const identifierCst = children.find(c => c.name === 'BindingIdentifier')
-            const typeAnnotationCst = children.find(c => c.name === 'TSTypeAnnotation')
-            
-            let id: any = undefined
-            if (identifierCst) {
-                id = this.createBindingIdentifierAst(identifierCst)
+        for (const child of cst.children) {
+            const name = child.name
+            if (name === 'Class' || child.value === 'class') {
+                classToken = SlimeTokenCreateUtils.createClassToken(child.loc)
+            } else if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
+                id = SlimeCstToAstUtil.createBindingIdentifierAst(child)
+            } else if (name === SlimeParser.prototype.ClassTail?.name || name === 'ClassTail') {
+                classTailCst = child
             }
+            // TSTypeParameterDeclaration 当前忽略（ESTree 不支持泛型参数）
+        }
 
-            return {
-                type: 'VariableDeclaration',
-                kind,
-                declarations: [{
-                    type: 'VariableDeclarator',
-                    id,
-                    init: null,
-                    loc: cst.loc,
-                }],
-                declare: true,
-                loc: cst.loc,
+        if (!classTailCst) {
+            throw new Error('ClassDeclaration missing ClassTail')
+        }
+
+        const classTailResult = this.createClassTailAst(classTailCst)
+
+        return SlimeAstCreateUtils.createClassDeclaration(
+            id, classTailResult.body, classTailResult.superClass, cst.loc,
+            classToken, classTailResult.extendsToken
+        )
+    }
+
+    /**
+     * [TypeScript] 重写 createClassExpressionAst
+     */
+    override createClassExpressionAst(cst: SubhutiCst): SlimeClassExpression {
+        let id: SlimeIdentifier | null = null
+        let classTailCst: SubhutiCst | null = null
+
+        for (const child of cst.children) {
+            const name = child.name
+            if (name === SlimeParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
+                id = SlimeCstToAstUtil.createBindingIdentifierAst(child)
+            } else if (name === SlimeParser.prototype.ClassTail?.name || name === 'ClassTail') {
+                classTailCst = child
             }
         }
 
-        if (hasFunction) {
-            // declare function name(): Type
-            const identifierCst = children.find(c => c.name === 'Identifier')
-            const typeParamsCst = children.find(c => c.name === 'TSTypeParameterDeclaration')
-            const formalParamsCst = children.find(c => c.name === 'FormalParameters')
-            const returnTypeCst = children.find(c => c.name === 'TSTypeAnnotation')
+        if (!classTailCst) {
+            throw new Error('ClassExpression missing ClassTail')
+        }
 
-            let id: any = undefined
-            if (identifierCst) {
-                const tokenCst = identifierCst.children?.[0] || identifierCst
-                id = {
-                    type: 'Identifier',
-                    name: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
-            }
+        const classTail = this.createClassTailAst(classTailCst)
+        return SlimeAstCreateUtils.createClassExpression(id, classTail.superClass, classTail.body, cst.loc)
+    }
 
-            return {
-                type: 'TSDeclareFunction',
-                id,
-                params: formalParamsCst ? SlimeCstToAstUtil.createFormalParametersAst(formalParamsCst) : [],
-                typeParameters: typeParamsCst ? this.createTSTypeParameterDeclarationAst(typeParamsCst) : undefined,
-                returnType: returnTypeCst ? this.createTSTypeAnnotationAst(returnTypeCst) : undefined,
-                declare: true,
-                loc: cst.loc,
+    /**
+     * [TypeScript] 重写 createClassTailAst
+     *
+     * ClassTail 结构（TypeScript 扩展）：
+     *   ClassHeritage_opt TSClassImplements_opt { ClassBody_opt }
+     *
+     * ClassHeritage 已被重写以支持类型参数
+     * TSClassImplements 是 TypeScript 特有的（JavaScript 没有 implements）
+     */
+    override createClassTailAst(cst: SubhutiCst): {
+        superClass: SlimeExpression | null;
+        body: SlimeClassBody;
+        extendsToken?: any;
+        lBraceToken?: any;
+        rBraceToken?: any;
+    } {
+        let superClass: SlimeExpression | null = null
+        let body: SlimeClassBody = { type: SlimeAstTypeName.ClassBody as any, body: [], loc: cst.loc }
+        let extendsToken: any = undefined
+        let lBraceToken: any = undefined
+        let rBraceToken: any = undefined
+
+        for (const child of cst.children) {
+            const childName = child.name
+            if (childName === 'ClassHeritage' || childName === SlimeParser.prototype.ClassHeritage?.name) {
+                // ClassHeritage: extends LeftHandSideExpression TSTypeParameterInstantiation_opt
+                const heritageResult = this.createClassHeritageAst(child)
+                superClass = heritageResult.superClass
+                extendsToken = heritageResult.extendsToken
+            } else if (childName === 'TSClassImplements') {
+                // TODO: 处理 implements 子句（当前忽略，ESTree 不支持）
+            } else if (childName === 'ClassBody' || childName === SlimeParser.prototype.ClassBody?.name) {
+                body = SlimeJavascriptCstToAstUtil.createClassBodyAst(child)
+            } else if (childName === 'LBrace' || child.value === '{') {
+                lBraceToken = SlimeTokenCreateUtils.createLBraceToken(child.loc)
+            } else if (childName === 'RBrace' || child.value === '}') {
+                rBraceToken = SlimeTokenCreateUtils.createRBraceToken(child.loc)
             }
         }
 
-        if (hasClass) {
-            // declare class Name { }
-            const identifierCst = children.find(c => c.name === 'Identifier')
-            const typeParamsCst = children.find(c => c.name === 'TSTypeParameterDeclaration')
-            const classTailCst = children.find(c => c.name === 'ClassTail')
+        if (body) {
+            body.lBraceToken = lBraceToken
+            body.rBraceToken = rBraceToken
+        }
 
-            let id: any = undefined
-            if (identifierCst) {
-                const tokenCst = identifierCst.children?.[0] || identifierCst
-                id = {
-                    type: 'Identifier',
-                    name: tokenCst.value,
-                    loc: tokenCst.loc,
-                }
+        return { superClass, body, extendsToken, lBraceToken, rBraceToken }
+    }
+
+    /**
+     * [TypeScript] 重写 createClassHeritageAst
+     *
+     * ClassHeritage: extends LeftHandSideExpression TSTypeParameterInstantiation_opt
+     */
+    private createClassHeritageAst(cst: SubhutiCst): {
+        superClass: SlimeExpression;
+        extendsToken: any;
+    } {
+        let extendsToken: any = undefined
+        let superClass: SlimeExpression | null = null
+
+        for (const child of cst.children) {
+            const childName = child.name
+            if (childName === 'Extends' || child.value === 'extends') {
+                extendsToken = SlimeTokenCreateUtils.createExtendsToken(child.loc)
+            } else if (childName === 'LeftHandSideExpression' ||
+                childName === SlimeParser.prototype.LeftHandSideExpression?.name) {
+                superClass = SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(child)
             }
+            // TSTypeParameterInstantiation 当前忽略（ESTree 不支持泛型参数）
+        }
 
-            return {
-                type: 'ClassDeclaration',
-                id,
-                typeParameters: typeParamsCst ? this.createTSTypeParameterDeclarationAst(typeParamsCst) : undefined,
-                body: classTailCst ? SlimeCstToAstUtil.createClassTailAst(classTailCst) : { type: 'ClassBody', body: [] },
-                declare: true,
-                loc: cst.loc,
+        if (!superClass) {
+            throw new Error('ClassHeritage missing LeftHandSideExpression')
+        }
+
+        return { superClass, extendsToken }
+    }
+
+    /**
+     * [TypeScript] 重写 createFieldDefinitionAst 以支持类型注解
+     *
+     * FieldDefinition: ClassElementName TSTypeAnnotation_opt Initializer_opt
+     */
+    override createFieldDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimePropertyDefinition {
+        const elementNameCst = cst.children[0]
+        const key = SlimeJavascriptCstToAstUtil.createClassElementNameAst(elementNameCst)
+        const isComputed = SlimeJavascriptCstToAstUtil.isComputedPropertyName(elementNameCst)
+
+        let typeAnnotation: any = undefined
+        let value: SlimeExpression | null = null
+
+        for (let i = 1; i < cst.children.length; i++) {
+            const child = cst.children[i]
+            const childName = child.name
+
+            if (childName === 'TSTypeAnnotation') {
+                typeAnnotation = SlimeIdentifierCstToAst.createTSTypeAnnotationAst(child)
+            } else if (childName === 'Initializer' ||
+                childName === SlimeParser.prototype.Initializer?.name) {
+                value = SlimeJavascriptCstToAstUtil.createInitializerAst(child)
             }
         }
 
-        if (hasNamespace) {
-            // declare namespace/module
-            const moduleCst = children.find(c => c.name === 'TSModuleDeclaration')
-            if (moduleCst) {
-                const result = this.createTSModuleDeclarationAst(moduleCst)
-                result.declare = true
-                return result
+        const isStatic = SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst)
+        const ast = SlimeAstCreateUtils.createPropertyDefinition(key, value, isComputed, isStatic || false, cst.loc)
+
+        if (typeAnnotation) {
+            (ast as any).typeAnnotation = typeAnnotation
+        }
+
+        return ast
+    }
+
+    /**
+     * [TypeScript] 重写 createMethodDefinitionClassElementNameAst
+     * 支持返回类型注解
+     *
+     * MethodDefinition: ClassElementName ( UniqueFormalParameters ) TSTypeAnnotation_opt { FunctionBody }
+     */
+    override createMethodDefinitionClassElementNameAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        const children = cst.children
+
+        // Token fields
+        let staticToken: any = undefined
+        let lParenToken: any = undefined
+        let rParenToken: any = undefined
+        let lBraceToken: any = undefined
+        let rBraceToken: any = undefined
+        let returnType: any = undefined
+
+        if (staticCst && (staticCst.name === 'Static' || staticCst.value === 'static')) {
+            staticToken = SlimeTokenCreateUtils.createStaticToken(staticCst.loc)
+        }
+
+        // 遍历子节点提取各部分
+        let classElementNameCst: SubhutiCst | null = null
+        let paramsCst: SubhutiCst | null = null
+        let bodyCst: SubhutiCst | null = null
+
+        for (const child of children) {
+            const name = child.name
+            if (name === 'ClassElementName' || name === SlimeParser.prototype.ClassElementName?.name) {
+                classElementNameCst = child
+            } else if (name === 'LParen' || child.value === '(') {
+                lParenToken = SlimeTokenCreateUtils.createLParenToken(child.loc)
+            } else if (name === 'RParen' || child.value === ')') {
+                rParenToken = SlimeTokenCreateUtils.createRParenToken(child.loc)
+            } else if (name === 'LBrace' || child.value === '{') {
+                lBraceToken = SlimeTokenCreateUtils.createLBraceToken(child.loc)
+            } else if (name === 'RBrace' || child.value === '}') {
+                rBraceToken = SlimeTokenCreateUtils.createRBraceToken(child.loc)
+            } else if (name === 'UniqueFormalParameters' || name === SlimeParser.prototype.UniqueFormalParameters?.name ||
+                name === 'FormalParameters' || name === SlimeParser.prototype.FormalParameters?.name) {
+                paramsCst = child
+            } else if (name === 'FunctionBody' || name === SlimeParser.prototype.FunctionBody?.name) {
+                bodyCst = child
+            } else if (name === 'TSTypeAnnotation') {
+                // [TypeScript] 返回类型注解
+                returnType = SlimeIdentifierCstToAst.createTSTypeAnnotationAst(child)
             }
         }
 
-        if (hasGlobal) {
-            // declare global { }
-            const moduleBlockCst = children.find(c => c.name === 'TSModuleBlock')
-            return {
-                type: SlimeAstTypeName.TSModuleDeclaration,
-                id: { type: 'Identifier', name: 'global', loc: cst.loc },
-                body: moduleBlockCst ? this.createTSModuleBlockAst(moduleBlockCst) : undefined,
-                declare: true,
-                global: true,
-                loc: cst.loc,
+        if (!classElementNameCst) {
+            throw new Error('MethodDefinition missing ClassElementName')
+        }
+
+        const key = SlimeJavascriptCstToAstUtil.createClassElementNameAst(classElementNameCst)
+
+        // 解析参数
+        let params: SlimeFunctionParam[] = []
+        if (paramsCst) {
+            if (paramsCst.name === 'UniqueFormalParameters' || paramsCst.name === SlimeParser.prototype.UniqueFormalParameters?.name) {
+                params = SlimeJavascriptCstToAstUtil.createUniqueFormalParametersAstWrapped(paramsCst)
+            } else {
+                params = SlimeJavascriptCstToAstUtil.createFormalParametersAstWrapped(paramsCst)
             }
         }
 
-        throw new Error(`TSDeclareStatement: unsupported declaration type`)
+        // 解析函数体
+        let body: SlimeBlockStatement
+        if (bodyCst) {
+            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(bodyCst)
+            body = SlimeAstCreateUtils.createBlockStatement(bodyStatements, cst.loc, lBraceToken, rBraceToken)
+        } else {
+            body = SlimeAstCreateUtils.createBlockStatement([], undefined, lBraceToken, rBraceToken)
+        }
+
+        // 创建函数表达式
+        const functionExpression = SlimeAstCreateUtils.createFunctionExpression(
+            body, null, params, false, false, cst.loc,
+            undefined, undefined, undefined, lParenToken, rParenToken, lBraceToken, rBraceToken
+        ) as SlimeFunctionExpression & { returnType?: any }
+
+        // [TypeScript] 添加返回类型
+        if (returnType) {
+            functionExpression.returnType = returnType
+        }
+
+        // 检查属性
+        const isComputed = SlimeJavascriptCstToAstUtil.isComputedPropertyName(classElementNameCst)
+        const isConstructor = (key as any).type === "Identifier" && (key as any).name === "constructor" &&
+            !SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst)
+        const isStatic = SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst)
+        const kind = isConstructor ? 'constructor' : 'method' as "constructor" | "method" | "get" | "set"
+
+        return SlimeAstCreateUtils.createMethodDefinition(key as any, functionExpression, kind, isComputed, isStatic, cst.loc, staticToken)
+    }
+
+    /**
+     * [TypeScript] 重写 createMethodDefinitionGetterMethodAst
+     * 支持返回类型注解
+     */
+    override createMethodDefinitionGetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        const children = cst.children
+
+        let staticToken: any = undefined
+        let getToken: any = undefined
+        let lParenToken: any = undefined
+        let rParenToken: any = undefined
+        let lBraceToken: any = undefined
+        let rBraceToken: any = undefined
+        let returnType: any = undefined
+
+        if (staticCst && (staticCst.name === 'Static' || staticCst.value === 'static')) {
+            staticToken = SlimeTokenCreateUtils.createStaticToken(staticCst.loc)
+        }
+
+        let classElementNameCst: SubhutiCst | null = null
+        let bodyCst: SubhutiCst | null = null
+
+        for (const child of children) {
+            const name = child.name
+            if (name === 'Get' || child.value === 'get') {
+                getToken = SlimeTokenCreateUtils.createGetToken(child.loc)
+            } else if (name === 'ClassElementName' || name === SlimeParser.prototype.ClassElementName?.name) {
+                classElementNameCst = child
+            } else if (name === 'LParen' || child.value === '(') {
+                lParenToken = SlimeTokenCreateUtils.createLParenToken(child.loc)
+            } else if (name === 'RParen' || child.value === ')') {
+                rParenToken = SlimeTokenCreateUtils.createRParenToken(child.loc)
+            } else if (name === 'LBrace' || child.value === '{') {
+                lBraceToken = SlimeTokenCreateUtils.createLBraceToken(child.loc)
+            } else if (name === 'RBrace' || child.value === '}') {
+                rBraceToken = SlimeTokenCreateUtils.createRBraceToken(child.loc)
+            } else if (name === 'FunctionBody' || name === SlimeParser.prototype.FunctionBody?.name) {
+                bodyCst = child
+            } else if (name === 'TSTypeAnnotation') {
+                returnType = SlimeIdentifierCstToAst.createTSTypeAnnotationAst(child)
+            }
+        }
+
+        if (!classElementNameCst) {
+            throw new Error('Getter missing ClassElementName')
+        }
+
+        const key = SlimeJavascriptCstToAstUtil.createClassElementNameAst(classElementNameCst)
+
+        let body: SlimeBlockStatement
+        if (bodyCst) {
+            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(bodyCst)
+            body = SlimeAstCreateUtils.createBlockStatement(bodyStatements, cst.loc, lBraceToken, rBraceToken)
+        } else {
+            body = SlimeAstCreateUtils.createBlockStatement([], undefined, lBraceToken, rBraceToken)
+        }
+
+        const functionExpression = SlimeAstCreateUtils.createFunctionExpression(
+            body, null, [], false, false, cst.loc,
+            undefined, undefined, undefined, lParenToken, rParenToken, lBraceToken, rBraceToken
+        ) as SlimeFunctionExpression & { returnType?: any }
+
+        if (returnType) {
+            functionExpression.returnType = returnType
+        }
+
+        const isComputed = SlimeJavascriptCstToAstUtil.isComputedPropertyName(classElementNameCst)
+        const isStatic = SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst)
+
+        const methodDef = SlimeAstCreateUtils.createMethodDefinition(key as any, functionExpression, 'get', isComputed, isStatic, cst.loc, staticToken)
+        ;(methodDef as any).getToken = getToken
+
+        return methodDef
     }
 }
-
-export const SlimeIdentifierCstToAst = new SlimeIdentifierCstToAstSingle()

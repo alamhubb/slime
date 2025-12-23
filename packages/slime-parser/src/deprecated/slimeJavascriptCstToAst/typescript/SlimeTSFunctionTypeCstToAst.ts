@@ -1,19 +1,135 @@
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeAstCreateUtils, type SlimeBlockStatement, type SlimeClassBody, type SlimeClassDeclaration,
-    SlimeClassExpression, type SlimeExpression,
-    type SlimeFunctionDeclaration,
-    type SlimeFunctionParam,
-    SlimeIdentifier, SlimeMethodDefinition, SlimeAstTypeName, SlimeStatement, SlimeTokenCreateUtils
+    SlimeAstCreateUtils,
+    SlimeAstTypeName, type SlimeBlockStatement, type SlimeFunctionDeclaration,
+    type SlimeFunctionParam, SlimeIdentifier, SlimeJavascriptAstTypeName, SlimeTokenCreateUtils
 } from "slime-ast";
 
-import SlimeParser from "../../SlimeParser.ts";
-import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
-import {SlimeVariableCstToAstSingle} from "../statements/SlimeVariableCstToAst.ts";
-import {SlimeJavascriptFunctionDeclarationCstToAstSingle} from "../../deprecated/slimeJavascriptCstToAst";
-import {SlimeIdentifierCstToAst} from "../identifier/SlimeIdentifierCstToAst.ts";
+export default class SlimeTSFunctionTypeCstToAst{
 
-export class SlimeFunctionDeclarationCstToAstSingle extends SlimeJavascriptFunctionDeclarationCstToAstSingle{
+    /**
+     * [TypeScript] 转换 TSFunctionType CST 为 AST
+     */
+    createTSFunctionTypeAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+
+        let typeParameters: any = undefined
+        let parameters: any[] = []
+        let returnType: any = undefined
+
+        for (const child of children) {
+            if (child.name === 'TSTypeParameterDeclaration') {
+                typeParameters = this.createTSTypeParameterDeclarationAst(child)
+            } else if (child.name === 'TSParameterList') {
+                parameters = this.createTSParameterListAst(child)
+            } else if (child.name === 'TSType') {
+                returnType = this.createTSTypeAst(child)
+            }
+        }
+
+        return {
+            type: SlimeAstTypeName.TSFunctionType,
+            typeParameters,
+            parameters,
+            returnType,
+            loc: cst.loc,
+        }
+    }
+
+
+    /**
+     * [TypeScript] 转换 TSConstructorType CST 为 AST
+     */
+    createTSConstructorTypeAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+
+        let typeParameters: any = undefined
+        let parameters: any[] = []
+        let returnType: any = undefined
+
+        for (const child of children) {
+            if (child.name === 'TSTypeParameterDeclaration') {
+                typeParameters = this.createTSTypeParameterDeclarationAst(child)
+            } else if (child.name === 'TSParameterList') {
+                parameters = this.createTSParameterListAst(child)
+            } else if (child.name === 'TSType') {
+                returnType = this.createTSTypeAst(child)
+            }
+        }
+
+        return {
+            type: SlimeAstTypeName.TSConstructorType,
+            typeParameters,
+            parameters,
+            returnType,
+            loc: cst.loc,
+        }
+    }
+
+
+    /**
+     * [TypeScript] 转换 TSParameterList CST 为 AST
+     */
+    createTSParameterListAst(cst: SubhutiCst): any[] {
+        const children = cst.children || []
+        const params: any[] = []
+
+        for (const child of children) {
+            if (child.name === 'TSParameter') {
+                params.push(this.createTSParameterAst(child))
+            }
+        }
+
+        return params
+    }
+
+
+
+    /**
+     * [TypeScript] 转换 TSParameter CST 为 AST
+     */
+    createTSParameterAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+
+        let name: any = undefined
+        let typeAnnotation: any = undefined
+        let optional = false
+        let rest = false
+
+        for (const child of children) {
+            if (child.name === 'Ellipsis' || child.value === '...') {
+                rest = true
+            } else if (child.name === 'BindingIdentifier' || child.name === 'Identifier' || child.name === 'IdentifierName') {
+                const tokenCst = child.children?.[0]?.children?.[0] || child.children?.[0] || child
+                name = {
+                    type: 'Identifier',
+                    name: tokenCst.value,
+                    loc: tokenCst.loc,
+                }
+            } else if (child.name === 'Question' || child.value === '?') {
+                optional = true
+            } else if (child.name === 'TSTypeAnnotation') {
+                typeAnnotation = this.createTSTypeAnnotationAst(child)
+            }
+        }
+
+        if (rest) {
+            return {
+                type: 'RestElement',
+                argument: name,
+                typeAnnotation,
+                loc: cst.loc,
+            }
+        }
+
+        return {
+            type: 'Identifier',
+            ...name,
+            typeAnnotation,
+            optional,
+            loc: cst.loc,
+        }
+    }
 
     /**
      * [TypeScript] 重写创建函数声明 AST 以支持返回类型
@@ -129,7 +245,7 @@ export class SlimeFunctionDeclarationCstToAstSingle extends SlimeJavascriptFunct
     override createGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
         // 调用父类方法获取基础结果
         const result = super.createGeneratorDeclarationAst(cst) as any
-        
+
         // [TypeScript] 检查是否有返回类型
         const children = cst.children || []
         for (const child of children) {
@@ -138,7 +254,7 @@ export class SlimeFunctionDeclarationCstToAstSingle extends SlimeJavascriptFunct
                 break
             }
         }
-        
+
         return result
     }
 
@@ -148,7 +264,7 @@ export class SlimeFunctionDeclarationCstToAstSingle extends SlimeJavascriptFunct
     override createAsyncFunctionDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
         // 调用父类方法获取基础结果
         const result = super.createAsyncFunctionDeclarationAst(cst) as any
-        
+
         // [TypeScript] 检查是否有返回类型
         const children = cst.children || []
         for (const child of children) {
@@ -157,7 +273,7 @@ export class SlimeFunctionDeclarationCstToAstSingle extends SlimeJavascriptFunct
                 break
             }
         }
-        
+
         return result
     }
 
@@ -167,7 +283,7 @@ export class SlimeFunctionDeclarationCstToAstSingle extends SlimeJavascriptFunct
     override createAsyncGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
         // 调用父类方法获取基础结果
         const result = super.createAsyncGeneratorDeclarationAst(cst) as any
-        
+
         // [TypeScript] 检查是否有返回类型
         const children = cst.children || []
         for (const child of children) {
@@ -176,9 +292,8 @@ export class SlimeFunctionDeclarationCstToAstSingle extends SlimeJavascriptFunct
                 break
             }
         }
-        
+
         return result
     }
-}
 
-export const SlimeFunctionDeclarationCstToAst = new SlimeFunctionDeclarationCstToAstSingle()
+}
