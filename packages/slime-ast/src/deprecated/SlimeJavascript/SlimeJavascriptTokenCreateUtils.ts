@@ -92,7 +92,7 @@ import {
     SlimeJavascriptUpdateOperatorTokenTypes,
 } from "slime-token";
 
-export class SlimeJavascriptTokenFactory {
+export class SlimeJavascriptTokenCreateFactory {
     // ============================================
     // 变量声明关键字 Token
     // ============================================
@@ -454,6 +454,6 @@ export class SlimeJavascriptTokenFactory {
     }
 }
 
-const SlimeJavascriptTokenCreateUtils = new SlimeJavascriptTokenFactory();
+const SlimeJavascriptTokenCreateUtils = new SlimeJavascriptTokenCreateFactory();
 export default SlimeJavascriptTokenCreateUtils;
 

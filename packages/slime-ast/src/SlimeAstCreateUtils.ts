@@ -1,8 +1,8 @@
-import {SlimeJavascriptAstCreateUtils} from "./deprecated/SlimeJavascript/SlimeJavascriptAstCreateUtils.ts";
+import {SlimeJavascriptAstCreateFactory} from "./deprecated/SlimeJavascript/SlimeJavascriptAstCreateUtils.ts";
 
-class SlimeAstCreateUtils extends SlimeJavascriptAstCreateUtils {
+class SlimeAstCreateFactory extends SlimeJavascriptAstCreateFactory {
 }
 
-const SlimeAstCreateUtil = new SlimeAstCreateUtils()
-export default SlimeAstCreateUtil
+const SlimeAstCreateUtils = new SlimeAstCreateFactory()
+export default SlimeAstCreateUtils
 

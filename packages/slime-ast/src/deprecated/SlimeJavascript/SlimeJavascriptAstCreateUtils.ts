@@ -191,8 +191,9 @@ import {
 
 import {SlimeJavascriptAstTypeName} from "./SlimeJavascriptAstTypeName.ts";
 import type { SubhutiSourceLocation } from "subhuti";
+import {SlimeJavascriptTokenCreateFactory} from "./SlimeJavascriptTokenCreateUtils.ts";
 
-export class SlimeJavascriptAstCreateUtils {
+export class SlimeJavascriptAstCreateFactory {
   // ============================================
   // 通用辅助方法
   // ============================================
@@ -1523,6 +1524,6 @@ export class SlimeJavascriptAstCreateUtils {
   }
 }
 
-const SlimeJavascriptAstCreateUtil = new SlimeJavascriptAstCreateUtils()
-export default SlimeJavascriptAstCreateUtil
+const SlimeJavascriptCreateUtils = new SlimeJavascriptAstCreateFactory()
+export default SlimeJavascriptCreateUtils
 

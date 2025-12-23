@@ -4,9 +4,9 @@
  * 为每个 Token 类型提供创建方法
  * 与 SlimeAstNode.ts 中的 Token 类型一一对应
  */
-import {SlimeJavascriptTokenFactory} from "./deprecated/SlimeJavascript/SlimeJavascriptTokenCreateUtils.ts";
+import {SlimeJavascriptTokenCreateFactory} from "./deprecated/SlimeJavascript/SlimeJavascriptTokenCreateUtils.ts";
 
-export class SlimeTokenFactory extends SlimeJavascriptTokenFactory {
+export class SlimeTokenFactory extends SlimeJavascriptTokenCreateFactory {
 }
 
 const SlimeTokenCreateUtils = new SlimeTokenFactory();

@@ -4,3 +4,6 @@ export { default as SlimeCodeMapping } from './SlimeCodeMapping.ts'
 export * from './SlimeGenerator.ts'
 export { default as SlimeGenerator } from './SlimeGenerator.ts'
 
+// 导出 deprecated 模块
+export * from './deprecated/SlimeJavascriptGenerator.ts'
+

@@ -14,6 +14,7 @@ import {
 } from "./cstToAst";
 import { SlimeJavascriptCstToAst } from "./deprecated/SlimeJavascriptCstToAstUtil.ts";
 import SlimeJavascriptCstToAstUtil from './deprecated/SlimeJavascriptCstToAstUtil.ts'
+import { SlimeJavascriptPrimaryExpressionCstToAst } from './deprecated/slimeJavascriptCstToAst/expressions/SlimeJavascriptPrimaryExpressionCstToAst.ts'
 
 
 // ============================================
@@ -143,6 +144,12 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
             this.createExpressionAstUncached.bind(this)
         ; (SlimeJavascriptCstToAstUtil as any).createUpdateExpressionAst = 
             this.createUpdateExpressionAst.bind(this)
+        
+        // PrimaryExpression - 支持子类扩展（如 cssts 的 css {} 语法）
+        ; (SlimeJavascriptCstToAstUtil as any).createPrimaryExpressionAst = 
+            this.createPrimaryExpressionAst.bind(this)
+        ; (SlimeJavascriptPrimaryExpressionCstToAst as any).createPrimaryExpressionAst = 
+            this.createPrimaryExpressionAst.bind(this)
     }
 
     // ============================================
