@@ -10,7 +10,7 @@ import {
     SlimeJavascriptAstTypeName, SlimeJavascriptNumericLiteral, type SlimeJavascriptSpreadElement,
     SlimeJavascriptStringLiteral, SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
@@ -44,7 +44,7 @@ export class SlimeJavascriptLiteralCstToAstSingle {
     createNumericLiteralAst(cst: SubhutiCst): SlimeNumericLiteral {
         // 兼容多种 NumericLiteral 名称：NumericLiteral, NumericLiteralTok, Number
         const validNames = [
-            SlimeJavascriptTokenConsumer.prototype.NumericLiteral?.name,
+            SlimeTokenConsumer.prototype.NumericLiteral?.name,
             'NumericLiteral',
             'NumericLiteral',
             'Number'
@@ -66,7 +66,7 @@ export class SlimeJavascriptLiteralCstToAstSingle {
     createStringLiteralAst(cst: SubhutiCst): SlimeStringLiteral {
         // 兼容多种 StringLiteral 名称：StringLiteral, StringLiteralTok, String
         const validNames = [
-            SlimeJavascriptTokenConsumer.prototype.StringLiteral?.name,
+            SlimeTokenConsumer.prototype.StringLiteral?.name,
             'StringLiteral',
             'StringLiteral',
             'String'
@@ -121,15 +121,15 @@ export class SlimeJavascriptLiteralCstToAstSingle {
 
     createLiteralFromToken(token: any): SlimeExpression {
         const tokenName = token.tokenName
-        if (tokenName === SlimeJavascriptTokenConsumer.prototype.NullLiteral?.name) {
+        if (tokenName === SlimeTokenConsumer.prototype.NullLiteral?.name) {
             return SlimeJavascriptCreateUtils.createNullLiteralToken()
-        } else if (tokenName === SlimeJavascriptTokenConsumer.prototype.True?.name) {
+        } else if (tokenName === SlimeTokenConsumer.prototype.True?.name) {
             return SlimeJavascriptCreateUtils.createBooleanLiteral(true)
-        } else if (tokenName === SlimeJavascriptTokenConsumer.prototype.False?.name) {
+        } else if (tokenName === SlimeTokenConsumer.prototype.False?.name) {
             return SlimeJavascriptCreateUtils.createBooleanLiteral(false)
-        } else if (tokenName === SlimeJavascriptTokenConsumer.prototype.NumericLiteral?.name) {
+        } else if (tokenName === SlimeTokenConsumer.prototype.NumericLiteral?.name) {
             return SlimeJavascriptCreateUtils.createNumericLiteral(Number(token.tokenValue))
-        } else if (tokenName === SlimeJavascriptTokenConsumer.prototype.StringLiteral?.name) {
+        } else if (tokenName === SlimeTokenConsumer.prototype.StringLiteral?.name) {
             return SlimeJavascriptCreateUtils.createStringLiteral(token.tokenValue)
         } else {
             throw new Error(`Unsupported literal token: ${tokenName}`)
@@ -146,16 +146,16 @@ export class SlimeJavascriptLiteralCstToAstSingle {
         const childName = firstChild.name
 
         // 直接�?token 的情�?
-        if (childName === SlimeJavascriptTokenConsumer.prototype.NumericLiteral?.name || childName === 'NumericLiteral') {
+        if (childName === SlimeTokenConsumer.prototype.NumericLiteral?.name || childName === 'NumericLiteral') {
             const rawValue = firstChild.value as string
             value = SlimeJavascriptCreateUtils.createNumericLiteral(Number(rawValue), rawValue)
-        } else if (childName === SlimeJavascriptTokenConsumer.prototype.True?.name || childName === 'True') {
+        } else if (childName === SlimeTokenConsumer.prototype.True?.name || childName === 'True') {
             value = SlimeJavascriptCreateUtils.createBooleanLiteral(true)
-        } else if (childName === SlimeJavascriptTokenConsumer.prototype.False?.name || childName === 'False') {
+        } else if (childName === SlimeTokenConsumer.prototype.False?.name || childName === 'False') {
             value = SlimeJavascriptCreateUtils.createBooleanLiteral(false)
-        } else if (childName === SlimeJavascriptTokenConsumer.prototype.NullLiteral?.name || childName === 'NullLiteral' || childName === 'Null') {
+        } else if (childName === SlimeTokenConsumer.prototype.NullLiteral?.name || childName === 'NullLiteral' || childName === 'Null') {
             value = SlimeJavascriptCreateUtils.createNullLiteralToken()
-        } else if (childName === SlimeJavascriptTokenConsumer.prototype.StringLiteral?.name || childName === 'StringLiteral') {
+        } else if (childName === SlimeTokenConsumer.prototype.StringLiteral?.name || childName === 'StringLiteral') {
             const rawValue = firstChild.value as string
             value = SlimeJavascriptCreateUtils.createStringLiteral(rawValue, firstChild.loc, rawValue)
         }
@@ -232,7 +232,7 @@ export class SlimeJavascriptLiteralCstToAstSingle {
         for (let i = 0; i < cst.children.length; i++) {
             const child = cst.children[i]
 
-            if (child.name === SlimeJavascriptTokenConsumer.prototype.TemplateMiddle?.name ||
+            if (child.name === SlimeTokenConsumer.prototype.TemplateMiddle?.name ||
                 child.name === 'TemplateMiddle') {
                 const raw = child.value || ''
                 const cooked = raw.slice(1, -2) // 去掉 } �?${
@@ -254,7 +254,7 @@ export class SlimeJavascriptLiteralCstToAstSingle {
         const first = cst.children[0]
 
         // 情况1：直接是TemplateTail -> }` 结束
-        if (first.name === SlimeJavascriptTokenConsumer.prototype.TemplateTail?.name) {
+        if (first.name === SlimeTokenConsumer.prototype.TemplateTail?.name) {
             const raw = first.value || ''
             const cooked = raw.slice(1, -1) // 去掉 } �?`
             quasis.push(SlimeJavascriptCreateUtils.createTemplateElement(true, raw, cooked, first.loc))
@@ -266,7 +266,7 @@ export class SlimeJavascriptLiteralCstToAstSingle {
             SlimeCstToAstUtil.processTemplateMiddleList(first, quasis, expressions)
 
             // 然后处理TemplateTail
-            if (cst.children[1] && cst.children[1].name === SlimeJavascriptTokenConsumer.prototype.TemplateTail?.name) {
+            if (cst.children[1] && cst.children[1].name === SlimeTokenConsumer.prototype.TemplateTail?.name) {
                 const tail = cst.children[1]
                 const raw = tail.value || ''
                 const cooked = raw.slice(1, -1) // 去掉 } �?`
@@ -283,7 +283,7 @@ export class SlimeJavascriptLiteralCstToAstSingle {
         const first = cst.children[0]
 
         // 简单模板：`hello` (无插�?
-        if (first.name === SlimeJavascriptTokenConsumer.prototype.NoSubstitutionTemplate?.name ||
+        if (first.name === SlimeTokenConsumer.prototype.NoSubstitutionTemplate?.name ||
             first.name === 'NoSubstitutionTemplate') {
             // 返回 TemplateLiteral AST，保持原始格�?
             const raw = first.value as string || '``'
@@ -309,7 +309,7 @@ export class SlimeJavascriptLiteralCstToAstSingle {
             const child = targetCst.children[i]
 
             // TemplateHead: `xxx${
-            if (child.name === SlimeJavascriptTokenConsumer.prototype.TemplateHead?.name ||
+            if (child.name === SlimeTokenConsumer.prototype.TemplateHead?.name ||
                 child.name === 'TemplateHead') {
                 const raw = child.value as string || ''
                 const cooked = raw.slice(1, -2) // 去掉 ` �?${

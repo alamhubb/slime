@@ -11,7 +11,7 @@ import {
 import SlimeParser from "../../SlimeParser.ts";
 
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 
 export class SlimeJavascriptFunctionParameterCstToAstSingle {
 
@@ -229,7 +229,7 @@ export class SlimeJavascriptFunctionParameterCstToAstSingle {
                     params.push(SlimeJavascriptCreateUtils.createFunctionParam(lastParam))
                 }
                 lastParam = SlimeCstToAstUtil.createFunctionRestParameterAst(child)
-            } else if (child.name === SlimeJavascriptTokenConsumer.prototype.Comma?.name || child.value === ',') {
+            } else if (child.name === SlimeTokenConsumer.prototype.Comma?.name || child.value === ',') {
                 if (lastParam) {
                     params.push(SlimeJavascriptCreateUtils.createFunctionParam(lastParam, SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)))
                     lastParam = null

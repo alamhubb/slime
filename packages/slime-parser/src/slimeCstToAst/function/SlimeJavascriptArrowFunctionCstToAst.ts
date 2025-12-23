@@ -10,11 +10,12 @@ import {
     SlimeJavascriptMethodDefinition,
     SlimeJavascriptPattern,
     SlimeJavascriptTokenCreateUtils,
-    SlimeJavascriptAstTypeName, SlimeJavascriptArrowFunctionExpression, SlimeJavascriptIdentifier
+    SlimeJavascriptAstTypeName, SlimeJavascriptArrowFunctionExpression, SlimeJavascriptIdentifier,
+    SlimeArrowFunctionExpression, SlimePattern
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
@@ -404,7 +405,7 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
         }
 
         // 参数列表�? FormalParameterList )
-        if (first.name === SlimeJavascriptTokenConsumer.prototype.LParen?.name) {
+        if (first.name === SlimeTokenConsumer.prototype.LParen?.name) {
             // 查找 FormalParameterList
             const formalParameterListCst = cst.children.find(
                 child => child.name === SlimeParser.prototype.FormalParameterList?.name

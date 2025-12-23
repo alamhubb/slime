@@ -1,7 +1,7 @@
 /**
  * UnaryExpressionCstToAst - 一�?更新表达式转�?
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     SlimeJavascriptCreateUtils, type SlimeJavascriptBlockStatement,
     SlimeJavascriptExpression,
@@ -12,8 +12,8 @@ import {
 
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
-import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
+import { SlimeJavascriptVariableCstToAstSingle } from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptUnaryExpressionCstToAstSingle {
 
@@ -137,7 +137,7 @@ export class SlimeJavascriptUnaryExpressionCstToAstSingle {
             yieldToken = SlimeJavascriptTokenCreateUtils.createYieldToken(cst.children[0].loc)
         }
 
-        if (cst.children[1] && cst.children[1].name === SlimeJavascriptTokenConsumer.prototype.Asterisk?.name) {
+        if (cst.children[1] && cst.children[1].name === SlimeTokenConsumer.prototype.Asterisk?.name) {
             asteriskToken = SlimeJavascriptTokenCreateUtils.createAsteriskToken(cst.children[1].loc)
             delegate = true
             startIndex = 2

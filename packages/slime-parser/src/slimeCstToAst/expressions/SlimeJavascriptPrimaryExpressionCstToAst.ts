@@ -13,7 +13,7 @@ import {
 import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
@@ -33,10 +33,10 @@ export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
             return SlimeCstToAstUtil.createObjectLiteralAst(first) as SlimeJavascriptExpression
         } else if (first.name === SlimeParser.prototype.ClassExpression?.name) {
             return SlimeCstToAstUtil.createClassExpressionAst(first) as SlimeJavascriptExpression
-        } else if (first.name === SlimeJavascriptTokenConsumer.prototype.This?.name) {
+        } else if (first.name === SlimeTokenConsumer.prototype.This?.name) {
             // 处理 this 关键�?
             return SlimeJavascriptCreateUtils.createThisExpression(first.loc)
-        } else if (first.name === SlimeJavascriptTokenConsumer.prototype.RegularExpressionLiteral?.name) {
+        } else if (first.name === SlimeTokenConsumer.prototype.RegularExpressionLiteral?.name) {
             // 处理正则表达式字面量
             return SlimeCstToAstUtil.createRegExpLiteralAst(first)
         } else if (first.name === SlimeParser.prototype.GeneratorExpression?.name || first.name === 'GeneratorExpression') {
@@ -160,7 +160,7 @@ export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
      * 在Expression中查找第一个Identifier（辅助方法）
      */
     findFirstIdentifierInExpression(cst: SubhutiCst): SubhutiCst | null {
-        if (cst.name === SlimeJavascriptTokenConsumer.prototype.IdentifierName?.name) {
+        if (cst.name === SlimeTokenConsumer.prototype.IdentifierName?.name) {
             return cst
         }
         if (cst.children) {

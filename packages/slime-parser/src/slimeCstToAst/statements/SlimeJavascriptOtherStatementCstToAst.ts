@@ -9,7 +9,7 @@ import {
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "./SlimeJavascriptVariableCstToAst.ts";
 
@@ -71,7 +71,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
                 label = SlimeCstToAstUtil.createLabelIdentifierAst(child)
             } else if (child.name === SlimeParser.prototype.IdentifierName?.name) {
                 label = SlimeCstToAstUtil.createIdentifierNameAst(child)
-            } else if (child.name === SlimeJavascriptTokenConsumer.prototype.IdentifierName?.name) {
+            } else if (child.name === SlimeTokenConsumer.prototype.IdentifierName?.name) {
                 label = SlimeCstToAstUtil.createIdentifierAst(child)
             }
         }
@@ -100,7 +100,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
                 label = SlimeCstToAstUtil.createLabelIdentifierAst(child)
             } else if (child.name === SlimeParser.prototype.IdentifierName?.name) {
                 label = SlimeCstToAstUtil.createIdentifierNameAst(child)
-            } else if (child.name === SlimeJavascriptTokenConsumer.prototype.IdentifierName?.name) {
+            } else if (child.name === SlimeTokenConsumer.prototype.IdentifierName?.name) {
                 label = SlimeCstToAstUtil.createIdentifierAst(child)
             }
         }
@@ -258,7 +258,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
         let semicolonToken: any = undefined
 
         // EmptyStatement 可能直接�?Semicolon token
-        if (cst.value === ';' || cst.name === SlimeJavascriptTokenConsumer.prototype.Semicolon?.name) {
+        if (cst.value === ';' || cst.name === SlimeTokenConsumer.prototype.Semicolon?.name) {
             semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(cst.loc)
         } else {
             // �?semicolon token
@@ -351,7 +351,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
                     label = SlimeCstToAstUtil.createIdentifierNameAst(child)
                     continue
                 }
-                if (name === SlimeJavascriptTokenConsumer.prototype.IdentifierName?.name) {
+                if (name === SlimeTokenConsumer.prototype.IdentifierName?.name) {
                     label = SlimeCstToAstUtil.createIdentifierAst(child)
                     continue
                 }

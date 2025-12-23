@@ -2,7 +2,7 @@
  * ClassDeclarationCstToAst - class body/element 转换
  */
 import {SubhutiCst} from "subhuti";
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import {
     SlimeJavascriptCreateUtils,
     SlimeJavascriptClassBody, SlimeJavascriptClassDeclaration, SlimeJavascriptClassExpression,
@@ -360,7 +360,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
     isStaticModifier(cst: SubhutiCst | null): boolean {
         if (!cst) return false
         // 方式1：直接是 Static
-        if (cst.name === SlimeJavascriptTokenConsumer.prototype.Static?.name || cst.name === 'Static' || cst.name === 'Static') {
+        if (cst.name === SlimeTokenConsumer.prototype.Static?.name || cst.name === 'Static' || cst.name === 'Static') {
             return true
         }
         // 方式2：是 IdentifierNameTok �?value �?'static'

@@ -21,7 +21,7 @@ import {
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
@@ -312,11 +312,11 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
             return SlimeCstToAstUtil.createIdentifierAst(first)
         }
         // NumericLiteral
-        else if (first.name === SlimeJavascriptTokenConsumer.prototype.NumericLiteral?.name || first.name === 'NumericLiteral' || first.name === 'Number') {
+        else if (first.name === SlimeTokenConsumer.prototype.NumericLiteral?.name || first.name === 'NumericLiteral' || first.name === 'Number') {
             return SlimeCstToAstUtil.createNumericLiteralAst(first)
         }
         // StringLiteral
-        else if (first.name === SlimeJavascriptTokenConsumer.prototype.StringLiteral?.name || first.name === 'StringLiteral' || first.name === 'String') {
+        else if (first.name === SlimeTokenConsumer.prototype.StringLiteral?.name || first.name === 'StringLiteral' || first.name === 'String') {
             return SlimeCstToAstUtil.createStringLiteralAst(first)
         }
         // 如果是直接的 token（有 value 属性），创�?Identifier

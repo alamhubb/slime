@@ -14,7 +14,7 @@ import {
 import SlimeParser from "../../SlimeParser.ts";
 
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptExportCstToAstSingle {
@@ -44,16 +44,16 @@ export class SlimeJavascriptExportCstToAstSingle {
 
         for (const child of children) {
             const name = child.name
-            if (name === SlimeJavascriptTokenConsumer.prototype.Export?.name || child.value === 'export') {
+            if (name === SlimeTokenConsumer.prototype.Export?.name || child.value === 'export') {
                 exportToken = SlimeJavascriptTokenCreateUtils.createExportToken(child.loc)
-            } else if (name === SlimeJavascriptTokenConsumer.prototype.Default?.name || child.value === 'default') {
+            } else if (name === SlimeTokenConsumer.prototype.Default?.name || child.value === 'default') {
                 defaultToken = SlimeJavascriptTokenCreateUtils.createDefaultToken(child.loc)
                 isDefault = true
-            } else if (name === SlimeJavascriptTokenConsumer.prototype.Asterisk?.name || child.value === '*') {
+            } else if (name === SlimeTokenConsumer.prototype.Asterisk?.name || child.value === '*') {
                 asteriskToken = SlimeJavascriptTokenCreateUtils.createAsteriskToken(child.loc)
-            } else if (name === SlimeJavascriptTokenConsumer.prototype.Semicolon?.name || child.value === ';') {
+            } else if (name === SlimeTokenConsumer.prototype.Semicolon?.name || child.value === ';') {
                 semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(child.loc)
-            } else if (name === SlimeJavascriptTokenConsumer.prototype.As?.name || child.value === 'as') {
+            } else if (name === SlimeTokenConsumer.prototype.As?.name || child.value === 'as') {
                 asToken = SlimeJavascriptTokenCreateUtils.createAsToken(child.loc)
             } else if (name === SlimeParser.prototype.ExportFromClause?.name) {
                 exportFromClause = child
@@ -104,7 +104,7 @@ export class SlimeJavascriptExportCstToAstSingle {
 
             // Check if it's export * or export * as name
             const hasAsterisk = exportFromClause.children?.some((ch: any) =>
-                ch.name === SlimeJavascriptTokenConsumer.prototype.Asterisk?.name || ch.value === '*')
+                ch.name === SlimeTokenConsumer.prototype.Asterisk?.name || ch.value === '*')
 
             if (hasAsterisk) {
                 // export * from ... or export * as name from ...
@@ -249,7 +249,7 @@ export class SlimeJavascriptExportCstToAstSingle {
                     specifiers.push({specifier: lastSpecifier})
                 }
                 lastSpecifier = SlimeCstToAstUtil.createExportSpecifierAst(child)
-            } else if (child.name === SlimeJavascriptTokenConsumer.prototype.Comma?.name || child.value === ',') {
+            } else if (child.name === SlimeTokenConsumer.prototype.Comma?.name || child.value === ',') {
                 if (lastSpecifier) {
                     specifiers.push({
                         specifier: lastSpecifier,
@@ -285,7 +285,7 @@ export class SlimeJavascriptExportCstToAstSingle {
                 } else {
                     exported = SlimeCstToAstUtil.createModuleExportNameAst(child)
                 }
-            } else if (child.name === SlimeJavascriptTokenConsumer.prototype.As?.name || child.value === 'as') {
+            } else if (child.name === SlimeTokenConsumer.prototype.As?.name || child.value === 'as') {
                 asToken = SlimeJavascriptTokenCreateUtils.createAsToken(child.loc)
             }
         }
@@ -309,7 +309,7 @@ export class SlimeJavascriptExportCstToAstSingle {
 
         if (first.name === SlimeParser.prototype.IdentifierName?.name) {
             return SlimeCstToAstUtil.createIdentifierNameAst(first)
-        } else if (first.name === SlimeJavascriptTokenConsumer.prototype.StringLiteral?.name) {
+        } else if (first.name === SlimeTokenConsumer.prototype.StringLiteral?.name) {
             return SlimeJavascriptCreateUtils.createStringLiteral(first.value, first.loc)
         } else {
             // Direct token

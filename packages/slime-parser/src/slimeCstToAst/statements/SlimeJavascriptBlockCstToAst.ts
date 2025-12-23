@@ -8,7 +8,7 @@ import {
     SlimeJavascriptFunctionDeclaration, SlimeJavascriptFunctionExpression, SlimeJavascriptAstTypeName, SlimeJavascriptStatement,
     SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "./SlimeJavascriptVariableCstToAst.ts";
 
