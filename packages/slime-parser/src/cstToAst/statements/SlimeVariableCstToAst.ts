@@ -355,50 +355,6 @@ export class SlimeVariableCstToAstSingle {
     }
 
 
-    /**
-     * ForDeclaration CST �?AST
-     * ForDeclaration -> LetOrConst ForBinding
-     */
-    createForDeclarationAst(cst: SubhutiCst): any {
-        const letOrConst = cst.children?.find(ch =>
-            ch.name === SlimeParser.prototype.LetOrConst?.name || ch.name === 'LetOrConst'
-        )
-        const forBinding = cst.children?.find(ch =>
-            ch.name === SlimeParser.prototype.ForBinding?.name || ch.name === 'ForBinding'
-        )
-
-        const kind = letOrConst?.children?.[0]?.value || 'let'
-        const id = forBinding ? SlimeCstToAstUtil.createForBindingAst(forBinding) : null
-
-        return {
-            type: SlimeAstTypeName.VariableDeclaration,
-            declarations: [{
-                type: SlimeAstTypeName.VariableDeclarator,
-                id: id,
-                init: null,
-                loc: forBinding?.loc
-            }],
-            kind: {type: 'VariableDeclarationKind', value: kind, loc: letOrConst?.loc},
-            loc: cst.loc
-        }
-    }
-
-
-    /**
-     * ForBinding CST �?AST
-     * ForBinding -> BindingIdentifier | BindingPattern
-     */
-    createForBindingAst(cst: SubhutiCst): any {
-        const firstChild = cst.children?.[0]
-        if (!firstChild) return null
-
-        if (firstChild.name === SlimeParser.prototype.BindingIdentifier?.name || firstChild.name === 'BindingIdentifier') {
-            return SlimeCstToAstUtil.createBindingIdentifierAst(firstChild)
-        } else if (firstChild.name === SlimeParser.prototype.BindingPattern?.name || firstChild.name === 'BindingPattern') {
-            return SlimeCstToAstUtil.createBindingPatternAst(firstChild)
-        }
-        return SlimeCstToAstUtil.createBindingIdentifierAst(firstChild)
-    }
 
 
 }
