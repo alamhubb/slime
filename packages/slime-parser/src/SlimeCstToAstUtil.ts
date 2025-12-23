@@ -156,7 +156,7 @@ import {SlimeCstToAstUtil} from "./index.ts";
  * ## 辅助处理方法
  * - toProgram: Program 入口处理
  */
-export class SlimeJavascriptCstToAst {
+export class SlimeCstToAst {
 
     /**
      * 将 Unicode 转义序列解码为实际字符
@@ -1260,6 +1260,6 @@ export class SlimeJavascriptCstToAst {
     // === class / ClassDeclarationCstToAst ===
 }
 
-const SlimeJavascriptCstToAstUtil = new SlimeJavascriptCstToAst()
+const SlimeCstToAstUtil = new SlimeCstToAst()
 
-export default SlimeJavascriptCstToAstUtil
+export default SlimeCstToAstUtil

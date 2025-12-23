@@ -57,8 +57,8 @@ export class SlimeJavascriptVariableCstToAstSingle {
 
     createVariableDeclarationAst(cst: SubhutiCst): SlimeVariableDeclaration {
         //直接返回声明
-        //                 SlimeJavascriptCstToAstUtil.Statement()
-        //                 SlimeJavascriptCstToAstUtil.Declaration()
+        //                 SlimeCstToAstUtil.Statement()
+        //                 SlimeCstToAstUtil.Declaration()
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.VariableDeclaration?.name);
         let kindCst: SubhutiCst = cst.children[0].children[0]
 
@@ -96,7 +96,7 @@ export class SlimeJavascriptVariableCstToAstSingle {
 
     createVariableDeclaratorAst(cst: SubhutiCst): SlimeVariableDeclarator {
         // 兼容 LexicalBinding �?VariableDeclaration
-        // const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, 'LexicalBinding');
+        // const astName = SlimeCstToAstUtil.checkCstName(cst, 'LexicalBinding');
 
         // children[0]可能是BindingIdentifier或BindingPattern（解构）
         const firstChild = cst.children[0]

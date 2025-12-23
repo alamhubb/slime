@@ -253,7 +253,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
      */
     createEmptyStatementAst(cst: SubhutiCst): any {
         // 兼容 EmptyStatement 和旧�?NotEmptySemicolon
-        // SlimeJavascriptCstToAstUtil.checkCstName(cst, Es2025Parser.prototype.EmptyStatement?.name);
+        // SlimeCstToAstUtil.checkCstName(cst, Es2025Parser.prototype.EmptyStatement?.name);
 
         let semicolonToken: any = undefined
 

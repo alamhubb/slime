@@ -1,7 +1,7 @@
 /**
  * CompoundLiteralCstToAst - 数组/对象字面量转�?
  */
-import {SubhutiCst} from "subhuti";
+import { SubhutiCst } from "subhuti";
 import {
     type SlimeJavascriptArrayElement,
     type SlimeJavascriptArrayExpression, type SlimeJavascriptArrowFunctionExpression,
@@ -23,7 +23,7 @@ import SlimeParser from "../../SlimeParser.ts";
 
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
-import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
+import { SlimeJavascriptVariableCstToAstSingle } from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptCompoundLiteralCstToAstSingle {
     /**
@@ -214,7 +214,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
             }
 
             // 继承MethodDefinition的kind标志（getter/setter/method�?
-            if (SlimeJavascriptMethodDefinition.kind === 'get' || SlimeMethodDefinition.kind === 'set') {
+            if (SlimeJavascriptMethodDefinition.kind === 'get' || SlimeJavascriptMethodDefinition.kind === 'set') {
                 keyAst.kind = SlimeJavascriptMethodDefinition.kind
             } else {
                 // 普通方法使�?method: true
