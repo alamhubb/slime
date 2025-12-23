@@ -262,6 +262,7 @@ export class SlimeMethodDefinitionCstToAstSingle {
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined
         let returnType: any = undefined  // [TypeScript] 返回类型
+        let typeParameters: any = undefined  // [TypeScript] 泛型参数
 
         // 检查 token
         if (staticCst && (staticCst.name === 'Static' || staticCst.value === 'static')) {
@@ -293,6 +294,9 @@ export class SlimeMethodDefinitionCstToAstSingle {
             } else if (name === 'TSTypeAnnotation') {
                 // [TypeScript] 返回类型注解
                 returnType = SlimeCstToAstUtil.createTSTypeAnnotationAst(child)
+            } else if (name === 'TSTypeParameterDeclaration') {
+                // [TypeScript] 泛型参数
+                typeParameters = SlimeCstToAstUtil.createTSTypeParameterDeclarationAst(child)
             }
         }
 
@@ -325,11 +329,16 @@ export class SlimeMethodDefinitionCstToAstSingle {
         const functionExpression = SlimeAstCreateUtils.createFunctionExpression(
             body, null, params, false, false, cst.loc,
             undefined, undefined, undefined, lParenToken, rParenToken, lBraceToken, rBraceToken
-        ) as SlimeFunctionExpression & { returnType?: any }
+        ) as SlimeFunctionExpression & { returnType?: any, typeParameters?: any }
 
         // [TypeScript] 添加返回类型
         if (returnType) {
             functionExpression.returnType = returnType
+        }
+
+        // [TypeScript] 添加泛型参数
+        if (typeParameters) {
+            functionExpression.typeParameters = typeParameters
         }
 
         // 检查是否是计算属性

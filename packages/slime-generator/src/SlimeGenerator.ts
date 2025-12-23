@@ -195,6 +195,11 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
 
         // 处理参数列表
         if (node.value) {
+            // [TypeScript] 处理泛型参数
+            if (node.value.typeParameters) {
+                this.generatorTSTypeParameterDeclaration(node.value.typeParameters)
+            }
+
             this.generatorFunctionParams(
                 node.value.params,
                 node.value.lParenToken?.loc,
@@ -1103,7 +1108,8 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
 
         if (node.declaration) {
             this.generatorNode(node.declaration)
-        } else if (node.specifiers && node.specifiers.length > 0) {
+        } else if (node.specifiers) {
+            // 处理 export {} 和 export { a, b } 两种情况
             this.addLBrace()
             node.specifiers.forEach((spec: any, index: number) => {
                 if (index > 0) {
@@ -1121,6 +1127,9 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
                 this.addSpacing()
                 this.generatorNode(node.source)
             }
+
+            // ES2025 Import Attributes: with { type: "json" }
+            this.generatorAttributes(node)
 
             this.addCode(SlimeJavascriptGeneratorTokensObj.Semicolon)
             this.addNewLine()

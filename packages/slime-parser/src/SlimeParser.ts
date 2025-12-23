@@ -73,7 +73,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
     // ============================================
 
     /**
-     * [TypeScript] 重写 BindingIdentifier 以支持可选的类型注解
+     * [TypeScript] 重写 BindingIdentifier 以支持可选标记和类型注解
      *
      * BindingIdentifier[Yield, Await] :
      *     Identifier
@@ -81,7 +81,7 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *     await
      *
      * [TypeScript 扩展]:
-     *     BindingIdentifier TSTypeAnnotation_opt
+     *     BindingIdentifier ?_opt TSTypeAnnotation_opt
      */
     @SubhutiRule
     override BindingIdentifier(params: ExpressionParams = {}) {
@@ -91,6 +91,8 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
             { alt: () => this.tokenConsumer.Yield() },
             { alt: () => this.tokenConsumer.Await() }
         ])
+        // [TypeScript] 可选的 ? 标记（可选参数）
+        this.Option(() => this.tokenConsumer.Question())
         // [TypeScript] 可选的类型注解
         this.Option(() => this.TSTypeAnnotation())
     }
@@ -1135,10 +1137,12 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
                     this.tokenConsumer.RBrace()
                 }
             },
-            // ClassElementName ( UniqueFormalParameters ) TSTypeAnnotation_opt { FunctionBody }
+            // ClassElementName TSTypeParameterDeclaration_opt ( UniqueFormalParameters ) TSTypeAnnotation_opt { FunctionBody }
             {
                 alt: () => {
                     this.ClassElementName(params)
+                    // [TypeScript] 可选的泛型参数
+                    this.Option(() => this.TSTypeParameterDeclaration())
                     this.tokenConsumer.LParen()
                     this.UniqueFormalParameters({ Yield: false, Await: false })
                     this.tokenConsumer.RParen()
@@ -1991,6 +1995,68 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
     }
 
     /**
+     * [TypeScript] 重写 MemberExpression 以支持非空断言后缀和泛型构造函数
+     *
+     * MemberExpression[Yield, Await] :
+     *     PrimaryExpression[?Yield, ?Await]
+     *     ... (其他分支)
+     *
+     * [TypeScript 扩展] 后缀操作符增加:
+     *     ! (非空断言，可以链式使用)
+     *
+     * [TypeScript 扩展] new 表达式支持泛型:
+     *     new MemberExpression TSTypeParameterInstantiation_opt Arguments
+     */
+    @SubhutiRule
+    override MemberExpression(params: ExpressionParams = {}) {
+        // 基础表达式
+        this.Or([
+            { alt: () => this.PrimaryExpression(params) },
+            { alt: () => this.SuperProperty(params) },
+            { alt: () => this.MetaProperty() },
+            {
+                alt: () => {
+                    this.tokenConsumer.New()
+                    this.MemberExpression(params)
+                    // [TypeScript] 可选的类型参数实例化 <T, U>
+                    this.Option(() => this.TSTypeParameterInstantiation())
+                    this.Arguments(params)
+                }
+            }
+        ])
+
+        // 后缀操作符 (0个或多个)
+        this.Many(() => this.Or([
+            // [ Expression[+In, ?Yield, ?Await] ]
+            {
+                alt: () => {
+                    this.tokenConsumer.LBracket()
+                    this.Expression({ ...params, In: true })
+                    this.tokenConsumer.RBracket()
+                }
+            },
+            // . IdentifierName
+            {
+                alt: () => {
+                    this.tokenConsumer.Dot()
+                    this.IdentifierName()
+                }
+            },
+            // TemplateLiteral[?Yield, ?Await, +Tagged]
+            { alt: () => this.TemplateLiteral({ ...params, Tagged: true }) },
+            // . PrivateIdentifier
+            {
+                alt: () => {
+                    this.tokenConsumer.Dot()
+                    this.tokenConsumer.PrivateIdentifier()
+                }
+            },
+            // [TypeScript] ! (非空断言)
+            { alt: () => this.tokenConsumer.LogicalNot() }
+        ]))
+    }
+
+    /**
      * [TypeScript] 重写 UnaryExpression 以支持尖括号类型断言
      *
      * UnaryExpression[Yield, Await] :
@@ -2391,6 +2457,25 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
     @SubhutiRule
     TSModuleBlock() {
         this.Many(() => this.ModuleItem())
+    }
+
+    /**
+     * [TypeScript] 重写 CoverCallExpressionAndAsyncArrowHead 以支持泛型调用
+     *
+     * CoverCallExpressionAndAsyncArrowHead[Yield, Await] :
+     *     MemberExpression[?Yield, ?Await] Arguments[?Yield, ?Await]
+     *
+     * [TypeScript 扩展]:
+     *     MemberExpression[?Yield, ?Await] TSTypeParameterInstantiation_opt Arguments[?Yield, ?Await]
+     *
+     * 支持: foo<A, B>(), obj.method<T>()
+     */
+    @SubhutiRule
+    override CoverCallExpressionAndAsyncArrowHead(params: ExpressionParams = {}) {
+        this.MemberExpression(params)
+        // [TypeScript] 可选的类型参数实例化 <T, U>
+        this.Option(() => this.TSTypeParameterInstantiation())
+        this.Arguments(params)
     }
 
     /**

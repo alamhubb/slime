@@ -485,10 +485,11 @@ export function getParseMode(testDir: string, filePath: string): 'module' | 'scr
     // 5. 代码内容检查
     try {
         const code = fs.readFileSync(filePath, 'utf-8')
-        if (/^\s*(import|export)\s/m.test(code)) return 'module'
+        // 匹配 import/export 语句（包括 export default）
+        if (/^\s*(import\s|export\s|export\{)/m.test(code)) return 'module'
     } catch {
     }
-    return 'script'
+    return 'module'  // 默认使用 module 模式（.ts 文件通常是 module）
 }
 
 /** 检查测试是否应该跳过 */
