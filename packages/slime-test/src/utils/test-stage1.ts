@@ -10,12 +10,12 @@
 import {runTests, testStage1} from './test-framework.ts'
 import SlimeJavascriptParser from "../../../slime-parser/src/deprecated/SlimeJavascriptParser.ts";
 
-// 运行测试 - 使用 SlimeParser (TypeScript)
+// 运行测试
 runTests(testStage1, {
-    stageName: '阶段1: CST生成测试 (SlimeParser)',
+    stageName: '阶段1: CST生成测试',
     description: '词法分析 → 语法分析',
     startFrom: 1,
     stopOnFail: true,
-    // ParserClass: SlimeJavascriptParser  // 注释掉使用默认 SlimeParser
+    // ParserClass: SlimeJavascriptParser
 })
 

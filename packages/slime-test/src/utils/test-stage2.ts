@@ -10,14 +10,12 @@
  */
 import {runTests, testStage2} from "./test-framework.ts";
 import SlimeJavascriptParser from "../../../slime-parser/src/deprecated/SlimeJavascriptParser.ts";
-import { SlimeJavascriptCstToAst } from "slime-parser";
 
-// 运行测试 - 使用 SlimeParser (TypeScript)
+// 运行测试
 runTests(testStage2, {
-    stageName: '阶段2: AST生成测试 (SlimeParser)',
+    stageName: '阶段2: AST生成测试',
     description: 'CST → AST 转换，验证 AST 结构完整性',
     startFrom: 1,
     stopOnFail: true,
-    // ParserClass: SlimeJavascriptParser,  // 注释掉使用默认 SlimeParser
-    // CstToAstClass: SlimeJavascriptCstToAst
+    // ParserClass: SlimeJavascriptParser
 })
