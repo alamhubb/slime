@@ -1,6 +1,6 @@
 {
   "name": "slime-test",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -24,16 +24,16 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "slime-ast": "^0.2.5",
+    "slime-ast": "^0.2.6",
     "slime-babel-test": "^0.0.3",
-    "slime-generator": "^0.2.5",
-    "slime-parser": "^0.2.5",
-    "slime-token": "^0.2.5",
+    "slime-generator": "^0.2.6",
+    "slime-parser": "^0.2.6",
+    "slime-token": "^0.2.6",
     "subhuti": "^0.2.6"
   },
   "devDependencies": {
     "tsdown": "0.17.0-beta.6",
     "typescript": "^5.8.3"
   },
-  "gitHead": "0c2ed77a5cd0c55acd75c27b4139b74e85aacb7c"
+  "gitHead": "fe097b71b4e3829e0106a7fc67c01e01c639ae52"
 }

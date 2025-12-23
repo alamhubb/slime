@@ -1,6 +1,6 @@
 {
   "name": "slime-ast",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -25,12 +25,12 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
-    "slime-token": "^0.2.5",
+    "slime-token": "^0.2.6",
     "subhuti": "^0.2.6"
   },
   "devDependencies": {
     "@types/estree": "1.0.6",
     "tsdown": "0.17.0-beta.6"
   },
-  "gitHead": "0c2ed77a5cd0c55acd75c27b4139b74e85aacb7c"
+  "gitHead": "fe097b71b4e3829e0106a7fc67c01e01c639ae52"
 }
