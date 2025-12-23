@@ -787,6 +787,8 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Eq, null)
         this.addSpacing()
         this.generatorTSType(node.typeAnnotation)
+        // 声明语句末尾需要换行
+        this.addNewLine()
     }
 
     /**
@@ -816,6 +818,8 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
         }
         this.addSpacing()
         this.generatorTSTypeLiteral(node.body)
+        // 声明语句末尾需要换行
+        this.addNewLine()
     }
 
     /**
