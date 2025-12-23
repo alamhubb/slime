@@ -119,7 +119,7 @@
   - [ ]* 8.4 编写属性测试: Interface Declaration Completeness
     - **Property 9: Interface Declaration Completeness**
     - **Validates: Requirements 11.1-11.5**
-  - [ ]* 8.5 编写属性测试: Type Alias Declaration Equivalence
+  - [x]* 8.5 编写属性测试: Type Alias Declaration Equivalence
     - **Property 10: Type Alias Declaration Equivalence**
     - **Validates: Requirements 12.1-12.4**
 
@@ -127,22 +127,25 @@
   - 确保所有测试通过，如有问题请询问用户
   - ✅ 测试通过: 1732/3202 (0 失败, 1470 跳过)
 
-- [ ] 10. Phase 5: 泛型
-  - [ ] 10.1 实现 TSTypeParameterDeclaration 解析
+- [x] 10. Phase 5: 泛型
+  - [x] 10.1 实现 TSTypeParameterDeclaration 解析
     - 支持 `<T>`, `<T extends Base>`, `<T = Default>`, `<T extends Base = Default>`
     - _Requirements: 14.1-14.6_
-  - [ ] 10.2 实现 TSTypeParameterInstantiation 解析
+  - [x] 10.2 实现 TSTypeParameterInstantiation 解析
     - 支持 `foo<number>()`, `new Box<string>()`
     - _Requirements: 15.1-15.3_
-  - [ ] 10.3 更新函数和类解析以支持泛型
+  - [x] 10.3 更新函数和类解析以支持泛型
     - 在 FunctionDeclaration, ClassDeclaration 中添加泛型支持
+    - 同时更新了 FunctionExpression, GeneratorDeclaration, GeneratorExpression, AsyncFunctionDeclaration, AsyncFunctionExpression, AsyncGeneratorDeclaration, AsyncGeneratorExpression, ClassExpression
+    - 创建了 TSClassTail, TSClassExtends, TSClassImplements 规则支持类继承的类型参数
     - _Requirements: 14.1-14.2_
   - [ ]* 10.4 编写属性测试: Generic Type Parameter Constraints and Defaults
     - **Property 12: Generic Type Parameter Constraints and Defaults**
     - **Validates: Requirements 14.1-14.6**
 
-- [ ] 11. Checkpoint - Phase 5 验证
+- [x] 11. Checkpoint - Phase 5 验证
   - 确保所有测试通过，如有问题请询问用户
+  - ✅ 测试通过: 14/14 TypeScript 测试通过
 
 - [ ] 12. Phase 6: 类型操作符
   - [ ] 12.1 实现 TSTypeQuery 解析

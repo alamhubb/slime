@@ -48,7 +48,7 @@ import type {SubhutiSourceLocation} from "subhuti";
 import {SubhutiCreateToken} from "subhuti";
 import {SubhutiMatchToken} from "subhuti";
 import {SlimeJavascriptTokensObj} from "slime-parser";
-import {SlimeJavascriptTokenType} from "slime-token";
+import {SlimeJavascriptContextualKeywordTokenTypes, SlimeJavascriptTokenType} from "slime-token";
 import {SlimeGeneratorUtil} from "../SlimeGenerator.ts";
 
 // 创建软关键字的 token 对象（用于代码生成）
@@ -59,7 +59,7 @@ const createSoftKeywordToken = (name: string, value: string): SubhutiCreateToken
 } as SubhutiCreateToken);
 
 // 扩展 es2025TokensObj，添加软关键字和别名
-const SlimeJavascriptGeneratorTokensObj = {
+export const SlimeJavascriptGeneratorTokensObj = {
     ...SlimeJavascriptTokensObj,
     // 软关键字（在 ES2025 中作为 IdentifierName 处理）
     OfTok: createSoftKeywordToken('OfTok', 'of'),
@@ -73,13 +73,13 @@ const SlimeJavascriptGeneratorTokensObj = {
     Eq: SlimeJavascriptTokensObj.Assign,  // = 等号
 };
 
-const letTok = createSoftKeywordToken('Let', 'let')
+const letTok = createSoftKeywordToken('Let', SlimeJavascriptContextualKeywordTokenTypes.Let)
 
 // 关键字到 Token 的映射（用于 VariableDeclaration 的 kind）
 // 注意：'let' 是软关键字，需要手动创建 token
 const SlimeJavascriptGeneratorTokenMapObj: Record<string, SubhutiCreateToken> = {
     [SlimeJavascriptTokensObj.ConstTok.value]: SlimeJavascriptTokensObj.ConstTok,
-    [letTok.value]: letTok,
+    [SlimeJavascriptContextualKeywordTokenTypes.Let]: letTok,
     [SlimeJavascriptTokensObj.VarTok.value]: SlimeJavascriptTokensObj.VarTok,
 };
 

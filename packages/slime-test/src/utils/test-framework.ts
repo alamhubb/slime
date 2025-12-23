@@ -360,20 +360,25 @@ export interface SkipResult {
 // 工具函数
 // ============================================
 
-/** 递归获取目录下所有 .js 文件 */
-export function getAllJsFiles(dir: string, baseDir: string = dir): string[] {
+/** 递归获取目录下所有指定扩展名的文件 */
+export function getAllFiles(dir: string, baseDir: string = dir, fileExtension: string = '.js'): string[] {
     const results: string[] = []
     const entries = fs.readdirSync(dir, {withFileTypes: true})
     for (const entry of entries) {
         const fullPath = path.join(dir, entry.name)
         if (entry.isDirectory()) {
             if (skipDirs.includes(entry.name)) continue
-            results.push(...getAllJsFiles(fullPath, baseDir))
-        } else if (entry.isFile() && entry.name.endsWith('.js')) {
+            results.push(...getAllFiles(fullPath, baseDir, fileExtension))
+        } else if (entry.isFile() && entry.name.endsWith(fileExtension)) {
             results.push(path.relative(baseDir, fullPath))
         }
     }
     return results
+}
+
+/** 递归获取目录下所有 .js 文件 (兼容旧代码) */
+export function getAllJsFiles(dir: string, baseDir: string = dir): string[] {
+    return getAllFiles(dir, baseDir, '.js')
 }
 
 /** 检查测试是否需要非标准插件 */
@@ -518,7 +523,8 @@ export async function runTests(
         stopOnFail: stopOnFailConfig,
         useSubprocess: useSubprocessConfig,
         ParserClass = DefaultParserClass,
-        CstToAstClass = DefaultCstToAstClass
+        CstToAstClass = DefaultCstToAstClass,
+        fileExtension = '.js'
     } = options
 
     const args = process.argv.slice(2)
@@ -529,7 +535,7 @@ export async function runTests(
     const stopOnFail = args.includes('--stop-on-fail') || args.includes('-s') || (stopOnFailConfig ?? DEFAULT_STOP_ON_FAIL)
     const useSubprocess = args.includes('--subprocess') || args.includes('-p') || (useSubprocessConfig ?? DEFAULT_USE_SUBPROCESS)
 
-    const files = getAllJsFiles(casesDir).sort()
+    const files = getAllFiles(casesDir, casesDir, fileExtension).sort()
 
     console.log('='.repeat(60))
     if (startIndex > 0) console.log(`📍 从 ${startIndex + 1} 开始测试 (跳过 1~${startIndex})`)
@@ -546,7 +552,7 @@ export async function runTests(
 
     for (let i = startIndex; i < files.length; i++) {
         const file = files[i]
-        const testName = file.replace('.js', '')
+        const testName = file.replace(fileExtension, '')
         const filePath = path.join(casesDir, file)
         const testDir = path.dirname(filePath)
 

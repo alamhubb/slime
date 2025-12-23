@@ -99,12 +99,63 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
             return this.createTSConstructorTypeAst(child)
         }
 
-        // 联合/交叉类型
+        // 条件类型（包含联合/交叉类型）
+        if (name === 'TSConditionalType') {
+            return this.createTSConditionalTypeAst(child)
+        }
+
+        // 联合/交叉类型（兼容旧代码）
         if (name === 'TSUnionOrIntersectionType') {
             return this.createTSUnionOrIntersectionTypeAst(child)
         }
 
         throw new Error(`Unknown TSType child: ${name}`)
+    }
+
+    /**
+     * [TypeScript] 转换 TSConditionalType CST 为 AST
+     * CST: TSConditionalType -> TSUnionOrIntersectionType (extends TSUnionOrIntersectionType ? TSType : TSType)?
+     */
+    createTSConditionalTypeAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+        
+        // 第一个子节点是 checkType (TSUnionOrIntersectionType)
+        const checkTypeCst = children.find(c => c.name === 'TSUnionOrIntersectionType')
+        if (!checkTypeCst) {
+            throw new Error('TSConditionalType missing checkType')
+        }
+        const checkType = this.createTSUnionOrIntersectionTypeAst(checkTypeCst)
+
+        // 检查是否有条件部分 (extends ... ? ... : ...)
+        const extendsToken = children.find(c => c.name === 'Extends')
+        if (!extendsToken) {
+            // 没有条件部分，直接返回 checkType
+            return checkType
+        }
+
+        // 找到所有 TSUnionOrIntersectionType，第二个是 extendsType
+        const unionTypes = children.filter(c => c.name === 'TSUnionOrIntersectionType')
+        if (unionTypes.length < 2) {
+            throw new Error('TSConditionalType missing extendsType')
+        }
+        const extendsType = this.createTSUnionOrIntersectionTypeAst(unionTypes[1])
+
+        // 找到所有 TSType，第一个是 trueType，第二个是 falseType
+        const tsTypes = children.filter(c => c.name === 'TSType')
+        if (tsTypes.length < 2) {
+            throw new Error('TSConditionalType missing trueType or falseType')
+        }
+        const trueType = this.createTSTypeAst(tsTypes[0])
+        const falseType = this.createTSTypeAst(tsTypes[1])
+
+        return {
+            type: SlimeAstTypeName.TSConditionalType,
+            checkType,
+            extendsType,
+            trueType,
+            falseType,
+            loc: cst.loc,
+        }
     }
 
 
@@ -166,21 +217,26 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
 
     /**
      * [TypeScript] 转换 TSTypeOperand CST 为 AST
-     * CST: TSTypeOperand -> TSPrimaryType ([] | [TSType])*
+     * CST: TSTypeOperand -> TSPrefixTypeOrPrimary ([] | [TSType])*
      */
     createTSTypeOperandAst(cst: SubhutiCst): any {
         const children = cst.children || []
         
-        // 第一个子节点是 TSPrimaryType
-        const primaryCst = children.find(c => c.name === 'TSPrimaryType')
-        if (!primaryCst) {
-            throw new Error('TSTypeOperand: TSPrimaryType not found')
+        // 第一个子节点是 TSPrefixTypeOrPrimary
+        const prefixOrPrimaryCst = children.find(c => c.name === 'TSPrefixTypeOrPrimary')
+        if (!prefixOrPrimaryCst) {
+            // 兼容旧的 TSPrimaryType
+            const primaryCst = children.find(c => c.name === 'TSPrimaryType')
+            if (!primaryCst) {
+                throw new Error('TSTypeOperand: TSPrefixTypeOrPrimary or TSPrimaryType not found')
+            }
+            return this.createTSPrimaryTypeAst(primaryCst)
         }
         
-        let result = this.createTSPrimaryTypeAst(primaryCst)
+        let result = this.createTSPrefixTypeOrPrimaryAst(prefixOrPrimaryCst)
         
         // 检查是否有数组后缀 []
-        let i = children.indexOf(primaryCst) + 1
+        let i = children.indexOf(prefixOrPrimaryCst) + 1
         while (i < children.length) {
             const child = children[i]
             if (child.name === 'LBracket' || child.value === '[') {
@@ -214,6 +270,151 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
         return result
     }
 
+    /**
+     * [TypeScript] 转换 TSPrefixTypeOrPrimary CST 为 AST
+     * CST: TSPrefixTypeOrPrimary -> TSTypeQuery | TSTypeOperator | TSInferType | TSPrimaryType
+     */
+    createTSPrefixTypeOrPrimaryAst(cst: SubhutiCst): any {
+        const child = cst.children?.[0]
+        if (!child) {
+            throw new Error('TSPrefixTypeOrPrimary has no children')
+        }
+
+        const name = child.name
+
+        // 类型查询 typeof x
+        if (name === 'TSTypeQuery') {
+            return this.createTSTypeQueryAst(child)
+        }
+
+        // 类型操作符 keyof, readonly, unique
+        if (name === 'TSTypeOperator') {
+            return this.createTSTypeOperatorAst(child)
+        }
+
+        // 推断类型 infer R
+        if (name === 'TSInferType') {
+            return this.createTSInferTypeAst(child)
+        }
+
+        // 基础类型
+        if (name === 'TSPrimaryType') {
+            return this.createTSPrimaryTypeAst(child)
+        }
+
+        throw new Error(`Unknown TSPrefixTypeOrPrimary child: ${name}`)
+    }
+
+    /**
+     * [TypeScript] 转换 TSTypeQuery CST 为 AST (typeof x)
+     */
+    createTSTypeQueryAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+        
+        // 找到 TSTypeName
+        const typeNameCst = children.find(c => c.name === 'TSTypeName')
+        if (!typeNameCst) {
+            throw new Error('TSTypeQuery: TSTypeName not found')
+        }
+        
+        const exprName = this.createTSTypeNameAst(typeNameCst)
+        
+        // 可选的类型参数
+        const typeParamsCst = children.find(c => c.name === 'TSTypeParameterInstantiation')
+        const typeParameters = typeParamsCst ? this.createTSTypeParameterInstantiationAst(typeParamsCst) : undefined
+
+        return {
+            type: SlimeAstTypeName.TSTypeQuery,
+            exprName,
+            typeParameters,
+            loc: cst.loc,
+        }
+    }
+
+    /**
+     * [TypeScript] 转换 TSTypeOperator CST 为 AST (keyof, readonly, unique)
+     */
+    createTSTypeOperatorAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+        
+        // 确定操作符类型
+        let operator: 'keyof' | 'readonly' | 'unique'
+        let typeAnnotation: any
+
+        // 检查第一个子节点来确定操作符
+        const firstChild = children[0]
+        if (!firstChild) {
+            throw new Error('TSTypeOperator has no children')
+        }
+
+        if (firstChild.value === 'keyof' || firstChild.name?.includes('Keyof')) {
+            operator = 'keyof'
+            const operandCst = children.find(c => c.name === 'TSTypeOperand')
+            if (!operandCst) {
+                throw new Error('TSTypeOperator keyof: TSTypeOperand not found')
+            }
+            typeAnnotation = this.createTSTypeOperandAst(operandCst)
+        } else if (firstChild.value === 'readonly' || firstChild.name?.includes('Readonly')) {
+            operator = 'readonly'
+            const operandCst = children.find(c => c.name === 'TSTypeOperand')
+            if (!operandCst) {
+                throw new Error('TSTypeOperator readonly: TSTypeOperand not found')
+            }
+            typeAnnotation = this.createTSTypeOperandAst(operandCst)
+        } else if (firstChild.value === 'unique' || firstChild.name?.includes('Unique')) {
+            operator = 'unique'
+            // unique symbol - 找到 TSSymbolKeyword
+            const symbolCst = children.find(c => c.name === 'TSSymbolKeyword')
+            if (!symbolCst) {
+                throw new Error('TSTypeOperator unique: TSSymbolKeyword not found')
+            }
+            typeAnnotation = this.createTSKeywordTypeAst(symbolCst, SlimeAstTypeName.TSSymbolKeyword)
+        } else {
+            throw new Error(`Unknown TSTypeOperator: ${firstChild.value || firstChild.name}`)
+        }
+
+        return {
+            type: SlimeAstTypeName.TSTypeOperator,
+            operator,
+            typeAnnotation,
+            loc: cst.loc,
+        }
+    }
+
+    /**
+     * [TypeScript] 转换 TSInferType CST 为 AST (infer R)
+     */
+    createTSInferTypeAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+        
+        // 找到标识符
+        const identifierCst = children.find(c => c.name === 'Identifier')
+        if (!identifierCst) {
+            throw new Error('TSInferType: Identifier not found')
+        }
+        
+        const typeParameter: any = {
+            type: SlimeAstTypeName.TSTypeParameter,
+            name: this.createIdentifierAst(identifierCst),
+            loc: identifierCst.loc,
+        }
+
+        // 可选的约束 extends TSType
+        const extendsCst = children.find(c => c.name === 'Extends')
+        if (extendsCst) {
+            const constraintCst = children.find(c => c.name === 'TSType')
+            if (constraintCst) {
+                typeParameter.constraint = this.createTSTypeAst(constraintCst)
+            }
+        }
+
+        return {
+            type: SlimeAstTypeName.TSInferType,
+            typeParameter,
+            loc: cst.loc,
+        }
+    }
+
 
     /**
      * [TypeScript] 转换 TSPrimaryType CST 为 AST
@@ -225,6 +426,9 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
         }
 
         const name = child.name
+
+        // 映射类型
+        if (name === 'TSMappedType') return this.createTSMappedTypeAst(child)
 
         // TSKeywordType 包装规则
         if (name === 'TSKeywordType') {
@@ -486,7 +690,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
         const elementTypes: any[] = []
 
         for (const child of children) {
-            if (child.name === 'TSTupleElement') {
+            if (child.name === 'TSTupleElement' || child.name === 'TSTupleElementType') {
                 elementTypes.push(this.createTSTupleElementAst(child))
             }
         }
@@ -504,7 +708,19 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
     createTSTupleElementAst(cst: SubhutiCst): any {
         const children = cst.children || []
         
-        // 检查是否是剩余元素
+        // 检查是否是剩余元素 TSRestType
+        const restCst = children.find(c => c.name === 'TSRestType')
+        if (restCst) {
+            return this.createTSRestTypeAst(restCst)
+        }
+
+        // 检查是否是命名元组 TSNamedTupleMember
+        const namedCst = children.find(c => c.name === 'TSNamedTupleMember')
+        if (namedCst) {
+            return this.createTSNamedTupleMemberAst(namedCst)
+        }
+
+        // 检查是否有 Ellipsis（旧格式）
         const hasEllipsis = children.some(c => c.name === 'Ellipsis' || c.value === '...')
         if (hasEllipsis) {
             const typeCst = children.find(c => c.name === 'TSType')
@@ -515,13 +731,7 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
             }
         }
 
-        // 检查是否是命名元组
-        const namedCst = children.find(c => c.name === 'TSNamedTupleMember')
-        if (namedCst) {
-            return this.createTSNamedTupleMemberAst(namedCst)
-        }
-
-        // 普通元素
+        // 普通元素 - 直接是 TSType
         const typeCst = children.find(c => c.name === 'TSType')
         const hasQuestion = children.some(c => c.name === 'Question' || c.value === '?')
 
@@ -537,7 +747,34 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
             return typeAst
         }
 
-        throw new Error('TSTupleElement: no type found')
+        // 如果没有找到 TSType，可能子节点本身就是类型
+        // 尝试直接处理第一个子节点
+        const firstChild = children[0]
+        if (firstChild && firstChild.name) {
+            // 可能是 TSConditionalType 或其他类型
+            if (firstChild.name === 'TSConditionalType') {
+                return this.createTSConditionalTypeAst(firstChild)
+            }
+            if (firstChild.name === 'TSUnionOrIntersectionType') {
+                return this.createTSUnionOrIntersectionTypeAst(firstChild)
+            }
+        }
+
+        throw new Error(`TSTupleElement: no type found, children: ${children.map(c => c.name).join(', ')}`)
+    }
+
+    /**
+     * [TypeScript] 转换 TSRestType CST 为 AST
+     */
+    createTSRestTypeAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+        const typeCst = children.find(c => c.name === 'TSType')
+        
+        return {
+            type: SlimeAstTypeName.TSRestType,
+            typeAnnotation: typeCst ? this.createTSTypeAst(typeCst) : undefined,
+            loc: cst.loc,
+        }
     }
 
     /**
@@ -574,6 +811,92 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
         }
     }
 
+
+    /**
+     * [TypeScript] 转换 TSMappedType CST 为 AST
+     * { [K in keyof T]: T[K] }
+     */
+    createTSMappedTypeAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+        
+        let readonly: '+' | '-' | true | undefined = undefined
+        let optional: '+' | '-' | true | undefined = undefined
+        let typeParameter: any = undefined
+        let nameType: any = undefined
+        let typeAnnotation: any = undefined
+
+        // 解析 readonly 修饰符
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i]
+            if (child.value === '+' && children[i + 1]?.value === 'readonly') {
+                readonly = '+'
+                i++
+            } else if (child.value === '-' && children[i + 1]?.value === 'readonly') {
+                readonly = '-'
+                i++
+            } else if (child.value === 'readonly') {
+                readonly = true
+            }
+        }
+
+        // 找到类型参数 [K in T]
+        const identifierCst = children.find(c => c.name === 'Identifier')
+        if (identifierCst) {
+            typeParameter = {
+                type: SlimeAstTypeName.TSTypeParameter,
+                name: this.createIdentifierAst(identifierCst),
+                loc: identifierCst.loc,
+            }
+            
+            // 找到 in 后面的约束类型
+            const tsTypes = children.filter(c => c.name === 'TSType')
+            if (tsTypes.length > 0) {
+                typeParameter.constraint = this.createTSTypeAst(tsTypes[0])
+            }
+            
+            // 找到 as 后面的 nameType
+            const asIndex = children.findIndex(c => c.value === 'as')
+            if (asIndex !== -1 && tsTypes.length > 1) {
+                nameType = this.createTSTypeAst(tsTypes[1])
+            }
+        }
+
+        // 解析 optional 修饰符 (?, +?, -?)
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i]
+            // 跳过 LBracket 内的 ?
+            if (child.value === ']') {
+                // 检查 ] 后面的 ?
+                const next = children[i + 1]
+                if (next?.value === '?') {
+                    optional = true
+                } else if (next?.value === '+' && children[i + 2]?.value === '?') {
+                    optional = '+'
+                } else if (next?.value === '-' && children[i + 2]?.value === '?') {
+                    optional = '-'
+                }
+            }
+        }
+
+        // 找到值类型（冒号后面的 TSType）
+        const colonIndex = children.findIndex(c => c.value === ':')
+        if (colonIndex !== -1) {
+            const tsTypesAfterColon = children.slice(colonIndex + 1).filter(c => c.name === 'TSType')
+            if (tsTypesAfterColon.length > 0) {
+                typeAnnotation = this.createTSTypeAst(tsTypesAfterColon[0])
+            }
+        }
+
+        return {
+            type: SlimeAstTypeName.TSMappedType,
+            typeParameter,
+            nameType,
+            typeAnnotation,
+            readonly,
+            optional,
+            loc: cst.loc,
+        }
+    }
 
     /**
      * [TypeScript] 转换 TSTypeLiteral CST 为 AST

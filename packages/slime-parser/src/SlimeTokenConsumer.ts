@@ -170,6 +170,11 @@ export default class SlimeTokenConsumer extends SlimeJavascriptTokenConsumer {
     // 类型断言和谓词
     // ============================================
 
+    /** 消费 'as' 关键字（类型断言） */
+    As() {
+        return this.consumeIdentifierValue(SlimeTypescriptContextualKeywordTokenTypes.As)
+    }
+
     /** 消费 'satisfies' 关键字 */
     TSSatisfies() {
         return this.consumeIdentifierValue(SlimeTypescriptContextualKeywordTokenTypes.Satisfies)

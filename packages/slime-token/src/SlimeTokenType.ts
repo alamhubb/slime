@@ -62,6 +62,7 @@ export const SlimeTypescriptContextualKeywordTokenTypes = {
     // ============================================
     // 类型断言和谓词（软关键字）
     // ============================================
+    As: 'as',               // 类型断言 `x as string`
     Satisfies: 'satisfies',
     Is: 'is',               // 类型谓词 `x is string`
     Asserts: 'asserts',     // 断言函数 `asserts x is string`
