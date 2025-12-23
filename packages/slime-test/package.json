@@ -36,15 +36,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "slime-ast": "^0.2.4",
+    "slime-ast": "^0.2.5",
     "slime-babel-test": "^0.0.3",
-    "slime-generator": "^0.2.4",
-    "slime-parser": "^0.2.4",
-    "slime-token": "^0.2.4",
+    "slime-generator": "^0.2.5",
+    "slime-parser": "^0.2.5",
+    "slime-token": "^0.2.5",
     "subhuti": "^0.2.6"
   },
   "devDependencies": {
     "tsdown": "0.17.0-beta.6",
     "typescript": "^5.8.3"
-  }
+  },
+  "gitHead": "0c2ed77a5cd0c55acd75c27b4139b74e85aacb7c"
 }
