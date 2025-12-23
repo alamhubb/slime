@@ -113,8 +113,53 @@ slime/
 │   ├── slime-parser/       # CST parser and CST→AST conversion
 │   ├── slime-generator/    # AST→Code generator
 │   ├── slime-token/        # Token definitions
-│   └── slime-test/         # Test utilities
+│   ├── slime-test/         # Test utilities
+│   └── subhuti/            # PEG Parser Generator framework
 └── README.md
+```
+
+## Package Management
+
+This project uses **Lerna** to manage multiple packages in a monorepo structure.
+
+### Conditional Exports
+
+Each package uses conditional exports in `package.json` to support both development and production:
+
+```json
+{
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  }
+}
+```
+
+- **Development**: When using `tsx` to run TypeScript directly, it resolves to `./src/index.ts`
+- **Production**: After publishing to npm, users get the compiled `./dist/index.js`
+
+### Development Workflow
+
+```bash
+# Run tests directly with tsx (no build needed)
+npx tsx packages/slime-test/src/utils/test-stage4.ts
+
+# Build a specific package
+npm run build --workspace=packages/slime-parser
+
+# Build all packages
+lerna run build
+```
+
+### Publishing
+
+```bash
+# Build and publish (prepublishOnly runs build automatically)
+lerna publish
 ```
 
 ## Contributing
@@ -133,4 +178,8 @@ npx tsx packages/slime-test/src/utils/test-stage4.ts
 
 ## License
 
-See [LICENSE](./LICENSE) file.
+MIT License - See [LICENSE](./LICENSE) file.
+
+---
+
+[中文文档](./README.zh-CN.md)

@@ -950,8 +950,96 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
             return this.generatorTSEnumDeclaration(node)
         }
 
+        // TypeScript Phase 2: 类型断言和表达式扩展
+        if (type === 'TSAsExpression') {
+            return this.generatorTSAsExpression(node)
+        }
+        if (type === 'TSTypeAssertion') {
+            return this.generatorTSTypeAssertionExpr(node)
+        }
+        if (type === 'TSNonNullExpression') {
+            return this.generatorTSNonNullExpression(node)
+        }
+        if (type === 'TSSatisfiesExpression') {
+            return this.generatorTSSatisfiesExpression(node)
+        }
+
         // 调用父类方法处理其他节点
         super.generatorNode(node)
+    }
+
+    // ============================================
+    // TypeScript Phase 2: 类型断言和表达式扩展
+    // ============================================
+
+    /**
+     * [TypeScript] 生成 as 类型断言
+     * expression as Type
+     */
+    generatorTSAsExpression(node: any) {
+        this.generatorNode(node.expression)
+        this.addSpacing()
+        this.generatorTSKeyword(node, 'as')
+        this.addSpacing()
+        this.generatorTSType(node.typeAnnotation)
+    }
+
+    /**
+     * [TypeScript] 生成尖括号类型断言
+     * <Type>expression
+     */
+    generatorTSTypeAssertionExpr(node: any) {
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Less, null)
+        this.generatorTSType(node.typeAnnotation)
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Greater, null)
+        this.generatorNode(node.expression)
+    }
+
+    /**
+     * [TypeScript] 生成非空断言
+     * expression!
+     */
+    generatorTSNonNullExpression(node: any) {
+        this.generatorNode(node.expression)
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.LogicalNot, null)
+    }
+
+    /**
+     * [TypeScript] 生成 satisfies 表达式
+     * expression satisfies Type
+     */
+    generatorTSSatisfiesExpression(node: any) {
+        this.generatorNode(node.expression)
+        this.addSpacing()
+        this.generatorTSKeyword(node, 'satisfies')
+        this.addSpacing()
+        this.generatorTSType(node.typeAnnotation)
+    }
+
+    /**
+     * [TypeScript] 生成类型谓词
+     * x is Type / asserts x is Type / asserts x
+     */
+    generatorTSTypePredicate(node: any) {
+        if (node.asserts) {
+            this.generatorTSKeyword(node, 'asserts')
+            this.addSpacing()
+        }
+        
+        if (node.parameterName) {
+            if (node.parameterName.type === 'TSThisType') {
+                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ThisTok, null)
+            } else {
+                this.generatorIdentifier(node.parameterName)
+            }
+        }
+        
+        if (node.typeAnnotation) {
+            this.addSpacing()
+            this.generatorTSKeyword(node, 'is')
+            this.addSpacing()
+            this.generatorTSType(node.typeAnnotation)
+        }
     }
 }
 

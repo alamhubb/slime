@@ -1,3 +1,15 @@
+/**
+ * ⚠️ 警告：请勿直接修改此文件！
+ * 
+ * 此文件属于 deprecated 包，包含 JavaScript ES2025 的基础实现。
+ * 
+ * 如需添加 TypeScript 支持或扩展功能：
+ * 1. 在 SlimeCstToAstUtil.ts 中重写方法
+ * 2. 在 _setupMethodInterception() 中添加方法拦截
+ * 3. 或在 cstToAst/ 目录下的对应文件中实现
+ * 
+ * 参考：packages/slime-parser/src/SlimeCstToAstUtil.ts
+ */
 import {
     type SlimeJavascriptAssignmentExpression,
     SlimeJavascriptBlockStatement,

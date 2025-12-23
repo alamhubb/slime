@@ -1878,4 +1878,254 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
         this.AsyncGeneratorBody()
         this.tokenConsumer.RBrace()
     }
+
+    // ============================================
+    // TypeScript: Phase 2 - 类型断言和表达式扩展
+    // ============================================
+
+    /**
+     * [TypeScript] 重写 UpdateExpression 以支持 as/satisfies/非空断言
+     *
+     * UpdateExpression[Yield, Await] :
+     *     LeftHandSideExpression[?Yield, ?Await]
+     *     LeftHandSideExpression[?Yield, ?Await] [no LineTerminator here] ++
+     *     LeftHandSideExpression[?Yield, ?Await] [no LineTerminator here] --
+     *     ++ UnaryExpression[?Yield, ?Await]
+     *     -- UnaryExpression[?Yield, ?Await]
+     *
+     * [TypeScript 扩展]:
+     *     UpdateExpression as TSType
+     *     UpdateExpression satisfies TSType
+     *     UpdateExpression !
+     */
+    @SubhutiRule
+    override UpdateExpression(params: ExpressionParams = {}) {
+        this.Or([
+            // LeftHandSideExpression [no LineTerminator here] ++
+            {
+                alt: () => {
+                    this.LeftHandSideExpression(params)
+                    this.assertNoLineBreak()
+                    this.tokenConsumer.Increment()
+                }
+            },
+            // LeftHandSideExpression [no LineTerminator here] --
+            {
+                alt: () => {
+                    this.LeftHandSideExpression(params)
+                    this.assertNoLineBreak()
+                    this.tokenConsumer.Decrement()
+                }
+            },
+            // ++ UnaryExpression
+            {
+                alt: () => {
+                    this.tokenConsumer.Increment()
+                    this.UnaryExpression(params)
+                }
+            },
+            // -- UnaryExpression
+            {
+                alt: () => {
+                    this.tokenConsumer.Decrement()
+                    this.UnaryExpression(params)
+                }
+            },
+            // [TypeScript] LeftHandSideExpression as TSType
+            {
+                alt: () => {
+                    this.LeftHandSideExpression(params)
+                    this.TSAsExpressionTail()
+                }
+            },
+            // [TypeScript] LeftHandSideExpression satisfies TSType
+            {
+                alt: () => {
+                    this.LeftHandSideExpression(params)
+                    this.TSSatisfiesExpressionTail()
+                }
+            },
+            // [TypeScript] LeftHandSideExpression !
+            {
+                alt: () => {
+                    this.LeftHandSideExpression(params)
+                    this.TSNonNullExpressionTail()
+                }
+            },
+            // LeftHandSideExpression (基础情况)
+            { alt: () => this.LeftHandSideExpression(params) }
+        ])
+    }
+
+    /**
+     * [TypeScript] as 表达式尾部
+     * TSAsExpressionTail : as TSType
+     */
+    @SubhutiRule
+    TSAsExpressionTail() {
+        this.tokenConsumer.As()
+        this.TSType()
+    }
+
+    /**
+     * [TypeScript] satisfies 表达式尾部
+     * TSSatisfiesExpressionTail : satisfies TSType
+     */
+    @SubhutiRule
+    TSSatisfiesExpressionTail() {
+        this.tokenConsumer.TSSatisfies()
+        this.TSType()
+    }
+
+    /**
+     * [TypeScript] 非空断言尾部
+     * TSNonNullExpressionTail : !
+     */
+    @SubhutiRule
+    TSNonNullExpressionTail() {
+        this.tokenConsumer.LogicalNot()
+    }
+
+    /**
+     * [TypeScript] 重写 UnaryExpression 以支持尖括号类型断言
+     *
+     * UnaryExpression[Yield, Await] :
+     *     UpdateExpression[?Yield, ?Await]
+     *     delete UnaryExpression[?Yield, ?Await]
+     *     void UnaryExpression[?Yield, ?Await]
+     *     typeof UnaryExpression[?Yield, ?Await]
+     *     + UnaryExpression[?Yield, ?Await]
+     *     - UnaryExpression[?Yield, ?Await]
+     *     ~ UnaryExpression[?Yield, ?Await]
+     *     ! UnaryExpression[?Yield, ?Await]
+     *     [+Await] AwaitExpression[?Yield]
+     *
+     * [TypeScript 扩展]:
+     *     < TSType > UnaryExpression  (尖括号类型断言)
+     */
+    @SubhutiRule
+    override UnaryExpression(params: ExpressionParams = {}) {
+        const { Await = false } = params
+
+        this.Or([
+            // [TypeScript] 尖括号类型断言 <Type>expr
+            { alt: () => this.TSTypeAssertion(params) },
+            // UpdateExpression (基础情况，必须在前面)
+            { alt: () => this.UpdateExpression(params) },
+            // delete UnaryExpression
+            {
+                alt: () => {
+                    this.tokenConsumer.Delete()
+                    this.UnaryExpression(params)
+                }
+            },
+            // void UnaryExpression
+            {
+                alt: () => {
+                    this.tokenConsumer.Void()
+                    this.UnaryExpression(params)
+                }
+            },
+            // typeof UnaryExpression
+            {
+                alt: () => {
+                    this.tokenConsumer.Typeof()
+                    this.UnaryExpression(params)
+                }
+            },
+            // + UnaryExpression
+            {
+                alt: () => {
+                    this.tokenConsumer.Plus()
+                    this.UnaryExpression(params)
+                }
+            },
+            // - UnaryExpression
+            {
+                alt: () => {
+                    this.tokenConsumer.Minus()
+                    this.UnaryExpression(params)
+                }
+            },
+            // ~ UnaryExpression
+            {
+                alt: () => {
+                    this.tokenConsumer.BitwiseNot()
+                    this.UnaryExpression(params)
+                }
+            },
+            // ! UnaryExpression
+            {
+                alt: () => {
+                    this.tokenConsumer.LogicalNot()
+                    this.UnaryExpression(params)
+                }
+            },
+            // [+Await] AwaitExpression
+            ...(Await ? [{ alt: () => this.AwaitExpression(params) }] : []),
+        ])
+    }
+
+    /**
+     * [TypeScript] 尖括号类型断言 <Type>expression
+     * 
+     * TSTypeAssertion :
+     *     < TSType > UnaryExpression
+     * 
+     * 注意：这与泛型调用 foo<T>() 有歧义，需要在 PrimaryExpression 中处理
+     */
+    @SubhutiRule
+    TSTypeAssertion(params: ExpressionParams = {}) {
+        this.tokenConsumer.Less()
+        this.TSType()
+        this.tokenConsumer.Greater()
+        this.UnaryExpression(params)
+    }
+
+    /**
+     * [TypeScript] 类型谓词（用于函数返回类型）
+     *
+     * TSTypePredicate :
+     *     Identifier is TSType
+     *     this is TSType
+     *     asserts Identifier
+     *     asserts Identifier is TSType
+     *     asserts this
+     *     asserts this is TSType
+     */
+    @SubhutiRule
+    TSTypePredicate() {
+        this.Or([
+            // asserts Identifier is TSType
+            // asserts Identifier
+            // asserts this is TSType
+            // asserts this
+            {
+                alt: () => {
+                    this.tokenConsumer.TSAsserts()
+                    this.Or([
+                        { alt: () => this.tokenConsumer.This() },
+                        { alt: () => this.Identifier() }
+                    ])
+                    // 可选的 is TSType
+                    this.Option(() => {
+                        this.tokenConsumer.TSIs()
+                        this.TSType()
+                    })
+                }
+            },
+            // Identifier is TSType
+            // this is TSType
+            {
+                alt: () => {
+                    this.Or([
+                        { alt: () => this.tokenConsumer.This() },
+                        { alt: () => this.Identifier() }
+                    ])
+                    this.tokenConsumer.TSIs()
+                    this.TSType()
+                }
+            }
+        ])
+    }
 }

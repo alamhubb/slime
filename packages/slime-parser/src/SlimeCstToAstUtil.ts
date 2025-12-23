@@ -137,6 +137,12 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
             SlimeMethodDefinitionCstToAst.createMethodDefinitionClassElementNameAst.bind(SlimeMethodDefinitionCstToAst)
         ; (SlimeJavascriptCstToAstUtil as any).createMethodDefinitionGetterMethodAst = 
             SlimeMethodDefinitionCstToAst.createMethodDefinitionGetterMethodAst.bind(SlimeMethodDefinitionCstToAst)
+        
+        // TypeScript 表达式 - 支持类型断言 (<Type>x, x as Type, x!, x satisfies Type)
+        ; (SlimeJavascriptCstToAstUtil as any).createExpressionAstUncached = 
+            this.createExpressionAstUncached.bind(this)
+        ; (SlimeJavascriptCstToAstUtil as any).createUpdateExpressionAst = 
+            this.createUpdateExpressionAst.bind(this)
     }
 
     // ============================================
@@ -156,6 +162,71 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
     /** 支持 TypeScript 声明 (interface, type, enum) */
     override createDeclarationAst(cst: SubhutiCst): SlimeDeclaration {
         return SlimeVariableCstToAst.createDeclarationAst(cst)
+    }
+
+    // ============================================
+    // [TypeScript] 表达式扩展 - 类型断言
+    // ============================================
+
+    /**
+     * 重写表达式转换，支持 TypeScript 类型断言表达式
+     * - TSTypeAssertion: <Type>expression
+     * - TSAsExpression: expression as Type (在 UpdateExpression 中处理)
+     * - TSNonNullExpression: expression! (在 UpdateExpression 中处理)
+     * - TSSatisfiesExpression: expression satisfies Type (在 UpdateExpression 中处理)
+     */
+    override createExpressionAstUncached(cst: SubhutiCst): any {
+        const astName = cst.name
+
+        // [TypeScript] 尖括号类型断言 <Type>expression
+        if (astName === 'TSTypeAssertion') {
+            return SlimeIdentifierCstToAst.createTSTypeAssertionAst(cst)
+        }
+
+        // 其他表达式类型交给父类处理
+        return super.createExpressionAstUncached(cst)
+    }
+
+    /**
+     * 重写 UpdateExpression 转换，支持 TypeScript 后缀表达式
+     * - TSAsExpression: expression as Type
+     * - TSNonNullExpression: expression!
+     * - TSSatisfiesExpression: expression satisfies Type
+     */
+    override createUpdateExpressionAst(cst: SubhutiCst): any {
+        const children = cst.children || []
+        
+        // 检查是否有 TypeScript 后缀表达式
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i]
+            
+            // TSAsExpressionTail: as Type
+            if (child.name === 'TSAsExpressionTail') {
+                const expression = SlimeJavascriptCstToAstUtil.createExpressionAst(children[0])
+                const typeCst = child.children?.find((c: SubhutiCst) => c.name === 'TSType')
+                if (typeCst) {
+                    return SlimeIdentifierCstToAst.createTSAsExpressionAst(expression, typeCst, cst.loc)
+                }
+            }
+            
+            // TSSatisfiesExpressionTail: satisfies Type
+            if (child.name === 'TSSatisfiesExpressionTail') {
+                const expression = SlimeJavascriptCstToAstUtil.createExpressionAst(children[0])
+                const typeCst = child.children?.find((c: SubhutiCst) => c.name === 'TSType')
+                if (typeCst) {
+                    return SlimeIdentifierCstToAst.createTSSatisfiesExpressionAst(expression, typeCst, cst.loc)
+                }
+            }
+            
+            // TSNonNullExpressionTail: !
+            if (child.name === 'TSNonNullExpressionTail') {
+                const expression = SlimeJavascriptCstToAstUtil.createExpressionAst(children[0])
+                return SlimeIdentifierCstToAst.createTSNonNullExpressionAst(expression, cst.loc)
+            }
+        }
+        
+        // 没有 TypeScript 后缀，交给父类处理
+        return super.createUpdateExpressionAst(cst)
     }
 }
 

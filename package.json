@@ -1,21 +1,19 @@
 {
   "name": "slimejs",
   "version": "0.1.5",
-  "description": "Slime库测试和调试工具",
+  "private": true,
+  "description": "Slime - TypeScript/JavaScript Parser and Code Generator",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "test": "tsx test-runner.ts",
+    "test": "npm run test -w slime-test",
+    "test:all": "npm run test:all -w slime-test",
+    "build": "npm run build -ws",
     "release": "npx lerna publish --no-git-reset --no-push --no-git-tag-version"
   },
-  "dependencies": {
-    "slime-token": "^0.2.2",
-    "slime-ast": "^0.2.2",
-    "slime-generator": "^0.2.2",
-    "slime-parser": "^0.2.2",
-    "slime-test": "^0.2.2",
-    "subhuti": "^0.2.5"
-  },
-  "gitHead": "2f8c9e3c52445d48435b6a432fffb4eed5187217"
+  "devDependencies": {
+    "lerna": "^8.0.0",
+    "tsx": "^4.0.0"
+  }
 }
