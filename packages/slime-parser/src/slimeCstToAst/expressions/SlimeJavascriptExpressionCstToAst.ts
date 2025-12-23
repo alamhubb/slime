@@ -240,7 +240,7 @@ export class SlimeJavascriptExpressionCstToAstSingle {
             const operator = cst.children[i]  // ?? token
             const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
             left = {
-                type: SlimeJavascriptAstTypeName.LogicalExpression,
+                type: SlimeAstTypeName.LogicalExpression,
                 operator: '??',
                 left: left,
                 right: right
@@ -305,7 +305,7 @@ export class SlimeJavascriptExpressionCstToAstSingle {
                 const right = SlimeCstToAstUtil.createExpressionAst(rightCst)
 
                 result = {
-                    type: SlimeJavascriptAstTypeName.LogicalExpression,
+                    type: SlimeAstTypeName.LogicalExpression,
                     operator: operator,
                     left: result,
                     right: right,
@@ -331,7 +331,7 @@ export class SlimeJavascriptExpressionCstToAstSingle {
                 const right = SlimeCstToAstUtil.createExpressionAst(rightCst)
 
                 result = {
-                    type: SlimeJavascriptAstTypeName.LogicalExpression,
+                    type: SlimeAstTypeName.LogicalExpression,
                     operator: operator,
                     left: result,
                     right: right,

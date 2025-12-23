@@ -359,7 +359,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.LabeledStatement,
+            type: SlimeAstTypeName.LabeledStatement,
             label: label,
             body: body,
             loc: cst.loc
@@ -410,7 +410,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.WithStatement,
+            type: SlimeAstTypeName.WithStatement,
             object,
             body,
             withToken,

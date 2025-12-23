@@ -182,7 +182,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
 
             // 返回SpreadElement（作为Property的一种特殊形式）
             return {
-                type: SlimeJavascriptAstTypeName.SpreadElement,
+                type: SlimeAstTypeName.SpreadElement,
                 argument: argument,
                 loc: cst.loc
             } as any
@@ -243,7 +243,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
 
             // 创建 AssignmentPattern 作为 value
             const assignmentPattern = {
-                type: SlimeJavascriptAstTypeName.AssignmentPattern,
+                type: SlimeAstTypeName.AssignmentPattern,
                 left: identifier,
                 right: defaultValue,
                 loc: first.loc
@@ -423,7 +423,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
         const initValue = init ? SlimeCstToAstUtil.createInitializerAst(init) : null
 
         return {
-            type: SlimeJavascriptAstTypeName.AssignmentPattern,
+            type: SlimeAstTypeName.AssignmentPattern,
             left: id,
             right: initValue,
             loc: cst.loc

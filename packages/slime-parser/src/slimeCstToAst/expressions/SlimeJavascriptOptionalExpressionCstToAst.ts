@@ -36,7 +36,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
                 // ()调用 - 可能是可选调用或普通调�?
                 const args = SlimeCstToAstUtil.createArgumentsAst(child)
                 result = {
-                    type: SlimeJavascriptAstTypeName.OptionalCallExpression,
+                    type: SlimeAstTypeName.OptionalCallExpression,
                     callee: result,
                     arguments: args,
                     optional: nextIsOptional,
@@ -50,7 +50,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
                 if (exprIndex < chainCst.children.length) {
                     const property = SlimeCstToAstUtil.createExpressionAst(chainCst.children[exprIndex])
                     result = {
-                        type: SlimeJavascriptAstTypeName.OptionalMemberExpression,
+                        type: SlimeAstTypeName.OptionalMemberExpression,
                         object: result,
                         property: property,
                         computed: true,
@@ -66,7 +66,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
                 const tokenCst = child.children[0]
                 property = SlimeJavascriptCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
                 result = {
-                    type: SlimeJavascriptAstTypeName.OptionalMemberExpression,
+                    type: SlimeAstTypeName.OptionalMemberExpression,
                     object: result,
                     property: property,
                     computed: false,
@@ -84,7 +84,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
                 // #prop - 私有属性访�?
                 const property = SlimeCstToAstUtil.createPrivateIdentifierAst(child)
                 result = {
-                    type: SlimeJavascriptAstTypeName.OptionalMemberExpression,
+                    type: SlimeAstTypeName.OptionalMemberExpression,
                     object: result,
                     property: property,
                     computed: false,

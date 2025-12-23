@@ -98,7 +98,7 @@ export class SlimeJavascriptLiteralCstToAstSingle {
             const pattern = match[1]
             const flags = match[2]
             return {
-                type: SlimeJavascriptAstTypeName.Literal,
+                type: SlimeAstTypeName.Literal,
                 value: new RegExp(pattern, flags),
                 raw: rawValue,
                 regex: {
@@ -110,7 +110,7 @@ export class SlimeJavascriptLiteralCstToAstSingle {
         }
         // 如果无法解析，返回原始�?
         return {
-            type: SlimeJavascriptAstTypeName.Literal,
+            type: SlimeAstTypeName.Literal,
             value: rawValue,
             raw: rawValue,
             loc: cst.loc

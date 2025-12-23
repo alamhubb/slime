@@ -46,7 +46,7 @@ export class SlimeJavascriptVariableCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.VariableDeclaration,
+            type: SlimeAstTypeName.VariableDeclaration,
             kind: 'var' as any,
             declarations: declarations,
             loc: cst.loc
@@ -161,7 +161,7 @@ export class SlimeJavascriptVariableCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.VariableDeclarator,
+            type: SlimeAstTypeName.VariableDeclarator,
             id: id,
             init: init,
             loc: cst.loc
@@ -190,7 +190,7 @@ export class SlimeJavascriptVariableCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.VariableDeclaration,
+            type: SlimeAstTypeName.VariableDeclaration,
             kind: kind as any,
             declarations: declarations,
             loc: cst.loc
@@ -255,7 +255,7 @@ export class SlimeJavascriptVariableCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.VariableDeclaration,
+            type: SlimeAstTypeName.VariableDeclaration,
             kind: kind as any,
             declarations: declarations,
             loc: cst.loc
@@ -392,9 +392,9 @@ export class SlimeJavascriptVariableCstToAstSingle {
         const id = forBinding ? SlimeCstToAstUtil.createForBindingAst(forBinding) : null
 
         return {
-            type: SlimeJavascriptAstTypeName.VariableDeclaration,
+            type: SlimeAstTypeName.VariableDeclaration,
             declarations: [{
-                type: SlimeJavascriptAstTypeName.VariableDeclarator,
+                type: SlimeAstTypeName.VariableDeclarator,
                 id: id,
                 init: null,
                 loc: forBinding?.loc

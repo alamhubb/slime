@@ -17,7 +17,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSTypeLiteral,
+            type: SlimeAstTypeName.TSTypeLiteral,
             members,
             loc: cst.loc,
         }
@@ -96,7 +96,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
 
         if (hasParams) {
             return {
-                type: SlimeJavascriptAstTypeName.TSMethodSignature,
+                type: SlimeAstTypeName.TSMethodSignature,
                 key,
                 parameters,
                 typeAnnotation,
@@ -105,7 +105,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
             }
         } else {
             return {
-                type: SlimeJavascriptAstTypeName.TSPropertySignature,
+                type: SlimeAstTypeName.TSPropertySignature,
                 key,
                 typeAnnotation,
                 readonly,
@@ -217,7 +217,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSPropertySignature,
+            type: SlimeAstTypeName.TSPropertySignature,
             key,
             typeAnnotation,
             readonly,
@@ -257,7 +257,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSMethodSignature,
+            type: SlimeAstTypeName.TSMethodSignature,
             key,
             parameters,
             typeAnnotation,
@@ -285,7 +285,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSCallSignatureDeclaration,
+            type: SlimeAstTypeName.TSCallSignatureDeclaration,
             parameters,
             typeAnnotation,
             loc: cst.loc,
@@ -312,7 +312,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSConstructSignatureDeclaration,
+            type: SlimeAstTypeName.TSConstructSignatureDeclaration,
             parameters,
             typeAnnotation,
             loc: cst.loc,
@@ -351,7 +351,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
         const identifierCst = children.find(c => c.name === 'Identifier')
         if (identifierCst) {
             typeParameter = {
-                type: SlimeJavascriptAstTypeName.TSTypeParameter,
+                type: SlimeAstTypeName.TSTypeParameter,
                 name: this.createIdentifierAst(identifierCst),
                 loc: identifierCst.loc,
             }
@@ -396,7 +396,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSMappedType,
+            type: SlimeAstTypeName.TSMappedType,
             typeParameter,
             nameType,
             typeAnnotation,
@@ -432,7 +432,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
                         type: 'Identifier',
                         name: tokenCst.value,
                         typeAnnotation: {
-                            type: SlimeJavascriptAstTypeName.TSTypeAnnotation,
+                            type: SlimeAstTypeName.TSTypeAnnotation,
                             typeAnnotation: this.createTSTypeAst(children[colonIdx + 1]),
                         },
                         loc: tokenCst.loc,
@@ -443,14 +443,14 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
             } else if (child.name === 'TSType' && parameters.length) {
                 // 返回类型
                 typeAnnotation = {
-                    type: SlimeJavascriptAstTypeName.TSTypeAnnotation,
+                    type: SlimeAstTypeName.TSTypeAnnotation,
                     typeAnnotation: this.createTSTypeAst(child),
                 }
             }
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSIndexSignature,
+            type: SlimeAstTypeName.TSIndexSignature,
             parameters,
             typeAnnotation,
             readonly,
@@ -509,7 +509,7 @@ export class SlimeJavascriptTSObjectTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSTypeLiteral,
+            type: SlimeAstTypeName.TSTypeLiteral,
             members,
             loc: cst.loc,
         }

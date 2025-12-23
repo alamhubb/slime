@@ -17,7 +17,7 @@ export class SlimeJavascriptTSTupleTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSTupleType,
+            type: SlimeAstTypeName.TSTupleType,
             elementTypes,
             loc: cst.loc,
         }
@@ -44,7 +44,7 @@ export class SlimeJavascriptTSTupleTypeCstToAstSingle {
         if (hasEllipsis) {
             const typeCst = children.find(c => c.name === 'TSType')
             return {
-                type: SlimeJavascriptAstTypeName.TSRestType,
+                type: SlimeAstTypeName.TSRestType,
                 typeAnnotation: typeCst ? this.createTSTypeAst(typeCst) : undefined,
                 loc: cst.loc,
             }
@@ -57,7 +57,7 @@ export class SlimeJavascriptTSTupleTypeCstToAstSingle {
             const typeAst = this.createTSTypeAst(typeCst)
             if (hasQuestion) {
                 return {
-                    type: SlimeJavascriptAstTypeName.TSOptionalType,
+                    type: SlimeAstTypeName.TSOptionalType,
                     typeAnnotation: typeAst,
                     loc: cst.loc,
                 }
@@ -87,7 +87,7 @@ export class SlimeJavascriptTSTupleTypeCstToAstSingle {
         const typeCst = children.find(c => c.name === 'TSType')
 
         return {
-            type: SlimeJavascriptAstTypeName.TSRestType,
+            type: SlimeAstTypeName.TSRestType,
             typeAnnotation: typeCst ? this.createTSTypeAst(typeCst) : undefined,
             loc: cst.loc,
         }
@@ -119,7 +119,7 @@ export class SlimeJavascriptTSTupleTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSNamedTupleMember,
+            type: SlimeAstTypeName.TSNamedTupleMember,
             label,
             elementType,
             optional,

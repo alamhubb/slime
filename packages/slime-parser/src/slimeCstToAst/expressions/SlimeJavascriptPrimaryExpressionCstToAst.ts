@@ -84,7 +84,7 @@ export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
             // If it's FormalParameterList, convert to expression
             if (middleCst.name === SlimeJavascriptParser.prototype.FormalParameterList?.name || middleCst.name === 'FormalParameterList') {
                 const params = SlimeCstToAstUtil.createFormalParameterListAst(middleCst)
-                if (params.length === 1 && params[0].type === SlimeJavascriptAstTypeName.Identifier) {
+                if (params.length === 1 && params[0].type === SlimeAstTypeName.Identifier) {
                     return SlimeJavascriptCreateUtils.createParenthesizedExpression(params[0] as any, first.loc)
                 }
                 if (params.length > 1) {

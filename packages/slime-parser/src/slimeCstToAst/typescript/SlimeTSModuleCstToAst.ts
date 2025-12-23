@@ -52,7 +52,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSModuleDeclaration,
+            type: SlimeAstTypeName.TSModuleDeclaration,
             id,
             body,
             declare,
@@ -75,7 +75,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSModuleBlock,
+            type: SlimeAstTypeName.TSModuleBlock,
             body,
             loc: cst.loc,
         }
@@ -222,7 +222,7 @@ export class SlimeJavascriptTSModuleCstToAstSingle {
             // declare global { }
             const moduleBlockCst = children.find(c => c.name === 'TSModuleBlock')
             return {
-                type: SlimeJavascriptAstTypeName.TSModuleDeclaration,
+                type: SlimeAstTypeName.TSModuleDeclaration,
                 id: { type: 'Identifier', name: 'global', loc: cst.loc },
                 body: moduleBlockCst ? this.createTSModuleBlockAst(moduleBlockCst) : undefined,
                 declare: true,

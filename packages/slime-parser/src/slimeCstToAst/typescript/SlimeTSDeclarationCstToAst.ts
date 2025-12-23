@@ -37,7 +37,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSInterfaceDeclaration,
+            type: SlimeAstTypeName.TSInterfaceDeclaration,
             id,
             typeParameters,
             extends: extendsClause.length > 0 ? extendsClause : undefined,
@@ -88,7 +88,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSInterfaceHeritage,
+            type: SlimeAstTypeName.TSInterfaceHeritage,
             expression,
             typeParameters,
             loc: cst.loc,
@@ -112,7 +112,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSInterfaceBody,
+            type: SlimeAstTypeName.TSInterfaceBody,
             body,
             loc: cst.loc,
         }
@@ -145,7 +145,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSEnumDeclaration,
+            type: SlimeAstTypeName.TSEnumDeclaration,
             id,
             members,
             const: isConst,
@@ -193,7 +193,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSEnumMember,
+            type: SlimeAstTypeName.TSEnumMember,
             id,
             initializer,
             loc: cst.loc,
@@ -227,7 +227,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSTypeAliasDeclaration,
+            type: SlimeAstTypeName.TSTypeAliasDeclaration,
             id,
             typeParameters,
             typeAnnotation,

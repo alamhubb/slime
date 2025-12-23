@@ -108,7 +108,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         const body = SlimeJavascriptCreateUtils.createBlockStatement(bodyStatements, bodyNode?.loc)
 
         const value: SlimeJavascriptFunctionExpression = {
-            type: SlimeJavascriptAstTypeName.FunctionExpression,
+            type: SlimeAstTypeName.FunctionExpression,
             id: null,
             params: params as any,
             body: body,

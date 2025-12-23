@@ -15,7 +15,7 @@ export class SlimeJavascriptTSExpressionCstToAstSingle {
      */
     createTSAsExpressionAst(expression: any, typeCst: SubhutiCst, loc: any): any {
         return {
-            type: SlimeJavascriptAstTypeName.TSAsExpression,
+            type: SlimeAstTypeName.TSAsExpression,
             expression,
             typeAnnotation: this.createTSTypeAst(typeCst),
             loc,
@@ -29,7 +29,7 @@ export class SlimeJavascriptTSExpressionCstToAstSingle {
      */
     createTSSatisfiesExpressionAst(expression: any, typeCst: SubhutiCst, loc: any): any {
         return {
-            type: SlimeJavascriptAstTypeName.TSSatisfiesExpression,
+            type: SlimeAstTypeName.TSSatisfiesExpression,
             expression,
             typeAnnotation: this.createTSTypeAst(typeCst),
             loc,
@@ -43,7 +43,7 @@ export class SlimeJavascriptTSExpressionCstToAstSingle {
      */
     createTSNonNullExpressionAst(expression: any, loc: any): any {
         return {
-            type: SlimeJavascriptAstTypeName.TSNonNullExpression,
+            type: SlimeAstTypeName.TSNonNullExpression,
             expression,
             loc,
         }
@@ -67,7 +67,7 @@ export class SlimeJavascriptTSExpressionCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSTypeAssertion,
+            type: SlimeAstTypeName.TSTypeAssertion,
             typeAnnotation: this.createTSTypeAst(typeCst),
             expression: SlimeJavascriptCstToAstUtil.createUnaryExpressionAst(exprCst),
             loc: cst.loc,
@@ -107,7 +107,7 @@ export class SlimeJavascriptTSExpressionCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSTypePredicate,
+            type: SlimeAstTypeName.TSTypePredicate,
             asserts,
             parameterName,
             typeAnnotation,

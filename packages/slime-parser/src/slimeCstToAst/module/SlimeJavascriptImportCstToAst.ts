@@ -148,7 +148,7 @@ export class SlimeJavascriptImportCstToAstSingle {
                     const imported = SlimeCstToAstUtil.createIdentifierNameAst(identifierName)
                     const local = SlimeCstToAstUtil.createImportedBindingAst(binding)
                     specifiers.push({
-                        type: SlimeJavascriptAstTypeName.ImportSpecifier,
+                        type: SlimeAstTypeName.ImportSpecifier,
                         imported: imported,
                         local: local,
                         loc: child.loc
@@ -157,7 +157,7 @@ export class SlimeJavascriptImportCstToAstSingle {
                     // import {name} - 简写形式
                     const id = SlimeCstToAstUtil.createImportedBindingAst(binding)
                     specifiers.push({
-                        type: SlimeJavascriptAstTypeName.ImportSpecifier,
+                        type: SlimeAstTypeName.ImportSpecifier,
                         imported: id,
                         local: id,
                         loc: child.loc
@@ -217,7 +217,7 @@ export class SlimeJavascriptImportCstToAstSingle {
                     const imported = SlimeCstToAstUtil.createModuleExportNameAst(moduleExportName)
                     const local = SlimeCstToAstUtil.createImportedBindingAst(binding)
                     currentSpec = {
-                        type: SlimeJavascriptAstTypeName.ImportSpecifier,
+                        type: SlimeAstTypeName.ImportSpecifier,
                         imported: imported,
                         local: local,
                         loc: child.loc
@@ -226,7 +226,7 @@ export class SlimeJavascriptImportCstToAstSingle {
                     // 简写形�? import { foo }
                     const id = SlimeCstToAstUtil.createImportedBindingAst(binding)
                     currentSpec = {
-                        type: SlimeJavascriptAstTypeName.ImportSpecifier,
+                        type: SlimeAstTypeName.ImportSpecifier,
                         imported: id,
                         local: id,
                         loc: child.loc
@@ -425,7 +425,7 @@ export class SlimeJavascriptImportCstToAstSingle {
                             if (keyChild.name === 'IdentifierName' || keyChild.name === SlimeJavascriptParser.prototype.IdentifierName?.name) {
                                 const nameToken = keyChild.children?.[0]
                                 currentKey = {
-                                    type: SlimeJavascriptAstTypeName.Identifier,
+                                    type: SlimeAstTypeName.Identifier,
                                     name: nameToken?.value || keyChild.value,
                                     loc: keyChild.loc
                                 }

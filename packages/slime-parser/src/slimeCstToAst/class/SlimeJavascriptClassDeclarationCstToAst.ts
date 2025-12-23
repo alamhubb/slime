@@ -302,7 +302,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
     } {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ClassTail?.name);
         let superClass: SlimeJavascriptExpression | null = null // 超类默认�?null
-        let body: SlimeJavascriptClassBody = {type: SlimeJavascriptAstTypeName.ClassBody as any, body: [], loc: cst.loc} // 默认空类�?
+        let body: SlimeJavascriptClassBody = {type: SlimeAstTypeName.ClassBody as any, body: [], loc: cst.loc} // 默认空类�?
         let extendsToken: any = undefined
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined

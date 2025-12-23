@@ -29,7 +29,7 @@ export class SlimeJavascriptTSFunctionTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSFunctionType,
+            type: SlimeAstTypeName.TSFunctionType,
             typeParameters,
             parameters,
             returnType,
@@ -59,7 +59,7 @@ export class SlimeJavascriptTSFunctionTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSConstructorType,
+            type: SlimeAstTypeName.TSConstructorType,
             typeParameters,
             parameters,
             returnType,
@@ -147,7 +147,7 @@ export class SlimeJavascriptTSFunctionTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSTypeParameterDeclaration,
+            type: SlimeAstTypeName.TSTypeParameterDeclaration,
             params,
             loc: cst.loc,
         }
@@ -186,7 +186,7 @@ export class SlimeJavascriptTSFunctionTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSTypeParameter,
+            type: SlimeAstTypeName.TSTypeParameter,
             name,
             constraint,
             default: defaultType,

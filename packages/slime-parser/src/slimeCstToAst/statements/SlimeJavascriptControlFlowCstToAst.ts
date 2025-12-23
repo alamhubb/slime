@@ -325,9 +325,9 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
             const kind = letOrConstCst.children[0].value  // 'let' or 'const'
 
             left = {
-                type: SlimeJavascriptAstTypeName.VariableDeclaration,
+                type: SlimeAstTypeName.VariableDeclaration,
                 declarations: [{
-                    type: SlimeJavascriptAstTypeName.VariableDeclarator,
+                    type: SlimeAstTypeName.VariableDeclarator,
                     id: id,
                     init: null,
                     loc: forBindingCst.loc
@@ -344,9 +344,9 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
             const id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingIdCst)
             const init = SlimeCstToAstUtil.createInitializerAst(initializerCst)
             left = {
-                type: SlimeJavascriptAstTypeName.VariableDeclaration,
+                type: SlimeAstTypeName.VariableDeclaration,
                 declarations: [{
-                    type: SlimeJavascriptAstTypeName.VariableDeclarator,
+                    type: SlimeAstTypeName.VariableDeclarator,
                     id: id,
                     init: init,
                     loc: {
@@ -376,9 +376,9 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
                 id = SlimeCstToAstUtil.createBindingIdentifierAst(actualBinding);
             }
             left = {
-                type: SlimeJavascriptAstTypeName.VariableDeclaration,
+                type: SlimeAstTypeName.VariableDeclaration,
                 declarations: [{
-                    type: SlimeJavascriptAstTypeName.VariableDeclarator,
+                    type: SlimeAstTypeName.VariableDeclarator,
                     id: id,
                     init: null,
                     loc: varBindingCst.loc
@@ -421,7 +421,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
         }
 
         const result: any = {
-            type: isForOf ? SlimeJavascriptAstTypeName.ForOfStatement : SlimeJavascriptAstTypeName.ForInStatement,
+            type: isForOf ? SlimeAstTypeName.ForOfStatement : SlimeAstTypeName.ForInStatement,
             left: left,
             right: right,
             body: body,

@@ -36,7 +36,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
             }
         }
         return {
-            type: SlimeJavascriptAstTypeName.ArrayPattern,
+            type: SlimeAstTypeName.ArrayPattern,
             elements,
             lBracketToken: expr.lBracketToken,
             rBracketToken: expr.rBracketToken,
@@ -62,7 +62,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
             if (hasAssign && cst.children && cst.children.length >= 3) {
                 // 这是默认参数: left = right
                 const expr = SlimeCstToAstUtil.createAssignmentExpressionAst(cst)
-                if (expr.type === SlimeJavascriptAstTypeName.AssignmentExpression) {
+                if (expr.type === SlimeAstTypeName.AssignmentExpression) {
                     return SlimeCstToAstUtil.convertAssignmentExpressionToPattern(expr)
                 }
             }
@@ -103,15 +103,15 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
 
         // 尝试将表达式作为 AST 处理
         const expr = SlimeCstToAstUtil.createExpressionAst(cst)
-        if (expr.type === SlimeJavascriptAstTypeName.Identifier) {
+        if (expr.type === SlimeAstTypeName.Identifier) {
             return expr as any
-        } else if (expr.type === SlimeJavascriptAstTypeName.ObjectExpression) {
+        } else if (expr.type === SlimeAstTypeName.ObjectExpression) {
             // ObjectExpression 需要转换为 ObjectPattern
             return SlimeCstToAstUtil.convertObjectExpressionToPattern(expr)
-        } else if (expr.type === SlimeJavascriptAstTypeName.ArrayExpression) {
+        } else if (expr.type === SlimeAstTypeName.ArrayExpression) {
             // ArrayExpression 需要转换为 ArrayPattern
             return SlimeCstToAstUtil.convertArrayExpressionToPattern(expr)
-        } else if (expr.type === SlimeJavascriptAstTypeName.AssignmentExpression) {
+        } else if (expr.type === SlimeAstTypeName.AssignmentExpression) {
             // AssignmentExpression 转换�?AssignmentPattern
             return SlimeCstToAstUtil.convertAssignmentExpressionToPattern(expr)
         }
@@ -196,7 +196,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
                                 if (idCst) {
                                     const restId = SlimeCstToAstUtil.createIdentifierAst(idCst)
                                     const restNode: SlimeJavascriptRestElement = {
-                                        type: SlimeJavascriptAstTypeName.RestElement,
+                                        type: SlimeAstTypeName.RestElement,
                                         argument: restId,
                                         ellipsisToken: SlimeJavascriptTokenCreateUtils.createEllipsisToken(ellipsis.loc),
                                         loc: prop.loc
@@ -216,7 +216,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.ObjectPattern,
+            type: SlimeAstTypeName.ObjectPattern,
             properties,
             lBraceToken,
             rBraceToken,
@@ -237,7 +237,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
             if (idNode) {
                 const id = SlimeJavascriptCreateUtils.createIdentifier(idNode.value, idNode.loc)
                 return {
-                    type: SlimeJavascriptAstTypeName.Property,
+                    type: SlimeAstTypeName.Property,
                     key: id,
                     value: id,
                     kind: 'init',
@@ -258,14 +258,14 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
                     if (initializer) {
                         const init = SlimeCstToAstUtil.createInitializerAst(initializer)
                         value = {
-                            type: SlimeJavascriptAstTypeName.AssignmentPattern,
+                            type: SlimeAstTypeName.AssignmentPattern,
                             left: id,
                             right: init,
                             loc: first.loc
                         }
                     }
                     return {
-                        type: SlimeJavascriptAstTypeName.Property,
+                        type: SlimeAstTypeName.Property,
                         key: id,
                         value: value,
                         kind: 'init',
@@ -285,7 +285,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
                 const valueExpr = SlimeCstToAstUtil.createExpressionAst(valueCst)
                 const value = SlimeCstToAstUtil.convertExpressionToPatternFromAST(valueExpr)
                 return {
-                    type: SlimeJavascriptAstTypeName.Property,
+                    type: SlimeAstTypeName.Property,
                     key: key,
                     value: value || valueExpr,
                     kind: 'init',
@@ -306,10 +306,10 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
         const properties: SlimeJavascriptObjectPatternProperty[] = []
         for (const prop of expr.properties || []) {
             const property = prop.property || prop
-            if (property.type === SlimeJavascriptAstTypeName.SpreadElement) {
+            if (property.type === SlimeAstTypeName.SpreadElement) {
                 properties.push({
                     property: {
-                        type: SlimeJavascriptAstTypeName.RestElement,
+                        type: SlimeAstTypeName.RestElement,
                         argument: property.argument,
                         loc: property.loc
                     } as SlimeJavascriptRestElement
@@ -318,7 +318,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
                 const value = SlimeCstToAstUtil.convertExpressionToPatternFromAST(property.value)
                 properties.push({
                     property: {
-                        type: SlimeJavascriptAstTypeName.Property,
+                        type: SlimeAstTypeName.Property,
                         key: property.key,
                         value: value || property.value,
                         kind: 'init',
@@ -330,7 +330,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
             }
         }
         return {
-            type: SlimeJavascriptAstTypeName.ObjectPattern,
+            type: SlimeAstTypeName.ObjectPattern,
             properties,
             lBraceToken: expr.lBraceToken,
             rBraceToken: expr.rBraceToken,
@@ -346,7 +346,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
     convertAssignmentExpressionToPattern(expr: any): any {
         const left = SlimeCstToAstUtil.convertExpressionToPatternFromAST(expr.left)
         return {
-            type: SlimeJavascriptAstTypeName.AssignmentPattern,
+            type: SlimeAstTypeName.AssignmentPattern,
             left: left || expr.left,
             right: expr.right,
             loc: expr.loc
@@ -358,13 +358,13 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
      */
     convertExpressionToPatternFromAST(expr: any): SlimeJavascriptPattern | null {
         if (!expr) return null
-        if (expr.type === SlimeJavascriptAstTypeName.Identifier) {
+        if (expr.type === SlimeAstTypeName.Identifier) {
             return expr
-        } else if (expr.type === SlimeJavascriptAstTypeName.ObjectExpression) {
+        } else if (expr.type === SlimeAstTypeName.ObjectExpression) {
             return SlimeCstToAstUtil.convertObjectExpressionToPattern(expr)
-        } else if (expr.type === SlimeJavascriptAstTypeName.ArrayExpression) {
+        } else if (expr.type === SlimeAstTypeName.ArrayExpression) {
             return SlimeCstToAstUtil.convertArrayExpressionToPattern(expr)
-        } else if (expr.type === SlimeJavascriptAstTypeName.AssignmentExpression) {
+        } else if (expr.type === SlimeAstTypeName.AssignmentExpression) {
             return SlimeCstToAstUtil.convertAssignmentExpressionToPattern(expr)
         }
         return null
@@ -421,7 +421,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
                         const restNode = SlimeCstToAstUtil.createSpreadElementAst(elem)
                         elements.push({
                             element: {
-                                type: SlimeJavascriptAstTypeName.RestElement,
+                                type: SlimeAstTypeName.RestElement,
                                 argument: restNode.argument,
                                 loc: restNode.loc
                             } as SlimeJavascriptRestElement
@@ -432,7 +432,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.ArrayPattern,
+            type: SlimeAstTypeName.ArrayPattern,
             elements,
             lBracketToken,
             rBracketToken,
@@ -450,26 +450,26 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
     convertExpressionToPattern(expr: any): SlimeJavascriptPattern {
         if (!expr) return expr
 
-        if (expr.type === SlimeJavascriptAstTypeName.Identifier) {
+        if (expr.type === SlimeAstTypeName.Identifier) {
             return expr
         }
 
-        if (expr.type === SlimeJavascriptAstTypeName.ObjectExpression) {
+        if (expr.type === SlimeAstTypeName.ObjectExpression) {
             // �?ObjectExpression 转换�?ObjectPattern
             const properties: any[] = []
             for (const item of expr.properties || []) {
                 const prop = item.property !== undefined ? item.property : item
-                if (prop.type === SlimeJavascriptAstTypeName.SpreadElement) {
+                if (prop.type === SlimeAstTypeName.SpreadElement) {
                     // SpreadElement -> RestElement
                     properties.push({
                         property: {
-                            type: SlimeJavascriptAstTypeName.RestElement,
+                            type: SlimeAstTypeName.RestElement,
                             argument: SlimeCstToAstUtil.convertExpressionToPattern(prop.argument),
                             loc: prop.loc
                         },
                         commaToken: item.commaToken
                     })
-                } else if (prop.type === SlimeJavascriptAstTypeName.Property) {
+                } else if (prop.type === SlimeAstTypeName.Property) {
                     // 转换 Property �?value
                     const convertedValue = SlimeCstToAstUtil.convertExpressionToPattern(prop.value)
                     properties.push({
@@ -484,7 +484,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
                 }
             }
             return {
-                type: SlimeJavascriptAstTypeName.ObjectPattern,
+                type: SlimeAstTypeName.ObjectPattern,
                 properties: properties,
                 loc: expr.loc,
                 lBraceToken: expr.lBraceToken,
@@ -492,18 +492,18 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
             } as any
         }
 
-        if (expr.type === SlimeJavascriptAstTypeName.ArrayExpression) {
+        if (expr.type === SlimeAstTypeName.ArrayExpression) {
             // �?ArrayExpression 转换�?ArrayPattern
             const elements: any[] = []
             for (const item of expr.elements || []) {
                 const elem = item.element !== undefined ? item.element : item
                 if (elem === null) {
                     elements.push(item)
-                } else if (elem.type === SlimeJavascriptAstTypeName.SpreadElement) {
+                } else if (elem.type === SlimeAstTypeName.SpreadElement) {
                     // SpreadElement -> RestElement
                     elements.push({
                         element: {
-                            type: SlimeJavascriptAstTypeName.RestElement,
+                            type: SlimeAstTypeName.RestElement,
                             argument: SlimeCstToAstUtil.convertExpressionToPattern(elem.argument),
                             loc: elem.loc
                         },
@@ -517,7 +517,7 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
                 }
             }
             return {
-                type: SlimeJavascriptAstTypeName.ArrayPattern,
+                type: SlimeAstTypeName.ArrayPattern,
                 elements: elements,
                 loc: expr.loc,
                 lBracketToken: expr.lBracketToken,
@@ -525,20 +525,20 @@ export class SlimeJavascriptPatternConvertCstToAstSingle {
             } as any
         }
 
-        if (expr.type === SlimeJavascriptAstTypeName.AssignmentExpression) {
+        if (expr.type === SlimeAstTypeName.AssignmentExpression) {
             // �?AssignmentExpression 转换�?AssignmentPattern
             return {
-                type: SlimeJavascriptAstTypeName.AssignmentPattern,
+                type: SlimeAstTypeName.AssignmentPattern,
                 left: SlimeCstToAstUtil.convertExpressionToPattern(expr.left),
                 right: expr.right,
                 loc: expr.loc
             } as any
         }
 
-        if (expr.type === SlimeJavascriptAstTypeName.SpreadElement) {
+        if (expr.type === SlimeAstTypeName.SpreadElement) {
             // SpreadElement -> RestElement
             return {
-                type: SlimeJavascriptAstTypeName.RestElement,
+                type: SlimeAstTypeName.RestElement,
                 argument: SlimeCstToAstUtil.convertExpressionToPattern(expr.argument),
                 loc: expr.loc
             } as any

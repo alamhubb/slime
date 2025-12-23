@@ -46,7 +46,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
                 // 有默认值，创建 AssignmentPattern
                 const init = SlimeCstToAstUtil.createInitializerAst(initializer)
                 return {
-                    type: SlimeJavascriptAstTypeName.AssignmentPattern,
+                    type: SlimeAstTypeName.AssignmentPattern,
                     left: pattern,
                     right: init,
                     loc: cst.loc
@@ -69,7 +69,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
             // 有默认值，创建AssignmentPattern
             const init = SlimeCstToAstUtil.createInitializerAst(initializer)
             return {
-                type: SlimeJavascriptAstTypeName.AssignmentPattern,
+                type: SlimeAstTypeName.AssignmentPattern,
                 left: id,
                 right: init,
                 loc: cst.loc
@@ -123,7 +123,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
         const value = bindingElement ? SlimeCstToAstUtil.createBindingElementAst(bindingElement) : null
 
         return {
-            type: SlimeJavascriptAstTypeName.Property,
+            type: SlimeAstTypeName.Property,
             key: key,
             value: value,
             kind: 'init',
@@ -310,7 +310,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.ArrayPattern,
+            type: SlimeAstTypeName.ArrayPattern,
             elements,
             lBracketToken,
             rBracketToken,
@@ -360,7 +360,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
 
                         properties.push({
                             property: {
-                                type: SlimeJavascriptAstTypeName.Property,
+                                type: SlimeAstTypeName.Property,
                                 key: key,
                                 value: value,
                                 kind: 'init',
@@ -383,7 +383,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
 
                             properties.push({
                                 property: {
-                                    type: SlimeJavascriptAstTypeName.Property,
+                                    type: SlimeAstTypeName.Property,
                                     key: key,
                                     value: value,
                                     kind: 'init',
@@ -428,7 +428,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
                 const ellipsisCst = restElement.children.find((ch: any) => ch.value === '...')
                 const ellipsisToken = ellipsisCst ? SlimeJavascriptTokenCreateUtils.createEllipsisToken(ellipsisCst.loc) : undefined
                 const restNode: SlimeJavascriptRestElement = {
-                    type: SlimeJavascriptAstTypeName.RestElement,
+                    type: SlimeAstTypeName.RestElement,
                     argument: restId,
                     ellipsisToken,
                     loc: restElement.loc
@@ -438,7 +438,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.ObjectPattern,
+            type: SlimeAstTypeName.ObjectPattern,
             properties,
             lBraceToken,
             rBraceToken,

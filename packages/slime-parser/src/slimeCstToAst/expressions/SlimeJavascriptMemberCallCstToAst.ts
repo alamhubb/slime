@@ -155,7 +155,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
                 // [expression] - computed property access (旧版兼容)
                 const propertyExpression = SlimeCstToAstUtil.createExpressionAst(child.children[1])
                 current = {
-                    type: SlimeJavascriptAstTypeName.MemberExpression,
+                    type: SlimeAstTypeName.MemberExpression,
                     object: current,
                     property: propertyExpression,
                     computed: true,
@@ -170,7 +170,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
                 if (expressionChild) {
                     const propertyExpression = SlimeCstToAstUtil.createExpressionAst(expressionChild)
                     current = {
-                        type: SlimeJavascriptAstTypeName.MemberExpression,
+                        type: SlimeAstTypeName.MemberExpression,
                         object: current,
                         property: propertyExpression,
                         computed: true,
@@ -361,7 +361,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
                 // [expr] - computed property (旧版兼容)
                 const propertyExpression = SlimeCstToAstUtil.createExpressionAst(child.children[1])
                 current = {
-                    type: SlimeJavascriptAstTypeName.MemberExpression,
+                    type: SlimeAstTypeName.MemberExpression,
                     object: current,
                     property: propertyExpression,
                     computed: true,
@@ -375,7 +375,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
                 if (expressionChild && expressionChild.name !== 'RBracket') {
                     const propertyExpression = SlimeCstToAstUtil.createExpressionAst(expressionChild)
                     current = {
-                        type: SlimeJavascriptAstTypeName.MemberExpression,
+                        type: SlimeAstTypeName.MemberExpression,
                         object: current,
                         property: propertyExpression,
                         computed: true,
@@ -512,7 +512,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             // super[expression] - 旧版兼容
             const propertyExpression = SlimeCstToAstUtil.createExpressionAst(second.children[1])
             return {
-                type: SlimeJavascriptAstTypeName.MemberExpression,
+                type: SlimeAstTypeName.MemberExpression,
                 object: superNode,
                 property: propertyExpression,
                 computed: true,
@@ -525,7 +525,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             const expressionCst = cst.children[2]
             const propertyExpression = SlimeCstToAstUtil.createExpressionAst(expressionCst)
             return {
-                type: SlimeJavascriptAstTypeName.MemberExpression,
+                type: SlimeAstTypeName.MemberExpression,
                 object: superNode,
                 property: propertyExpression,
                 computed: true,
@@ -546,7 +546,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             }
 
             return {
-                type: SlimeJavascriptAstTypeName.MemberExpression,
+                type: SlimeAstTypeName.MemberExpression,
                 object: superNode,
                 property: property,
                 computed: false,
@@ -560,7 +560,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             const property = SlimeJavascriptCreateUtils.createIdentifier(propToken.value, propToken.loc)
 
             return {
-                type: SlimeJavascriptAstTypeName.MemberExpression,
+                type: SlimeAstTypeName.MemberExpression,
                 object: superNode,
                 property: property,
                 computed: false,

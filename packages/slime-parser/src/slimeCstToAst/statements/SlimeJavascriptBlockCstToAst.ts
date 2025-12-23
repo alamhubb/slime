@@ -120,15 +120,15 @@ export class SlimeJavascriptBlockCstToAstSingle {
 
             // 检查是否是命名�?FunctionExpression �?ClassExpression（应该转�?Declaration�?
             return result.map(stmt => {
-                if (stmt.type === SlimeJavascriptAstTypeName.ExpressionStatement) {
+                if (stmt.type === SlimeAstTypeName.ExpressionStatement) {
                     const expr = (stmt as SlimeJavascriptExpressionStatement).expression
 
                     // 命名�?FunctionExpression �?FunctionDeclaration
-                    if (expr.type === SlimeJavascriptAstTypeName.FunctionExpression) {
+                    if (expr.type === SlimeAstTypeName.FunctionExpression) {
                         const funcExpr = expr as SlimeJavascriptFunctionExpression
                         if (funcExpr.id) {
                             return {
-                                type: SlimeJavascriptAstTypeName.FunctionDeclaration,
+                                type: SlimeAstTypeName.FunctionDeclaration,
                                 id: funcExpr.id,
                                 params: funcExpr.params,
                                 body: funcExpr.body,
@@ -140,11 +140,11 @@ export class SlimeJavascriptBlockCstToAstSingle {
                     }
 
                     // ClassExpression �?ClassDeclaration
-                    if (expr.type === SlimeJavascriptAstTypeName.ClassExpression) {
+                    if (expr.type === SlimeAstTypeName.ClassExpression) {
                         const classExpr = expr as any
                         if (classExpr.id) {
                             return {
-                                type: SlimeJavascriptAstTypeName.ClassDeclaration,
+                                type: SlimeAstTypeName.ClassDeclaration,
                                 id: classExpr.id,
                                 superClass: classExpr.superClass,
                                 body: classExpr.body,

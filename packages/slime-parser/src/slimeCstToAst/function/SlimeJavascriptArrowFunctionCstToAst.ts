@@ -116,7 +116,7 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
         // 注意：createArrowFunctionExpression 参数顺序�?(body, params, expression, async, loc, arrowToken, asyncToken, lParenToken, rParenToken)
         // commaTokens 目前函数签名不支持，暂时忽略
         return SlimeJavascriptCreateUtils.createArrowFunctionExpression(
-            body, params, body.type !== SlimeJavascriptAstTypeName.BlockStatement, isAsync, cst.loc,
+            body, params, body.type !== SlimeAstTypeName.BlockStatement, isAsync, cst.loc,
             arrowToken, asyncToken, lParenToken, rParenToken
         )
     }
@@ -164,7 +164,7 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
             }
             // 返回不完整的箭头函数（没�?body�?
             return {
-                type: SlimeJavascriptAstTypeName.ArrowFunctionExpression,
+                type: SlimeAstTypeName.ArrowFunctionExpression,
                 id: null,
                 params: params,
                 body: SlimeJavascriptCreateUtils.createBlockStatement([]),
@@ -234,13 +234,13 @@ export class SlimeJavascriptArrowFunctionCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.ArrowFunctionExpression,
+            type: SlimeAstTypeName.ArrowFunctionExpression,
             id: null,
             params: params,
             body: body,
             generator: false,
             async: true,
-            expression: body.type !== SlimeJavascriptAstTypeName.BlockStatement,
+            expression: body.type !== SlimeAstTypeName.BlockStatement,
             arrowToken: arrowToken,
             asyncToken: asyncToken,
             lParenToken: lParenToken,

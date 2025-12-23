@@ -1,5 +1,5 @@
 import {SubhutiCst} from "subhuti";
-import {SlimeJavascriptAstTypeName} from "slime-ast";
+import {SlimeAstTypeName, SlimeJavascriptAstTypeName} from "slime-ast";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptTSCompositeTypeCstToAstSingle {
@@ -35,7 +35,7 @@ export class SlimeJavascriptTSCompositeTypeCstToAstSingle {
         const falseType = this.createTSTypeAst(tsTypes[1])
 
         return {
-            type: SlimeJavascriptAstTypeName.TSConditionalType,
+            type: SlimeAstTypeName.TSConditionalType,
             checkType,
             extendsType,
             trueType,
@@ -63,7 +63,7 @@ export class SlimeJavascriptTSCompositeTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSUnionType,
+            type: SlimeAstTypeName.TSUnionType,
             types: intersectionTypes,
             loc: cst.loc,
         }
@@ -88,7 +88,7 @@ export class SlimeJavascriptTSCompositeTypeCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.TSIntersectionType,
+            type: SlimeAstTypeName.TSIntersectionType,
             types: operandTypes,
             loc: cst.loc,
         }
@@ -119,14 +119,14 @@ export class SlimeJavascriptTSCompositeTypeCstToAstSingle {
                 const next = children[i + 1]
                 if (next && (next.name === 'RBracket' || next.value === ']')) {
                     result = {
-                        type: SlimeJavascriptAstTypeName.TSArrayType,
+                        type: SlimeAstTypeName.TSArrayType,
                         elementType: result,
                         loc: cst.loc,
                     }
                     i += 2
                 } else if (next && next.name === 'TSType') {
                     result = {
-                        type: SlimeJavascriptAstTypeName.TSIndexedAccessType,
+                        type: SlimeAstTypeName.TSIndexedAccessType,
                         objectType: result,
                         indexType: this.createTSTypeAst(next),
                         loc: cst.loc,

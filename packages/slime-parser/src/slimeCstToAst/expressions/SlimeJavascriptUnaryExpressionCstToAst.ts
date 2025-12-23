@@ -70,7 +70,7 @@ export class SlimeJavascriptUnaryExpressionCstToAstSingle {
 
         // 创建 UnaryExpression AST
         return {
-            type: SlimeJavascriptAstTypeName.UnaryExpression,
+            type: SlimeAstTypeName.UnaryExpression,
             operator: operator,
             prefix: true,  // 前缀运算�?
             argument: argument,
@@ -93,7 +93,7 @@ export class SlimeJavascriptUnaryExpressionCstToAstSingle {
                 const operator = first.value || first.loc?.value
                 const argument = SlimeCstToAstUtil.createExpressionAst(cst.children[1])
                 return {
-                    type: SlimeJavascriptAstTypeName.UpdateExpression,
+                    type: SlimeAstTypeName.UpdateExpression,
                     operator: operator,
                     argument: argument,
                     prefix: true,
@@ -113,7 +113,7 @@ export class SlimeJavascriptUnaryExpressionCstToAstSingle {
                 }
                 if (operator) {
                     return {
-                        type: SlimeJavascriptAstTypeName.UpdateExpression,
+                        type: SlimeAstTypeName.UpdateExpression,
                         operator: operator,
                         argument: argument,
                         prefix: false,

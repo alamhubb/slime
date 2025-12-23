@@ -160,7 +160,7 @@ export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.FunctionDeclaration,
+            type: SlimeAstTypeName.FunctionDeclaration,
             id: id,
             params: params,
             body: body,
@@ -253,7 +253,7 @@ export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
         }
 
         return {
-            type: SlimeJavascriptAstTypeName.FunctionDeclaration,
+            type: SlimeAstTypeName.FunctionDeclaration,
             id: id,
             params: params,
             body: body,
