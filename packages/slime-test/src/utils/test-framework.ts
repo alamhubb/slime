@@ -6,10 +6,11 @@
  */
 import * as fs from 'fs'
 import * as path from 'path'
-import {performance} from 'perf_hooks'
-import { SlimeParser, SlimeCstToAst } from "slime-parser"
-import {fileURLToPath} from "url";
-import {createRequire} from "module";
+import { performance } from 'perf_hooks'
+import SlimeParser from "../../../slime-parser/src/SlimeParser.ts"
+import SlimeCstToAst from "../../../slime-parser/src/SlimeCstToAstUtil.ts"
+import { fileURLToPath } from "url";
+import { createRequire } from "module";
 
 // ============================================
 // Parser 类型定义（支持自定义 Parser）
@@ -67,10 +68,10 @@ export function parseToAst(
 ) {
     const parser = new ParserClass(code)
     const cst = parser.Program(parseMode)
-    if (!cst) return {cst: null, ast: null}
+    if (!cst) return { cst: null, ast: null }
     const converter = new CstToAstClass()
     const ast = converter.toProgram(cst)
-    return {cst, ast}
+    return { cst, ast }
 }
 
 /** 创建解析器并解析为 AST，同时返回 tokens（供代码生成使用） */
@@ -83,10 +84,10 @@ export function parseToAstWithTokens(
     const parser = new ParserClass(code)
     const cst = parser.Program(parseMode)
     const tokens = parser.parsedTokens
-    if (!cst) return {cst: null, ast: null, tokens}
+    if (!cst) return { cst: null, ast: null, tokens }
     const converter = new CstToAstClass()
     const ast = converter.toProgram(cst)
-    return {cst, ast, tokens}
+    return { cst, ast, tokens }
 }
 
 // ============================================
@@ -98,7 +99,7 @@ export function testStage1(ctx: TestContext): TestResult {
     const cst = parseToCst(ctx.code, ctx.parseMode, ctx.ParserClass)
 
     if (!cst) {
-        return {success: false, message: 'CST 生成返回 undefined'}
+        return { success: false, message: 'CST 生成返回 undefined' }
     }
 
     const childCount = cst.children?.length || 0
@@ -123,12 +124,12 @@ export function validateAST(node: any, path: string = 'root'): ValidationError[]
     const errors: ValidationError[] = []
 
     if (node === null || node === undefined) {
-        errors.push({path, issue: `Node is ${node}`})
+        errors.push({ path, issue: `Node is ${node}` })
         return errors
     }
 
     if (!node.type) {
-        errors.push({path, issue: 'Node has no type property'})
+        errors.push({ path, issue: 'Node has no type property' })
     }
 
     // 递归检查常见的子节点数组
@@ -172,14 +173,14 @@ export function countNodes(node: any): number {
 
 /** Stage2 测试函数：CST → AST，验证 AST 结构 */
 export function testStage2(ctx: TestContext): TestResult {
-    const {cst, ast} = parseToAst(ctx.code, ctx.parseMode, ctx.ParserClass, ctx.CstToAstClass)
+    const { cst, ast } = parseToAst(ctx.code, ctx.parseMode, ctx.ParserClass, ctx.CstToAstClass)
 
     if (!cst) {
-        return {success: false, message: 'CST 生成返回 undefined'}
+        return { success: false, message: 'CST 生成返回 undefined' }
     }
 
     if (!ast) {
-        return {success: false, message: 'AST 转换返回 null/undefined'}
+        return { success: false, message: 'AST 转换返回 null/undefined' }
     }
 
     // 验证 AST 结构
@@ -234,8 +235,8 @@ export function compareTokens(inputTokens: SubhutiMatchToken[], outputTokens: Su
             return {
                 success: false,
                 message: `Token不匹配 @ [${inputIdx}]: "${inputValues[inputIdx]}" vs "${outputValues[outputIdx]}"`,
-                details: `  输入: ...${inputValues.slice(Math.max(0, inputIdx-2), inputIdx+3).join(' ')}...\n` +
-                         `  输出: ...${outputValues.slice(Math.max(0, outputIdx-2), outputIdx+3).join(' ')}...`
+                details: `  输入: ...${inputValues.slice(Math.max(0, inputIdx - 2), inputIdx + 3).join(' ')}...\n` +
+                    `  输出: ...${outputValues.slice(Math.max(0, outputIdx - 2), outputIdx + 3).join(' ')}...`
             }
         }
     }
@@ -373,7 +374,7 @@ export interface SkipResult {
 /** 递归获取目录下所有指定扩展名的文件 */
 export function getAllFiles(dir: string, baseDir: string = dir, fileExtension: string = '.js'): string[] {
     const results: string[] = []
-    const entries = fs.readdirSync(dir, {withFileTypes: true})
+    const entries = fs.readdirSync(dir, { withFileTypes: true })
     for (const entry of entries) {
         const fullPath = path.join(dir, entry.name)
         if (entry.isDirectory()) {
@@ -493,19 +494,19 @@ export function getParseMode(testDir: string, filePath: string): 'module' | 'scr
 
 /** 检查测试是否应该跳过 */
 export function shouldSkipTest(testName: string, testDir: string): SkipResult {
-    if (requiresNonStandardPlugin(testDir)) return {skip: true, reason: '需要非标准插件'}
+    if (requiresNonStandardPlugin(testDir)) return { skip: true, reason: '需要非标准插件' }
     const babelExt = usesBabelExtensionOptions(testDir)
-    if (babelExt) return {skip: true, reason: `Babel 扩展: ${babelExt}`}
-    if (isErrorRecoveryTest(testDir)) return {skip: true, reason: '错误恢复测试'}
-    if (isExpectedToThrow(testDir)) return {skip: true, reason: '期望抛出错误'}
+    if (babelExt) return { skip: true, reason: `Babel 扩展: ${babelExt}` }
+    if (isErrorRecoveryTest(testDir)) return { skip: true, reason: '错误恢复测试' }
+    if (isExpectedToThrow(testDir)) return { skip: true, reason: '期望抛出错误' }
     const dirName = path.basename(testDir)
-    if (dirName.startsWith('invalid')) return {skip: true, reason: 'invalid 用例，期望解析失败'}
+    if (dirName.startsWith('invalid')) return { skip: true, reason: 'invalid 用例，期望解析失败' }
     // if (testName.includes('await') && testName.includes('static-block') && testName.includes('initializer'))
     //   return { skip: true, reason: 'await 边缘情况' }
-    if (testName.includes('accessor')) return {skip: true, reason: 'accessor 提案，暂不支持'}
-    if (testName.includes('typescript')) return {skip: true, reason: 'TypeScript 语法，暂不支持'}
+    if (testName.includes('accessor')) return { skip: true, reason: 'accessor 提案，暂不支持' }
+    if (testName.includes('typescript')) return { skip: true, reason: 'TypeScript 语法，暂不支持' }
     // if (testName.includes('nested-cover-grammar')) return { skip: true, reason: '深度嵌套，性能边缘情况' }
-    return {skip: false}
+    return { skip: false }
 }
 
 // ============================================
@@ -559,7 +560,7 @@ export async function runTests(
     console.log(`📊 共 ${files.length} 个用例 (1~${files.length})，测试 ${files.length - startIndex} 个`)
     console.log('='.repeat(60))
 
-    const stats: TestStats = {total: files.length - startIndex, passed: 0, failed: 0, skipped: 0, firstFailIndex: -1}
+    const stats: TestStats = { total: files.length - startIndex, passed: 0, failed: 0, skipped: 0, firstFailIndex: -1 }
 
     for (let i = startIndex; i < files.length; i++) {
         const file = files[i]
@@ -576,7 +577,7 @@ export async function runTests(
 
         const parseMode = getParseMode(testDir, filePath)
         const code = fs.readFileSync(filePath, 'utf-8')
-        const ctx: TestContext = {filePath, testName, code, parseMode, index: i, ParserClass, CstToAstClass, Generator}
+        const ctx: TestContext = { filePath, testName, code, parseMode, index: i, ParserClass, CstToAstClass, Generator }
 
         const startTime = performance.now()
 
@@ -646,7 +647,7 @@ async function runTestWithTimeout(
     ctx: TestContext,
     timeoutMs: number
 ): Promise<TestResult & { timeout?: boolean }> {
-    const {spawn} = await import('child_process')
+    const { spawn } = await import('child_process')
 
     return new Promise((resolve) => {
         // 使用 spawn 创建子进程运行 test-worker.ts
@@ -663,7 +664,7 @@ async function runTestWithTimeout(
             if (!resolved) {
                 resolved = true
                 child.kill('SIGKILL')
-                resolve({success: false, message: '超时', timeout: true})
+                resolve({ success: false, message: '超时', timeout: true })
             }
         }, timeoutMs)
 
@@ -681,7 +682,7 @@ async function runTestWithTimeout(
                     const result = JSON.parse(stdout.trim())
                     resolve(result)
                 } catch {
-                    resolve({success: false, message: `解析结果失败: ${stdout}`})
+                    resolve({ success: false, message: `解析结果失败: ${stdout}` })
                 }
             }
         })
