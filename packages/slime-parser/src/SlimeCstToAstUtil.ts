@@ -168,6 +168,8 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
         ; (SlimeJavascriptCstToAstUtil as any).createBindingIdentifierAst = this.createBindingIdentifierAst.bind(this)
             ; (SlimeJavascriptCstToAstUtil as any).createLexicalBindingAst = this.createLexicalBindingAst.bind(this)
             ; (SlimeJavascriptCstToAstUtil as any).toProgram = this.toProgram.bind(this)
+            // [TypeScript] 添加 createDeclarationAst 拦截以支持 TypeScript 声明
+            ; (SlimeJavascriptCstToAstUtil as any).createDeclarationAst = this.createDeclarationAst.bind(this)
     }
 
     // ============================================
@@ -196,6 +198,14 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
      */
     override toProgram(cst: SubhutiCst): SlimeProgram {
         return SlimeModuleCstToAst.toProgram(cst)
+    }
+
+    /**
+     * [TypeScript] 重写 createDeclarationAst
+     * 使用 SlimeVariableCstToAst 来支持 TypeScript 声明
+     */
+    override createDeclarationAst(cst: SubhutiCst): SlimeDeclaration {
+        return SlimeVariableCstToAst.createDeclarationAst(cst)
     }
 }
 

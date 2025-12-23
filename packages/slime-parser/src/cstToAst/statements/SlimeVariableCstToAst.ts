@@ -24,6 +24,32 @@ import { SlimeIdentifierCstToAst } from "../identifier/SlimeIdentifierCstToAst.t
 export class SlimeVariableCstToAstSingle extends SlimeJavascriptVariableCstToAstSingle {
 
     /**
+     * [TypeScript] 重写 createDeclarationAst 以支持 TypeScript 声明
+     */
+    override createDeclarationAst(cst: SubhutiCst): SlimeDeclaration {
+        // Support both Declaration wrapper and direct types
+        const first = cst.name === SlimeParser.prototype.Declaration?.name || cst.name === 'Declaration'
+            ? cst.children[0]
+            : cst
+
+        const name = first.name
+
+        // TypeScript 声明
+        if (name === 'TSInterfaceDeclaration') {
+            return SlimeIdentifierCstToAst.createTSInterfaceDeclarationAst(first)
+        }
+        if (name === 'TSTypeAliasDeclaration') {
+            return SlimeIdentifierCstToAst.createTSTypeAliasDeclarationAst(first)
+        }
+        if (name === 'TSEnumDeclaration') {
+            return SlimeIdentifierCstToAst.createTSEnumDeclarationAst(first)
+        }
+
+        // 调用父类处理 JavaScript 声明
+        return super.createDeclarationAst(cst)
+    }
+
+    /**
      * [TypeScript] 重写 createLexicalBindingAst 以使用新的 createBindingIdentifierAst
      * 该方法处理类似 `const a: number = 1` 的声明
      */

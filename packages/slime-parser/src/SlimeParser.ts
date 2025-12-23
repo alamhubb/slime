@@ -18,7 +18,7 @@ import {
     type SubhutiTokenConsumerConstructor,
 } from "subhuti"
 import SlimeTokenConsumer from "./SlimeTokenConsumer.ts"
-import SlimeJavascriptParser, { type ExpressionParams } from "./deprecated/SlimeJavascriptParser.ts";
+import SlimeJavascriptParser, { type ExpressionParams, type DeclarationParams } from "./deprecated/SlimeJavascriptParser.ts";
 import { slimeJavascriptTokens } from "./deprecated/SlimeJavascriptTokens.ts";
 
 // ============================================
@@ -843,6 +843,725 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
         this.Option(() => {
             this.tokenConsumer.Assign()
             this.TSType()
+        })
+    }
+
+    // ============================================
+    // TypeScript: Phase 3 - 类型注解位置
+    // ============================================
+
+    /**
+     * [TypeScript] 重写 FunctionExpression 以支持返回类型注解
+     *
+     * FunctionExpression :
+     *     function BindingIdentifier[~Yield, ~Await]_opt ( FormalParameters[~Yield, ~Await] ) TSTypeAnnotation_opt { FunctionBody[~Yield, ~Await] }
+     */
+    @SubhutiRule
+    override FunctionExpression() {
+        this.tokenConsumer.Function()
+        this.Option(() => this.BindingIdentifier({ Yield: false, Await: false }))
+        this.tokenConsumer.LParen()
+        this.FormalParameters({ Yield: false, Await: false })
+        this.tokenConsumer.RParen()
+        // [TypeScript] 可选的返回类型注解
+        this.Option(() => this.TSTypeAnnotation())
+        this.tokenConsumer.LBrace()
+        this.FunctionBody({ Yield: false, Await: false })
+        this.tokenConsumer.RBrace()
+    }
+
+    /**
+     * [TypeScript] 重写 FunctionDeclaration 以支持返回类型注解
+     *
+     * FunctionDeclaration[Yield, Await, Default] :
+     *     function BindingIdentifier[?Yield, ?Await] ( FormalParameters[~Yield, ~Await] ) TSTypeAnnotation_opt { FunctionBody[~Yield, ~Await] }
+     *     [+Default] function ( FormalParameters[~Yield, ~Await] ) TSTypeAnnotation_opt { FunctionBody[~Yield, ~Await] }
+     */
+    @SubhutiRule
+    override FunctionDeclaration(params: DeclarationParams = {}) {
+        const { Default = false } = params
+
+        this.Or([
+            // function BindingIdentifier ( FormalParameters ) TSTypeAnnotation_opt { FunctionBody }
+            {
+                alt: () => {
+                    this.tokenConsumer.Function()
+                    this.BindingIdentifier(params)
+                    this.tokenConsumer.LParen()
+                    this.FormalParameters({ Yield: false, Await: false })
+                    this.tokenConsumer.RParen()
+                    // [TypeScript] 可选的返回类型注解
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.tokenConsumer.LBrace()
+                    this.FunctionBody({ Yield: false, Await: false })
+                    this.tokenConsumer.RBrace()
+                }
+            },
+            // [+Default] function ( FormalParameters ) TSTypeAnnotation_opt { FunctionBody }
+            ...(Default ? [{
+                alt: () => {
+                    this.tokenConsumer.Function()
+                    this.tokenConsumer.LParen()
+                    this.FormalParameters({ Yield: false, Await: false })
+                    this.tokenConsumer.RParen()
+                    // [TypeScript] 可选的返回类型注解
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.tokenConsumer.LBrace()
+                    this.FunctionBody({ Yield: false, Await: false })
+                    this.tokenConsumer.RBrace()
+                }
+            }] : [])
+        ])
+    }
+
+    /**
+     * [TypeScript] 重写 GeneratorExpression 以支持返回类型注解
+     *
+     * GeneratorExpression :
+     *     function * BindingIdentifier[+Yield, ~Await]_opt ( FormalParameters[+Yield, ~Await] ) TSTypeAnnotation_opt { GeneratorBody }
+     */
+    @SubhutiRule
+    override GeneratorExpression() {
+        this.tokenConsumer.Function()
+        this.tokenConsumer.Asterisk()
+        this.Option(() => this.BindingIdentifier({ Yield: true, Await: false }))
+        this.tokenConsumer.LParen()
+        this.FormalParameters({ Yield: true, Await: false })
+        this.tokenConsumer.RParen()
+        // [TypeScript] 可选的返回类型注解
+        this.Option(() => this.TSTypeAnnotation())
+        this.tokenConsumer.LBrace()
+        this.GeneratorBody()
+        this.tokenConsumer.RBrace()
+    }
+
+    /**
+     * [TypeScript] 重写 GeneratorDeclaration 以支持返回类型注解
+     *
+     * GeneratorDeclaration[Yield, Await, Default] :
+     *     function * BindingIdentifier[?Yield, ?Await] ( FormalParameters[+Yield, ~Await] ) TSTypeAnnotation_opt { GeneratorBody }
+     *     [+Default] function * ( FormalParameters[+Yield, ~Await] ) TSTypeAnnotation_opt { GeneratorBody }
+     */
+    @SubhutiRule
+    override GeneratorDeclaration(params: DeclarationParams = {}) {
+        const { Default = false } = params
+
+        this.Or([
+            {
+                alt: () => {
+                    this.tokenConsumer.Function()
+                    this.tokenConsumer.Asterisk()
+                    this.BindingIdentifier(params)
+                    this.tokenConsumer.LParen()
+                    this.FormalParameters({ Yield: true, Await: false })
+                    this.tokenConsumer.RParen()
+                    // [TypeScript] 可选的返回类型注解
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.tokenConsumer.LBrace()
+                    this.GeneratorBody()
+                    this.tokenConsumer.RBrace()
+                }
+            },
+            ...(Default ? [{
+                alt: () => {
+                    this.tokenConsumer.Function()
+                    this.tokenConsumer.Asterisk()
+                    this.tokenConsumer.LParen()
+                    this.FormalParameters({ Yield: true, Await: false })
+                    this.tokenConsumer.RParen()
+                    // [TypeScript] 可选的返回类型注解
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.tokenConsumer.LBrace()
+                    this.GeneratorBody()
+                    this.tokenConsumer.RBrace()
+                }
+            }] : [])
+        ])
+    }
+
+    /**
+     * [TypeScript] 重写 ArrowFunction 以支持返回类型注解
+     *
+     * ArrowFunction[In, Yield, Await] :
+     *     ArrowParameters[?Yield, ?Await] TSTypeAnnotation_opt [no LineTerminator here] => ConciseBody[?In]
+     */
+    @SubhutiRule
+    override ArrowFunction(params: ExpressionParams = {}) {
+        this.ArrowParameters(params)
+        // [TypeScript] 可选的返回类型注解
+        this.Option(() => this.TSTypeAnnotation())
+        this.assertNoLineBreak()  // [no LineTerminator here]
+        this.tokenConsumer.Arrow()
+        this.ConciseBody(params)
+    }
+
+    /**
+     * [TypeScript] 重写 AsyncFunctionExpression 以支持返回类型注解
+     *
+     * AsyncFunctionExpression :
+     *     async [no LineTerminator here] function BindingIdentifier[~Yield, +Await]_opt ( FormalParameters[~Yield, +Await] ) TSTypeAnnotation_opt { AsyncFunctionBody }
+     */
+    @SubhutiRule
+    override AsyncFunctionExpression() {
+        this.tokenConsumer.Async()
+        this.assertNoLineBreak()  // [no LineTerminator here]
+        this.tokenConsumer.Function()
+        this.Option(() => this.BindingIdentifier({ Yield: false, Await: true }))
+        this.tokenConsumer.LParen()
+        this.FormalParameters({ Yield: false, Await: true })
+        this.tokenConsumer.RParen()
+        // [TypeScript] 可选的返回类型注解
+        this.Option(() => this.TSTypeAnnotation())
+        this.tokenConsumer.LBrace()
+        this.AsyncFunctionBody()
+        this.tokenConsumer.RBrace()
+    }
+
+    /**
+     * [TypeScript] 重写 AsyncFunctionDeclaration 以支持返回类型注解
+     *
+     * AsyncFunctionDeclaration[Yield, Await, Default] :
+     *     async [no LineTerminator here] function BindingIdentifier[?Yield, ?Await] ( FormalParameters[~Yield, +Await] ) TSTypeAnnotation_opt { AsyncFunctionBody }
+     *     [+Default] async [no LineTerminator here] function ( FormalParameters[~Yield, +Await] ) TSTypeAnnotation_opt { AsyncFunctionBody }
+     */
+    @SubhutiRule
+    override AsyncFunctionDeclaration(params: DeclarationParams = {}) {
+        const { Default = false } = params
+
+        this.Or([
+            {
+                alt: () => {
+                    this.tokenConsumer.Async()
+                    this.assertNoLineBreak()
+                    this.tokenConsumer.Function()
+                    this.BindingIdentifier(params)
+                    this.tokenConsumer.LParen()
+                    this.FormalParameters({ Yield: false, Await: true })
+                    this.tokenConsumer.RParen()
+                    // [TypeScript] 可选的返回类型注解
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.tokenConsumer.LBrace()
+                    this.AsyncFunctionBody()
+                    this.tokenConsumer.RBrace()
+                }
+            },
+            ...(Default ? [{
+                alt: () => {
+                    this.tokenConsumer.Async()
+                    this.assertNoLineBreak()
+                    this.tokenConsumer.Function()
+                    this.tokenConsumer.LParen()
+                    this.FormalParameters({ Yield: false, Await: true })
+                    this.tokenConsumer.RParen()
+                    // [TypeScript] 可选的返回类型注解
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.tokenConsumer.LBrace()
+                    this.AsyncFunctionBody()
+                    this.tokenConsumer.RBrace()
+                }
+            }] : [])
+        ])
+    }
+
+    /**
+     * [TypeScript] 重写 AsyncGeneratorExpression 以支持返回类型注解
+     *
+     * AsyncGeneratorExpression :
+     *     async [no LineTerminator here] function * BindingIdentifier[+Yield, +Await]_opt ( FormalParameters[+Yield, +Await] ) TSTypeAnnotation_opt { AsyncGeneratorBody }
+     */
+    @SubhutiRule
+    override AsyncGeneratorExpression() {
+        this.tokenConsumer.Async()
+        this.assertNoLineBreak()
+        this.tokenConsumer.Function()
+        this.tokenConsumer.Asterisk()
+        this.Option(() => this.BindingIdentifier({ Yield: true, Await: true }))
+        this.tokenConsumer.LParen()
+        this.FormalParameters({ Yield: true, Await: true })
+        this.tokenConsumer.RParen()
+        // [TypeScript] 可选的返回类型注解
+        this.Option(() => this.TSTypeAnnotation())
+        this.tokenConsumer.LBrace()
+        this.AsyncGeneratorBody()
+        this.tokenConsumer.RBrace()
+    }
+
+    /**
+     * [TypeScript] 重写 AsyncGeneratorDeclaration 以支持返回类型注解
+     *
+     * AsyncGeneratorDeclaration[Yield, Await, Default] :
+     *     async [no LineTerminator here] function * BindingIdentifier[?Yield, ?Await] ( FormalParameters[+Yield, +Await] ) TSTypeAnnotation_opt { AsyncGeneratorBody }
+     *     [+Default] async [no LineTerminator here] function * ( FormalParameters[+Yield, +Await] ) TSTypeAnnotation_opt { AsyncGeneratorBody }
+     */
+    @SubhutiRule
+    override AsyncGeneratorDeclaration(params: DeclarationParams = {}) {
+        const { Default = false } = params
+
+        this.Or([
+            {
+                alt: () => {
+                    this.tokenConsumer.Async()
+                    this.assertNoLineBreak()
+                    this.tokenConsumer.Function()
+                    this.tokenConsumer.Asterisk()
+                    this.BindingIdentifier(params)
+                    this.tokenConsumer.LParen()
+                    this.FormalParameters({ Yield: true, Await: true })
+                    this.tokenConsumer.RParen()
+                    // [TypeScript] 可选的返回类型注解
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.tokenConsumer.LBrace()
+                    this.AsyncGeneratorBody()
+                    this.tokenConsumer.RBrace()
+                }
+            },
+            ...(Default ? [{
+                alt: () => {
+                    this.tokenConsumer.Async()
+                    this.assertNoLineBreak()
+                    this.tokenConsumer.Function()
+                    this.tokenConsumer.Asterisk()
+                    this.tokenConsumer.LParen()
+                    this.FormalParameters({ Yield: true, Await: true })
+                    this.tokenConsumer.RParen()
+                    // [TypeScript] 可选的返回类型注解
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.tokenConsumer.LBrace()
+                    this.AsyncGeneratorBody()
+                    this.tokenConsumer.RBrace()
+                }
+            }] : [])
+        ])
+    }
+
+    /**
+     * [TypeScript] 重写 AsyncArrowFunction 以支持返回类型注解
+     *
+     * AsyncArrowFunction[In, Yield, Await] :
+     *     async [no LineTerminator here] AsyncArrowBindingIdentifier[?Yield] TSTypeAnnotation_opt [no LineTerminator here] => AsyncConciseBody[?In]
+     *     CoverCallExpressionAndAsyncArrowHead[?Yield, ?Await] TSTypeAnnotation_opt [no LineTerminator here] => AsyncConciseBody[?In]
+     */
+    @SubhutiRule
+    override AsyncArrowFunction(params: ExpressionParams = {}) {
+        this.Or([
+            // async [no LineTerminator here] AsyncArrowBindingIdentifier TSTypeAnnotation_opt [no LineTerminator here] => AsyncConciseBody
+            {
+                alt: () => {
+                    this.tokenConsumer.Async()
+                    this.assertNoLineBreak()
+                    this.AsyncArrowBindingIdentifier(params)
+                    // [TypeScript] 可选的返回类型注解
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.assertNoLineBreak()
+                    this.tokenConsumer.Arrow()
+                    this.AsyncConciseBody(params)
+                }
+            },
+            // CoverCallExpressionAndAsyncArrowHead TSTypeAnnotation_opt [no LineTerminator here] => AsyncConciseBody
+            {
+                alt: () => {
+                    this.CoverCallExpressionAndAsyncArrowHead(params)
+                    // [TypeScript] 可选的返回类型注解
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.assertNoLineBreak()
+                    this.tokenConsumer.Arrow()
+                    this.AsyncConciseBody(params)
+                }
+            }
+        ])
+    }
+
+    /**
+     * [TypeScript] 重写 MethodDefinition 以支持返回类型注解
+     *
+     * MethodDefinition[Yield, Await] :
+     *     ClassElementName[?Yield, ?Await] ( UniqueFormalParameters[~Yield, ~Await] ) TSTypeAnnotation_opt { FunctionBody[~Yield, ~Await] }
+     *     GeneratorMethod[?Yield, ?Await]
+     *     AsyncMethod[?Yield, ?Await]
+     *     AsyncGeneratorMethod[?Yield, ?Await]
+     *     get ClassElementName[?Yield, ?Await] ( ) TSTypeAnnotation_opt { FunctionBody[~Yield, ~Await] }
+     *     set ClassElementName[?Yield, ?Await] ( PropertySetParameterList ) { FunctionBody[~Yield, ~Await] }
+     */
+    @SubhutiRule
+    override MethodDefinition(params: ExpressionParams = {}) {
+        this.Or([
+            // AsyncGeneratorMethod (最具体，必须先匹配)
+            { alt: () => this.AsyncGeneratorMethod(params) },
+            // AsyncMethod
+            { alt: () => this.AsyncMethod(params) },
+            // GeneratorMethod
+            { alt: () => this.GeneratorMethod(params) },
+            // get ClassElementName ( ) TSTypeAnnotation_opt { FunctionBody }
+            {
+                alt: () => {
+                    this.tokenConsumer.Get()
+                    this.ClassElementName(params)
+                    this.tokenConsumer.LParen()
+                    this.tokenConsumer.RParen()
+                    // [TypeScript] 可选的返回类型注解
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.tokenConsumer.LBrace()
+                    this.FunctionBody({ Yield: false, Await: false })
+                    this.tokenConsumer.RBrace()
+                }
+            },
+            // set ClassElementName ( PropertySetParameterList ) { FunctionBody }
+            {
+                alt: () => {
+                    this.tokenConsumer.Set()
+                    this.ClassElementName(params)
+                    this.tokenConsumer.LParen()
+                    this.PropertySetParameterList()
+                    this.tokenConsumer.RParen()
+                    this.tokenConsumer.LBrace()
+                    this.FunctionBody({ Yield: false, Await: false })
+                    this.tokenConsumer.RBrace()
+                }
+            },
+            // ClassElementName ( UniqueFormalParameters ) TSTypeAnnotation_opt { FunctionBody }
+            {
+                alt: () => {
+                    this.ClassElementName(params)
+                    this.tokenConsumer.LParen()
+                    this.UniqueFormalParameters({ Yield: false, Await: false })
+                    this.tokenConsumer.RParen()
+                    // [TypeScript] 可选的返回类型注解
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.tokenConsumer.LBrace()
+                    this.FunctionBody({ Yield: false, Await: false })
+                    this.tokenConsumer.RBrace()
+                }
+            }
+        ])
+    }
+
+    /**
+     * [TypeScript] 重写 GeneratorMethod 以支持返回类型注解
+     *
+     * GeneratorMethod[Yield, Await] :
+     *     * ClassElementName[?Yield, ?Await] ( UniqueFormalParameters[+Yield, ~Await] ) TSTypeAnnotation_opt { GeneratorBody }
+     */
+    @SubhutiRule
+    override GeneratorMethod(params: ExpressionParams = {}) {
+        this.tokenConsumer.Asterisk()
+        this.ClassElementName(params)
+        this.tokenConsumer.LParen()
+        this.UniqueFormalParameters({ Yield: true, Await: false })
+        this.tokenConsumer.RParen()
+        // [TypeScript] 可选的返回类型注解
+        this.Option(() => this.TSTypeAnnotation())
+        this.tokenConsumer.LBrace()
+        this.GeneratorBody()
+        this.tokenConsumer.RBrace()
+    }
+
+    /**
+     * [TypeScript] 重写 AsyncMethod 以支持返回类型注解
+     *
+     * AsyncMethod[Yield, Await] :
+     *     async [no LineTerminator here] ClassElementName[?Yield, ?Await] ( UniqueFormalParameters[~Yield, +Await] ) TSTypeAnnotation_opt { AsyncFunctionBody }
+     */
+    @SubhutiRule
+    override AsyncMethod(params: ExpressionParams = {}) {
+        this.tokenConsumer.Async()
+        this.assertNoLineBreak()
+        this.ClassElementName(params)
+        this.tokenConsumer.LParen()
+        this.UniqueFormalParameters({ Yield: false, Await: true })
+        this.tokenConsumer.RParen()
+        // [TypeScript] 可选的返回类型注解
+        this.Option(() => this.TSTypeAnnotation())
+        this.tokenConsumer.LBrace()
+        this.AsyncFunctionBody()
+        this.tokenConsumer.RBrace()
+    }
+
+    /**
+     * [TypeScript] 重写 AsyncGeneratorMethod 以支持返回类型注解
+     *
+     * AsyncGeneratorMethod[Yield, Await] :
+     *     async [no LineTerminator here] * ClassElementName[?Yield, ?Await] ( UniqueFormalParameters[+Yield, +Await] ) TSTypeAnnotation_opt { AsyncGeneratorBody }
+     */
+    @SubhutiRule
+    override AsyncGeneratorMethod(params: ExpressionParams = {}) {
+        this.tokenConsumer.Async()
+        this.assertNoLineBreak()
+        this.tokenConsumer.Asterisk()
+        this.ClassElementName(params)
+        this.tokenConsumer.LParen()
+        this.UniqueFormalParameters({ Yield: true, Await: true })
+        this.tokenConsumer.RParen()
+        // [TypeScript] 可选的返回类型注解
+        this.Option(() => this.TSTypeAnnotation())
+        this.tokenConsumer.LBrace()
+        this.AsyncGeneratorBody()
+        this.tokenConsumer.RBrace()
+    }
+
+    /**
+     * [TypeScript] 重写 ClassElement 以支持可见性修饰符
+     *
+     * ClassElement[Yield, Await] :
+     *     TSAccessibilityModifier_opt MethodDefinition[?Yield, ?Await]
+     *     TSAccessibilityModifier_opt static MethodDefinition[?Yield, ?Await]
+     *     TSAccessibilityModifier_opt FieldDefinition[?Yield, ?Await] ;
+     *     TSAccessibilityModifier_opt static FieldDefinition[?Yield, ?Await] ;
+     *     ClassStaticBlock
+     *     ;
+     *
+     * TSAccessibilityModifier :
+     *     public | private | protected | readonly
+     */
+    @SubhutiRule
+    override ClassElement(params: ExpressionParams = {}) {
+        this.Or([
+            // MethodDefinition (可能带修饰符)
+            {
+                alt: () => {
+                    // [TypeScript] 可选的可见性修饰符
+                    this.Many(() => this.TSAccessibilityModifier())
+                    this.MethodDefinition(params)
+                }
+            },
+            // static MethodDefinition (可能带修饰符)
+            {
+                alt: () => {
+                    // [TypeScript] 可选的可见性修饰符
+                    this.Many(() => this.TSAccessibilityModifier())
+                    this.tokenConsumer.Static()
+                    this.MethodDefinition(params)
+                }
+            },
+            // FieldDefinition ; (可能带修饰符)
+            {
+                alt: () => {
+                    // [TypeScript] 可选的可见性修饰符
+                    this.Many(() => this.TSAccessibilityModifier())
+                    this.FieldDefinition(params)
+                    this.SemicolonASI()
+                }
+            },
+            // static FieldDefinition ; (可能带修饰符)
+            {
+                alt: () => {
+                    // [TypeScript] 可选的可见性修饰符
+                    this.Many(() => this.TSAccessibilityModifier())
+                    this.tokenConsumer.Static()
+                    this.FieldDefinition(params)
+                    this.SemicolonASI()
+                }
+            },
+            // ClassStaticBlock
+            { alt: () => this.ClassStaticBlock() },
+            // ;
+            { alt: () => this.tokenConsumer.Semicolon() }
+        ])
+    }
+
+    /**
+     * [TypeScript] 可见性修饰符
+     *
+     * TSAccessibilityModifier :
+     *     public | private | protected | readonly
+     */
+    @SubhutiRule
+    TSAccessibilityModifier() {
+        this.Or([
+            { alt: () => this.tokenConsumer.TSPublic() },
+            { alt: () => this.tokenConsumer.TSPrivate() },
+            { alt: () => this.tokenConsumer.TSProtected() },
+            { alt: () => this.tokenConsumer.TSReadonly() },
+        ])
+    }
+
+    /**
+     * [TypeScript] 重写 FieldDefinition 以支持类型注解
+     *
+     * FieldDefinition[Yield, Await] :
+     *     ClassElementName[?Yield, ?Await] TSTypeAnnotation_opt Initializer[+In, ?Yield, ?Await]_opt
+     */
+    @SubhutiRule
+    override FieldDefinition(params: ExpressionParams = {}) {
+        this.ClassElementName(params)
+        // [TypeScript] 可选的类型注解
+        this.Option(() => this.TSTypeAnnotation())
+        // Initializer 中的 await/yield 不能作为表达式使用，只能作为标识符
+        this.Option(() => this.Initializer({ ...params, In: true, Yield: false, Await: false }))
+    }
+
+    // ============================================
+    // TypeScript: Phase 4 - 类型声明
+    // ============================================
+
+    /**
+     * [TypeScript] 重写 Declaration 以支持 TypeScript 声明
+     *
+     * Declaration[Yield, Await] :
+     *     HoistableDeclaration[?Yield, ?Await, ~Default]
+     *     ClassDeclaration[?Yield, ?Await, ~Default]
+     *     LexicalDeclaration[+In, ?Yield, ?Await]
+     *     [TypeScript] TSInterfaceDeclaration
+     *     [TypeScript] TSTypeAliasDeclaration
+     *     [TypeScript] TSEnumDeclaration
+     */
+    @SubhutiRule
+    override Declaration(params: DeclarationParams = {}) {
+        this.Or([
+            // TypeScript 声明（必须在 JavaScript 声明之前，因为 interface/type/enum 是软关键字）
+            { alt: () => this.TSInterfaceDeclaration() },
+            { alt: () => this.TSTypeAliasDeclaration() },
+            { alt: () => this.TSEnumDeclaration() },
+            // JavaScript 声明
+            { alt: () => this.HoistableDeclaration({ ...params, Default: false }) },
+            { alt: () => this.ClassDeclaration({ ...params, Default: false }) },
+            { alt: () => this.LexicalDeclaration({ ...params, In: true }) }
+        ])
+    }
+
+    /**
+     * [TypeScript] 接口声明
+     *
+     * TSInterfaceDeclaration :
+     *     interface Identifier TSTypeParameterDeclaration_opt TSInterfaceExtends_opt TSInterfaceBody
+     *
+     * TSInterfaceExtends :
+     *     extends TSExpressionWithTypeArguments (, TSExpressionWithTypeArguments)*
+     *
+     * TSInterfaceBody :
+     *     { TSTypeMembers_opt }
+     */
+    @SubhutiRule
+    TSInterfaceDeclaration() {
+        this.tokenConsumer.TSInterface()
+        this.Identifier()
+        // 可选的类型参数
+        this.Option(() => this.TSTypeParameterDeclaration())
+        // 可选的 extends 子句
+        this.Option(() => this.TSInterfaceExtends())
+        // 接口体
+        this.TSInterfaceBody()
+    }
+
+    /**
+     * [TypeScript] 接口继承子句
+     *
+     * TSInterfaceExtends :
+     *     extends TSExpressionWithTypeArguments (, TSExpressionWithTypeArguments)*
+     */
+    @SubhutiRule
+    TSInterfaceExtends() {
+        this.tokenConsumer.Extends()
+        // 至少一个父接口
+        this.TSExpressionWithTypeArguments()
+        // 可选的更多父接口
+        this.Many(() => {
+            this.tokenConsumer.Comma()
+            this.TSExpressionWithTypeArguments()
+        })
+    }
+
+    /**
+     * [TypeScript] 带类型参数的表达式
+     *
+     * TSExpressionWithTypeArguments :
+     *     TSTypeName TSTypeParameterInstantiation_opt
+     */
+    @SubhutiRule
+    TSExpressionWithTypeArguments() {
+        this.TSTypeName()
+        this.Option(() => this.TSTypeParameterInstantiation())
+    }
+
+    /**
+     * [TypeScript] 接口体
+     *
+     * TSInterfaceBody :
+     *     { TSTypeMembers_opt }
+     */
+    @SubhutiRule
+    TSInterfaceBody() {
+        this.tokenConsumer.LBrace()
+        // 可选的类型成员列表（复用 TSTypeLiteral 的成员解析逻辑）
+        this.Option(() => {
+            this.TSTypeMember()
+            this.Many(() => {
+                // 成员分隔符：分号或逗号
+                this.Or([
+                    { alt: () => this.tokenConsumer.Semicolon() },
+                    { alt: () => this.tokenConsumer.Comma() },
+                ])
+                // 可选的下一个成员（允许尾随分隔符）
+                this.Option(() => this.TSTypeMember())
+            })
+        })
+        this.tokenConsumer.RBrace()
+    }
+
+    /**
+     * [TypeScript] 类型别名声明
+     *
+     * TSTypeAliasDeclaration :
+     *     type Identifier TSTypeParameterDeclaration_opt = TSType ;_opt
+     */
+    @SubhutiRule
+    TSTypeAliasDeclaration() {
+        this.tokenConsumer.TSType()
+        this.Identifier()
+        // 可选的类型参数
+        this.Option(() => this.TSTypeParameterDeclaration())
+        this.tokenConsumer.Assign()
+        this.TSType()
+        // 可选的分号
+        this.Option(() => this.tokenConsumer.Semicolon())
+    }
+
+    /**
+     * [TypeScript] 枚举声明
+     *
+     * TSEnumDeclaration :
+     *     const_opt enum Identifier { TSEnumMembers_opt }
+     *
+     * TSEnumMembers :
+     *     TSEnumMember
+     *     TSEnumMembers , TSEnumMember
+     *     TSEnumMembers ,
+     */
+    @SubhutiRule
+    TSEnumDeclaration() {
+        // 可选的 const 修饰符
+        this.Option(() => this.tokenConsumer.Const())
+        this.tokenConsumer.Enum()
+        this.Identifier()
+        this.tokenConsumer.LBrace()
+        // 可选的枚举成员列表
+        this.Option(() => {
+            this.TSEnumMember()
+            this.Many(() => {
+                this.tokenConsumer.Comma()
+                // 可选的下一个成员（允许尾随逗号）
+                this.Option(() => this.TSEnumMember())
+            })
+        })
+        this.tokenConsumer.RBrace()
+    }
+
+    /**
+     * [TypeScript] 枚举成员
+     *
+     * TSEnumMember :
+     *     PropertyName (= AssignmentExpression)?
+     */
+    @SubhutiRule
+    TSEnumMember() {
+        // 枚举成员名（可以是标识符或字符串字面量）
+        this.Or([
+            { alt: () => this.Identifier() },
+            { alt: () => this.tokenConsumer.StringLiteral() },
+        ])
+        // 可选的初始化器
+        this.Option(() => {
+            this.tokenConsumer.Assign()
+            this.AssignmentExpression({ In: true, Yield: false, Await: false })
         })
     }
 }
