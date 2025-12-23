@@ -13,7 +13,7 @@ import {
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
-import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptLiteralCstToAstSingle {
@@ -138,7 +138,7 @@ export class SlimeJavascriptLiteralCstToAstSingle {
 
 
     createLiteralAst(cst: SubhutiCst): SlimeJavascriptLiteral {
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.Literal?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.Literal?.name);
         const firstChild = cst.children[0]
         let value: SlimeJavascriptLiteral
 
@@ -239,11 +239,11 @@ export class SlimeJavascriptLiteralCstToAstSingle {
                 quasis.push(SlimeJavascriptCreateUtils.createTemplateElement(false, raw, cooked, child.loc))
             } else if (child.name === SlimeJavascriptParser.prototype.Expression?.name ||
                 child.name === 'Expression') {
-                expressions.push(SlimeJavascriptCstToAstUtil.createExpressionAst(child))
+                expressions.push(SlimeCstToAstUtil.createExpressionAst(child))
             } else if (child.name === SlimeJavascriptParser.prototype.TemplateMiddleList?.name ||
                 child.name === 'TemplateMiddleList') {
                 // 递归处理嵌套�?TemplateMiddleList
-                SlimeJavascriptCstToAstUtil.processTemplateMiddleList(child, quasis, expressions)
+                SlimeCstToAstUtil.processTemplateMiddleList(child, quasis, expressions)
             }
         }
     }
@@ -263,7 +263,7 @@ export class SlimeJavascriptLiteralCstToAstSingle {
 
         // 情况2：TemplateMiddleList -> 有更多插�?
         if (first.name === SlimeJavascriptParser.prototype.TemplateMiddleList?.name) {
-            SlimeJavascriptCstToAstUtil.processTemplateMiddleList(first, quasis, expressions)
+            SlimeCstToAstUtil.processTemplateMiddleList(first, quasis, expressions)
 
             // 然后处理TemplateTail
             if (cst.children[1] && cst.children[1].name === SlimeJavascriptTokenConsumer.prototype.TemplateTail?.name) {
@@ -278,7 +278,7 @@ export class SlimeJavascriptLiteralCstToAstSingle {
 
     // 模板字符串处�?
     createTemplateLiteralAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.TemplateLiteral?.name)
+        SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.TemplateLiteral?.name)
 
         const first = cst.children[0]
 
@@ -318,12 +318,12 @@ export class SlimeJavascriptLiteralCstToAstSingle {
             // Expression
             else if (child.name === SlimeJavascriptParser.prototype.Expression?.name ||
                 child.name === 'Expression') {
-                expressions.push(SlimeJavascriptCstToAstUtil.createExpressionAst(child))
+                expressions.push(SlimeCstToAstUtil.createExpressionAst(child))
             }
             // TemplateSpans
             else if (child.name === SlimeJavascriptParser.prototype.TemplateSpans?.name ||
                 child.name === 'TemplateSpans') {
-                SlimeJavascriptCstToAstUtil.processTemplateSpans(child, quasis, expressions)
+                SlimeCstToAstUtil.processTemplateSpans(child, quasis, expressions)
             }
         }
 

@@ -12,21 +12,21 @@ import {
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
-import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptBinaryExpressionCstToAstSingle {
     createLogicalORExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.LogicalORExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.LogicalORExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?LogicalExpression
             // 支持多个运算符：a || b || c
-            let left = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
 
             for (let i = 1; i < cst.children.length; i += 2) {
                 const operatorNode = cst.children[i]
                 const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
-                const right = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[i + 1])
+                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
                     type: SlimeJavascriptAstTypeName.LogicalExpression,
@@ -38,20 +38,20 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
             }
             return left
         }
-        return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
     createLogicalANDExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.LogicalANDExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.LogicalANDExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?LogicalExpression
             // 支持多个运算符：a && b && c
-            let left = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
 
             for (let i = 1; i < cst.children.length; i += 2) {
                 const operatorNode = cst.children[i]
                 const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
-                const right = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[i + 1])
+                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
                     type: SlimeJavascriptAstTypeName.LogicalExpression,
@@ -63,19 +63,19 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
             }
             return left
         }
-        return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
     createBitwiseORExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BitwiseORExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BitwiseORExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression（支持链式：a | b | c�?
-            let left = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
 
             for (let i = 1; i < cst.children.length; i += 2) {
                 const operatorNode = cst.children[i]
                 const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
-                const right = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[i + 1])
+                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
                     type: SlimeJavascriptAstTypeName.BinaryExpression,
@@ -87,19 +87,19 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
             }
             return left
         }
-        return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
     createBitwiseXORExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BitwiseXORExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BitwiseXORExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression（支持链式：a ^ b ^ c�?
-            let left = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
 
             for (let i = 1; i < cst.children.length; i += 2) {
                 const operatorNode = cst.children[i]
                 const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
-                const right = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[i + 1])
+                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
                     type: SlimeJavascriptAstTypeName.BinaryExpression,
@@ -111,19 +111,19 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
             }
             return left
         }
-        return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
     createBitwiseANDExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BitwiseANDExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BitwiseANDExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression（支持链式：a & b & c�?
-            let left = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
 
             for (let i = 1; i < cst.children.length; i += 2) {
                 const operatorNode = cst.children[i]
                 const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
-                const right = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[i + 1])
+                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
                     type: SlimeJavascriptAstTypeName.BinaryExpression,
@@ -135,17 +135,17 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
             }
             return left
         }
-        return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
 
     createEqualityExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.EqualityExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.EqualityExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
-            const left = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+            const left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
             const operator = cst.children[1].value as any  // ===, !==, ==, != 运算�?
-            const right = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[2])
+            const right = SlimeCstToAstUtil.createExpressionAst(cst.children[2])
 
             return {
                 type: SlimeJavascriptAstTypeName.BinaryExpression,
@@ -155,22 +155,22 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
                 loc: cst.loc
             } as any
         }
-        return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
 
     createRelationalExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.RelationalExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.RelationalExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
             // 支持多个运算符：x < y < z => BinaryExpression(BinaryExpression(x, <, y), <, z)
-            let left = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
 
             // 循环处理剩余�?(operator, operand) �?
             for (let i = 1; i < cst.children.length; i += 2) {
                 const operatorNode = cst.children[i]
                 const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
-                const right = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[i + 1])
+                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
                     type: SlimeJavascriptAstTypeName.BinaryExpression,
@@ -182,22 +182,22 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
             }
             return left
         }
-        return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
 
     createShiftExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ShiftExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ShiftExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
             // 支持多个运算符：x << y << z => BinaryExpression(BinaryExpression(x, <<, y), <<, z)
-            let left = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
 
             // 循环处理剩余�?(operator, operand) �?
             for (let i = 1; i < cst.children.length; i += 2) {
                 const operatorNode = cst.children[i]
                 const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
-                const right = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[i + 1])
+                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
                     type: SlimeJavascriptAstTypeName.BinaryExpression,
@@ -209,16 +209,16 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
             }
             return left
         }
-        return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
 
     createAdditiveExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.AdditiveExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.AdditiveExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
             // 支持多个运算符：x + y + z => BinaryExpression(BinaryExpression(x, +, y), +, z)
-            let left = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
 
             // 循环处理剩余�?(operator, operand) �?
             // CST结构: [operand, operator, operand, operator, operand, ...]
@@ -227,7 +227,7 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
                 const operatorNode = cst.children[i]
                 const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
 
-                const right = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[i + 1])
+                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
                     type: SlimeJavascriptAstTypeName.BinaryExpression,
@@ -240,15 +240,15 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
 
             return left
         }
-        return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
     createMultiplicativeExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.MultiplicativeExpression?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.MultiplicativeExpression?.name);
         if (cst.children.length > 1) {
             // 有运算符，创�?BinaryExpression
             // 支持多个运算符：a * b * c => BinaryExpression(BinaryExpression(a, *, b), *, c)
-            let left = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+            let left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
 
             // 循环处理剩余�?(operator, operand) �?
             for (let i = 1; i < cst.children.length; i += 2) {
@@ -256,7 +256,7 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
                 const operatorNode = cst.children[i]
                 const operator = operatorNode.children ? operatorNode.children[0].value : operatorNode.value
 
-                const right = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[i + 1])
+                const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
 
                 left = {
                     type: SlimeJavascriptAstTypeName.BinaryExpression,
@@ -269,7 +269,7 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
 
             return left
         }
-        return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+        return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
     }
 
 
@@ -289,13 +289,13 @@ export class SlimeJavascriptBinaryExpressionCstToAstSingle {
     createExponentiationExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
         // ExponentiationExpression -> UnaryExpression | UpdateExpression ** ExponentiationExpression
         if (cst.children.length === 1) {
-            return SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+            return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
         }
 
         // 有多个子节点，右结合：a ** b ** c = a ** (b ** c)
-        const left = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+        const left = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
         const operator = cst.children[1]  // ** token
-        const right = SlimeJavascriptCstToAstUtil.createExponentiationExpressionAst(cst.children[2])  // 递归处理右侧
+        const right = SlimeCstToAstUtil.createExponentiationExpressionAst(cst.children[2])  // 递归处理右侧
         return {
             type: SlimeJavascriptAstTypeName.BinaryExpression,
             operator: '**',

@@ -11,14 +11,14 @@ import {
 } from "slime-ast";
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
 
-import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptMethodDefinitionCstToAstSingle {
 
     createMethodDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
         // 注意：参数顺序是 (staticCst, cst)，与调用保持一�?
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.MethodDefinition?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.MethodDefinition?.name);
         const first = cst.children?.[0]
 
         if (!first) {
@@ -27,40 +27,40 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
 
         if (first.name === 'ClassElementName') {
             // MethodDefinition 分支: ClassElementName ( UniqueFormalParameters ) { FunctionBody }
-            return SlimeJavascriptCstToAstUtil.createMethodDefinitionClassElementNameAst(staticCst, cst)
+            return SlimeCstToAstUtil.createMethodDefinitionClassElementNameAst(staticCst, cst)
         } else if (first.name === 'Get') {
             // MethodDefinition 分支: get ClassElementName ( ) { FunctionBody }
-            return SlimeJavascriptCstToAstUtil.createMethodDefinitionGetterMethodAst(staticCst, cst)
+            return SlimeCstToAstUtil.createMethodDefinitionGetterMethodAst(staticCst, cst)
         } else if (first.name === 'Set') {
             // MethodDefinition 分支: set ClassElementName ( PropertySetParameterList ) { FunctionBody }
-            return SlimeJavascriptCstToAstUtil.createMethodDefinitionSetterMethodAst(staticCst, cst)
+            return SlimeCstToAstUtil.createMethodDefinitionSetterMethodAst(staticCst, cst)
         } else if (first.name === SlimeJavascriptParser.prototype.GeneratorMethod?.name || first.name === 'GeneratorMethod') {
             // MethodDefinition 分支: GeneratorMethod
-            return SlimeJavascriptCstToAstUtil.createMethodDefinitionGeneratorMethodAst(staticCst, first)
+            return SlimeCstToAstUtil.createMethodDefinitionGeneratorMethodAst(staticCst, first)
         } else if (first.name === 'AsyncMethod' || first.name === SlimeJavascriptParser.prototype.AsyncMethod?.name) {
             // MethodDefinition 分支: AsyncMethod
-            return SlimeJavascriptCstToAstUtil.createMethodDefinitionAsyncMethodAst(staticCst, first)
+            return SlimeCstToAstUtil.createMethodDefinitionAsyncMethodAst(staticCst, first)
         } else if (first.name === 'AsyncGeneratorMethod' || first.name === SlimeJavascriptParser.prototype.AsyncGeneratorMethod?.name) {
             // MethodDefinition 分支: AsyncGeneratorMethod
-            return SlimeJavascriptCstToAstUtil.createMethodDefinitionAsyncGeneratorMethodAst(staticCst, first)
+            return SlimeCstToAstUtil.createMethodDefinitionAsyncGeneratorMethodAst(staticCst, first)
         } else if (first.name === 'Asterisk') {
             // MethodDefinition 分支: * ClassElementName ( UniqueFormalParameters ) { GeneratorBody }
-            return SlimeJavascriptCstToAstUtil.createMethodDefinitionGeneratorMethodAst(staticCst, cst)
+            return SlimeCstToAstUtil.createMethodDefinitionGeneratorMethodAst(staticCst, cst)
         } else if (first.name === 'Async') {
             // MethodDefinition 分支: async [no LineTerminator here] ClassElementName ( ... ) { ... }
-            return SlimeJavascriptCstToAstUtil.createMethodDefinitionAsyncMethodFromChildren(staticCst, cst)
+            return SlimeCstToAstUtil.createMethodDefinitionAsyncMethodFromChildren(staticCst, cst)
         } else if (first.name === 'IdentifierName' || first.name === 'IdentifierName' ||
             first.name === 'PropertyName' || first.name === 'LiteralPropertyName') {
             // 检查是否是 getter/setter
             if (first.value === 'get' && cst.children[1]?.name === 'ClassElementName') {
                 // getter方法：get ClassElementName ( ) { FunctionBody }
-                return SlimeJavascriptCstToAstUtil.createMethodDefinitionGetterMethodFromIdentifier(staticCst, cst)
+                return SlimeCstToAstUtil.createMethodDefinitionGetterMethodFromIdentifier(staticCst, cst)
             } else if (first.value === 'set' && cst.children[1]?.name === 'ClassElementName') {
                 // setter方法：set ClassElementName ( PropertySetParameterList ) { FunctionBody }
-                return SlimeJavascriptCstToAstUtil.createMethodDefinitionSetterMethodFromIdentifier(staticCst, cst)
+                return SlimeCstToAstUtil.createMethodDefinitionSetterMethodFromIdentifier(staticCst, cst)
             }
             // MethodDefinition 分支: 直接的标识符作为方法名
-            return SlimeJavascriptCstToAstUtil.createMethodDefinitionMethodDefinitionFromIdentifier(staticCst, cst)
+            return SlimeCstToAstUtil.createMethodDefinitionMethodDefinitionFromIdentifier(staticCst, cst)
         } else {
             throw new Error('不支持的类型: ' + first.name)
         }
@@ -79,7 +79,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
             ch.name === 'PropertyName'
         )
 
-        const key = classElementName ? SlimeJavascriptCstToAstUtil.createClassElementNameAst(classElementName) : null
+        const key = classElementName ? SlimeCstToAstUtil.createClassElementNameAst(classElementName) : null
 
         // 查找参数
         const formalParams = cst.children?.find(ch =>
@@ -88,7 +88,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
             ch.name === SlimeJavascriptParser.prototype.FormalParameters?.name ||
             ch.name === 'FormalParameters'
         )
-        const params = formalParams ? SlimeJavascriptCstToAstUtil.createFormalParametersAst(formalParams) : []
+        const params = formalParams ? SlimeCstToAstUtil.createFormalParametersAst(formalParams) : []
 
         // 查找函数�?
         const bodyNode = cst.children?.find(ch =>
@@ -96,7 +96,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
             ch.name === 'AsyncGeneratorBody' || ch.name === 'FunctionBody' ||
             ch.name === SlimeJavascriptParser.prototype.FunctionBody?.name
         )
-        const bodyStatements = bodyNode ? SlimeJavascriptCstToAstUtil.createFunctionBodyAst(bodyNode) : []
+        const bodyStatements = bodyNode ? SlimeCstToAstUtil.createFunctionBodyAst(bodyNode) : []
         const body = SlimeJavascriptCreateUtils.createBlockStatement(bodyStatements, bodyNode?.loc)
 
         const value: SlimeJavascriptFunctionExpression = {
@@ -120,7 +120,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
      * GeneratorMethod -> * ClassElementName ( UniqueFormalParameters ) { GeneratorBody }
      */
     createGeneratorMethodAst(cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptCstToAstUtil.createMethodDefinitionAstInternal(cst, 'method', true, false)
+        return SlimeCstToAstUtil.createMethodDefinitionAstInternal(cst, 'method', true, false)
     }
 
 
@@ -129,7 +129,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
      * AsyncMethod -> async ClassElementName ( UniqueFormalParameters ) { AsyncFunctionBody }
      */
     createAsyncMethodAst(cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptCstToAstUtil.createMethodDefinitionAstInternal(cst, 'method', false, true)
+        return SlimeCstToAstUtil.createMethodDefinitionAstInternal(cst, 'method', false, true)
     }
 
 
@@ -137,7 +137,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
      * AsyncGeneratorMethod CST �?AST
      */
     createAsyncGeneratorMethodAst(cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptCstToAstUtil.createMethodDefinitionAstInternal(cst, 'method', true, true)
+        return SlimeCstToAstUtil.createMethodDefinitionAstInternal(cst, 'method', true, true)
     }
 
 
@@ -171,8 +171,8 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         }
 
         const classElementNameCst = children[i++]
-        const key = SlimeJavascriptCstToAstUtil.createClassElementNameAst(classElementNameCst)
-        const isComputed = SlimeJavascriptCstToAstUtil.isComputedPropertyName(classElementNameCst)
+        const key = SlimeCstToAstUtil.createClassElementNameAst(classElementNameCst)
+        const isComputed = SlimeCstToAstUtil.isComputedPropertyName(classElementNameCst)
 
         // LParen - 保存 token 信息
         if (children[i]?.name === 'LParen') {
@@ -193,7 +193,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // FunctionBody
         let body: SlimeJavascriptBlockStatement
         if (children[i]?.name === 'FunctionBody' || children[i]?.name === SlimeJavascriptParser.prototype.FunctionBody?.name) {
-            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(children[i])
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(children[i])
             i++
             // RBrace
             if (children[i]?.name === 'RBrace') {
@@ -213,7 +213,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
             undefined, undefined, undefined, lParenToken, rParenToken, lBraceToken, rBraceToken
         )
 
-        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'get', isComputed, SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, getToken)
+        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'get', isComputed, SlimeCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, getToken)
 
         return methodDef
     }
@@ -249,8 +249,8 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         }
 
         const classElementNameCst = children[i++]
-        const key = SlimeJavascriptCstToAstUtil.createClassElementNameAst(classElementNameCst)
-        const isComputed = SlimeJavascriptCstToAstUtil.isComputedPropertyName(classElementNameCst)
+        const key = SlimeCstToAstUtil.createClassElementNameAst(classElementNameCst)
+        const isComputed = SlimeCstToAstUtil.isComputedPropertyName(classElementNameCst)
 
         // LParen - 保存 token 信息
         if (children[i]?.name === 'LParen') {
@@ -261,7 +261,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // PropertySetParameterList
         let params: SlimeJavascriptPattern[] = []
         if (children[i]?.name === 'PropertySetParameterList' || children[i]?.name === SlimeJavascriptParser.prototype.PropertySetParameterList?.name) {
-            params = SlimeJavascriptCstToAstUtil.createPropertySetParameterListAst(children[i])
+            params = SlimeCstToAstUtil.createPropertySetParameterListAst(children[i])
             i++
         }
 
@@ -279,7 +279,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // FunctionBody
         let body: SlimeJavascriptBlockStatement
         if (children[i]?.name === 'FunctionBody' || children[i]?.name === SlimeJavascriptParser.prototype.FunctionBody?.name) {
-            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(children[i])
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(children[i])
             i++
             // RBrace
             if (children[i]?.name === 'RBrace') {
@@ -299,7 +299,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
             undefined, undefined, undefined, lParenToken, rParenToken, lBraceToken, rBraceToken
         )
 
-        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'set', isComputed, SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, setToken)
+        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'set', isComputed, SlimeCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, setToken)
 
         return methodDef
     }
@@ -341,9 +341,9 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
             const tokenCst = firstChild.children[0]
             key = SlimeJavascriptCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
         } else if (firstChild.name === 'PropertyName' || firstChild.name === 'LiteralPropertyName') {
-            key = SlimeJavascriptCstToAstUtil.createPropertyNameAst(firstChild)
+            key = SlimeCstToAstUtil.createPropertyNameAst(firstChild)
         } else {
-            key = SlimeJavascriptCstToAstUtil.createClassElementNameAst(firstChild)
+            key = SlimeCstToAstUtil.createClassElementNameAst(firstChild)
         }
 
         // LParen
@@ -355,10 +355,10 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // UniqueFormalParameters (使用包装类型)
         let params: SlimeJavascriptFunctionParam[] = []
         if (children[i]?.name === 'UniqueFormalParameters' || children[i]?.name === SlimeJavascriptParser.prototype.UniqueFormalParameters?.name) {
-            params = SlimeJavascriptCstToAstUtil.createUniqueFormalParametersAstWrapped(children[i])
+            params = SlimeCstToAstUtil.createUniqueFormalParametersAstWrapped(children[i])
             i++
         } else if (children[i]?.name === 'FormalParameters' || children[i]?.name === SlimeJavascriptParser.prototype.FormalParameters?.name) {
-            params = SlimeJavascriptCstToAstUtil.createFormalParametersAstWrapped(children[i])
+            params = SlimeCstToAstUtil.createFormalParametersAstWrapped(children[i])
             i++
         }
 
@@ -376,7 +376,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // FunctionBody
         let body: SlimeJavascriptBlockStatement
         if (children[i]?.name === 'FunctionBody' || children[i]?.name === SlimeJavascriptParser.prototype.FunctionBody?.name) {
-            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(children[i])
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(children[i])
             body = SlimeJavascriptCreateUtils.createBlockStatement(bodyStatements, children[i].loc, lBraceToken, rBraceToken)
             i++
         } else {
@@ -396,9 +396,9 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
 
         // 检查是否是 constructor
         const isConstructor = key.type === "Identifier" && (key as SlimeJavascriptIdentifier).name === "constructor" &&
-            !SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst)
+            !SlimeCstToAstUtil.isStaticModifier(staticCst)
 
-        const isStatic = SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst)
+        const isStatic = SlimeCstToAstUtil.isStaticModifier(staticCst)
         const kind = isConstructor ? 'constructor' : 'method' as "constructor" | "method" | "get" | "set"
 
         const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, kind, false, isStatic, cst.loc, staticToken)
@@ -431,7 +431,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
 
         // ClassElementName
         const classElementNameCst = children[i++]
-        const key = SlimeJavascriptCstToAstUtil.createClassElementNameAst(classElementNameCst)
+        const key = SlimeCstToAstUtil.createClassElementNameAst(classElementNameCst)
 
         // LParen - 保存 token 信息
         if (children[i]?.name === 'LParen') {
@@ -442,10 +442,10 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // UniqueFormalParameters (使用包装类型)
         let params: SlimeJavascriptFunctionParam[] = []
         if (children[i]?.name === 'UniqueFormalParameters' || children[i]?.name === SlimeJavascriptParser.prototype.UniqueFormalParameters?.name) {
-            params = SlimeJavascriptCstToAstUtil.createUniqueFormalParametersAstWrapped(children[i])
+            params = SlimeCstToAstUtil.createUniqueFormalParametersAstWrapped(children[i])
             i++
         } else if (children[i]?.name === 'FormalParameters' || children[i]?.name === SlimeJavascriptParser.prototype.FormalParameters?.name) {
-            params = SlimeJavascriptCstToAstUtil.createFormalParametersAstWrapped(children[i])
+            params = SlimeCstToAstUtil.createFormalParametersAstWrapped(children[i])
             i++
         }
 
@@ -463,7 +463,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // FunctionBody
         let body: SlimeJavascriptBlockStatement
         if (children[i]?.name === 'FunctionBody' || children[i]?.name === SlimeJavascriptParser.prototype.FunctionBody?.name) {
-            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(children[i])
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(children[i])
             i++
             // RBrace - 在 FunctionBody 之后
             if (children[i]?.name === 'RBrace') {
@@ -485,13 +485,13 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         )
 
         // 检查是否是计算属性
-        const isComputed = SlimeJavascriptCstToAstUtil.isComputedPropertyName(classElementNameCst)
+        const isComputed = SlimeCstToAstUtil.isComputedPropertyName(classElementNameCst)
 
         // 检查是否是 constructor
         const isConstructor = key.type === "Identifier" && key.name === "constructor" &&
-            !SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst)
+            !SlimeCstToAstUtil.isStaticModifier(staticCst)
 
-        const isStatic = SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst)
+        const isStatic = SlimeCstToAstUtil.isStaticModifier(staticCst)
         const kind = isConstructor ? 'constructor' : 'method' as "constructor" | "method" | "get" | "set"
 
         const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, kind, isComputed, isStatic, cst.loc, staticToken)
@@ -529,8 +529,8 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         }
 
         const classElementNameCst = children[i++]
-        const key = SlimeJavascriptCstToAstUtil.createClassElementNameAst(classElementNameCst)
-        const isComputed = SlimeJavascriptCstToAstUtil.isComputedPropertyName(classElementNameCst)
+        const key = SlimeCstToAstUtil.createClassElementNameAst(classElementNameCst)
+        const isComputed = SlimeCstToAstUtil.isComputedPropertyName(classElementNameCst)
 
         // LParen - 保存 token 信息
         if (children[i]?.name === 'LParen') {
@@ -551,7 +551,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // FunctionBody
         let body: SlimeJavascriptBlockStatement
         if (children[i]?.name === 'FunctionBody' || children[i]?.name === SlimeJavascriptParser.prototype.FunctionBody?.name) {
-            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(children[i])
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(children[i])
             i++
             // RBrace
             if (children[i]?.name === 'RBrace') {
@@ -571,7 +571,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
             undefined, undefined, undefined, lParenToken, rParenToken, lBraceToken, rBraceToken
         )
 
-        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'get', isComputed, SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, getToken)
+        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'get', isComputed, SlimeCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, getToken)
 
         return methodDef
     }
@@ -606,8 +606,8 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         }
 
         const classElementNameCst = children[i++]
-        const key = SlimeJavascriptCstToAstUtil.createClassElementNameAst(classElementNameCst)
-        const isComputed = SlimeJavascriptCstToAstUtil.isComputedPropertyName(classElementNameCst)
+        const key = SlimeCstToAstUtil.createClassElementNameAst(classElementNameCst)
+        const isComputed = SlimeCstToAstUtil.isComputedPropertyName(classElementNameCst)
 
         // LParen - 保存 token 信息
         if (children[i]?.name === 'LParen') {
@@ -618,11 +618,11 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // PropertySetParameterList 或直接的 BindingIdentifier
         let params: SlimeJavascriptPattern[] = []
         if (children[i]?.name === 'PropertySetParameterList' || children[i]?.name === SlimeJavascriptParser.prototype.PropertySetParameterList?.name) {
-            params = SlimeJavascriptCstToAstUtil.createPropertySetParameterListAst(children[i])
+            params = SlimeCstToAstUtil.createPropertySetParameterListAst(children[i])
             i++
         } else if (children[i]?.name === 'BindingIdentifier' || children[i]?.name === 'BindingElement') {
             // 直接的参数标识符
-            params = [SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(children[i])]
+            params = [SlimeCstToAstUtil.createBindingIdentifierAst(children[i])]
             i++
         }
 
@@ -640,7 +640,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // FunctionBody
         let body: SlimeJavascriptBlockStatement
         if (children[i]?.name === 'FunctionBody' || children[i]?.name === SlimeJavascriptParser.prototype.FunctionBody?.name) {
-            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(children[i])
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(children[i])
             i++
             // RBrace
             if (children[i]?.name === 'RBrace') {
@@ -660,7 +660,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
             undefined, undefined, undefined, lParenToken, rParenToken, lBraceToken, rBraceToken
         )
 
-        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'set', isComputed, SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, setToken)
+        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'set', isComputed, SlimeCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, setToken)
 
         return methodDef
     }
@@ -671,7 +671,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
      * @internal
      */
     createMethodDefinitionGeneratorMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptCstToAstUtil.createMethodDefinitionGeneratorMethodAst(staticCst, cst)
+        return SlimeCstToAstUtil.createMethodDefinitionGeneratorMethodAst(staticCst, cst)
     }
 
 
@@ -683,9 +683,9 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // 检查是否是 AsyncGeneratorMethod (async * ...)
         const children = cst.children
         if (children[1]?.name === 'Asterisk') {
-            return SlimeJavascriptCstToAstUtil.createMethodDefinitionAsyncGeneratorMethodAst(staticCst, cst)
+            return SlimeCstToAstUtil.createMethodDefinitionAsyncGeneratorMethodAst(staticCst, cst)
         }
-        return SlimeJavascriptCstToAstUtil.createMethodDefinitionAsyncMethodAst(staticCst, cst)
+        return SlimeCstToAstUtil.createMethodDefinitionAsyncMethodAst(staticCst, cst)
     }
 
 
@@ -699,10 +699,10 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         }
         const first = cst.children[0]
         if (first.name === 'FormalParameter' || first.name === SlimeJavascriptParser.prototype.FormalParameter?.name) {
-            return [SlimeJavascriptCstToAstUtil.createFormalParameterAst(first)]
+            return [SlimeCstToAstUtil.createFormalParameterAst(first)]
         }
         if (first.name === 'BindingElement' || first.name === SlimeJavascriptParser.prototype.BindingElement?.name) {
-            return [SlimeJavascriptCstToAstUtil.createBindingElementAst(first)]
+            return [SlimeCstToAstUtil.createBindingElementAst(first)]
         }
         return []
     }
@@ -716,10 +716,10 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         }
         const first = cst.children[0]
         if (first.name === 'FormalParameter' || first.name === SlimeJavascriptParser.prototype.FormalParameter?.name) {
-            return [SlimeJavascriptCreateUtils.createFunctionParam(SlimeJavascriptCstToAstUtil.createFormalParameterAst(first), undefined)]
+            return [SlimeJavascriptCreateUtils.createFunctionParam(SlimeCstToAstUtil.createFormalParameterAst(first), undefined)]
         }
         if (first.name === 'BindingElement' || first.name === SlimeJavascriptParser.prototype.BindingElement?.name) {
-            return [SlimeJavascriptCreateUtils.createFunctionParam(SlimeJavascriptCstToAstUtil.createBindingElementAst(first), undefined)]
+            return [SlimeJavascriptCreateUtils.createFunctionParam(SlimeCstToAstUtil.createBindingElementAst(first), undefined)]
         }
         return []
     }
@@ -755,8 +755,8 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         }
 
         const classElementNameCst = children[i++]
-        const key = SlimeJavascriptCstToAstUtil.createClassElementNameAst(classElementNameCst)
-        const isComputed = SlimeJavascriptCstToAstUtil.isComputedPropertyName(classElementNameCst)
+        const key = SlimeCstToAstUtil.createClassElementNameAst(classElementNameCst)
+        const isComputed = SlimeCstToAstUtil.isComputedPropertyName(classElementNameCst)
 
         // LParen - 保存 token 信息
         if (children[i]?.name === 'LParen') {
@@ -767,7 +767,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // UniqueFormalParameters
         let params: SlimeJavascriptPattern[] = []
         if (children[i]?.name === 'UniqueFormalParameters' || children[i]?.name === SlimeJavascriptParser.prototype.UniqueFormalParameters?.name) {
-            params = SlimeJavascriptCstToAstUtil.createUniqueFormalParametersAst(children[i])
+            params = SlimeCstToAstUtil.createUniqueFormalParametersAst(children[i])
             i++
         }
 
@@ -787,7 +787,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         const bodyChild = children[i]
         if (bodyChild?.name === 'GeneratorBody' || bodyChild?.name === SlimeJavascriptParser.prototype.GeneratorBody?.name ||
             bodyChild?.name === 'FunctionBody' || bodyChild?.name === SlimeJavascriptParser.prototype.FunctionBody?.name) {
-            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(bodyChild)
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(bodyChild)
             i++
             // RBrace
             if (children[i]?.name === 'RBrace') {
@@ -807,7 +807,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
             undefined, undefined, asteriskToken, lParenToken, rParenToken, lBraceToken, rBraceToken
         )
 
-        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'method', isComputed, SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, undefined, asteriskToken)
+        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'method', isComputed, SlimeCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, undefined, asteriskToken)
 
         return methodDef
     }
@@ -843,8 +843,8 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         }
 
         const classElementNameCst = children[i++]
-        const key = SlimeJavascriptCstToAstUtil.createClassElementNameAst(classElementNameCst)
-        const isComputed = SlimeJavascriptCstToAstUtil.isComputedPropertyName(classElementNameCst)
+        const key = SlimeCstToAstUtil.createClassElementNameAst(classElementNameCst)
+        const isComputed = SlimeCstToAstUtil.isComputedPropertyName(classElementNameCst)
 
         // LParen - 保存 token 信息
         if (children[i]?.name === 'LParen') {
@@ -855,7 +855,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // UniqueFormalParameters
         let params: SlimeJavascriptPattern[] = []
         if (children[i]?.name === 'UniqueFormalParameters' || children[i]?.name === SlimeJavascriptParser.prototype.UniqueFormalParameters?.name) {
-            params = SlimeJavascriptCstToAstUtil.createUniqueFormalParametersAst(children[i])
+            params = SlimeCstToAstUtil.createUniqueFormalParametersAst(children[i])
             i++
         }
 
@@ -875,7 +875,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         const bodyChild = children[i]
         if (bodyChild?.name === 'AsyncFunctionBody' || bodyChild?.name === SlimeJavascriptParser.prototype.AsyncFunctionBody?.name ||
             bodyChild?.name === 'FunctionBody' || bodyChild?.name === SlimeJavascriptParser.prototype.FunctionBody?.name) {
-            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(bodyChild)
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(bodyChild)
             i++
             // RBrace
             if (children[i]?.name === 'RBrace') {
@@ -895,7 +895,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
             undefined, asyncToken, undefined, lParenToken, rParenToken, lBraceToken, rBraceToken
         )
 
-        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'method', isComputed, SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, undefined, undefined, asyncToken)
+        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'method', isComputed, SlimeCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, undefined, undefined, asyncToken)
 
         return methodDef
     }
@@ -938,8 +938,8 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         }
 
         const classElementNameCst = children[i++]
-        const key = SlimeJavascriptCstToAstUtil.createClassElementNameAst(classElementNameCst)
-        const isComputed = SlimeJavascriptCstToAstUtil.isComputedPropertyName(classElementNameCst)
+        const key = SlimeCstToAstUtil.createClassElementNameAst(classElementNameCst)
+        const isComputed = SlimeCstToAstUtil.isComputedPropertyName(classElementNameCst)
 
         // LParen - 保存 token 信息
         if (children[i]?.name === 'LParen') {
@@ -950,7 +950,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         // UniqueFormalParameters
         let params: SlimeJavascriptPattern[] = []
         if (children[i]?.name === 'UniqueFormalParameters' || children[i]?.name === SlimeJavascriptParser.prototype.UniqueFormalParameters?.name) {
-            params = SlimeJavascriptCstToAstUtil.createUniqueFormalParametersAst(children[i])
+            params = SlimeCstToAstUtil.createUniqueFormalParametersAst(children[i])
             i++
         }
 
@@ -970,7 +970,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
         const bodyChild = children[i]
         if (bodyChild?.name === 'AsyncGeneratorBody' || bodyChild?.name === SlimeJavascriptParser.prototype.AsyncGeneratorBody?.name ||
             bodyChild?.name === 'FunctionBody' || bodyChild?.name === SlimeJavascriptParser.prototype.FunctionBody?.name) {
-            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(bodyChild)
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(bodyChild)
             i++
             // RBrace
             if (children[i]?.name === 'RBrace') {
@@ -990,7 +990,7 @@ export class SlimeJavascriptMethodDefinitionCstToAstSingle {
             undefined, asyncToken, asteriskToken, lParenToken, rParenToken, lBraceToken, rBraceToken
         )
 
-        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'method', isComputed, SlimeJavascriptCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, undefined, asteriskToken, asyncToken)
+        const methodDef = SlimeJavascriptCreateUtils.createMethodDefinition(key, functionExpression, 'method', isComputed, SlimeCstToAstUtil.isStaticModifier(staticCst), cst.loc, staticToken, undefined, undefined, asteriskToken, asyncToken)
 
         return methodDef
     }

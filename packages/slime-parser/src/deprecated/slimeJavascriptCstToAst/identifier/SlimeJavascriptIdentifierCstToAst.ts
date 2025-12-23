@@ -12,7 +12,7 @@ import {
 } from "slime-ast";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
-import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
@@ -25,7 +25,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
 
         // 如果直接�?value，使用它
         if (cst.value !== undefined) {
-            const decodedName = SlimeJavascriptCstToAstUtil.decodeUnicodeEscapes(cst.value as string)
+            const decodedName = SlimeCstToAstUtil.decodeUnicodeEscapes(cst.value as string)
             return SlimeJavascriptCreateUtils.createIdentifier(decodedName, cst.loc)
         }
 
@@ -36,7 +36,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
         }
 
         if (current.value !== undefined) {
-            const decodedName = SlimeJavascriptCstToAstUtil.decodeUnicodeEscapes(current.value as string)
+            const decodedName = SlimeCstToAstUtil.decodeUnicodeEscapes(current.value as string)
             return SlimeJavascriptCreateUtils.createIdentifier(decodedName, current.loc || cst.loc)
         }
 
@@ -45,7 +45,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
 
 
     createBindingIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
-        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BindingIdentifier?.name);
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BindingIdentifier?.name);
         // BindingIdentifier 结构�?
         // ES2025: BindingIdentifier -> Identifier -> IdentifierNameTok
         // 或�? BindingIdentifier -> YieldTok | AwaitTok
@@ -83,7 +83,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
         // 例如：{ name: 'PrivateIdentifier', value: '#count' } �?value: '#\u{61}'
         if (cst.value) {
             const rawName = cst.value as string
-            const decodedName = SlimeJavascriptCstToAstUtil.decodeUnicodeEscapes(rawName)
+            const decodedName = SlimeCstToAstUtil.decodeUnicodeEscapes(rawName)
             // 保存原始值和解码后的�?
             const name = decodedName.startsWith('#') ? decodedName : '#' + decodedName
             const raw = rawName.startsWith('#') ? rawName : '#' + rawName
@@ -100,7 +100,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
             const identifierNameCst = cst.children[1]
             const identifierCst = identifierNameCst.children[0]
             const rawName = identifierCst.value as string
-            const decodedName = SlimeJavascriptCstToAstUtil.decodeUnicodeEscapes(rawName)
+            const decodedName = SlimeCstToAstUtil.decodeUnicodeEscapes(rawName)
             const identifier = SlimeJavascriptCreateUtils.createIdentifier('#' + decodedName)
             // 保存原始�?
             if (rawName !== decodedName) {
@@ -114,7 +114,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
             const child = cst.children[0]
             if (child.value) {
                 const rawName = child.value as string
-                const decodedName = SlimeJavascriptCstToAstUtil.decodeUnicodeEscapes(rawName)
+                const decodedName = SlimeCstToAstUtil.decodeUnicodeEscapes(rawName)
                 const identifier = SlimeJavascriptCreateUtils.createIdentifier('#' + decodedName)
                 if (rawName !== decodedName) {
                     (identifier as any).raw = '#' + rawName
@@ -146,7 +146,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
             throw new Error('LabelIdentifier has no children')
         }
 
-        return SlimeJavascriptCstToAstUtil.createIdentifierAst(child)
+        return SlimeCstToAstUtil.createIdentifierAst(child)
     }
 
 
@@ -170,7 +170,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
             throw new Error('IdentifierReference has no children')
         }
 
-        return SlimeJavascriptCstToAstUtil.createIdentifierAst(child)
+        return SlimeCstToAstUtil.createIdentifierAst(child)
     }
 
 
@@ -228,7 +228,7 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
         }
 
         // 解码 Unicode 转义序列（如 \u0061 -> a�?
-        const decodedName = SlimeJavascriptCstToAstUtil.decodeUnicodeEscapes(value)
+        const decodedName = SlimeCstToAstUtil.decodeUnicodeEscapes(value)
         // 使用 token �?loc（包含原始值），而不是规则的 loc
         const identifier = SlimeJavascriptCreateUtils.createIdentifier(decodedName, tokenLoc || cst.loc)
         return identifier

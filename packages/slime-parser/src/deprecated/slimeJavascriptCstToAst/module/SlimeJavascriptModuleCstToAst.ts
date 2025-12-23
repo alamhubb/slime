@@ -8,7 +8,7 @@ import {
     SlimeJavascriptStatement
 } from "slime-ast";
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
-import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptModuleCstToAstSingle {
@@ -58,24 +58,24 @@ export class SlimeJavascriptModuleCstToAstSingle {
             if (bodyChild.name === 'ModuleBody') {
                 const moduleItemList = bodyChild.children?.[0]
                 if (moduleItemList && (moduleItemList.name === 'ModuleItemList' || moduleItemList.name === SlimeJavascriptParser.prototype.ModuleItemList?.name)) {
-                    const body = SlimeJavascriptCstToAstUtil.createModuleItemListAst(moduleItemList)
+                    const body = SlimeCstToAstUtil.createModuleItemListAst(moduleItemList)
                     program = SlimeJavascriptCreateUtils.createProgram(body, 'module')
                 } else {
                     program = SlimeJavascriptCreateUtils.createProgram([], 'module')
                 }
             } else if (bodyChild.name === SlimeJavascriptParser.prototype.ModuleItemList?.name || bodyChild.name === 'ModuleItemList') {
-                const body = SlimeJavascriptCstToAstUtil.createModuleItemListAst(bodyChild)
+                const body = SlimeCstToAstUtil.createModuleItemListAst(bodyChild)
                 program = SlimeJavascriptCreateUtils.createProgram(body, 'module')
             } else if (bodyChild.name === 'ScriptBody') {
                 const statementList = bodyChild.children?.[0]
                 if (statementList && (statementList.name === 'StatementList' || statementList.name === SlimeJavascriptParser.prototype.StatementList?.name)) {
-                    const body = SlimeJavascriptCstToAstUtil.createStatementListAst(statementList)
+                    const body = SlimeCstToAstUtil.createStatementListAst(statementList)
                     program = SlimeJavascriptCreateUtils.createProgram(body, 'script')
                 } else {
                     program = SlimeJavascriptCreateUtils.createProgram([], 'script')
                 }
             } else if (bodyChild.name === SlimeJavascriptParser.prototype.StatementList?.name || bodyChild.name === 'StatementList') {
-                const body = SlimeJavascriptCstToAstUtil.createStatementListAst(bodyChild)
+                const body = SlimeCstToAstUtil.createStatementListAst(bodyChild)
                 program = SlimeJavascriptCreateUtils.createProgram(body, 'script')
             } else {
                 throw new Error(`Unexpected body child: ${bodyChild.name}`)
@@ -104,13 +104,13 @@ export class SlimeJavascriptModuleCstToAstSingle {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             if (firstChild.name === 'Script' || firstChild.name === SlimeJavascriptParser.prototype.Script?.name) {
-                return SlimeJavascriptCstToAstUtil.createScriptAst(firstChild)
+                return SlimeCstToAstUtil.createScriptAst(firstChild)
             } else if (firstChild.name === 'Module' || firstChild.name === SlimeJavascriptParser.prototype.Module?.name) {
-                return SlimeJavascriptCstToAstUtil.createModuleAst(firstChild)
+                return SlimeCstToAstUtil.createModuleAst(firstChild)
             }
         }
         // 如果直接就是内容，调?toProgram
-        return SlimeJavascriptCstToAstUtil.toProgram(cst)
+        return SlimeCstToAstUtil.toProgram(cst)
     }
 
     /**
@@ -121,7 +121,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
             ch.name === 'ModuleBody' || ch.name === SlimeJavascriptParser.prototype.ModuleBody?.name
         )
         if (moduleBody) {
-            return SlimeJavascriptCstToAstUtil.createModuleBodyAst(moduleBody)
+            return SlimeCstToAstUtil.createModuleBodyAst(moduleBody)
         }
         return SlimeJavascriptCreateUtils.createProgram([], 'module')
     }
@@ -134,7 +134,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
             ch.name === 'ScriptBody' || ch.name === SlimeJavascriptParser.prototype.ScriptBody?.name
         )
         if (scriptBody) {
-            return SlimeJavascriptCstToAstUtil.createScriptBodyAst(scriptBody)
+            return SlimeCstToAstUtil.createScriptBodyAst(scriptBody)
         }
         return SlimeJavascriptCreateUtils.createProgram([], 'script')
     }
@@ -147,7 +147,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
             ch.name === 'ModuleItemList' || ch.name === SlimeJavascriptParser.prototype.ModuleItemList?.name
         )
         if (moduleItemList) {
-            const body = SlimeJavascriptCstToAstUtil.createModuleItemListAst(moduleItemList)
+            const body = SlimeCstToAstUtil.createModuleItemListAst(moduleItemList)
             return SlimeJavascriptCreateUtils.createProgram(body, 'module')
         }
         return SlimeJavascriptCreateUtils.createProgram([], 'module')
@@ -161,7 +161,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
             ch.name === 'StatementList' || ch.name === SlimeJavascriptParser.prototype.StatementList?.name
         )
         if (stmtList) {
-            const body = SlimeJavascriptCstToAstUtil.createStatementListAst(stmtList)
+            const body = SlimeCstToAstUtil.createStatementListAst(stmtList)
             return SlimeJavascriptCreateUtils.createProgram(body, 'script')
         }
         return SlimeJavascriptCreateUtils.createProgram([], 'script')
@@ -173,10 +173,10 @@ export class SlimeJavascriptModuleCstToAstSingle {
             if (item.name === SlimeJavascriptParser.prototype.ModuleItem?.name || item.name === 'ModuleItem') {
                 const innerItem = item.children?.[0]
                 if (!innerItem) return undefined
-                return SlimeJavascriptCstToAstUtil.createModuleItemAst(innerItem)
+                return SlimeCstToAstUtil.createModuleItemAst(innerItem)
             }
             // Fallback: direct type
-            return SlimeJavascriptCstToAstUtil.createModuleItemAst(item)
+            return SlimeCstToAstUtil.createModuleItemAst(item)
         }).filter(ast => ast !== undefined)
 
         return asts.flat()
@@ -185,11 +185,11 @@ export class SlimeJavascriptModuleCstToAstSingle {
     createModuleItemAst(item: SubhutiCst): SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration | SlimeJavascriptStatement[] | undefined {
         const name = item.name
         if (name === SlimeJavascriptParser.prototype.ExportDeclaration?.name || name === 'ExportDeclaration') {
-            return SlimeJavascriptCstToAstUtil.createExportDeclarationAst(item)
+            return SlimeCstToAstUtil.createExportDeclarationAst(item)
         } else if (name === SlimeJavascriptParser.prototype.ImportDeclaration?.name || name === 'ImportDeclaration') {
-            return SlimeJavascriptCstToAstUtil.createImportDeclarationAst(item)
+            return SlimeCstToAstUtil.createImportDeclarationAst(item)
         } else if (name === SlimeJavascriptParser.prototype.StatementListItem?.name || name === 'StatementListItem') {
-            return SlimeJavascriptCstToAstUtil.createStatementListItemAst(item)
+            return SlimeCstToAstUtil.createStatementListItemAst(item)
         }
         console.warn(`createModuleItemAst: Unknown item type: ${name}`)
         return undefined

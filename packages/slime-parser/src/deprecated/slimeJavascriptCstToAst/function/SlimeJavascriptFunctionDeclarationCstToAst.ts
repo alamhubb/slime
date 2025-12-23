@@ -8,7 +8,7 @@ import {
 } from "slime-ast";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
-import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
@@ -79,19 +79,19 @@ export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
 
             // BindingIdentifier - function name
             if (name === SlimeJavascriptParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
-                functionName = SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(child)
+                functionName = SlimeCstToAstUtil.createBindingIdentifierAst(child)
                 continue
             }
 
             // FormalParameters - function parameters (使用包装类型)
             if (name === SlimeJavascriptParser.prototype.FormalParameters?.name || name === 'FormalParameters') {
-                params = SlimeJavascriptCstToAstUtil.createFormalParametersAstWrapped(child)
+                params = SlimeCstToAstUtil.createFormalParametersAstWrapped(child)
                 continue
             }
 
             // FunctionBody - function body
             if (name === SlimeJavascriptParser.prototype.FunctionBody?.name || name === 'FunctionBody') {
-                const statements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(child)
+                const statements = SlimeCstToAstUtil.createFunctionBodyAst(child)
                 body = SlimeJavascriptCreateUtils.createBlockStatement(statements, child.loc)
                 continue
             }
@@ -123,7 +123,7 @@ export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
         const bindingId = cst.children.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.BindingIdentifier?.name || ch.name === 'BindingIdentifier')
         if (bindingId) {
-            id = SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(bindingId)
+            id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingId)
         }
 
         // 查找 FormalParameters �?FormalParameterList (使用包装类型)
@@ -132,9 +132,9 @@ export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
             ch.name === SlimeJavascriptParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
         if (formalParams) {
             if (formalParams.name === 'FormalParameters' || formalParams.name === SlimeJavascriptParser.prototype.FormalParameters?.name) {
-                params = SlimeJavascriptCstToAstUtil.createFormalParametersAstWrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParametersAstWrapped(formalParams)
             } else {
-                params = SlimeJavascriptCstToAstUtil.createFormalParameterListFromEs2025Wrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParameterListFromEs2025Wrapped(formalParams)
             }
         }
 
@@ -143,7 +143,7 @@ export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
             ch.name === 'GeneratorBody' || ch.name === SlimeJavascriptParser.prototype.GeneratorBody?.name ||
             ch.name === 'FunctionBody' || ch.name === SlimeJavascriptParser.prototype.FunctionBody?.name)
         if (bodyNode) {
-            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(bodyNode)
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(bodyNode)
             body = SlimeJavascriptCreateUtils.createBlockStatement(bodyStatements, bodyNode.loc)
         } else {
             body = SlimeJavascriptCreateUtils.createBlockStatement([])
@@ -174,7 +174,7 @@ export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
         const bindingId = cst.children.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.BindingIdentifier?.name || ch.name === 'BindingIdentifier')
         if (bindingId) {
-            id = SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(bindingId)
+            id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingId)
         }
 
         // 查找 FormalParameters �?FormalParameterList
@@ -183,9 +183,9 @@ export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
             ch.name === SlimeJavascriptParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
         if (formalParams) {
             if (formalParams.name === 'FormalParameters' || formalParams.name === SlimeJavascriptParser.prototype.FormalParameters?.name) {
-                params = SlimeJavascriptCstToAstUtil.createFormalParametersAstWrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParametersAstWrapped(formalParams)
             } else {
-                params = SlimeJavascriptCstToAstUtil.createFormalParameterListAstWrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParameterListAstWrapped(formalParams)
             }
         }
 
@@ -194,7 +194,7 @@ export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
             ch.name === 'AsyncFunctionBody' || ch.name === SlimeJavascriptParser.prototype.AsyncFunctionBody?.name ||
             ch.name === 'FunctionBody' || ch.name === SlimeJavascriptParser.prototype.FunctionBody?.name)
         if (bodyNode) {
-            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(bodyNode)
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(bodyNode)
             body = SlimeJavascriptCreateUtils.createBlockStatement(bodyStatements, bodyNode.loc)
         } else {
             body = SlimeJavascriptCreateUtils.createBlockStatement([])
@@ -216,7 +216,7 @@ export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
         const bindingId = cst.children.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.BindingIdentifier?.name || ch.name === 'BindingIdentifier')
         if (bindingId) {
-            id = SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(bindingId)
+            id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingId)
         }
 
         // 查找 FormalParameters �?FormalParameterList (使用包装类型)
@@ -225,9 +225,9 @@ export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
             ch.name === SlimeJavascriptParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
         if (formalParams) {
             if (formalParams.name === 'FormalParameters' || formalParams.name === SlimeJavascriptParser.prototype.FormalParameters?.name) {
-                params = SlimeJavascriptCstToAstUtil.createFormalParametersAstWrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParametersAstWrapped(formalParams)
             } else {
-                params = SlimeJavascriptCstToAstUtil.createFormalParameterListFromEs2025Wrapped(formalParams)
+                params = SlimeCstToAstUtil.createFormalParameterListFromEs2025Wrapped(formalParams)
             }
         }
 
@@ -236,7 +236,7 @@ export class SlimeJavascriptFunctionDeclarationCstToAstSingle {
             ch.name === 'AsyncGeneratorBody' || ch.name === SlimeJavascriptParser.prototype.AsyncGeneratorBody?.name ||
             ch.name === 'FunctionBody' || ch.name === SlimeJavascriptParser.prototype.FunctionBody?.name)
         if (bodyNode) {
-            const bodyStatements = SlimeJavascriptCstToAstUtil.createFunctionBodyAst(bodyNode)
+            const bodyStatements = SlimeCstToAstUtil.createFunctionBodyAst(bodyNode)
             body = SlimeJavascriptCreateUtils.createBlockStatement(bodyStatements, bodyNode.loc)
         } else {
             body = SlimeJavascriptCreateUtils.createBlockStatement([])

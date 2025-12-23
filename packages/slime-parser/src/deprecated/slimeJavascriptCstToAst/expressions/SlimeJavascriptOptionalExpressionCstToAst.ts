@@ -8,7 +8,7 @@ import {
 import { SubhutiCst } from "subhuti";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
-import SlimeJavascriptCstToAstUtil from "../../SlimeJavascriptCstToAstUtil.ts";
+import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptOptionalExpressionCstToAstSingle {
@@ -34,7 +34,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
                 continue
             } else if (name === 'Arguments') {
                 // ()调用 - 可能是可选调用或普通调�?
-                const args = SlimeJavascriptCstToAstUtil.createArgumentsAst(child)
+                const args = SlimeCstToAstUtil.createArgumentsAst(child)
                 result = {
                     type: SlimeJavascriptAstTypeName.OptionalCallExpression,
                     callee: result,
@@ -48,7 +48,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
                 // 下一个子节点是表达式，跳�?]
                 const exprIndex = chainCst.children.indexOf(child) + 1
                 if (exprIndex < chainCst.children.length) {
-                    const property = SlimeJavascriptCstToAstUtil.createExpressionAst(chainCst.children[exprIndex])
+                    const property = SlimeCstToAstUtil.createExpressionAst(chainCst.children[exprIndex])
                     result = {
                         type: SlimeJavascriptAstTypeName.OptionalMemberExpression,
                         object: result,
@@ -82,7 +82,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
                 continue
             } else if (name === 'PrivateIdentifier') {
                 // #prop - 私有属性访�?
-                const property = SlimeJavascriptCstToAstUtil.createPrivateIdentifierAst(child)
+                const property = SlimeCstToAstUtil.createPrivateIdentifierAst(child)
                 result = {
                     type: SlimeJavascriptAstTypeName.OptionalMemberExpression,
                     object: result,
@@ -121,13 +121,13 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
         }
 
         // 首先处理基础表达式（MemberExpression �?CallExpression�?
-        let result = SlimeJavascriptCstToAstUtil.createExpressionAst(cst.children[0])
+        let result = SlimeCstToAstUtil.createExpressionAst(cst.children[0])
 
         // 处理 OptionalChain（可能有多个链式调用�?
         for (let i = 1; i < cst.children.length; i++) {
             const chainCst = cst.children[i]
             if (chainCst.name === 'OptionalChain') {
-                result = SlimeJavascriptCstToAstUtil.createOptionalChainAst(result, chainCst)
+                result = SlimeCstToAstUtil.createOptionalChainAst(result, chainCst)
             }
         }
 
