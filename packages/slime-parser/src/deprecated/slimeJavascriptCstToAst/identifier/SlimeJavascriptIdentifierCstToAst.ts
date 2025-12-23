@@ -8,7 +8,7 @@ import {
     SlimeJavascriptIdentifier,
     SlimeJavascriptMethodDefinition, SlimeJavascriptPattern,
     SlimeJavascriptPropertyDefinition,
-    SlimeJavascriptStatement
+    SlimeJavascriptStatement, SlimeIdentifier
 } from "slime-ast";
 
 import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
@@ -231,6 +231,40 @@ export class SlimeJavascriptIdentifierCstToAstSingle {
         const decodedName = SlimeJavascriptCstToAstUtil.decodeUnicodeEscapes(value)
         // 使用 token �?loc（包含原始值），而不是规则的 loc
         const identifier = SlimeJavascriptCreateUtils.createIdentifier(decodedName, tokenLoc || cst.loc)
+        return identifier
+    }
+
+    /**
+     * [TypeScript] 重写 createBindingIdentifierAst 以支持可选的类型注解
+     */
+    override createBindingIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
+        const children = cst.children || []
+        const first = children[0]
+
+        let identifier: SlimeIdentifier
+
+        if (first.name === 'Identifier' || first.name === SlimeParser.prototype.Identifier?.name) {
+            const tokenCst = first.children?.[0]
+            if (tokenCst && tokenCst.value !== undefined) {
+                identifier = SlimeJavascriptCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
+            } else {
+                throw new Error(`createBindingIdentifierAst: Cannot extract value from Identifier`)
+            }
+        } else if (first.value !== undefined) {
+            identifier = SlimeJavascriptCreateUtils.createIdentifier(first.value, first.loc)
+        } else {
+            throw new Error(`createBindingIdentifierAst: Cannot extract identifier value from ${first.name}`)
+        }
+
+        // [TypeScript] 检查是否有类型注解
+        const tsTypeAnnotationName = SlimeParser.prototype.TSTypeAnnotation?.name || 'TSTypeAnnotation'
+        const typeAnnotationCst = children.find(child =>
+            child.name === tsTypeAnnotationName || child.name === 'TSTypeAnnotation'
+        )
+        if (typeAnnotationCst) {
+            identifier.typeAnnotation = this.createTSTypeAnnotationAst(typeAnnotationCst)
+        }
+
         return identifier
     }
 }
