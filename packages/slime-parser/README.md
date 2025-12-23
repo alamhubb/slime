@@ -2,6 +2,8 @@
 
 ES2025 JavaScript/ECMAScript 解析器，将源代码解析为 CST（具体语法树），并转换为 ESTree 兼容的 AST（抽象语法树）。
 
+支持 TypeScript 语法扩展。
+
 ## 安装
 
 ```bash
@@ -20,6 +22,79 @@ const cst = parser.parse('const x = 1 + 2')
 // 将 CST 转换为 AST
 const ast = SlimeCstToAstUtil.toProgram(cst)
 ```
+
+## TypeScript 扩展设计原则
+
+### 核心原则：优先采用 override 重写，而不是创建新规则
+
+当扩展 JavaScript 语法以支持 TypeScript 时，应该：
+
+**✅ 正确做法：override 重写父类方法**
+```typescript
+// SlimeParser.ts
+@SubhutiRule
+override ClassTail(params: ExpressionParams = {}) {
+    // 可选的 extends 子句（使用重写的 ClassHeritage）
+    this.Option(() => this.ClassHeritage(params))
+    // [TypeScript] 可选的 implements 子句
+    this.Option(() => this.TSClassImplements())
+    this.tokenConsumer.LBrace()
+    this.Option(() => this.ClassBody(params))
+    this.tokenConsumer.RBrace()
+}
+
+@SubhutiRule
+override ClassHeritage(params: ExpressionParams = {}) {
+    this.tokenConsumer.Extends()
+    this.LeftHandSideExpression(params)
+    // [TypeScript] 可选的类型参数
+    this.Option(() => this.TSTypeParameterInstantiation())
+}
+```
+
+**❌ 错误做法：创建新规则**
+```typescript
+// 不要这样做！
+@SubhutiRule
+TSClassTail(params: ExpressionParams = {}) { ... }
+
+@SubhutiRule  
+TSClassExtends(params: ExpressionParams = {}) { ... }
+```
+
+### 为什么要用 override？
+
+1. **CST 节点名称一致**：重写后 CST 节点名称仍然是 `ClassTail`，CST-to-AST 转换器不需要处理两种情况
+
+2. **代码更简洁**：不需要在转换器中检查 `name === 'ClassTail' || name === 'TSClassTail'`
+
+3. **语义清晰**：`SlimeParser` 就是 TypeScript 版本的 Parser，它的 `ClassTail` 就是支持 TypeScript 的版本
+
+4. **避免混乱**：新规则会导致 CST 结构不一致，增加维护成本
+
+### 什么时候创建新规则？
+
+只有当 JavaScript 中完全不存在对应概念时，才创建新规则：
+
+```typescript
+// TypeScript 特有的语法，JavaScript 没有对应概念
+@SubhutiRule
+TSTypeAnnotation() { ... }      // 类型注解 `: number`
+
+@SubhutiRule
+TSClassImplements() { ... }     // implements 子句
+
+@SubhutiRule
+TSInterfaceDeclaration() { ... } // interface 声明
+```
+
+### 适用范围
+
+这个原则适用于所有模块：
+- **slime-parser**: Parser 规则应该用 override
+- **slime-parser/cstToAst**: CST-to-AST 转换器应该用 override
+- **slime-generator**: 代码生成器应该用 override
+- **slime-ast**: AST 类型可以扩展，但优先复用现有类型
 
 ## 架构设计
 

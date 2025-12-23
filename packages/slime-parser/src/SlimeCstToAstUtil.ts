@@ -213,6 +213,12 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
             SlimeClassDeclarationCstToAst.createClassTailAst.bind(SlimeClassDeclarationCstToAst)
         ; (SlimeJavascriptCstToAstUtil as any).createFieldDefinitionAst = 
             SlimeClassDeclarationCstToAst.createFieldDefinitionAst.bind(SlimeClassDeclarationCstToAst)
+        
+        // 方法定义 - 支持返回类型注解 (add(a: number): number { })
+        ; (SlimeJavascriptCstToAstUtil as any).createMethodDefinitionClassElementNameAst = 
+            SlimeMethodDefinitionCstToAst.createMethodDefinitionClassElementNameAst.bind(SlimeMethodDefinitionCstToAst)
+        ; (SlimeJavascriptCstToAstUtil as any).createMethodDefinitionGetterMethodAst = 
+            SlimeMethodDefinitionCstToAst.createMethodDefinitionGetterMethodAst.bind(SlimeMethodDefinitionCstToAst)
     }
 
     // ============================================

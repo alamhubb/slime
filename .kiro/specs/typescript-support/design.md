@@ -6,6 +6,84 @@
 
 采用渐进式实现策略，按照需求文档中定义的 10 个阶段逐步实现，确保每个阶段都可以独立测试和验证。
 
+## 核心设计原则：优先采用 override 重写
+
+### 原则说明
+
+当扩展 JavaScript 语法以支持 TypeScript 时，**必须优先采用 override 重写父类方法，而不是创建新规则**。
+
+### 正确做法 ✅
+
+```typescript
+// SlimeParser.ts - 重写 ClassTail 以支持 TypeScript
+@SubhutiRule
+override ClassTail(params: ExpressionParams = {}) {
+    this.Option(() => this.ClassHeritage(params))
+    this.Option(() => this.TSClassImplements())  // TypeScript 扩展
+    this.tokenConsumer.LBrace()
+    this.Option(() => this.ClassBody(params))
+    this.tokenConsumer.RBrace()
+}
+
+@SubhutiRule
+override ClassHeritage(params: ExpressionParams = {}) {
+    this.tokenConsumer.Extends()
+    this.LeftHandSideExpression(params)
+    this.Option(() => this.TSTypeParameterInstantiation())  // TypeScript 扩展
+}
+```
+
+### 错误做法 ❌
+
+```typescript
+// 不要创建新规则！
+@SubhutiRule
+TSClassTail(params: ExpressionParams = {}) { ... }
+
+@SubhutiRule  
+TSClassExtends(params: ExpressionParams = {}) { ... }
+```
+
+### 为什么必须用 override？
+
+1. **CST 节点名称一致**：重写后 CST 节点名称仍然是 `ClassTail`，CST-to-AST 转换器不需要处理两种情况
+
+2. **代码更简洁**：不需要在转换器中检查 `name === 'ClassTail' || name === 'TSClassTail'`
+
+3. **语义清晰**：`SlimeParser` 就是 TypeScript 版本的 Parser，它的 `ClassTail` 就是支持 TypeScript 的版本
+
+4. **避免混乱**：新规则会导致 CST 结构不一致，增加维护成本
+
+### 什么时候创建新规则？
+
+**只有当 JavaScript 中完全不存在对应概念时**，才创建新规则：
+
+```typescript
+// TypeScript 特有的语法，JavaScript 没有对应概念
+@SubhutiRule
+TSTypeAnnotation() { ... }      // 类型注解 `: number`
+
+@SubhutiRule
+TSClassImplements() { ... }     // implements 子句
+
+@SubhutiRule
+TSInterfaceDeclaration() { ... } // interface 声明
+
+@SubhutiRule
+TSType() { ... }                // 类型表达式
+```
+
+### 适用范围
+
+这个原则适用于所有模块：
+
+| 模块 | 说明 |
+|------|------|
+| **slime-parser** | Parser 规则应该用 override 重写 |
+| **slime-parser/cstToAst** | CST-to-AST 转换器应该用 override 重写 |
+| **slime-generator** | 代码生成器应该用 override 重写 |
+| **slime-ast** | AST 类型可以扩展，但优先复用现有类型 |
+
 ## Architecture
 
 ### 整体架构

@@ -766,7 +766,116 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
         this.addSpacing()
         this.addRBrace()
     }
+
+    // ============================================
+    // TypeScript 声明生成
+    // ============================================
+
+    /**
+     * [TypeScript] 生成类型别名声明
+     * type ID = number
+     */
+    generatorTSTypeAliasDeclaration(node: any) {
+        this.generatorTSKeyword(node, 'type')
+        this.addSpacing()
+        this.generatorIdentifier(node.id)
+        // 可选的类型参数
+        if (node.typeParameters) {
+            this.generatorTSTypeParameterDeclaration(node.typeParameters)
+        }
+        this.addSpacing()
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Eq, null)
+        this.addSpacing()
+        this.generatorTSType(node.typeAnnotation)
+    }
+
+    /**
+     * [TypeScript] 生成接口声明
+     * interface Foo { ... }
+     */
+    generatorTSInterfaceDeclaration(node: any) {
+        this.generatorTSKeyword(node, 'interface')
+        this.addSpacing()
+        this.generatorIdentifier(node.id)
+        // 可选的类型参数
+        if (node.typeParameters) {
+            this.generatorTSTypeParameterDeclaration(node.typeParameters)
+        }
+        // 可选的 extends
+        if (node.extends && node.extends.length > 0) {
+            this.addSpacing()
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ExtendsTok, null)
+            this.addSpacing()
+            node.extends.forEach((ext: any, index: number) => {
+                if (index > 0) {
+                    this.addComma()
+                    this.addSpacing()
+                }
+                this.generatorTSExpressionWithTypeArguments(ext)
+            })
+        }
+        this.addSpacing()
+        this.generatorTSTypeLiteral(node.body)
+    }
+
+    /**
+     * [TypeScript] 生成带类型参数的表达式
+     */
+    generatorTSExpressionWithTypeArguments(node: any) {
+        this.generatorNode(node.expression)
+        if (node.typeParameters) {
+            this.generatorTSTypeParameterInstantiation(node.typeParameters)
+        }
+    }
+
+    /**
+     * [TypeScript] 生成类型参数声明 <T, U extends V = W>
+     */
+    generatorTSTypeParameterDeclaration(node: any) {
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Less, null)
+        node.params.forEach((param: any, index: number) => {
+            if (index > 0) {
+                this.addComma()
+                this.addSpacing()
+            }
+            this.generatorIdentifier(param.name || param)
+            if (param.constraint) {
+                this.addSpacing()
+                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ExtendsTok, null)
+                this.addSpacing()
+                this.generatorTSType(param.constraint)
+            }
+            if (param.default) {
+                this.addSpacing()
+                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Eq, null)
+                this.addSpacing()
+                this.generatorTSType(param.default)
+            }
+        })
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Greater, null)
+    }
+
+    /**
+     * [TypeScript] 重写 generatorNode 以支持 TypeScript 节点
+     */
+    override generatorNode(node: any) {
+        if (!node) return
+
+        const type = node.type
+
+        // TypeScript 声明
+        if (type === 'TSTypeAliasDeclaration') {
+            return this.generatorTSTypeAliasDeclaration(node)
+        }
+        if (type === 'TSInterfaceDeclaration') {
+            return this.generatorTSInterfaceDeclaration(node)
+        }
+
+        // 调用父类方法处理其他节点
+        super.generatorNode(node)
+    }
 }
+
 
 const SlimeGenerator = new SlimeGeneratorUtil()
 
