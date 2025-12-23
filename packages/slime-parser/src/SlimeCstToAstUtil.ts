@@ -338,44 +338,6 @@ export class SlimeJavascriptCstToAst {
      *               SlimeJavascriptXxxCstToAst.methodName.bind(SlimeJavascriptXxxCstToAst)
      */
     private _setupMethodInterception() {
-        // 基础标识符和变量声明 - 支持类型注解 (let x: number = 1)
-        ; (SlimeJavascriptCstToAstUtil as any).createBindingIdentifierAst =
-            this.createBindingIdentifierAst.bind(this)
-            ; (SlimeJavascriptCstToAstUtil as any).createLexicalBindingAst =
-                this.createLexicalBindingAst.bind(this)
-            ; (SlimeJavascriptCstToAstUtil as any).toProgram =
-                this.toProgram.bind(this)
-
-            // TypeScript 声明 - interface, type, enum
-            ; (SlimeJavascriptCstToAstUtil as any).createDeclarationAst =
-                this.createDeclarationAst.bind(this)
-
-            // 函数声明 - 支持返回类型注解 (function foo(): number { })
-            ; (SlimeJavascriptCstToAstUtil as any).createFunctionDeclarationAst =
-                SlimeJavascriptFunctionDeclarationCstToAst.createFunctionDeclarationAst.bind(SlimeJavascriptFunctionDeclarationCstToAst)
-            ; (SlimeJavascriptCstToAstUtil as any).createGeneratorDeclarationAst =
-                SlimeJavascriptFunctionDeclarationCstToAst.createGeneratorDeclarationAst.bind(SlimeJavascriptFunctionDeclarationCstToAst)
-            ; (SlimeJavascriptCstToAstUtil as any).createAsyncFunctionDeclarationAst =
-                SlimeJavascriptFunctionDeclarationCstToAst.createAsyncFunctionDeclarationAst.bind(SlimeJavascriptFunctionDeclarationCstToAst)
-            ; (SlimeJavascriptCstToAstUtil as any).createAsyncGeneratorDeclarationAst =
-                SlimeJavascriptFunctionDeclarationCstToAst.createAsyncGeneratorDeclarationAst.bind(SlimeJavascriptFunctionDeclarationCstToAst)
-
-            // 类声明 - 支持 TSClassTail (class Foo<T> implements Bar { })
-            ; (SlimeJavascriptCstToAstUtil as any).createClassDeclarationAst =
-                SlimeJavascriptClassDeclarationCstToAst.createClassDeclarationAst.bind(SlimeJavascriptClassDeclarationCstToAst)
-            ; (SlimeJavascriptCstToAstUtil as any).createClassExpressionAst =
-                SlimeJavascriptClassDeclarationCstToAst.createClassExpressionAst.bind(SlimeJavascriptClassDeclarationCstToAst)
-            ; (SlimeJavascriptCstToAstUtil as any).createClassTailAst =
-                SlimeJavascriptClassDeclarationCstToAst.createClassTailAst.bind(SlimeJavascriptClassDeclarationCstToAst)
-            ; (SlimeJavascriptCstToAstUtil as any).createFieldDefinitionAst =
-                SlimeJavascriptClassDeclarationCstToAst.createFieldDefinitionAst.bind(SlimeJavascriptClassDeclarationCstToAst)
-
-            // 方法定义 - 支持返回类型注解 (add(a: number): number { })
-            ; (SlimeJavascriptCstToAstUtil as any).createMethodDefinitionClassElementNameAst =
-                SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionClassElementNameAst.bind(SlimeJavascriptMethodDefinitionCstToAst)
-            ; (SlimeJavascriptCstToAstUtil as any).createMethodDefinitionGetterMethodAst =
-                SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionGetterMethodAst.bind(SlimeJavascriptMethodDefinitionCstToAst)
-
         // TypeScript 表达式 - 类型断言 (<Type>expr, expr as Type, expr!)
         // 保存原始方法引用，用于非 TypeScript 表达式的处理
         const originalCreateExpressionAstUncached = SlimeJavascriptCstToAstUtil.createExpressionAstUncached.bind(SlimeJavascriptCstToAstUtil)
@@ -426,14 +388,6 @@ export class SlimeJavascriptCstToAst {
                 // 没有 TypeScript 后缀：使用原始实现
                 return originalCreateUpdateExpressionAst(cst)
             }
-
-            // TypeScript 模块 - 支持 import type, export type, namespace
-            ; (SlimeJavascriptCstToAstUtil as any).createModuleItemAst =
-                this.createModuleItemAst.bind(this)
-            ; (SlimeJavascriptCstToAstUtil as any).createImportDeclarationAst =
-                this.createImportDeclarationAst.bind(this)
-            ; (SlimeJavascriptCstToAstUtil as any).createExportDeclarationAst =
-                this.createExportDeclarationAst.bind(this)
     }
 
     // ============================================
