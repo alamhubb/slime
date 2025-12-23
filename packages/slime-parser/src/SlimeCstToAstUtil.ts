@@ -155,21 +155,99 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
     }
 
     /**
-     * 设置方法拦截
-     * 将需要 TypeScript 支持的方法重新绑定到新的实现
+     * [TypeScript] 重写 toProgram
+     * 使用 SlimeModuleCstToAst 来支持 TypeScript 类型注解
+     */
+    override toProgram(cst: SubhutiCst): SlimeProgram {
+        return SlimeModuleCstToAst.toProgram(cst)
+    }
+
+    /**
+     * ============================================
+     * 方法拦截机制 - TypeScript 支持的核心实现
+     * ============================================
      * 
-     * 原理：deprecated 类内部调用 SlimeJavascriptCstToAstUtil.xxx()（硬编码单例）
-     * 我们通过运行时修改该单例的方法引用，让它指向我们重写的方法
+     * ## 背景问题
+     * 
+     * deprecated 包中的 SlimeJavascriptXxxCstToAst 类内部硬编码调用了
+     * SlimeJavascriptCstToAstUtil 单例的方法，例如：
+     * 
+     * ```typescript
+     * // 在 SlimeJavascriptVariableCstToAst.ts 中
+     * return SlimeJavascriptCstToAstUtil.createFunctionDeclarationAst(first)
+     * ```
+     * 
+     * 这种硬编码调用无法通过普通的类继承重写来拦截，因为：
+     * 1. 调用的是单例对象的方法，不是 this 上的方法
+     * 2. 即使我们继承并重写了方法，父类代码仍然调用原始单例
+     * 
+     * ## 解决方案
+     * 
+     * 在运行时修改 SlimeJavascriptCstToAstUtil 单例对象的方法引用，
+     * 将其指向我们新实现的方法（支持 TypeScript）。
+     * 
+     * ```
+     * 调用链变化：
+     * 
+     * 修改前：
+     * SlimeJavascriptVariableCstToAst.createDeclarationAst()
+     *   -> SlimeJavascriptCstToAstUtil.createFunctionDeclarationAst()  // 不支持 TS
+     * 
+     * 修改后：
+     * SlimeJavascriptVariableCstToAst.createDeclarationAst()
+     *   -> SlimeJavascriptCstToAstUtil.createFunctionDeclarationAst()  // 已被替换
+     *   -> SlimeFunctionDeclarationCstToAst.createFunctionDeclarationAst()  // 支持 TS
+     * ```
+     * 
+     * ## 何时需要添加新的拦截
+     * 
+     * 当你需要为某个 CST-to-AST 转换方法添加 TypeScript 支持时：
+     * 
+     * 1. 在对应的 Slime 版本文件中重写该方法（如 SlimeFunctionDeclarationCstToAst.ts）
+     * 2. 在下面的 _setupMethodInterception() 中添加拦截代码
+     * 3. 拦截代码格式：
+     *    ```typescript
+     *    ; (SlimeJavascriptCstToAstUtil as any).methodName = 
+     *        SlimeXxxCstToAst.methodName.bind(SlimeXxxCstToAst)
+     *    ```
+     * 
+     * ## 注意事项
+     * 
+     * - 这个拦截在 SlimeCstToAst 构造函数中执行，确保在任何转换之前完成
+     * - 使用 .bind() 确保方法内部的 this 指向正确的对象
+     * - 分号开头是为了避免 JavaScript ASI（自动分号插入）问题
      */
     private _setupMethodInterception() {
-        // 绑定重写的方法到 SlimeJavascriptCstToAstUtil
-        // 这样所有调用 SlimeJavascriptCstToAstUtil.createBindingIdentifierAst 的地方
-        // 都会使用我们的实现（支持 TypeScript 类型注解）
-        ; (SlimeJavascriptCstToAstUtil as any).createBindingIdentifierAst = this.createBindingIdentifierAst.bind(this)
-            ; (SlimeJavascriptCstToAstUtil as any).createLexicalBindingAst = this.createLexicalBindingAst.bind(this)
-            ; (SlimeJavascriptCstToAstUtil as any).toProgram = this.toProgram.bind(this)
-            // [TypeScript] 添加 createDeclarationAst 拦截以支持 TypeScript 声明
-            ; (SlimeJavascriptCstToAstUtil as any).createDeclarationAst = this.createDeclarationAst.bind(this)
+        // ============================================
+        // 基础标识符和变量声明 - 支持类型注解
+        // 例如: let x: number = 1
+        // ============================================
+        ; (SlimeJavascriptCstToAstUtil as any).createBindingIdentifierAst = 
+            this.createBindingIdentifierAst.bind(this)
+        ; (SlimeJavascriptCstToAstUtil as any).createLexicalBindingAst = 
+            this.createLexicalBindingAst.bind(this)
+        ; (SlimeJavascriptCstToAstUtil as any).toProgram = 
+            this.toProgram.bind(this)
+        
+        // ============================================
+        // TypeScript 声明 - 支持 interface, type, enum
+        // 例如: interface Foo { }, type Bar = string, enum Color { }
+        // ============================================
+        ; (SlimeJavascriptCstToAstUtil as any).createDeclarationAst = 
+            this.createDeclarationAst.bind(this)
+        
+        // ============================================
+        // 函数声明 - 支持返回类型注解
+        // 例如: function foo(): number { }
+        // ============================================
+        ; (SlimeJavascriptCstToAstUtil as any).createFunctionDeclarationAst = 
+            SlimeFunctionDeclarationCstToAst.createFunctionDeclarationAst.bind(SlimeFunctionDeclarationCstToAst)
+        ; (SlimeJavascriptCstToAstUtil as any).createGeneratorDeclarationAst = 
+            SlimeFunctionDeclarationCstToAst.createGeneratorDeclarationAst.bind(SlimeFunctionDeclarationCstToAst)
+        ; (SlimeJavascriptCstToAstUtil as any).createAsyncFunctionDeclarationAst = 
+            SlimeFunctionDeclarationCstToAst.createAsyncFunctionDeclarationAst.bind(SlimeFunctionDeclarationCstToAst)
+        ; (SlimeJavascriptCstToAstUtil as any).createAsyncGeneratorDeclarationAst = 
+            SlimeFunctionDeclarationCstToAst.createAsyncGeneratorDeclarationAst.bind(SlimeFunctionDeclarationCstToAst)
     }
 
     // ============================================
@@ -190,14 +268,6 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
      */
     override createLexicalBindingAst(cst: SubhutiCst): SlimeVariableDeclarator {
         return SlimeVariableCstToAst.createLexicalBindingAst(cst)
-    }
-
-    /**
-     * [TypeScript] 重写 toProgram
-     * 使用 SlimeModuleCstToAst 来支持 TypeScript 类型注解
-     */
-    override toProgram(cst: SubhutiCst): SlimeProgram {
-        return SlimeModuleCstToAst.toProgram(cst)
     }
 
     /**

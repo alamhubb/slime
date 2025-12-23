@@ -969,8 +969,12 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
         for (const child of children) {
             if (child.name === 'TSReadonly' || child.value === 'readonly') {
                 readonly = true
-            } else if (child.name === 'PropertyName' || child.name === 'Identifier' || child.name === 'IdentifierName') {
-                const tokenCst = child.children?.[0]?.children?.[0] || child.children?.[0] || child
+            } else if (child.name === 'PropertyName') {
+                // PropertyName -> LiteralPropertyName -> IdentifierName -> IdentifierName (token)
+                // 或 PropertyName -> ComputedPropertyName -> ...
+                key = this.extractPropertyNameKey(child)
+            } else if (child.name === 'Identifier' || child.name === 'IdentifierName') {
+                const tokenCst = child.children?.[0] || child
                 key = {
                     type: 'Identifier',
                     name: tokenCst.value,
@@ -1007,6 +1011,63 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
                 computed: false,
                 loc: cst.loc,
             }
+        }
+    }
+
+    /**
+     * [TypeScript] 从 PropertyName CST 中提取 key
+     */
+    extractPropertyNameKey(cst: SubhutiCst): any {
+        const children = cst.children || []
+        const firstChild = children[0]
+        
+        if (!firstChild) {
+            throw new Error('PropertyName has no children')
+        }
+        
+        if (firstChild.name === 'LiteralPropertyName') {
+            // LiteralPropertyName -> IdentifierName | StringLiteral | NumericLiteral
+            const literalChild = firstChild.children?.[0]
+            if (!literalChild) {
+                throw new Error('LiteralPropertyName has no children')
+            }
+            
+            if (literalChild.name === 'IdentifierName') {
+                // IdentifierName -> IdentifierName (token)
+                const tokenCst = literalChild.children?.[0] || literalChild
+                return {
+                    type: 'Identifier',
+                    name: tokenCst.value,
+                    loc: tokenCst.loc,
+                }
+            } else if (literalChild.name === 'StringLiteral') {
+                const tokenCst = literalChild.children?.[0] || literalChild
+                return {
+                    type: 'Literal',
+                    value: tokenCst.value,
+                    raw: tokenCst.value,
+                    loc: tokenCst.loc,
+                }
+            } else if (literalChild.name === 'NumericLiteral') {
+                const tokenCst = literalChild.children?.[0] || literalChild
+                return {
+                    type: 'Literal',
+                    value: Number(tokenCst.value),
+                    raw: tokenCst.value,
+                    loc: tokenCst.loc,
+                }
+            }
+        } else if (firstChild.name === 'ComputedPropertyName') {
+            // TODO: 处理计算属性名
+            throw new Error('ComputedPropertyName not yet supported in TSPropertyOrMethodSignature')
+        }
+        
+        // 回退：尝试直接从 children 中提取
+        const tokenCst = firstChild.children?.[0]?.children?.[0] || firstChild.children?.[0] || firstChild
+        return {
+            type: 'Identifier',
+            name: tokenCst.value,
+            loc: tokenCst.loc,
         }
     }
 

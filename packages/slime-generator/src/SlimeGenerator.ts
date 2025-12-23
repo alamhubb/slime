@@ -24,6 +24,95 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
     }
 
     /**
+     * [TypeScript] 重写 generatorFunctionDeclaration 以支持返回类型
+     */
+    override generatorFunctionDeclaration(node: any) {
+        // 如果是async函数，先输出async关键字
+        if (node.async) {
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.AsyncTok, node.asyncToken?.loc)
+            this.addSpacing()
+        }
+
+        // 输出 function 关键字
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.FunctionTok, node.functionToken?.loc)
+
+        // Generator函数：输出 * 号
+        if (node.generator) {
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Asterisk, node.asteriskToken?.loc)
+        }
+
+        // 输出函数名
+        if (node.id) {
+            this.addSpacing()
+            // 注意：不使用 generatorIdentifier，因为函数名不应该有类型注解
+            const identifierName = (node.id as any).raw || (node.id.loc as any)?.value || node.id.name || ''
+            const identifier = {
+                type: SlimeJavascriptTokenType.IdentifierName,
+                name: SlimeJavascriptTokenType.IdentifierName,
+                value: identifierName
+            }
+            this.addCodeAndMappings(identifier, node.id.loc)
+        }
+
+        // 输出参数列表
+        this.generatorFunctionParams(node.params, node.lParenToken?.loc, node.rParenToken?.loc)
+
+        // [TypeScript] 输出返回类型
+        if (node.returnType) {
+            this.generatorTSTypeAnnotation(node.returnType)
+        }
+
+        // 输出函数体
+        if (node.body) {
+            this.generatorBlockStatement(node.body, true)
+        }
+    }
+
+    /**
+     * [TypeScript] 重写 generatorFunctionExpression 以支持返回类型
+     */
+    override generatorFunctionExpression(node: any) {
+        // 如果是async函数，先输出async关键字
+        if (node.async) {
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.AsyncTok, node.asyncToken?.loc)
+            this.addSpacing()
+        }
+
+        // 输出 function 关键字
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.FunctionTok, node.functionToken?.loc)
+
+        // Generator函数：输出 * 号
+        if (node.generator) {
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Asterisk, node.asteriskToken?.loc)
+        }
+
+        // 输出函数名（如果有）
+        if (node.id) {
+            this.addSpacing()
+            const identifierName = (node.id as any).raw || (node.id.loc as any)?.value || node.id.name || ''
+            const identifier = {
+                type: SlimeJavascriptTokenType.IdentifierName,
+                name: SlimeJavascriptTokenType.IdentifierName,
+                value: identifierName
+            }
+            this.addCodeAndMappings(identifier, node.id.loc)
+        }
+
+        // 输出参数列表
+        this.generatorFunctionParams(node.params, node.lParenToken?.loc, node.rParenToken?.loc)
+
+        // [TypeScript] 输出返回类型
+        if (node.returnType) {
+            this.generatorTSTypeAnnotation(node.returnType)
+        }
+
+        // 输出函数体
+        if (node.body) {
+            this.generatorNode(node.body)
+        }
+    }
+
+    /**
      * [TypeScript] 生成类型注解：: Type
      */
     generatorTSTypeAnnotation(node: any) {
@@ -263,7 +352,7 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
             this.addSpacing()
             node.members.forEach((member: any, index: number) => {
                 if (index > 0) {
-                    this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Semicolon, null)
+                    this.addComma()
                     this.addSpacing()
                 }
                 this.generatorTSTypeMember(member)
@@ -359,12 +448,30 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
                 this.addComma()
                 this.addSpacing()
             }
-            this.generatorIdentifier(param.name || param)
-            if (param.optional) {
-                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Question, null)
-            }
-            if (param.typeAnnotation) {
-                this.generatorTSTypeAnnotation(param.typeAnnotation)
+            // param 是一个 Identifier 节点，带有 name, typeAnnotation, optional 属性
+            // generatorIdentifier 会自动处理 typeAnnotation
+            if (param.type === 'Identifier') {
+                // 先输出标识符名称（不调用 generatorIdentifier 以避免重复输出类型注解）
+                const identifierName = (param as any).raw || (param.loc as any)?.value || param.name || ''
+                const identifier = {
+                    type: 'IdentifierName',
+                    name: 'IdentifierName',
+                    value: identifierName
+                }
+                this.addCodeAndMappings(identifier, param.loc)
+                
+                // 处理可选参数
+                if (param.optional) {
+                    this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Question, null)
+                }
+                
+                // 处理类型注解
+                if (param.typeAnnotation) {
+                    this.generatorTSTypeAnnotation(param.typeAnnotation)
+                }
+            } else {
+                // 其他类型的参数（如解构模式）
+                this.generatorNode(param)
             }
         })
     }
@@ -384,7 +491,11 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
         this.addSpacing()
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Arrow, null)
         this.addSpacing()
-        this.generatorTSType(node.typeAnnotation.typeAnnotation || node.returnType)
+        // 返回类型可能在 returnType 或 typeAnnotation.typeAnnotation 中
+        const returnType = node.returnType || node.typeAnnotation?.typeAnnotation
+        if (returnType) {
+            this.generatorTSType(returnType)
+        }
     }
 
     /**
@@ -404,7 +515,11 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
         this.addSpacing()
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Arrow, null)
         this.addSpacing()
-        this.generatorTSType(node.typeAnnotation.typeAnnotation || node.returnType)
+        // 返回类型可能在 returnType 或 typeAnnotation.typeAnnotation 中
+        const returnType = node.returnType || node.typeAnnotation?.typeAnnotation
+        if (returnType) {
+            this.generatorTSType(returnType)
+        }
     }
 
     /**
