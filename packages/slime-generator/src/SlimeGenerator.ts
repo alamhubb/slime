@@ -142,7 +142,7 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
         // 处理 value（属性值）
         if (node.value) {
             this.addSpacing()
-            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Eq, node.equalToken?.loc)
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Assign, node.equalToken?.loc)
             this.addSpacing()
             this.generatorNode(node.value)
         }
@@ -784,7 +784,7 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
             this.generatorTSTypeParameterDeclaration(node.typeParameters)
         }
         this.addSpacing()
-        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Eq, null)
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Assign, null)
         this.addSpacing()
         this.generatorTSType(node.typeAnnotation)
         // 声明语句末尾需要换行
@@ -851,12 +851,69 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
             }
             if (param.default) {
                 this.addSpacing()
-                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Eq, null)
+                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Assign, null)
                 this.addSpacing()
                 this.generatorTSType(param.default)
             }
         })
         this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Greater, null)
+    }
+
+    /**
+     * [TypeScript] 生成枚举声明
+     * enum Direction { Up, Down, Left, Right }
+     * const enum HttpStatus { OK = 200 }
+     */
+    generatorTSEnumDeclaration(node: any) {
+        // 可选的 const 修饰符
+        if (node.const) {
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ConstTok, null)
+            this.addSpacing()
+        }
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.EnumTok, null)
+        this.addSpacing()
+        this.generatorIdentifier(node.id)
+        this.addSpacing()
+        this.addLBrace()
+        this.addNewLine()
+        this.indent++
+        
+        // 枚举成员
+        node.members.forEach((member: any, index: number) => {
+            this.addIndent()
+            this.generatorTSEnumMember(member)
+            // 除了最后一个成员，都添加逗号
+            if (index < node.members.length - 1) {
+                this.addComma()
+            }
+            this.addNewLine()
+        })
+        
+        this.indent--
+        this.addIndent()
+        this.addRBrace()
+        // 声明语句末尾需要换行
+        this.addNewLine()
+    }
+
+    /**
+     * [TypeScript] 生成枚举成员
+     * Up, Down = 1, Red = "RED"
+     */
+    generatorTSEnumMember(node: any) {
+        // 成员名（可以是标识符或字符串字面量）
+        if (node.id.type === 'Identifier') {
+            this.generatorIdentifier(node.id)
+        } else {
+            this.generatorNode(node.id)
+        }
+        // 可选的初始化器
+        if (node.initializer) {
+            this.addSpacing()
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Assign, null)
+            this.addSpacing()
+            this.generatorNode(node.initializer)
+        }
     }
 
     /**
@@ -873,6 +930,9 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
         }
         if (type === 'TSInterfaceDeclaration') {
             return this.generatorTSInterfaceDeclaration(node)
+        }
+        if (type === 'TSEnumDeclaration') {
+            return this.generatorTSEnumDeclaration(node)
         }
 
         // 调用父类方法处理其他节点

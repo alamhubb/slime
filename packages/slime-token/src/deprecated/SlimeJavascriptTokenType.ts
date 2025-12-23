@@ -15,6 +15,13 @@
 /**
  * 赋值运算符 Token 类型
  * 对应: = += -= *= /= %= **= <<= >>= >>>= &= |= ^= &&= ||= ??=
+ * 
+ * 命名说明：
+ * - 使用 `Assign` 而非 ES2025 规范中的 `Eq`
+ * - 原因：
+ *   1. 语义清晰：`Assign` 明确表达赋值操作，`Eq` 容易与相等比较 `==`/`===` 混淆
+ *   2. 命名一致：与复合赋值运算符 `PlusAssign`、`MinusAssign` 等保持统一风格
+ *   3. 避免歧义：代码中看到 `Eq` 可能让人困惑是 `=` 还是 `==`
  */
 export const SlimeJavascriptAssignmentOperatorTokenTypes = {
     Assign: 'Assign',                                       // =

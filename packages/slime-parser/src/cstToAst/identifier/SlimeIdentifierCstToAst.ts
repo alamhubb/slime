@@ -17,7 +17,7 @@ import SlimeParser from "../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import { SlimeVariableCstToAstSingle } from "../statements/SlimeVariableCstToAst.ts";
-import { SlimeJavascriptIdentifierCstToAstSingle } from "../../deprecated/slimeJavascriptCstToAst";
+import { SlimeJavascriptIdentifierCstToAstSingle, SlimeJavascriptCstToAstUtil } from "../../deprecated/slimeJavascriptCstToAst";
 import { SlimeJavascriptAstUtil } from "slime-ast";
 
 export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstToAstSingle {
@@ -1640,6 +1640,12 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
 
     /**
      * [TypeScript] 转换 TSEnumMember CST 为 AST
+     * 
+     * CST 结构:
+     * TSEnumMember
+     *   - Identifier (成员名)
+     *   - Assign (可选的 = 符号)
+     *   - AssignmentExpression (可选的初始化表达式)
      */
     createTSEnumMemberAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -1648,47 +1654,25 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
         let initializer: any = undefined
 
         for (const child of children) {
-            if (child.name === 'Identifier' || child.name === 'IdentifierName' || child.name === 'PropertyName') {
-                const tokenCst = child.children?.[0]?.children?.[0] || child.children?.[0] || child
+            if (child.name === 'Identifier') {
+                // 枚举成员名
+                const tokenCst = child.children?.[0] || child
                 id = {
                     type: 'Identifier',
                     name: tokenCst.value,
                     loc: tokenCst.loc,
                 }
-            } else if (child.name === 'Initializer') {
-                // 获取初始化表达式
-                const initChild = child.children?.find((c: SubhutiCst) => 
-                    c.name !== 'Assign' && c.value !== '='
-                )
-                if (initChild) {
-                    // 简单处理：直接使用字面量值
-                    const tokenCst = initChild.children?.[0]?.children?.[0] || initChild.children?.[0] || initChild
-                    if (tokenCst.value !== undefined) {
-                        const value = tokenCst.value
-                        if (typeof value === 'string' && (value.startsWith('"') || value.startsWith("'"))) {
-                            initializer = {
-                                type: 'Literal',
-                                value: value.slice(1, -1),
-                                raw: value,
-                                loc: tokenCst.loc,
-                            }
-                        } else if (!isNaN(Number(value))) {
-                            initializer = {
-                                type: 'Literal',
-                                value: Number(value),
-                                raw: value,
-                                loc: tokenCst.loc,
-                            }
-                        } else {
-                            // 可能是标识符引用
-                            initializer = {
-                                type: 'Identifier',
-                                name: value,
-                                loc: tokenCst.loc,
-                            }
-                        }
-                    }
+            } else if (child.name === 'StringLiteral') {
+                // 字符串字面量作为成员名
+                id = {
+                    type: 'Literal',
+                    value: child.value?.slice(1, -1),
+                    raw: child.value,
+                    loc: child.loc,
                 }
+            } else if (child.name === 'AssignmentExpression') {
+                // 初始化表达式 - 使用通用的表达式转换
+                initializer = this.createExpressionAst(child)
             }
         }
 

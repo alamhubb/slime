@@ -69,8 +69,6 @@ export const SlimeJavascriptGeneratorTokensObj = {
     GetTok: createSoftKeywordToken('GetTok', 'get'),
     SetTok: createSoftKeywordToken('SetTok', 'set'),
     FromTok: createSoftKeywordToken('FromTok', 'from'),
-    // 别名（ES2025 使用不同的名称）
-    Eq: SlimeJavascriptTokensObj.Assign,  // = 等号
 };
 
 const letTok = createSoftKeywordToken('Let', SlimeJavascriptContextualKeywordTokenTypes.Let)
@@ -968,7 +966,7 @@ export class SlimeJavascriptGeneratorUtil {
         // 处理 value（属性值）
         if (node.value) {
             this.addSpacing()
-            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Eq, node.equalToken?.loc) // 使用精确 token 位置
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Assign, node.equalToken?.loc) // 使用精确 token 位置
             this.addSpacing()
             this.generatorNode(node.value)
         }
@@ -1317,7 +1315,7 @@ export class SlimeJavascriptGeneratorUtil {
         // 默认值模式：name = 'Guest'
         this.generatorNode(node.left)
         this.addSpacing()
-        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Eq, (node as any).equalToken?.loc) // 使用精确 token 位置
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Assign, (node as any).equalToken?.loc) // 使用精确 token 位置
         this.addSpacing()
         this.generatorNode(node.right)
     }
@@ -1526,9 +1524,9 @@ export class SlimeJavascriptGeneratorUtil {
             this.addSpacing()
             // 优先使用 node.equal，如果没有则使用默认的等号 token
             if (node.eqToken) {
-                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Eq, node.eqToken.loc)
+                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.Assign, node.eqToken.loc)
             } else {
-                this.addCode(SlimeJavascriptGeneratorTokensObj.Eq)
+                this.addCode(SlimeJavascriptGeneratorTokensObj.Assign)
             }
             this.addSpacing()
             this.generatorNode(node.init)
