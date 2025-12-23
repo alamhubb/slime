@@ -100,7 +100,7 @@ import {
     SlimeUnaryExpressionCstToAst,
     SlimeVariableCstToAst,
     SlimeClassDeclarationCstToAst,
-} from "./SlimeCstToAst";
+} from "./cstToAst";
 
 
 
