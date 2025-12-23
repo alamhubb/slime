@@ -7,8 +7,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { performance } from 'perf_hooks'
-import SlimeParser from "../../../slime-parser/src/SlimeParser.ts"
-import SlimeCstToAst from "../../../slime-parser/src/SlimeCstToAstUtil.ts"
+import { SlimeParser, SlimeCstToAst } from "slime-parser"
 import { fileURLToPath } from "url";
 import { createRequire } from "module";
 

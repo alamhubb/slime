@@ -10,7 +10,6 @@
  *   npx tsx slime/packages/slime-test/src/utils/test-stage3.ts 100 -s       # 从第100个开始，遇错停止
  */
 import {runTests, testStage3} from "./test-framework.ts";
-import SlimeJavascriptParser from "../../../slime-parser/src/deprecated/SlimeJavascriptParser.ts";
 
 // 运行测试
 runTests(testStage3, {
@@ -18,5 +17,4 @@ runTests(testStage3, {
     description: 'AST → JavaScript代码，比较输入/输出的 token 序列',
     startFrom: 1,
     stopOnFail: true,
-    // ParserClass: SlimeJavascriptParser
 })
