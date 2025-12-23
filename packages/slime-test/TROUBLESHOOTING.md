@@ -24,16 +24,16 @@ RangeError: Maximum call stack size exceeded
 
 #### 1.1 方法拦截导致的循环调用
 
-**问题**: deprecated 包中的方法内部调用 `SlimeCstToAstUtil.xxx()`，而 `SlimeCstToAstUtil` 的方法被拦截后指向新实现，新实现又调用原始方法，形成循环。
+**问题**: deprecated 包中的方法内部调用 `SlimeJavascriptCstToAstUtil.xxx()`，而 `SlimeJavascriptCstToAstUtil` 的方法被拦截后指向新实现，新实现又调用原始方法，形成循环。
 
 **调用链示例**:
 ```
-SlimeCstToAstUtil.createExpressionAst 
+SlimeJavascriptCstToAstUtil.createExpressionAst 
   → this.createExpressionAstUncached (被拦截)
   → 我们的 createExpressionAstUncached
   → SlimeJavascriptExpressionCstToAst.createExpressionAstUncached
-  → SlimeCstToAstUtil.createPrimaryExpressionAst
-  → ... → SlimeCstToAstUtil.createExpressionAst (回到起点)
+  → SlimeJavascriptCstToAstUtil.createPrimaryExpressionAst
+  → ... → SlimeJavascriptCstToAstUtil.createExpressionAst (回到起点)
 ```
 
 **解决方案**: 
@@ -42,8 +42,8 @@ SlimeCstToAstUtil.createExpressionAst
 
 ```typescript
 // 正确做法：保存原始方法引用
-const originalMethod = SlimeCstToAstUtil.someMethod.bind(SlimeCstToAstUtil)
-;(SlimeCstToAstUtil as any).someMethod = (cst: SubhutiCst) => {
+const originalMethod = SlimeJavascriptCstToAstUtil.someMethod.bind(SlimeJavascriptCstToAstUtil)
+;(SlimeJavascriptCstToAstUtil as any).someMethod = (cst: SubhutiCst) => {
     if (cst.name === 'TSSpecificType') {
         return handleTSType(cst)  // 处理 TypeScript 特有类型
     }
