@@ -43,3 +43,12 @@ export * from './components/SlimePatternConvertCstToAst.ts';
 export * from './identifier/SlimeIdentifierCstToAst.ts';
 export * from './literal/SlimeLiteralCstToAst.ts';
 export * from './expressions/SlimeOptionalExpressionCstToAst.ts';
+
+export * from './typescript/SlimeTSTypeAnnotationCstToAst.ts'
+export * from './typescript/SlimeTSKeywordTypeCstToAst.ts'
+export * from './typescript/SlimeTSCompositeTypeCstToAst.ts'
+export * from './typescript/SlimeTSPrimaryTypeCstToAst.ts'
+export * from './typescript/SlimeTSTypeLiteralCstToAst.ts'
+export * from './typescript/SlimeTSFunctionTypeCstToAst.ts'
+export * from './typescript/SlimeTSDeclarationCstToAst.ts'
+export * from './typescript/SlimeTSExpressionCstToAst.ts'
