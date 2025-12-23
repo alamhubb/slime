@@ -1,14 +1,5 @@
 /**
- * ⚠️ 警告：请勿直接修改此文件！
- *
- * 此文件属于 deprecated 包，包含 JavaScript ES2025 的基础实现。
- *
- * 如需添加 TypeScript 支持或扩展功能：
- * 1. 在 SlimeJavascriptCstToAstUtil.ts 中重写方法
- * 2. 在 _setupMethodInterception() 中添加方法拦截
- * 3. 或在 cstToAst/ 目录下的对应文件中实现
- *
- * 参考：packages/slime-parser/src/SlimeJavascriptCstToAstUtil.ts
+ * SlimeCstToAstUtil - CST 到 AST 转换工具类
  */
 import {
     type SlimeJavascriptAssignmentExpression,
@@ -77,7 +68,7 @@ import {
     SlimeJavascriptDeclaration,
     SlimeAstTypeName,
 } from "slime-ast";
-import {SubhutiCst, type SubhutiSourceLocation} from "subhuti";
+import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
 import {
     SlimeJavascriptArrowFunctionCstToAst,
     SlimeJavascriptAssignmentPatternCstToAst,
@@ -106,6 +97,10 @@ import {
     SlimeJavascriptVariableCstToAst,
     SlimeJavascriptClassDeclarationCstToAst,
 } from "./slimeCstToAst";
+
+import { SlimeJavascriptTSModuleCstToAst } from "./slimeCstToAst/typescript/SlimeTSModuleCstToAst.ts";
+import { SlimeJavascriptTSDeclarationCstToAst } from "./slimeCstToAst/typescript/SlimeTSDeclarationCstToAst.ts";
+import { SlimeJavascriptTSTypeAnnotationCstToAst } from "./slimeCstToAst/typescript/SlimeTSTypeAnnotationCstToAst.ts";
 
 
 // ============================================
@@ -1257,6 +1252,32 @@ export class SlimeCstToAst {
     }
 
     // === class / ClassDeclarationCstToAst ===
+
+    // === TypeScript Support ===
+
+    createTSInterfaceDeclarationAst(cst: SubhutiCst): any {
+        return SlimeJavascriptTSDeclarationCstToAst.createTSInterfaceDeclarationAst(cst)
+    }
+
+    createTSTypeAliasDeclarationAst(cst: SubhutiCst): any {
+        return SlimeJavascriptTSDeclarationCstToAst.createTSTypeAliasDeclarationAst(cst)
+    }
+
+    createTSEnumDeclarationAst(cst: SubhutiCst): any {
+        return SlimeJavascriptTSDeclarationCstToAst.createTSEnumDeclarationAst(cst)
+    }
+
+    createTSModuleDeclarationAst(cst: SubhutiCst): any {
+        return SlimeJavascriptTSModuleCstToAst.createTSModuleDeclarationAst(cst)
+    }
+
+    createTSDeclareStatementAst(cst: SubhutiCst): any {
+        return SlimeJavascriptTSModuleCstToAst.createTSDeclareStatementAst(cst)
+    }
+
+    createTSTypeAnnotationAst(cst: SubhutiCst): any {
+        return SlimeJavascriptTSTypeAnnotationCstToAst.createTSTypeAnnotationAst(cst)
+    }
 }
 
 const SlimeCstToAstUtil = new SlimeCstToAst()

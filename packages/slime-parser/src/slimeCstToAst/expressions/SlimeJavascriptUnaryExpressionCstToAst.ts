@@ -4,7 +4,7 @@
 import { SubhutiCst } from "subhuti";
 import {
     SlimeJavascriptCreateUtils, type SlimeJavascriptBlockStatement,
-    SlimeJavascriptExpression,
+    SlimeJavascriptExpression, SlimeExpression,
     type SlimeJavascriptFunctionExpression,
     type SlimeJavascriptFunctionParam,
     type SlimeJavascriptIdentifier, SlimeAstTypeName, SlimeJavascriptTokenCreateUtils

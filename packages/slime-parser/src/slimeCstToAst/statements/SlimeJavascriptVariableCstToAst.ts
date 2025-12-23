@@ -9,13 +9,15 @@ import {
     type SlimeJavascriptBlockStatement, type SlimeJavascriptClassDeclaration, type SlimeJavascriptDeclaration,
     type SlimeJavascriptFunctionDeclaration, type SlimeJavascriptFunctionExpression,
     type SlimeJavascriptFunctionParam,
-    type SlimeJavascriptIdentifier, SlimeAstTypeName, type SlimeJavascriptPropertyDefinition,
+    type SlimeJavascriptIdentifier, type SlimeJavascriptPropertyDefinition,
     SlimeJavascriptTokenCreateUtils, type SlimeJavascriptVariableDeclaration, type SlimeJavascriptVariableDeclarator,
     SlimeJavascriptCreateUtils, type SlimeJavascriptPattern, type SlimeJavascriptExpression, SlimeDeclaration,
     SlimeVariableDeclarator, SlimeTokenCreateUtils, SlimeAstCreateUtils, SlimeAstTypeName, SlimeVariableDeclaration,
-    SlimeIdentifier, SlimeExpression
+    SlimeIdentifier, SlimeExpression, SlimePattern
 } from "slime-ast";
 import { SlimeJavascriptClassDeclarationCstToAstSingle } from "../class/SlimeJavascriptClassDeclarationCstToAst.ts";
+import { SlimeJavascriptTSDeclarationCstToAst } from "../typescript/SlimeTSDeclarationCstToAst.ts";
+import { SlimeJavascriptTSModuleCstToAst } from "../typescript/SlimeTSModuleCstToAst.ts";
 // SlimeIdentifierCstToAst functions are accessed through SlimeCstToAstUtil
 
 
@@ -323,19 +325,19 @@ export class SlimeJavascriptVariableCstToAstSingle {
 
         // TypeScript 声明
         if (name === 'TSInterfaceDeclaration') {
-            return SlimeCstToAstUtil.createTSInterfaceDeclarationAst(first)
+            return SlimeJavascriptTSDeclarationCstToAst.createTSInterfaceDeclarationAst(first)
         }
         if (name === 'TSTypeAliasDeclaration') {
-            return SlimeCstToAstUtil.createTSTypeAliasDeclarationAst(first)
+            return SlimeJavascriptTSDeclarationCstToAst.createTSTypeAliasDeclarationAst(first)
         }
         if (name === 'TSEnumDeclaration') {
-            return SlimeCstToAstUtil.createTSEnumDeclarationAst(first)
+            return SlimeJavascriptTSDeclarationCstToAst.createTSEnumDeclarationAst(first)
         }
         if (name === 'TSModuleDeclaration') {
-            return SlimeCstToAstUtil.createTSModuleDeclarationAst(first)
+            return SlimeJavascriptTSModuleCstToAst.createTSModuleDeclarationAst(first)
         }
         if (name === 'TSDeclareStatement') {
-            return SlimeCstToAstUtil.createTSDeclareStatementAst(first)
+            return SlimeJavascriptTSModuleCstToAst.createTSDeclareStatementAst(first)
         }
 
 

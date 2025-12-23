@@ -1,5 +1,5 @@
 /**
- * CompoundLiteralCstToAst - 数组/对象字面量转�?
+ * CompoundLiteralCstToAst - 数组/对象字面量转换
  */
 import { SubhutiCst } from "subhuti";
 import {
@@ -17,7 +17,9 @@ import {
     type SlimeJavascriptPropertyDefinition,
     type SlimeJavascriptSpreadElement,
     type SlimeJavascriptStatement,
-    SlimeJavascriptTokenCreateUtils
+    SlimeJavascriptTokenCreateUtils,
+    SlimeExpression, SlimeIdentifier, SlimeLiteral, SlimeProperty, SlimeSpreadElement,
+    SlimeArrayExpression, SlimeObjectExpression
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
 

@@ -4,10 +4,11 @@
 import { SubhutiCst } from "subhuti";
 import {
     SlimeJavascriptCreateUtils, type SlimeJavascriptCallArgument,
-    SlimeJavascriptExpression,
+    SlimeJavascriptExpression, SlimeExpression,
     type SlimeJavascriptIdentifier, SlimeAstTypeName, type SlimeJavascriptPattern, SlimeJavascriptSpreadElement, type SlimeJavascriptSuper,
     SlimeJavascriptTokenCreateUtils,
-    type SlimeJavascriptVariableDeclarator
+    type SlimeJavascriptVariableDeclarator,
+    SlimeIdentifier, SlimeCallArgument, SlimeSuper
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
