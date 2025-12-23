@@ -143,6 +143,14 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
             this.createExpressionAstUncached.bind(this)
         ; (SlimeJavascriptCstToAstUtil as any).createUpdateExpressionAst = 
             this.createUpdateExpressionAst.bind(this)
+        
+        // TypeScript 模块 - 支持 import type, export type, namespace
+        ; (SlimeJavascriptCstToAstUtil as any).createModuleItemAst = 
+            this.createModuleItemAst.bind(this)
+        ; (SlimeJavascriptCstToAstUtil as any).createImportDeclarationAst = 
+            this.createImportDeclarationAst.bind(this)
+        ; (SlimeJavascriptCstToAstUtil as any).createExportDeclarationAst = 
+            this.createExportDeclarationAst.bind(this)
     }
 
     // ============================================
@@ -228,6 +236,57 @@ export class SlimeCstToAst extends SlimeJavascriptCstToAst {
         
         // 没有 TypeScript 后缀，交给父类处理
         return super.createUpdateExpressionAst(cst)
+    }
+
+    // ============================================
+    // [TypeScript] Phase 7 - 模块和命名空间
+    // ============================================
+
+    /**
+     * 重写 ModuleItem 转换，支持 TypeScript 模块语法
+     * 处理 ModuleItem 包装节点，解包后分发到具体处理方法
+     */
+    override createModuleItemAst(cst: SubhutiCst): any {
+        const name = cst.name
+        
+        // 如果是 ModuleItem 包装节点，解包获取内部节点
+        if (name === 'ModuleItem') {
+            const innerItem = cst.children?.[0]
+            if (!innerItem) return undefined
+            return this.createModuleItemAst(innerItem)
+        }
+        
+        // ImportDeclaration - 支持 import type
+        if (name === 'ImportDeclaration') {
+            return this.createImportDeclarationAst(cst)
+        }
+        
+        // ExportDeclaration - 支持 export type
+        if (name === 'ExportDeclaration') {
+            return this.createExportDeclarationAst(cst)
+        }
+        
+        // StatementListItem - 包含 TypeScript 声明
+        if (name === 'StatementListItem') {
+            return SlimeJavascriptCstToAstUtil.createStatementListItemAst(cst)
+        }
+        
+        // 其他情况交给父类处理
+        return super.createModuleItemAst(cst)
+    }
+
+    /**
+     * 重写 ImportDeclaration 转换，支持 import type
+     */
+    override createImportDeclarationAst(cst: SubhutiCst): any {
+        return SlimeModuleCstToAst.createImportDeclarationAst(cst)
+    }
+
+    /**
+     * 重写 ExportDeclaration 转换，支持 export type
+     */
+    override createExportDeclarationAst(cst: SubhutiCst): any {
+        return SlimeModuleCstToAst.createExportDeclarationAst(cst)
     }
 }
 

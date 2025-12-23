@@ -44,6 +44,12 @@ export class SlimeVariableCstToAstSingle extends SlimeJavascriptVariableCstToAst
         if (name === 'TSEnumDeclaration') {
             return SlimeIdentifierCstToAst.createTSEnumDeclarationAst(first)
         }
+        if (name === 'TSModuleDeclaration') {
+            return SlimeIdentifierCstToAst.createTSModuleDeclarationAst(first)
+        }
+        if (name === 'TSDeclareStatement') {
+            return SlimeIdentifierCstToAst.createTSDeclareStatementAst(first)
+        }
 
         // 调用父类处理 JavaScript 声明
         return super.createDeclarationAst(cst)

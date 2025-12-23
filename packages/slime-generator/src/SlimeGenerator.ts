@@ -293,7 +293,7 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
             name: SlimeJavascriptTokenType.IdentifierName,
             value: keyword
         }
-        this.addCodeAndMappings(token, node.loc)
+        this.addCodeAndMappings(token, node?.loc || null)
     }
 
     /**
@@ -949,6 +949,12 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
         if (type === 'TSEnumDeclaration') {
             return this.generatorTSEnumDeclaration(node)
         }
+        if (type === 'TSModuleDeclaration') {
+            return this.generatorTSModuleDeclaration(node)
+        }
+        if (type === 'TSDeclareFunction') {
+            return this.generatorTSDeclareFunction(node)
+        }
 
         // TypeScript Phase 2: 类型断言和表达式扩展
         if (type === 'TSAsExpression') {
@@ -966,6 +972,166 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
 
         // 调用父类方法处理其他节点
         super.generatorNode(node)
+    }
+
+    /**
+     * [TypeScript] 重写 ImportDeclaration 生成，支持 import type
+     */
+    override generatorImportDeclaration(node: any) {
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ImportTok, node.loc)
+        this.addSpacing()
+
+        // [TypeScript] 添加 type 关键字
+        if (node.importKind === 'type') {
+            this.generatorTSKeyword(node, 'type')
+            this.addSpacing()
+        }
+
+        const hasSpecifiers = node.specifiers && node.specifiers.length > 0
+        const hasEmptyNamedImport = !hasSpecifiers && node.lBraceToken && node.rBraceToken
+
+        if (hasSpecifiers) {
+            const getSpecType = (s: any) => s.specifier?.type || s.type
+            const getSpec = (s: any) => s.specifier || s
+
+            const hasDefault = node.specifiers.some((s: any) => getSpecType(s) === 'ImportDefaultSpecifier')
+            const hasNamed = node.specifiers.some((s: any) => getSpecType(s) === 'ImportSpecifier')
+            const hasNamespace = node.specifiers.some((s: any) => getSpecType(s) === 'ImportNamespaceSpecifier')
+
+            if (hasDefault) {
+                const defaultItem = node.specifiers.find((s: any) => getSpecType(s) === 'ImportDefaultSpecifier')
+                this.generatorNode(getSpec(defaultItem))
+                if (hasNamed || hasNamespace) {
+                    this.addComma()
+                    this.addSpacing()
+                }
+            }
+
+            if (hasNamespace) {
+                const nsItem = node.specifiers.find((s: any) => getSpecType(s) === 'ImportNamespaceSpecifier')
+                this.generatorNode(getSpec(nsItem))
+            } else if (hasNamed) {
+                const namedItems = node.specifiers.filter((s: any) => getSpecType(s) === 'ImportSpecifier')
+                this.addLBrace()
+                namedItems.forEach((item: any, index: number) => {
+                    if (index > 0) {
+                        this.addComma()
+                        this.addSpacing()
+                    }
+                    this.generatorTSImportSpecifier(getSpec(item))
+                })
+                this.addRBrace()
+            }
+
+            this.addSpacing()
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.FromTok, node.loc)
+            this.addSpacing()
+        } else if (hasEmptyNamedImport) {
+            this.addLBrace()
+            this.addRBrace()
+            this.addSpacing()
+            this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.FromTok, node.loc)
+            this.addSpacing()
+        }
+
+        this.generatorNode(node.source)
+        this.generatorAttributes(node)
+        this.addCode(SlimeJavascriptGeneratorTokensObj.Semicolon)
+        this.addNewLine()
+    }
+
+    /**
+     * [TypeScript] 生成 ImportSpecifier，支持内联 type
+     */
+    generatorTSImportSpecifier(node: any) {
+        // [TypeScript] 内联 type 关键字
+        if (node.importKind === 'type') {
+            this.generatorTSKeyword(node, 'type')
+            this.addSpacing()
+        }
+        
+        // imported as local 或 imported
+        if (node.imported && node.local) {
+            const importedName = node.imported.name
+            const localName = node.local.name
+            
+            if (importedName !== localName) {
+                this.generatorIdentifier(node.imported)
+                this.addSpacing()
+                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.AsTok, null)
+                this.addSpacing()
+                this.generatorIdentifier(node.local)
+            } else {
+                this.generatorIdentifier(node.imported)
+            }
+        } else if (node.imported) {
+            this.generatorIdentifier(node.imported)
+        } else if (node.local) {
+            this.generatorIdentifier(node.local)
+        }
+    }
+
+    /**
+     * [TypeScript] 重写 ExportNamedDeclaration 生成，支持 export type
+     */
+    override generatorExportNamedDeclaration(node: any) {
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.ExportTok, node.loc)
+        this.addSpacing()
+
+        // [TypeScript] 添加 type 关键字
+        if (node.exportKind === 'type') {
+            this.generatorTSKeyword(node, 'type')
+            this.addSpacing()
+        }
+
+        if (node.declaration) {
+            this.generatorNode(node.declaration)
+        } else if (node.specifiers && node.specifiers.length > 0) {
+            this.addLBrace()
+            node.specifiers.forEach((spec: any, index: number) => {
+                if (index > 0) {
+                    this.addComma()
+                    this.addSpacing()
+                }
+                const s = spec.specifier || spec
+                this.generatorTSExportSpecifier(s)
+            })
+            this.addRBrace()
+
+            if (node.source) {
+                this.addSpacing()
+                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.FromTok, node.loc)
+                this.addSpacing()
+                this.generatorNode(node.source)
+            }
+
+            this.addCode(SlimeJavascriptGeneratorTokensObj.Semicolon)
+            this.addNewLine()
+        }
+    }
+
+    /**
+     * [TypeScript] 生成 ExportSpecifier
+     */
+    generatorTSExportSpecifier(node: any) {
+        if (node.local && node.exported) {
+            const localName = node.local.name
+            const exportedName = node.exported.name
+            
+            if (localName !== exportedName) {
+                this.generatorIdentifier(node.local)
+                this.addSpacing()
+                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.AsTok, null)
+                this.addSpacing()
+                this.generatorIdentifier(node.exported)
+            } else {
+                this.generatorIdentifier(node.local)
+            }
+        } else if (node.local) {
+            this.generatorIdentifier(node.local)
+        } else if (node.exported) {
+            this.generatorIdentifier(node.exported)
+        }
     }
 
     // ============================================
@@ -1040,6 +1206,114 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
             this.addSpacing()
             this.generatorTSType(node.typeAnnotation)
         }
+    }
+
+    // ============================================
+    // TypeScript Phase 7: 模块和命名空间
+    // ============================================
+
+    /**
+     * [TypeScript] 生成命名空间/模块声明
+     * namespace A.B.C { } / module "name" { }
+     */
+    generatorTSModuleDeclaration(node: any) {
+        // 可选的 declare 修饰符
+        if (node.declare) {
+            this.generatorTSKeyword(node, 'declare')
+            this.addSpacing()
+        }
+        
+        // global 特殊处理
+        if (node.global) {
+            this.generatorTSKeyword(node, 'global')
+        } else {
+            // namespace 或 module 关键字
+            this.generatorTSKeyword(node, 'namespace')
+            this.addSpacing()
+            
+            // 模块标识符
+            if (node.id) {
+                if (node.id.type === 'Literal') {
+                    // module "name"
+                    this.generatorNode(node.id)
+                } else {
+                    // namespace A.B.C
+                    this.generatorIdentifier(node.id)
+                }
+            }
+        }
+        
+        this.addSpacing()
+        
+        // 模块体
+        if (node.body) {
+            this.generatorTSModuleBlock(node.body)
+        } else {
+            this.addLBrace()
+            this.addRBrace()
+        }
+        
+        this.addNewLine()
+    }
+
+    /**
+     * [TypeScript] 生成模块块
+     */
+    generatorTSModuleBlock(node: any) {
+        this.addLBrace()
+        this.addNewLine()
+        this.indent++
+        
+        if (node.body && node.body.length > 0) {
+            for (const item of node.body) {
+                this.addIndent()
+                this.generatorNode(item)
+            }
+        }
+        
+        this.indent--
+        this.addIndent()
+        this.addRBrace()
+    }
+
+    /**
+     * [TypeScript] 生成 declare function
+     * declare function name(): Type
+     */
+    generatorTSDeclareFunction(node: any) {
+        this.generatorTSKeyword(node, 'declare')
+        this.addSpacing()
+        this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.FunctionTok, null)
+        this.addSpacing()
+        
+        if (node.id) {
+            this.generatorIdentifier(node.id)
+        }
+        
+        // 可选的类型参数
+        if (node.typeParameters) {
+            this.generatorTSTypeParameterDeclaration(node.typeParameters)
+        }
+        
+        // 参数列表
+        this.addLParen()
+        if (node.params && node.params.length > 0) {
+            node.params.forEach((param: any, index: number) => {
+                if (index > 0) {
+                    this.addComma()
+                    this.addSpacing()
+                }
+                this.generatorNode(param)
+            })
+        }
+        this.addRParen()
+        
+        // 可选的返回类型
+        if (node.returnType) {
+            this.generatorTSTypeAnnotation(node.returnType)
+        }
+        
+        this.addNewLine()
     }
 }
 

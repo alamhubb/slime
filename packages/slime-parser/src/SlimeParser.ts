@@ -1320,11 +1320,15 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *     [TypeScript] TSInterfaceDeclaration
      *     [TypeScript] TSTypeAliasDeclaration
      *     [TypeScript] TSEnumDeclaration
+     *     [TypeScript] TSModuleDeclaration
+     *     [TypeScript] TSDeclareStatement
      */
     @SubhutiRule
     override Declaration(params: DeclarationParams = {}) {
         this.Or([
             // TypeScript 声明（必须在 JavaScript 声明之前，因为 interface/type/enum 是软关键字）
+            { alt: () => this.TSDeclareStatement() },
+            { alt: () => this.TSModuleDeclaration() },
             { alt: () => this.TSInterfaceDeclaration() },
             { alt: () => this.TSTypeAliasDeclaration() },
             { alt: () => this.TSEnumDeclaration() },
@@ -2124,6 +2128,331 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
                     ])
                     this.tokenConsumer.TSIs()
                     this.TSType()
+                }
+            }
+        ])
+    }
+
+    // ============================================
+    // TypeScript: Phase 7 - 模块和命名空间
+    // ============================================
+
+    /**
+     * [TypeScript] 重写 ImportDeclaration 以支持 import type
+     *
+     * ImportDeclaration :
+     *     import ImportClause FromClause WithClause_opt ;
+     *     import ModuleSpecifier WithClause_opt ;
+     *     [TypeScript] import type ImportClause FromClause ;
+     *     [TypeScript] import type * as Identifier FromClause ;
+     */
+    @SubhutiRule
+    override ImportDeclaration() {
+        this.Or([
+            // [TypeScript] import type ImportClause FromClause ;
+            {
+                alt: () => {
+                    this.tokenConsumer.Import()
+                    this.tokenConsumer.TSType()
+                    this.ImportClause()
+                    this.FromClause()
+                    this.SemicolonASI()
+                }
+            },
+            // import ImportClause FromClause WithClause_opt ;
+            {
+                alt: () => {
+                    this.tokenConsumer.Import()
+                    this.ImportClause()
+                    this.FromClause()
+                    this.Option(() => this.WithClause())
+                    this.SemicolonASI()
+                }
+            },
+            // import ModuleSpecifier WithClause_opt ;
+            {
+                alt: () => {
+                    this.tokenConsumer.Import()
+                    this.ModuleSpecifier()
+                    this.Option(() => this.WithClause())
+                    this.SemicolonASI()
+                }
+            }
+        ])
+    }
+
+    /**
+     * [TypeScript] 重写 ImportSpecifier 以支持内联类型导入
+     *
+     * ImportSpecifier :
+     *     ImportedBinding
+     *     ModuleExportName as ImportedBinding
+     *     [TypeScript] type ImportedBinding
+     *     [TypeScript] type ModuleExportName as ImportedBinding
+     */
+    @SubhutiRule
+    override ImportSpecifier() {
+        this.Or([
+            // [TypeScript] type ModuleExportName as ImportedBinding
+            {
+                alt: () => {
+                    this.tokenConsumer.TSType()
+                    this.ModuleExportName()
+                    this.tokenConsumer.As()
+                    this.ImportedBinding()
+                }
+            },
+            // [TypeScript] type ImportedBinding
+            {
+                alt: () => {
+                    this.tokenConsumer.TSType()
+                    this.ImportedBinding()
+                }
+            },
+            // ModuleExportName as ImportedBinding
+            {
+                alt: () => {
+                    this.ModuleExportName()
+                    this.tokenConsumer.As()
+                    this.ImportedBinding()
+                }
+            },
+            // ImportedBinding
+            { alt: () => this.ImportedBinding() }
+        ])
+    }
+
+    /**
+     * [TypeScript] 重写 ExportDeclaration 以支持 export type
+     *
+     * ExportDeclaration :
+     *     export ExportFromClause FromClause WithClause_opt ;
+     *     export NamedExports ;
+     *     export VariableStatement[~Yield, +Await]
+     *     export Declaration[~Yield, +Await]
+     *     export default HoistableDeclaration[~Yield, +Await, +Default]
+     *     export default ClassDeclaration[~Yield, +Await, +Default]
+     *     export default AssignmentExpression[+In, ~Yield, +Await] ;
+     *     [TypeScript] export type NamedExports ;
+     *     [TypeScript] export type NamedExports FromClause ;
+     */
+    @SubhutiRule
+    override ExportDeclaration() {
+        this.Or([
+            // [TypeScript] export type NamedExports FromClause ;
+            {
+                alt: () => {
+                    this.tokenConsumer.Export()
+                    this.tokenConsumer.TSType()
+                    this.NamedExports()
+                    this.FromClause()
+                    this.SemicolonASI()
+                }
+            },
+            // [TypeScript] export type NamedExports ;
+            {
+                alt: () => {
+                    this.tokenConsumer.Export()
+                    this.tokenConsumer.TSType()
+                    this.NamedExports()
+                    this.SemicolonASI()
+                }
+            },
+            // export ExportFromClause FromClause WithClause_opt ;
+            {
+                alt: () => {
+                    this.tokenConsumer.Export()
+                    this.ExportFromClause()
+                    this.FromClause()
+                    this.Option(() => this.WithClause())
+                    this.SemicolonASI()
+                }
+            },
+            // export NamedExports ;
+            {
+                alt: () => {
+                    this.tokenConsumer.Export()
+                    this.NamedExports()
+                    this.SemicolonASI()
+                }
+            },
+            // export VariableStatement[~Yield, +Await]
+            {
+                alt: () => {
+                    this.tokenConsumer.Export()
+                    this.VariableStatement({ Yield: false, Await: true })
+                }
+            },
+            // export Declaration[~Yield, +Await]
+            {
+                alt: () => {
+                    this.tokenConsumer.Export()
+                    this.Declaration({ Yield: false, Await: true })
+                }
+            },
+            // export default HoistableDeclaration[~Yield, +Await, +Default]
+            {
+                alt: () => {
+                    this.tokenConsumer.Export()
+                    this.tokenConsumer.Default()
+                    this.HoistableDeclaration({ Yield: false, Await: true, Default: true })
+                }
+            },
+            // export default ClassDeclaration[~Yield, +Await, +Default]
+            {
+                alt: () => {
+                    this.tokenConsumer.Export()
+                    this.tokenConsumer.Default()
+                    this.ClassDeclaration({ Yield: false, Await: true, Default: true })
+                }
+            },
+            // export default AssignmentExpression[+In, ~Yield, +Await] ;
+            {
+                alt: () => {
+                    this.tokenConsumer.Export()
+                    this.tokenConsumer.Default()
+                    this.AssignmentExpression({ In: true, Yield: false, Await: true })
+                    this.SemicolonASI()
+                }
+            }
+        ])
+    }
+
+    /**
+     * [TypeScript] 命名空间声明
+     *
+     * TSModuleDeclaration :
+     *     namespace TSModuleIdentifier { TSModuleBlock }
+     *     module TSModuleIdentifier { TSModuleBlock }
+     *     module StringLiteral { TSModuleBlock }
+     *
+     * TSModuleIdentifier :
+     *     Identifier
+     *     Identifier . TSModuleIdentifier
+     */
+    @SubhutiRule
+    TSModuleDeclaration() {
+        this.Or([
+            // namespace Identifier.Identifier... { }
+            {
+                alt: () => {
+                    this.tokenConsumer.TSNamespace()
+                    this.TSModuleIdentifier()
+                    this.tokenConsumer.LBrace()
+                    this.Option(() => this.TSModuleBlock())
+                    this.tokenConsumer.RBrace()
+                }
+            },
+            // module Identifier.Identifier... { }
+            {
+                alt: () => {
+                    this.tokenConsumer.TSModule()
+                    this.TSModuleIdentifier()
+                    this.tokenConsumer.LBrace()
+                    this.Option(() => this.TSModuleBlock())
+                    this.tokenConsumer.RBrace()
+                }
+            },
+            // module "string" { }
+            {
+                alt: () => {
+                    this.tokenConsumer.TSModule()
+                    this.tokenConsumer.StringLiteral()
+                    this.tokenConsumer.LBrace()
+                    this.Option(() => this.TSModuleBlock())
+                    this.tokenConsumer.RBrace()
+                }
+            }
+        ])
+    }
+
+    /**
+     * [TypeScript] 模块标识符（支持点分隔的嵌套命名空间）
+     *
+     * TSModuleIdentifier :
+     *     Identifier
+     *     Identifier . TSModuleIdentifier
+     */
+    @SubhutiRule
+    TSModuleIdentifier() {
+        this.Identifier()
+        this.Many(() => {
+            this.tokenConsumer.Dot()
+            this.Identifier()
+        })
+    }
+
+    /**
+     * [TypeScript] 模块块（命名空间体）
+     *
+     * TSModuleBlock :
+     *     ModuleItem*
+     */
+    @SubhutiRule
+    TSModuleBlock() {
+        this.Many(() => this.ModuleItem())
+    }
+
+    /**
+     * [TypeScript] declare 语句
+     *
+     * TSDeclareStatement :
+     *     declare const BindingIdentifier TSTypeAnnotation ;
+     *     declare let BindingIdentifier TSTypeAnnotation ;
+     *     declare var BindingIdentifier TSTypeAnnotation ;
+     *     declare function Identifier ( ) TSTypeAnnotation_opt ;
+     *     declare class Identifier { }
+     *     declare TSModuleDeclaration
+     *     declare global { }
+     */
+    @SubhutiRule
+    TSDeclareStatement() {
+        this.tokenConsumer.TSDeclare()
+        this.Or([
+            // declare const/let/var BindingIdentifier TSTypeAnnotation ;
+            {
+                alt: () => {
+                    this.Or([
+                        { alt: () => this.tokenConsumer.Const() },
+                        { alt: () => this.tokenConsumer.Let() },
+                        { alt: () => this.tokenConsumer.Var() }
+                    ])
+                    this.BindingIdentifier({ Yield: false, Await: false })
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.SemicolonASI()
+                }
+            },
+            // declare function Identifier TSTypeParameterDeclaration_opt ( FormalParameters ) TSTypeAnnotation_opt ;
+            {
+                alt: () => {
+                    this.tokenConsumer.Function()
+                    this.Identifier()
+                    this.Option(() => this.TSTypeParameterDeclaration())
+                    this.tokenConsumer.LParen()
+                    this.FormalParameters({ Yield: false, Await: false })
+                    this.tokenConsumer.RParen()
+                    this.Option(() => this.TSTypeAnnotation())
+                    this.SemicolonASI()
+                }
+            },
+            // declare class Identifier TSTypeParameterDeclaration_opt ClassTail
+            {
+                alt: () => {
+                    this.tokenConsumer.Class()
+                    this.Identifier()
+                    this.Option(() => this.TSTypeParameterDeclaration())
+                    this.ClassTail({ Yield: false, Await: false })
+                }
+            },
+            // declare namespace/module
+            { alt: () => this.TSModuleDeclaration() },
+            // declare global { }
+            {
+                alt: () => {
+                    this.tokenConsumer.TSGlobal()
+                    this.tokenConsumer.LBrace()
+                    this.Option(() => this.TSModuleBlock())
+                    this.tokenConsumer.RBrace()
                 }
             }
         ])

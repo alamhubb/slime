@@ -147,37 +147,38 @@
   - 确保所有测试通过，如有问题请询问用户
   - ✅ 测试通过: 14/14 TypeScript 测试通过
 
-- [ ] 12. Phase 6: 类型操作符
-  - [ ] 12.1 实现 TSTypeQuery 解析
+- [x] 12. Phase 6: 类型操作符
+  - [x] 12.1 实现 TSTypeQuery 解析
     - 支持 `typeof x` 在类型位置
     - _Requirements: 16.1_
-  - [ ] 12.2 实现 TSTypeOperator 解析
+  - [x] 12.2 实现 TSTypeOperator 解析
     - 支持 `keyof T`, `readonly T[]`, `unique symbol`
     - _Requirements: 16.2, 16.4_
-  - [ ] 12.3 实现 TSIndexedAccessType 解析
+  - [x] 12.3 实现 TSIndexedAccessType 解析
     - 支持 `T[K]`
     - _Requirements: 16.3_
-  - [ ] 12.4 实现 TSConditionalType 解析
+  - [x] 12.4 实现 TSConditionalType 解析
     - 支持 `T extends U ? X : Y`
     - _Requirements: 17.1-17.3_
-  - [ ] 12.5 实现 TSInferType 解析
+  - [x] 12.5 实现 TSInferType 解析
     - 支持 `infer R` 在条件类型中
     - _Requirements: 17.2_
-  - [ ] 12.6 实现 TSMappedType 解析
+  - [x] 12.6 实现 TSMappedType 解析
     - 支持 `{ [K in keyof T]: T[K] }` 及修饰符
     - _Requirements: 18.1-18.4_
   - [ ]* 12.7 编写 Phase 6 单元测试
     - _Requirements: 16.1-16.4, 17.1-17.3, 18.1-18.4_
 
-- [ ] 13. Checkpoint - Phase 6 验证
+- [x] 13. Checkpoint - Phase 6 验证
   - 确保所有测试通过，如有问题请询问用户
+  - ✅ 测试通过: 16/16 TypeScript 测试通过
 
 - [ ] 14. Phase 7: 模块和命名空间
   - [ ] 14.1 实现类型导入导出解析
     - 支持 `import type { Foo }`, `export type { Foo }`
     - 支持内联类型导入 `import { type Foo }`
     - _Requirements: 19.1-19.4_
-  - [ ] 14.2 实现 TSModuleDeclaration 解析
+  - [x] 14.2 实现 TSModuleDeclaration 解析
     - 支持 `namespace Foo { }`, `module Foo { }`
     - 支持嵌套命名空间 `namespace A.B.C { }`
     - _Requirements: 20.1-20.4_
@@ -193,18 +194,19 @@
 
 - [ ] 15. Checkpoint - Phase 7 验证
   - 确保所有测试通过，如有问题请询问用户
+  - ✅ 命名空间测试通过: 17/17 TypeScript 测试通过
 
-- [ ] 16. Phase 8: 特殊语法
-  - [ ] 16.1 实现 TSAsExpression 解析
+- [x] 16. Phase 8: 特殊语法
+  - [x] 16.1 实现 TSAsExpression 解析
     - 支持 `x as string`, `x as const`
     - _Requirements: 22.1, 22.3_
-  - [ ] 16.2 实现 TSTypeAssertion 解析
+  - [x] 16.2 实现 TSTypeAssertion 解析
     - 支持 `<string>x`
     - _Requirements: 22.2_
-  - [ ] 16.3 实现 TSNonNullExpression 解析
+  - [x] 16.3 实现 TSNonNullExpression 解析
     - 支持 `x!`
     - _Requirements: 22.4_
-  - [ ] 16.4 实现 TSSatisfiesExpression 解析
+  - [x] 16.4 实现 TSSatisfiesExpression 解析
     - 支持 `x satisfies Type`
     - _Requirements: 22.5_
   - [ ] 16.5 实现装饰器解析
