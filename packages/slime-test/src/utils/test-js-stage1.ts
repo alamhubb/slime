@@ -2,7 +2,7 @@
  * JS Stage 1: CST生成测试 (SlimeJavascriptParser)
  */
 import {runTests, testStage1} from './test-framework.ts'
-import SlimeJavascriptParser from "../../../slime-parser/src/deprecated/SlimeJavascriptParser.ts";
+import { SlimeJavascriptParser } from "slime-parser";
 
 runTests(testStage1, {
     stageName: '阶段1: CST生成测试 (SlimeJavascriptParser)',

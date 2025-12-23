@@ -19,7 +19,15 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test:stage1": "tsx --conditions=development src/utils/test-stage1.ts",
+    "test:stage2": "tsx --conditions=development src/utils/test-stage2.ts",
+    "test:stage3": "tsx --conditions=development src/utils/test-stage3.ts",
+    "test:js-stage1": "tsx --conditions=development src/utils/test-js-stage1.ts",
+    "test:js-stage2": "tsx --conditions=development src/utils/test-js-stage2.ts",
+    "test:js-stage3": "tsx --conditions=development src/utils/test-js-stage3.ts",
+    "test": "npm run test:stage1 && npm run test:stage2 && npm run test:stage3",
+    "test:js": "npm run test:js-stage1 && npm run test:js-stage2 && npm run test:js-stage3"
   },
   "keywords": [],
   "author": "",
