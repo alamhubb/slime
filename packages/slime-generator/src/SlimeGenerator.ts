@@ -1102,7 +1102,8 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
 
         if (node.declaration) {
             this.generatorNode(node.declaration)
-        } else if (node.specifiers && node.specifiers.length > 0) {
+        } else if (node.specifiers) {
+            // 支持空导出 export {} 和有 specifiers 的导出
             this.addLBrace()
             node.specifiers.forEach((spec: any, index: number) => {
                 if (index > 0) {
@@ -1121,6 +1122,9 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
                 this.generatorNode(node.source)
             }
 
+            // ES2025 Import Attributes: with { type: "json" }
+            this.generatorAttributes(node)
+
             this.addCode(SlimeJavascriptGeneratorTokensObj.Semicolon)
             this.addNewLine()
         }
@@ -1128,25 +1132,32 @@ export class SlimeGeneratorUtil extends SlimeJavascriptGeneratorUtil {
 
     /**
      * [TypeScript] 生成 ExportSpecifier
+     * 支持 Identifier 和 Literal（ES2022 字符串模块名称）
      */
     generatorTSExportSpecifier(node: any) {
         if (node.local && node.exported) {
-            const localName = node.local.name
-            const exportedName = node.exported.name
+            // 获取比较值：Identifier 用 name，Literal 用 value
+            const localValue = node.local.type === 'Literal'
+                ? node.local.value
+                : node.local.name
+            const exportedValue = node.exported.type === 'Literal'
+                ? node.exported.value
+                : node.exported.name
             
-            if (localName !== exportedName) {
-                this.generatorIdentifier(node.local)
+            // 先输出 local
+            this.generatorNode(node.local)
+            
+            // 如果 local 和 exported 不同，输出 as exported
+            if (localValue !== exportedValue) {
                 this.addSpacing()
-                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.AsTok, null)
+                this.addCodeAndMappings(SlimeJavascriptGeneratorTokensObj.AsTok, node.asToken?.loc)
                 this.addSpacing()
-                this.generatorIdentifier(node.exported)
-            } else {
-                this.generatorIdentifier(node.local)
+                this.generatorNode(node.exported)
             }
         } else if (node.local) {
-            this.generatorIdentifier(node.local)
+            this.generatorNode(node.local)
         } else if (node.exported) {
-            this.generatorIdentifier(node.exported)
+            this.generatorNode(node.exported)
         }
     }
 

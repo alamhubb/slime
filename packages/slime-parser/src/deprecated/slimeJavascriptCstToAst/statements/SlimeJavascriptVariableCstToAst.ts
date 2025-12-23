@@ -11,9 +11,11 @@ import {
     type SlimeJavascriptFunctionParam,
     type SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, type SlimeJavascriptPropertyDefinition,
     SlimeJavascriptTokenCreateUtils, type SlimeJavascriptVariableDeclaration, type SlimeJavascriptVariableDeclarator,
-    SlimeJavascriptCreateUtils, type SlimeJavascriptPattern, type SlimeJavascriptExpression
+    SlimeJavascriptCreateUtils, type SlimeJavascriptPattern, type SlimeJavascriptExpression, SlimeDeclaration,
+    SlimeVariableDeclarator, SlimeTokenCreateUtils, SlimeAstCreateUtils
 } from "slime-ast";
 import {SlimeJavascriptClassDeclarationCstToAstSingle} from "../class/SlimeJavascriptClassDeclarationCstToAst.ts";
+import {SlimeIdentifierCstToAst} from "../../../cstToAst";
 
 
 
@@ -264,7 +266,6 @@ export class SlimeJavascriptVariableCstToAstSingle {
     createLexicalBindingAst(cst: SubhutiCst): SlimeJavascriptVariableDeclarator {
         // LexicalBinding: BindingIdentifier Initializer? | BindingPattern Initializer
         const children = cst.children || []
-
         let id: any = null
         let init: any = null
         let assignToken: any = undefined
@@ -311,12 +312,39 @@ export class SlimeJavascriptVariableCstToAstSingle {
 
 
     createDeclarationAst(cst: SubhutiCst): SlimeJavascriptDeclaration {
+
+        // Support both Declaration wrapper and direct types
+        const first = cst.name === SlimeParser.prototype.Declaration?.name || cst.name === 'Declaration'
+            ? cst.children[0]
+            : cst
+
+        const name = first.name
+
         // Support both Declaration wrapper and direct types
         const first = cst.name === SlimeJavascriptParser.prototype.Declaration?.name || cst.name === 'Declaration'
             ? cst.children[0]
             : cst
 
         const name = first.name
+
+        // TypeScript 声明
+        if (name === 'TSInterfaceDeclaration') {
+            return SlimeIdentifierCstToAst.createTSInterfaceDeclarationAst(first)
+        }
+        if (name === 'TSTypeAliasDeclaration') {
+            return SlimeIdentifierCstToAst.createTSTypeAliasDeclarationAst(first)
+        }
+        if (name === 'TSEnumDeclaration') {
+            return SlimeIdentifierCstToAst.createTSEnumDeclarationAst(first)
+        }
+        if (name === 'TSModuleDeclaration') {
+            return SlimeIdentifierCstToAst.createTSModuleDeclarationAst(first)
+        }
+        if (name === 'TSDeclareStatement') {
+            return SlimeIdentifierCstToAst.createTSDeclareStatementAst(first)
+        }
+
+
 
         if (name === SlimeJavascriptParser.prototype.VariableDeclaration?.name || name === 'VariableDeclaration') {
             return SlimeJavascriptCstToAstUtil.createVariableDeclarationAst(first);

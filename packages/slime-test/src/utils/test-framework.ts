@@ -33,6 +33,11 @@ export type ParserConstructor<T extends IParser = IParser> = new (code: string) 
 /** CstToAst 类构造器类型 */
 export type CstToAstConstructor<T extends ICstToAst = ICstToAst> = new () => T
 
+/** Generator 接口 - 代码生成器需要实现的方法 */
+export interface IGenerator {
+    generator(node: any, tokens: any[]): { code: string; mapping?: any[] }
+}
+
 /** 默认 Parser 类 */
 export const DefaultParserClass: ParserConstructor = SlimeParser
 
@@ -261,8 +266,9 @@ export function testStage3(ctx: TestContext): TestResult {
         return { success: false, message: 'AST 转换失败' }
     }
 
-    // AST → 代码
-    const result = SlimeGenerator.generator(ast, inputTokens)
+    // AST → 代码（使用自定义 Generator 或默认 SlimeGenerator）
+    const generator = ctx.Generator || SlimeGenerator
+    const result = generator.generator(ast, inputTokens)
     const generatedCode = result.code
 
     // 重新解析生成的代码
@@ -319,6 +325,8 @@ export interface TestContext {
     ParserClass: ParserConstructor
     /** CstToAst 类（用于自定义转换器） */
     CstToAstClass: CstToAstConstructor
+    /** Generator 实例（用于自定义代码生成器） */
+    Generator?: IGenerator
 }
 
 export interface TestResult {
@@ -339,6 +347,8 @@ export interface TestRunnerOptions {
     ParserClass?: ParserConstructor
     /** 自定义 CstToAst 类（默认使用 SlimeCstToAst） */
     CstToAstClass?: CstToAstConstructor
+    /** 自定义 Generator 实例（默认使用 SlimeGenerator） */
+    Generator?: IGenerator
     /** 测试文件扩展名（默认 '.js'） */
     fileExtension?: string
 }
@@ -524,6 +534,7 @@ export async function runTests(
         useSubprocess: useSubprocessConfig,
         ParserClass = DefaultParserClass,
         CstToAstClass = DefaultCstToAstClass,
+        Generator,
         fileExtension = '.js'
     } = options
 
@@ -565,7 +576,7 @@ export async function runTests(
 
         const parseMode = getParseMode(testDir, filePath)
         const code = fs.readFileSync(filePath, 'utf-8')
-        const ctx: TestContext = {filePath, testName, code, parseMode, index: i, ParserClass, CstToAstClass}
+        const ctx: TestContext = {filePath, testName, code, parseMode, index: i, ParserClass, CstToAstClass, Generator}
 
         const startTime = performance.now()
 

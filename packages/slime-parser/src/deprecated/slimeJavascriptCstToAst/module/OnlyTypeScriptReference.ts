@@ -133,6 +133,24 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
         // 获取 ModuleSpecifier (for side-effect imports)
         const moduleSpecifierCst = children.find(c => c.name === 'ModuleSpecifier')
         
+        // 查找 WithClause (ES2025 Import Attributes)
+        // 可能直接是 WithClause，也可能包装在 ImportWithClauseOpt 中
+        let withClauseCst = children.find(c => c.name === 'WithClause')
+        if (!withClauseCst) {
+            const importWithClauseOptCst = children.find(c => c.name === 'ImportWithClauseOpt')
+            if (importWithClauseOptCst) {
+                withClauseCst = importWithClauseOptCst.children?.find((c: SubhutiCst) => c.name === 'WithClause')
+            }
+        }
+        
+        let attributes: any[] = []
+        let withToken: any = undefined
+        if (withClauseCst) {
+            const parsed = SlimeJavascriptCstToAstUtil.createWithClauseAst(withClauseCst)
+            attributes = parsed.attributes
+            withToken = parsed.withToken
+        }
+        
         let specifiers: any[] = []
         let source: any = undefined
         let fromToken: any = undefined
@@ -155,7 +173,12 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
             source,
             cst.loc,
             importToken,
-            fromToken
+            fromToken,
+            undefined, // lBraceToken
+            undefined, // rBraceToken
+            undefined, // semicolonToken
+            attributes.length > 0 ? attributes : undefined,
+            withToken
         )
         
         // 添加 importKind 属性
@@ -169,9 +192,15 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
     /**
      * [TypeScript] 转换 ImportClause，支持内联 type 导入
      */
-    createImportClauseAst(cst: SubhutiCst, importKind: 'type' | 'value'): { specifiers: any[] } {
+    createImportClauseAst(cst: SubhutiCst, importKind: 'type' | 'value'): { 
+        specifiers: any[], 
+        lBraceToken?: any, 
+        rBraceToken?: any 
+    } {
         const children = cst.children || []
         const specifiers: any[] = []
+        let lBraceToken: any = undefined
+        let rBraceToken: any = undefined
         
         for (const child of children) {
             if (child.name === 'ImportedDefaultBinding') {
@@ -206,24 +235,46 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
                 }
             } else if (child.name === 'NamedImports') {
                 // { a, b as c, type d }
-                const namedSpecs = this.createNamedImportsAst(child, importKind)
-                specifiers.push(...namedSpecs)
+                const namedResult = this.createNamedImportsAst(child, importKind)
+                specifiers.push(...namedResult.specifiers)
+                lBraceToken = namedResult.lBraceToken
+                rBraceToken = namedResult.rBraceToken
             }
         }
         
-        return { specifiers }
+        return { specifiers, lBraceToken, rBraceToken }
     }
 
     /**
      * [TypeScript] 转换 NamedImports，支持内联 type 导入
      */
-    createNamedImportsAst(cst: SubhutiCst, importKind: 'type' | 'value'): any[] {
+    createNamedImportsAst(cst: SubhutiCst, importKind: 'type' | 'value'): {
+        specifiers: any[],
+        lBraceToken?: any,
+        rBraceToken?: any
+    } {
         const children = cst.children || []
         const specifiers: any[] = []
         
+        // 提取 brace tokens
+        const lBraceCst = children.find(c => c.name === 'LBrace' || c.value === '{')
+        const rBraceCst = children.find(c => c.name === 'RBrace' || c.value === '}')
+        
+        const lBraceToken = lBraceCst ? {
+            type: 'LBrace',
+            value: '{',
+            loc: lBraceCst.loc
+        } : undefined
+        
+        const rBraceToken = rBraceCst ? {
+            type: 'RBrace',
+            value: '}',
+            loc: rBraceCst.loc
+        } : undefined
+        
         // 找到 ImportsList
         const importsListCst = children.find(c => c.name === 'ImportsList')
-        if (!importsListCst) return specifiers
+        if (!importsListCst) return { specifiers, lBraceToken, rBraceToken }
         
         const importSpecifiers = importsListCst.children?.filter((c: SubhutiCst) => c.name === 'ImportSpecifier') || []
         
@@ -234,7 +285,7 @@ export class SlimeModuleCstToAstSingle extends SlimeJavascriptModuleCstToAstSing
             }
         }
         
-        return specifiers
+        return { specifiers, lBraceToken, rBraceToken }
     }
 
     /**

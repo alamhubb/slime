@@ -1,5 +1,84 @@
 # Implementation Plan: TypeScript Support
 
+---
+
+## ⚠️ 重要：测试流程与问题排查
+
+### 测试执行顺序（必须严格遵守）
+
+当遇到测试失败时，按以下顺序逐步排查：
+
+```
+Stage 1 (CST生成) → Stage 2 (AST生成) → Stage 3 (代码生成)
+     ↓                    ↓                    ↓
+   JS先 → TS后          JS先 → TS后          JS先 → TS后
+```
+
+**完整测试顺序：**
+1. `SlimeJavascriptParser` + Stage 1 (JS基础CST)
+2. `SlimeParser` + Stage 1 (TS扩展CST)
+3. `SlimeJavascriptParser` + Stage 2 (JS基础AST)
+4. `SlimeParser` + Stage 2 (TS扩展AST)
+5. `SlimeJavascriptParser` + Stage 3 (JS基础代码生成)
+6. `SlimeParser` + Stage 3 (TS扩展代码生成)
+
+### 问题定位原则
+
+| 失败位置 | 问题所在 |
+|---------|---------|
+| JS Stage 1 失败 | `deprecated/SlimeJavascriptParser.ts` (基础解析器) |
+| TS Stage 1 失败，JS通过 | `SlimeParser.ts` (TypeScript扩展) |
+| JS Stage 2 失败 | `deprecated/SlimeJavascriptCstToAstUtil.ts` (基础CST→AST) |
+| TS Stage 2 失败，JS通过 | `SlimeCstToAstUtil.ts` 或 `cstToAst/` 目录 |
+| JS Stage 3 失败 | `SlimeGenerator.ts` (代码生成) |
+| TS Stage 3 失败，JS通过 | `SlimeGenerator.ts` (TypeScript节点生成) |
+
+### 测试命令
+
+已创建独立的 JS 和 TS 测试文件，无需手动修改配置：
+
+```bash
+# JavaScript 测试 (使用 SlimeJavascriptParser + SlimeJavascriptCstToAst + SlimeJavascriptGenerator)
+npx tsx packages/slime-test/src/utils/test-js-stage1.ts  # JS CST生成测试
+npx tsx packages/slime-test/src/utils/test-js-stage2.ts  # JS AST生成测试
+npx tsx packages/slime-test/src/utils/test-js-stage3.ts  # JS 代码生成测试
+
+# TypeScript 测试 (使用 SlimeParser + SlimeCstToAst + SlimeGenerator)
+npx tsx packages/slime-test/src/utils/test-ts-stage1.ts  # TS CST生成测试
+npx tsx packages/slime-test/src/utils/test-ts-stage2.ts  # TS AST生成测试
+npx tsx packages/slime-test/src/utils/test-ts-stage3.ts  # TS 代码生成测试
+
+# 从指定测试编号开始（用于调试失败的测试）
+npx tsx packages/slime-test/src/utils/test-ts-stage3.ts 2271
+```
+
+### 最新测试结果 (2024-12-23)
+
+| 测试 | Parser | 状态 |
+|------|--------|------|
+| JS Stage 1 | SlimeJavascriptParser | ✅ 1732 passed |
+| TS Stage 1 | SlimeParser | ✅ 1732 passed |
+| JS Stage 2 | SlimeJavascriptParser | ✅ 1732 passed |
+| TS Stage 2 | SlimeParser | ✅ 1732 passed |
+| JS Stage 3 | SlimeJavascriptParser | ✅ 1732 passed |
+| TS Stage 3 | SlimeParser | ❌ 1201 passed, 1 failed |
+
+**TS Stage 3 失败用例:**
+- 测试: `babel\fixtures\esprima\es2015-export-declaration\export-named-empty\input`
+- 输入: `export {};`
+- 错误: Parser internal error - 空导出语法重新解析失败
+
+### 关键规则
+
+**🚫 不要修改 `packages/slime-parser/src/deprecated/` 目录下的任何文件！**
+
+如需扩展功能，请：
+1. 在 `SlimeCstToAstUtil.ts` 中重写方法
+2. 在 `_setupMethodInterception()` 中添加方法拦截
+3. 在 `cstToAst/` 目录下创建新文件
+
+---
+
 ## Overview
 
 基于渐进式实现策略，按照需求文档中定义的 10 个阶段逐步实现 TypeScript 支持。每个阶段独立可测试，确保增量交付。

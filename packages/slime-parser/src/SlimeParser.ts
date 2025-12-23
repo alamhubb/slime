@@ -20,6 +20,7 @@ import {
 import SlimeTokenConsumer from "./SlimeTokenConsumer.ts"
 import SlimeJavascriptParser, { type ExpressionParams, type DeclarationParams } from "./deprecated/SlimeJavascriptParser.ts";
 import { slimeJavascriptTokens } from "./deprecated/SlimeJavascriptTokens.ts";
+import { SlimeJavascriptTokenType } from "slime-token";
 
 // ============================================
 // 保留字集合（用于 Identifier 验证）
@@ -2145,6 +2146,8 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
      *     import ModuleSpecifier WithClause_opt ;
      *     [TypeScript] import type ImportClause FromClause ;
      *     [TypeScript] import type * as Identifier FromClause ;
+     * 
+     * 注意：ES2025 规范中，with 关键字不受 ASI 影响，即使前面有换行符
      */
     @SubhutiRule
     override ImportDeclaration() {
@@ -2165,7 +2168,8 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
                     this.tokenConsumer.Import()
                     this.ImportClause()
                     this.FromClause()
-                    this.Option(() => this.WithClause())
+                    // ES2025: with 关键字不受 ASI 影响，需要先检查
+                    this.ImportWithClauseOpt()
                     this.SemicolonASI()
                 }
             },
@@ -2174,11 +2178,25 @@ export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsum
                 alt: () => {
                     this.tokenConsumer.Import()
                     this.ModuleSpecifier()
-                    this.Option(() => this.WithClause())
+                    // ES2025: with 关键字不受 ASI 影响，需要先检查
+                    // 即使 with 前面有换行符，也应该解析为 import attributes
+                    this.ImportWithClauseOpt()
                     this.SemicolonASI()
                 }
             }
         ])
+    }
+
+    /**
+     * 处理 import 语句的可选 WithClause
+     * ES2025 规范：with 关键字不受 ASI 影响
+     */
+    @SubhutiRule
+    ImportWithClauseOpt() {
+        // 检查下一个 token 是否是 'with'（即使前面有换行符）
+        if (this.match(SlimeJavascriptTokenType.With)) {
+            this.WithClause()
+        }
     }
 
     /**

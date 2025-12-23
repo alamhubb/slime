@@ -11,12 +11,16 @@
  */
 import {runTests, testStage3} from "./test-framework.ts";
 import SlimeJavascriptParser from "../../../slime-parser/src/deprecated/SlimeJavascriptParser.ts";
+import { SlimeJavascriptCstToAst } from "../../../slime-parser/src/deprecated/SlimeJavascriptCstToAstUtil.ts";
+import SlimeJavascriptGenerator from "../../../slime-generator/src/deprecated/SlimeJavascriptGenerator.ts";
 
-// 运行测试
+// 运行测试 - 使用 SlimeJavascriptParser + SlimeJavascriptGenerator (deprecated stack)
 runTests(testStage3, {
-    stageName: '阶段3: 代码生成测试',
+    stageName: '阶段3: 代码生成测试 (SlimeJavascriptParser)',
     description: 'AST → JavaScript代码，比较输入/输出的 token 序列',
     startFrom: 1,
     stopOnFail: true,
-    // ParserClass: SlimeJavascriptParser
+    ParserClass: SlimeJavascriptParser,
+    CstToAstClass: SlimeJavascriptCstToAst,
+    Generator: SlimeJavascriptGenerator
 })
