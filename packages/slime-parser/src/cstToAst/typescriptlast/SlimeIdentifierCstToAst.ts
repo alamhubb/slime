@@ -58,8 +58,6 @@ export class SlimeIdentifierCstToAstSingle extends SlimeJavascriptIdentifierCstT
     }
 
 
-
-
     /**
      * [TypeScript] 转换 TSModuleDeclaration CST 为 AST
      * namespace A.B.C { } / module "name" { }
