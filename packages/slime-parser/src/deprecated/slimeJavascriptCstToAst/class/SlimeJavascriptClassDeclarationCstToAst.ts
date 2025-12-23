@@ -33,10 +33,8 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
                 classToken = SlimeJavascriptTokenCreate.createClassToken(child.loc)
             } else if (name === SlimeJavascriptParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
                 id = SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(child)
-            } else if (name === SlimeJavascriptParser.prototype.ClassTail?.name || name === 'ClassTail' || name === 'TSClassTail') {
+            } else if (name === SlimeJavascriptParser.prototype.ClassTail?.name || name === 'ClassTail') {
                 classTailCst = child
-            } else if (name === 'TSTypeParameterDeclaration') {
-                // [TypeScript] 跳过泛型参数声明，暂不处理
             }
         }
 
@@ -61,25 +59,13 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
         const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ClassExpression?.name);
 
         let id: SlimeJavascriptIdentifier | null = null // class 表达式可选的标识�?
-        let classTailCst: SubhutiCst | null = null
-        
-        // 遍历子节点找到 BindingIdentifier 和 ClassTail/TSClassTail
-        for (const child of cst.children) {
-            const name = child.name
-            if (name === SlimeJavascriptParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
-                id = SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(child)
-            } else if (name === SlimeJavascriptParser.prototype.ClassTail?.name || name === 'ClassTail' || name === 'TSClassTail') {
-                classTailCst = child
-            } else if (name === 'TSTypeParameterDeclaration') {
-                // [TypeScript] 跳过泛型参数声明，暂不处理
-            }
+        let tailStartIndex = 1 // 默认 ClassTail 位于索引 1
+        const nextChild = cst.children[1]
+        if (nextChild && nextChild.name === SlimeJavascriptParser.prototype.BindingIdentifier?.name) {
+            id = SlimeJavascriptCstToAstUtil.createBindingIdentifierAst(nextChild) // 若存在标识符则解�?
+            tailStartIndex = 2 // ClassTail 的位置后�?
         }
-        
-        if (!classTailCst) {
-            throw new Error('ClassExpression missing ClassTail')
-        }
-        
-        const classTail = SlimeJavascriptCstToAstUtil.createClassTailAst(classTailCst)
+        const classTail = SlimeJavascriptCstToAstUtil.createClassTailAst(cst.children[tailStartIndex]) // 统一解析 ClassTail
 
         return SlimeJavascriptAstUtil.createClassExpression(id, classTail.superClass, classTail.body, cst.loc) // 生成 ClassExpression AST
     }
@@ -293,32 +279,16 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
     }
 
     createClassHeritageAstWithToken(cst: SubhutiCst): { superClass: SlimeJavascriptExpression; extendsToken?: any } {
-        // 支持 ClassHeritage 和 TSClassExtends
-        const validNames = [SlimeJavascriptParser.prototype.ClassHeritage?.name, 'ClassHeritage', 'TSClassExtends']
-        if (!validNames.includes(cst.name)) {
-            throw new Error(`Expected ClassHeritage or TSClassExtends, got ${cst.name}`)
-        }
+        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ClassHeritage?.name);
         let extendsToken: any = undefined
 
         // ClassHeritage: extends LeftHandSideExpression
-        // TSClassExtends: extends LeftHandSideExpression TSTypeParameterInstantiation?
         const extendsCst = cst.children.find(ch => ch.name === 'Extends' || ch.value === 'extends')
         if (extendsCst) {
             extendsToken = SlimeJavascriptTokenCreate.createExtendsToken(extendsCst.loc)
         }
 
-        // 找到 LeftHandSideExpression（跳过 extends 关键字和可能的 TSTypeParameterInstantiation）
-        let superClassCst = null
-        for (const child of cst.children) {
-            if (child.name !== 'Extends' && child.value !== 'extends' && child.name !== 'TSTypeParameterInstantiation') {
-                superClassCst = child
-                break
-            }
-        }
-        
-        const superClass = superClassCst 
-            ? SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(superClassCst)
-            : SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(cst.children[1])
+        const superClass = SlimeJavascriptCstToAstUtil.createLeftHandSideExpressionAst(cst.children[1])
         return {superClass, extendsToken}
     }
 
@@ -330,11 +300,7 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
         lBraceToken?: any;
         rBraceToken?: any;
     } {
-        // 支持 ClassTail 和 TSClassTail
-        const validNames = [SlimeJavascriptParser.prototype.ClassTail?.name, 'ClassTail', 'TSClassTail']
-        if (!validNames.includes(cst.name)) {
-            throw new Error(`Expected ClassTail or TSClassTail, got ${cst.name}`)
-        }
+        const astName = SlimeJavascriptCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ClassTail?.name);
         let superClass: SlimeJavascriptExpression | null = null // 超类默认�?null
         let body: SlimeJavascriptClassBody = {type: SlimeJavascriptAstTypeName.ClassBody as any, body: [], loc: cst.loc} // 默认空类�?
         let extendsToken: any = undefined
@@ -342,10 +308,9 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
         let rBraceToken: any = undefined
 
         // ClassTail = ClassHeritage? { ClassBody? }
-        // TSClassTail = TSClassExtends? TSClassImplements? { ClassBody? }
-        // 遍历 children 找到 ClassHeritage/TSClassExtends �?ClassBody
+        // 遍历 children 找到 ClassHeritage �?ClassBody
         for (const child of cst.children) {
-            if (child.name === SlimeJavascriptParser.prototype.ClassHeritage?.name || child.name === 'TSClassExtends') {
+            if (child.name === SlimeJavascriptParser.prototype.ClassHeritage?.name) {
                 const heritageResult = SlimeJavascriptCstToAstUtil.createClassHeritageAstWithToken(child)
                 superClass = heritageResult.superClass
                 extendsToken = heritageResult.extendsToken
@@ -355,8 +320,6 @@ export class SlimeJavascriptClassDeclarationCstToAstSingle {
                 lBraceToken = SlimeJavascriptTokenCreate.createLBraceToken(child.loc)
             } else if (child.name === 'RBrace' || child.value === '}') {
                 rBraceToken = SlimeJavascriptTokenCreate.createRBraceToken(child.loc)
-            } else if (child.name === 'TSClassImplements') {
-                // [TypeScript] 暂时跳过 implements 子句
             }
         }
 
