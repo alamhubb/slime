@@ -12,7 +12,8 @@ import {
     type SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, type SlimeJavascriptPropertyDefinition,
     SlimeJavascriptTokenCreateUtils, type SlimeJavascriptVariableDeclaration, type SlimeJavascriptVariableDeclarator,
     SlimeJavascriptCreateUtils, type SlimeJavascriptPattern, type SlimeJavascriptExpression, SlimeDeclaration,
-    SlimeVariableDeclarator, SlimeTokenCreateUtils, SlimeAstCreateUtils
+    SlimeVariableDeclarator, SlimeTokenCreateUtils, SlimeAstCreateUtils, SlimeAstTypeName, SlimeVariableDeclaration,
+    SlimeIdentifier, SlimeExpression
 } from "slime-ast";
 import { SlimeJavascriptClassDeclarationCstToAstSingle } from "../class/SlimeJavascriptClassDeclarationCstToAst.ts";
 // SlimeIdentifierCstToAst functions are accessed through SlimeCstToAstUtil

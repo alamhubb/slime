@@ -11,7 +11,7 @@ import {
     SlimeJavascriptPattern,
     SlimeJavascriptTokenCreateUtils,
     SlimeJavascriptAstTypeName, SlimeJavascriptArrowFunctionExpression, SlimeJavascriptIdentifier,
-    SlimeArrowFunctionExpression, SlimePattern
+    SlimeArrowFunctionExpression, SlimePattern, SlimeFunctionParam
 } from "slime-ast";
 
 import SlimeParser from "../../SlimeParser.ts";
