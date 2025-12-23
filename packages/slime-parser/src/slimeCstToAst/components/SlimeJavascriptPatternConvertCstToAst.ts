@@ -17,7 +17,7 @@ import { SubhutiCst } from "subhuti";
 import SlimeParser from "../../SlimeParser.ts";
 
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
-import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
+import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptPatternConvertCstToAstSingle {

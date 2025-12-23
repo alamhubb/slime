@@ -11,7 +11,7 @@ import {
     SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, SlimeJavascriptPattern, SlimeJavascriptRestElement
 } from "slime-ast";
 import SlimeParser from "../../SlimeParser.ts";
-import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
+import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";

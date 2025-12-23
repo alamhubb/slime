@@ -11,7 +11,7 @@ import {
     type SlimeJavascriptVariableDeclaration,
     type SlimeJavascriptVariableDeclarator
 } from "slime-ast";
-import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
+import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "./SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptControlFlowCstToAstSingle {

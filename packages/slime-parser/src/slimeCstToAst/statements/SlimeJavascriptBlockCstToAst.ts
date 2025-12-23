@@ -9,7 +9,7 @@ import {
     SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
-import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
+import SlimeCstToAstUtil from "../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "./SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptBlockCstToAstSingle {
