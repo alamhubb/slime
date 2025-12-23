@@ -1,5 +1,5 @@
 /**
- * FunctionExpressionCstToAst - 函数表达式转换
+ * FunctionExpressionCstToAst - 函数表达式转�?
  */
 import { SubhutiCst } from "subhuti";
 import {
@@ -10,7 +10,7 @@ import {
     SlimeJavascriptIdentifier, SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
 
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeJavascriptParser from "../../deprecated/SlimeJavascriptParser.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
@@ -18,15 +18,15 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
 
 
 
-    createFunctionExpressionAst(cst: SubhutiCst): SlimeJavascriptFunctionExpression {
+    createFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.FunctionExpression?.name);
         // Es2025Parser FunctionExpression 结构
 
         let isAsync = false;
         let isGenerator = false;
-        let functionId: SlimeJavascriptIdentifier | null = null
-        let params: SlimeJavascriptFunctionParam[] = []
-        let body: SlimeJavascriptBlockStatement
+        let functionId: SlimeIdentifier | null = null
+        let params: SlimeFunctionParam[] = []
+        let body: SlimeBlockStatement
 
         // Token fields
         let functionToken: any = undefined
@@ -73,7 +73,7 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
                 continue
             }
 
-            // BindingIdentifier（命名函数表达式�?
+            // BindingIdentifier（命名函数表达式�?
             if (name === SlimeJavascriptParser.prototype.BindingIdentifier?.name || name === 'BindingIdentifier') {
                 functionId = SlimeCstToAstUtil.createBindingIdentifierAst(child)
                 continue
@@ -107,14 +107,14 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
 
 
     // 生成器表达式处理：function* (...) { ... }
-    createGeneratorExpressionAst(cst: SubhutiCst): SlimeJavascriptFunctionExpression {
+    createGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
         // GeneratorExpression: function* [name](params) { body }
         // 旧版 CST children: [FunctionTok, Asterisk, BindingIdentifier?, LParen, FormalParameterList?, RParen, FunctionBodyDefine]
         // Es2025 CST children: [FunctionTok, Asterisk, BindingIdentifier?, LParen, FormalParameters?, RParen, LBrace, GeneratorBody, RBrace]
 
-        let id: SlimeJavascriptIdentifier | null = null
-        let params: SlimeJavascriptFunctionParam[] = []
-        let body: SlimeJavascriptBlockStatement
+        let id: SlimeIdentifier | null = null
+        let params: SlimeFunctionParam[] = []
+        let body: SlimeBlockStatement
 
         // 查找 BindingIdentifier
         const bindingId = cst.children.find(ch =>
@@ -123,7 +123,7 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
             id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingId)
         }
 
-        // 查找 FormalParameters �?FormalParameterList (使用包装类型)
+        // 查找 FormalParameters �?FormalParameterList (使用包装类型)
         const formalParams = cst.children.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.FormalParameters?.name || ch.name === 'FormalParameters' ||
             ch.name === SlimeJavascriptParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
@@ -135,7 +135,7 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
             }
         }
 
-        // 查找 GeneratorBody �?FunctionBody
+        // 查找 GeneratorBody �?FunctionBody
         const bodyNode = cst.children.find(ch =>
             ch.name === 'GeneratorBody' || ch.name === SlimeJavascriptParser.prototype.GeneratorBody?.name ||
             ch.name === 'FunctionBody' || ch.name === SlimeJavascriptParser.prototype.FunctionBody?.name)
@@ -151,13 +151,13 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
     }
 
     // Async 函数表达式处理：async function (...) { ... }
-    createAsyncFunctionExpressionAst(cst: SubhutiCst): SlimeJavascriptFunctionExpression {
+    createAsyncFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
         // AsyncFunctionExpression: async function [name](params) { body }
         // Es2025 CST children: [AsyncTok, FunctionTok, BindingIdentifier?, LParen, FormalParameters?, RParen, LBrace, AsyncFunctionBody, RBrace]
 
-        let id: SlimeJavascriptIdentifier | null = null
-        let params: SlimeJavascriptFunctionParam[] = []
-        let body: SlimeJavascriptBlockStatement
+        let id: SlimeIdentifier | null = null
+        let params: SlimeFunctionParam[] = []
+        let body: SlimeBlockStatement
 
         // 查找 BindingIdentifier
         const bindingId = cst.children.find(ch =>
@@ -166,7 +166,7 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
             id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingId)
         }
 
-        // 查找 FormalParameters �?FormalParameterList (使用包装类型)
+        // 查找 FormalParameters �?FormalParameterList (使用包装类型)
         const formalParams = cst.children.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.FormalParameters?.name || ch.name === 'FormalParameters' ||
             ch.name === SlimeJavascriptParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
@@ -178,7 +178,7 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
             }
         }
 
-        // 查找 AsyncFunctionBody �?FunctionBody
+        // 查找 AsyncFunctionBody �?FunctionBody
         const bodyNode = cst.children.find(ch =>
             ch.name === 'AsyncFunctionBody' || ch.name === SlimeJavascriptParser.prototype.AsyncFunctionBody?.name ||
             ch.name === 'FunctionBody' || ch.name === SlimeJavascriptParser.prototype.FunctionBody?.name)
@@ -194,13 +194,13 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
     }
 
     // Async Generator 表达式处理：async function* (...) { ... }
-    createAsyncGeneratorExpressionAst(cst: SubhutiCst): SlimeJavascriptFunctionExpression {
+    createAsyncGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
         // AsyncGeneratorExpression: async function* [name](params) { body }
         // Es2025 CST children: [AsyncTok, FunctionTok, Asterisk, BindingIdentifier?, LParen, FormalParameters?, RParen, LBrace, AsyncGeneratorBody, RBrace]
 
-        let id: SlimeJavascriptIdentifier | null = null
-        let params: SlimeJavascriptFunctionParam[] = []
-        let body: SlimeJavascriptBlockStatement
+        let id: SlimeIdentifier | null = null
+        let params: SlimeFunctionParam[] = []
+        let body: SlimeBlockStatement
 
         // 查找 BindingIdentifier
         const bindingId = cst.children.find(ch =>
@@ -209,7 +209,7 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
             id = SlimeCstToAstUtil.createBindingIdentifierAst(bindingId)
         }
 
-        // 查找 FormalParameters �?FormalParameterList (使用包装类型)
+        // 查找 FormalParameters �?FormalParameterList (使用包装类型)
         const formalParams = cst.children.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.FormalParameters?.name || ch.name === 'FormalParameters' ||
             ch.name === SlimeJavascriptParser.prototype.FormalParameterList?.name || ch.name === 'FormalParameterList')
@@ -221,7 +221,7 @@ export class SlimeJavascriptFunctionExpressionCstToAstSingle {
             }
         }
 
-        // 查找 AsyncGeneratorBody �?FunctionBody
+        // 查找 AsyncGeneratorBody �?FunctionBody
         const bodyNode = cst.children.find(ch =>
             ch.name === 'AsyncGeneratorBody' || ch.name === SlimeJavascriptParser.prototype.AsyncGeneratorBody?.name ||
             ch.name === 'FunctionBody' || ch.name === SlimeJavascriptParser.prototype.FunctionBody?.name)

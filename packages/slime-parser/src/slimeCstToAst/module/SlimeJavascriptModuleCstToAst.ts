@@ -8,14 +8,14 @@ import {
     SlimeJavascriptProgram,
     SlimeJavascriptStatement, SlimeProgram
 } from "slime-ast";
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeJavascriptParser from "../../deprecated/SlimeJavascriptParser.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
 export class SlimeJavascriptModuleCstToAstSingle {
 
     /**
-     * [TypeScript] 重写 toProgram 以使用新的 SlimeCstToAstUtil
+     * [TypeScript] 重写 toProgram 以使用新�?SlimeCstToAstUtil
      * 这确保了 TypeScript 类型注解能被正确处理
      */
     override toProgram(cst: SubhutiCst): SlimeProgram {
@@ -60,14 +60,14 @@ export class SlimeJavascriptModuleCstToAstSingle {
             } else if (bodyChild.name === 'ScriptBody') {
                 const statementList = bodyChild.children?.[0]
                 if (statementList && (statementList.name === 'StatementList' || statementList.name === SlimeParser.prototype.StatementList?.name)) {
-                    // [TypeScript] 使用 SlimeCstToAstUtil 以支持 TypeScript 语法
+                    // [TypeScript] 使用 SlimeCstToAstUtil 以支�?TypeScript 语法
                     const body = SlimeCstToAstUtil.createStatementListAst(statementList)
                     program = SlimeAstCreateUtils.createProgram(body, 'script')
                 } else {
                     program = SlimeAstCreateUtils.createProgram([], 'script')
                 }
             } else if (bodyChild.name === SlimeParser.prototype.StatementList?.name || bodyChild.name === 'StatementList') {
-                // [TypeScript] 使用 SlimeCstToAstUtil 以支持 TypeScript 语法
+                // [TypeScript] 使用 SlimeCstToAstUtil 以支�?TypeScript 语法
                 const body = SlimeCstToAstUtil.createStatementListAst(bodyChild)
                 program = SlimeAstCreateUtils.createProgram(body, 'script')
             } else {
@@ -86,15 +86,15 @@ export class SlimeJavascriptModuleCstToAstSingle {
     }
 
     /**
-     * 重置状态钩子方法
+     * 重置状态钩子方�?
      *
-     * [入口方法] 将顶层 CST 转换为 Program AST
+     * [入口方法] 将顶�?CST 转换�?Program AST
      *
-     * 存在必要性：这是外部调用的主入口，支持 Module、Script、Program 多种顶层 CST
+     * 存在必要性：这是外部调用的主入口，支�?Module、Script、Program 多种顶层 CST
      *
-     * 注意：子类如需重置状态，应重写此方法，先调用自己的 resetState()，再调用 super.toProgram()
+     * 注意：子类如需重置状态，应重写此方法，先调用自己�?resetState()，再调用 super.toProgram()
      */
-    toProgram(cst: SubhutiCst): SlimeJavascriptProgram {
+    toProgram(cst: SubhutiCst): SlimeProgram {
         // Support both Module and Script entry points
         const isModule = cst.name === SlimeJavascriptParser.prototype.Module?.name || cst.name === 'Module'
         const isScript = cst.name === SlimeJavascriptParser.prototype.Script?.name || cst.name === 'Script'
@@ -104,7 +104,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
             throw new Error(`Expected CST name 'Module', 'Script' or 'Program', but got '${cst.name}'`)
         }
 
-        let program: SlimeJavascriptProgram
+        let program: SlimeProgram
         let hashbangComment: string | null = null
 
         // If children is empty, return empty program
@@ -116,7 +116,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
         let bodyChild: SubhutiCst | null = null
         for (const child of cst.children) {
             if (child.name === 'HashbangComment') {
-                // 提取 Hashbang 注释的?
+                // 提取 Hashbang 注释�?
                 hashbangComment = child.value || child.children?.[0]?.value || null
             } else if (child.name === 'ModuleBody' || child.name === 'ScriptBody' ||
                 child.name === 'ModuleItemList' || child.name === SlimeJavascriptParser.prototype.ModuleItemList?.name ||
@@ -171,7 +171,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
      *
      * 存在必要性：Program 是顶层入口规则，需要处?Script ?Module 两种情况?
      */
-    createProgramAst(cst: SubhutiCst): SlimeJavascriptProgram {
+    createProgramAst(cst: SubhutiCst): SlimeProgram {
         // 处理 Program -> Script | Module
         const firstChild = cst.children?.[0]
         if (firstChild) {
@@ -188,7 +188,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
     /**
      * Module CST ?AST
      */
-    createModuleAst(cst: SubhutiCst): SlimeJavascriptProgram {
+    createModuleAst(cst: SubhutiCst): SlimeProgram {
         const moduleBody = cst.children?.find(ch =>
             ch.name === 'ModuleBody' || ch.name === SlimeJavascriptParser.prototype.ModuleBody?.name
         )
@@ -201,7 +201,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
     /**
      * Script CST ?AST
      */
-    createScriptAst(cst: SubhutiCst): SlimeJavascriptProgram {
+    createScriptAst(cst: SubhutiCst): SlimeProgram {
         const scriptBody = cst.children?.find(ch =>
             ch.name === 'ScriptBody' || ch.name === SlimeJavascriptParser.prototype.ScriptBody?.name
         )
@@ -214,7 +214,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
     /**
      * ModuleBody CST ?AST
      */
-    createModuleBodyAst(cst: SubhutiCst): SlimeJavascriptProgram {
+    createModuleBodyAst(cst: SubhutiCst): SlimeProgram {
         const moduleItemList = cst.children?.find(ch =>
             ch.name === 'ModuleItemList' || ch.name === SlimeJavascriptParser.prototype.ModuleItemList?.name
         )
@@ -228,7 +228,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
     /**
      * ScriptBody CST ?AST
      */
-    createScriptBodyAst(cst: SubhutiCst): SlimeJavascriptProgram {
+    createScriptBodyAst(cst: SubhutiCst): SlimeProgram {
         const stmtList = cst.children?.find(ch =>
             ch.name === 'StatementList' || ch.name === SlimeJavascriptParser.prototype.StatementList?.name
         )
@@ -254,7 +254,7 @@ export class SlimeJavascriptModuleCstToAstSingle {
         return asts.flat()
     }
 
-    createModuleItemAst(item: SubhutiCst): SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration | SlimeJavascriptStatement[] | undefined {
+    createModuleItemAst(item: SubhutiCst): SlimeStatement | SlimeJavascriptModuleDeclaration | SlimeJavascriptStatement[] | undefined {
         const name = item.name
         if (name === SlimeJavascriptParser.prototype.ExportDeclaration?.name || name === 'ExportDeclaration') {
             return SlimeCstToAstUtil.createExportDeclarationAst(item)

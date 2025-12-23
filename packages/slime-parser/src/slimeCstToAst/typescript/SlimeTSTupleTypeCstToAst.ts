@@ -4,7 +4,7 @@ import {SlimeJavascriptTSPrimaryTypeCstToAstSingle} from "./SlimeTSPrimaryTypeCs
 
 export class SlimeJavascriptTSTupleTypeCstToAstSingle {
     /**
-     * [TypeScript] 转换 TSTupleType CST 为 AST
+     * [TypeScript] 转换 TSTupleType CST �?AST
      */
     createTSTupleTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -25,7 +25,7 @@ export class SlimeJavascriptTSTupleTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTupleElement CST 为 AST
+     * [TypeScript] 转换 TSTupleElement CST �?AST
      */
     createTSTupleElementAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -80,7 +80,7 @@ export class SlimeJavascriptTSTupleTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSRestType CST 为 AST
+     * [TypeScript] 转换 TSRestType CST �?AST
      */
     createTSRestTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -94,7 +94,7 @@ export class SlimeJavascriptTSTupleTypeCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSNamedTupleMember CST 为 AST
+     * [TypeScript] 转换 TSNamedTupleMember CST �?AST
      */
     createTSNamedTupleMemberAst(cst: SubhutiCst): any {
         const children = cst.children || []

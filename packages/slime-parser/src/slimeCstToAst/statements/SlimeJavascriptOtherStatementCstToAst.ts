@@ -8,20 +8,20 @@ import {
     SlimeJavascriptAstTypeName, type SlimeJavascriptPattern, SlimeJavascriptReturnStatement, SlimeJavascriptTokenCreateUtils, type SlimeJavascriptVariableDeclarator
 } from "slime-ast";
 
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeJavascriptParser from "../../deprecated/SlimeJavascriptParser.ts";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "./SlimeJavascriptVariableCstToAst.ts";
 
 /**
- * OtherStatementCstToAst - try/switch/break/continue/label 等转换
+ * OtherStatementCstToAst - try/switch/break/continue/label 等转�?
  */
 export class SlimeJavascriptOtherStatementCstToAstSingle {
 
-    createReturnStatementAst(cst: SubhutiCst): SlimeJavascriptReturnStatement {
+    createReturnStatementAst(cst: SubhutiCst): SlimeReturnStatement {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ReturnStatement?.name);
 
-        // return 语句可能有或没有表达�?
+        // return 语句可能有或没有表达�?
         // children[0] = ReturnTok
         // children[1] = Expression? | Semicolon | SemicolonASI
         let argument: any = null
@@ -141,7 +141,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
 
 
     /**
-     * Catch CST �?CatchClause AST
+     * Catch CST �?CatchClause AST
      * Catch -> catch ( CatchParameter ) Block | catch Block
      */
     createCatchAst(cst: SubhutiCst): any {
@@ -167,7 +167,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
         const blockCst = cst.children.find(ch => ch.name === SlimeJavascriptParser.prototype.Block?.name)
 
         const param = paramCst ? SlimeCstToAstUtil.createCatchParameterAst(paramCst) : null
-        const body = blockCst ? SlimeCstToAstUtil.createBlockAst(blockCst) : SlimeJavascriptCreateUtils.createBlockStatement([])
+        const body = blockCst ? SlimeCstToAstUtil.createBlockAst(blockCst) : SlimeCreateUtils.createBlockStatement([])
 
         return SlimeJavascriptCreateUtils.createCatchClause(body, param, cst.loc, catchToken, lParenToken, rParenToken)
     }
@@ -228,7 +228,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
     }
 
 
-    createExpressionStatementAst(cst: SubhutiCst): SlimeJavascriptExpressionStatement {
+    createExpressionStatementAst(cst: SubhutiCst): SlimeExpressionStatement {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ExpressionStatement?.name);
 
         let semicolonToken: any = undefined
@@ -249,19 +249,19 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
 
 
     /**
-     * 创建空语�?AST
+     * 创建空语�?AST
      */
     createEmptyStatementAst(cst: SubhutiCst): any {
-        // 兼容 EmptyStatement 和旧�?NotEmptySemicolon
+        // 兼容 EmptyStatement 和旧�?NotEmptySemicolon
         // SlimeJavascriptCstToAstUtil.checkCstName(cst, Es2025Parser.prototype.EmptyStatement?.name);
 
         let semicolonToken: any = undefined
 
-        // EmptyStatement 可能直接�?Semicolon token
+        // EmptyStatement 可能直接�?Semicolon token
         if (cst.value === ';' || cst.name === SlimeJavascriptTokenConsumer.prototype.Semicolon?.name) {
             semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(cst.loc)
         } else {
-            // �?semicolon token
+            // �?semicolon token
             const semicolonCst = cst.children?.find(ch => ch.name === 'Semicolon' || ch.value === ';')
             if (semicolonCst) {
                 semicolonToken = SlimeJavascriptTokenCreateUtils.createSemicolonToken(semicolonCst.loc)
@@ -273,11 +273,11 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
 
 
     /**
-     * SemicolonASI CST �?AST
+     * SemicolonASI CST �?AST
      * 处理自动分号插入
      */
     createSemicolonASIAst(cst: SubhutiCst): any {
-        // ASI 不产生实际的 AST 节点，返�?null
+        // ASI 不产生实际的 AST 节点，返�?null
         return null
     }
 
@@ -330,10 +330,10 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
 
                 // LabelledItem -> Statement | FunctionDeclaration
                 if (name === SlimeJavascriptParser.prototype.LabelledItem?.name || name === 'LabelledItem') {
-                    // LabelledItem 内部�?Statement �?FunctionDeclaration
+                    // LabelledItem 内部�?Statement �?FunctionDeclaration
                     const itemChild = child.children?.[0]
                     if (itemChild) {
-                        // 使用 createStatementDeclarationAst 而不�?createStatementAst
+                        // 使用 createStatementDeclarationAst 而不�?createStatementAst
                         // 因为 LabelledItem 可能直接包含 FunctionDeclaration
                         body = SlimeCstToAstUtil.createStatementDeclarationAst(itemChild)
                     }
@@ -368,7 +368,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
 
 
     /**
-     * LabelledItem CST �?AST（透传�?
+     * LabelledItem CST �?AST（透传�?
      * LabelledItem -> Statement | FunctionDeclaration
      */
     createLabelledItemAst(cst: SubhutiCst): any {
@@ -403,7 +403,7 @@ export class SlimeJavascriptOtherStatementCstToAstSingle {
             } else if (child.name === SlimeJavascriptParser.prototype.Expression?.name || child.name === 'Expression') {
                 object = SlimeCstToAstUtil.createExpressionAst(child)
             } else if (child.name === SlimeJavascriptParser.prototype.Statement?.name || child.name === 'Statement') {
-                // createStatementAst 返回数组，取第一个元�?
+                // createStatementAst 返回数组，取第一个元�?
                 const bodyArray = SlimeCstToAstUtil.createStatementAst(child)
                 body = Array.isArray(bodyArray) && bodyArray.length > 0 ? bodyArray[0] : bodyArray
             }

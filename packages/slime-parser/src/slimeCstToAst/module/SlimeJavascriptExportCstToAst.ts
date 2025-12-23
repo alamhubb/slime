@@ -11,7 +11,7 @@ import {
     SlimeJavascriptModuleDeclaration, SlimeJavascriptPattern,
     SlimeJavascriptStatement, SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeJavascriptParser from "../../deprecated/SlimeJavascriptParser.ts";
 
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
@@ -19,7 +19,7 @@ import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascri
 
 export class SlimeJavascriptExportCstToAstSingle {
 
-    createExportDeclarationAst(cst: SubhutiCst): SlimeJavascriptExportDefaultDeclaration | SlimeJavascriptExportNamedDeclaration | SlimeJavascriptExportAllDeclaration {
+    createExportDeclarationAst(cst: SubhutiCst): SlimeExportDefaultDeclaration | SlimeJavascriptExportNamedDeclaration | SlimeJavascriptExportAllDeclaration {
         let astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ExportDeclaration?.name);
         const children = cst.children || []
 
@@ -30,7 +30,7 @@ export class SlimeJavascriptExportCstToAstSingle {
         let semicolonToken: any = undefined
         let asToken: any = undefined
 
-        // 遍历子节点提取信�?
+        // 遍历子节点提取信�?
         let exportFromClause: SubhutiCst | null = null
         let fromClause: SubhutiCst | null = null
         let namedExports: SubhutiCst | null = null
@@ -118,7 +118,7 @@ export class SlimeJavascriptExportCstToAstSingle {
                     fromClauseResult.source, exported, cst.loc,
                     exportToken, asteriskToken, asToken, fromClauseResult.fromToken, semicolonToken
                 ) as any
-                // 添加 attributes（如果有 withToken，即�?attributes 为空也要添加�?
+                // 添加 attributes（如果有 withToken，即�?attributes 为空也要添加�?
                 if (withToken) {
                     result.attributes = attributes
                     result.withToken = withToken
@@ -126,7 +126,7 @@ export class SlimeJavascriptExportCstToAstSingle {
                 return result
             } else {
                 // export { ... } from ...
-                // exportFromClause 的结构是 [NamedExports]，需要从中提�?NamedExports
+                // exportFromClause 的结构是 [NamedExports]，需要从中提�?NamedExports
                 const namedExportsCst = exportFromClause.children?.find((ch: any) =>
                     ch.name === SlimeJavascriptParser.prototype.NamedExports?.name || ch.name === 'NamedExports'
                 )
@@ -137,7 +137,7 @@ export class SlimeJavascriptExportCstToAstSingle {
                     null, specifiers, fromClauseResult.source, cst.loc,
                     exportToken, fromClauseResult.fromToken, semicolonToken
                 )
-                // 添加 attributes（如果有 withToken，即�?attributes 为空也要添加�?
+                // 添加 attributes（如果有 withToken，即�?attributes 为空也要添加�?
                 if (withToken) {
                     (result as any).attributes = attributes;
                     (result as any).withToken = withToken
@@ -175,7 +175,7 @@ export class SlimeJavascriptExportCstToAstSingle {
 
 
     /**
-     * ExportFromClause CST �?AST
+     * ExportFromClause CST �?AST
      * ExportFromClause -> * | * as ModuleExportName | NamedExports
      */
     createExportFromClauseAst(cst: SubhutiCst): any {
@@ -221,9 +221,9 @@ export class SlimeJavascriptExportCstToAstSingle {
     /**
      * 创建 NamedExports AST (export { a, b, c })
      */
-    createNamedExportsAst(cst: SubhutiCst): SlimeJavascriptExportSpecifierItem[] {
+    createNamedExportsAst(cst: SubhutiCst): SlimeExportSpecifierItem[] {
         // NamedExports: { ExportsList? }
-        const specifiers: SlimeJavascriptExportSpecifierItem[] = []
+        const specifiers: SlimeExportSpecifierItem[] = []
 
         for (const child of cst.children || []) {
             if (child.name === SlimeJavascriptParser.prototype.ExportsList?.name) {
@@ -239,9 +239,9 @@ export class SlimeJavascriptExportCstToAstSingle {
     /**
      * 创建 ExportsList AST
      */
-    createExportsListAst(cst: SubhutiCst): SlimeJavascriptExportSpecifierItem[] {
-        const specifiers: SlimeJavascriptExportSpecifierItem[] = []
-        let lastSpecifier: SlimeJavascriptExportSpecifier | null = null
+    createExportsListAst(cst: SubhutiCst): SlimeExportSpecifierItem[] {
+        const specifiers: SlimeExportSpecifierItem[] = []
+        let lastSpecifier: SlimeExportSpecifier | null = null
 
         for (const child of cst.children || []) {
             if (child.name === SlimeJavascriptParser.prototype.ExportSpecifier?.name) {
@@ -253,7 +253,7 @@ export class SlimeJavascriptExportCstToAstSingle {
                 if (lastSpecifier) {
                     specifiers.push({
                         specifier: lastSpecifier,
-                        commaToken: SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
+                        commaToken: SlimeTokenCreateUtils.createCommaToken(child.loc)
                     })
                     lastSpecifier = null
                 }
@@ -270,7 +270,7 @@ export class SlimeJavascriptExportCstToAstSingle {
     /**
      * 创建 ExportSpecifier AST
      */
-    createExportSpecifierAst(cst: SubhutiCst): SlimeJavascriptExportSpecifier {
+    createExportSpecifierAst(cst: SubhutiCst): SlimeExportSpecifier {
         // ExportSpecifier: ModuleExportName | ModuleExportName as ModuleExportName
         const children = cst.children || []
         let local: any = null
@@ -301,7 +301,7 @@ export class SlimeJavascriptExportCstToAstSingle {
     /**
      * 创建 ModuleExportName AST
      */
-    createModuleExportNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral {
+    createModuleExportNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeJavascriptLiteral {
         const first = cst.children?.[0]
         if (!first) {
             throw new Error('ModuleExportName has no children')

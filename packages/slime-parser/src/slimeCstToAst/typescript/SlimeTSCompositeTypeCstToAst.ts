@@ -5,7 +5,7 @@ import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascri
 export class SlimeJavascriptTSCompositeTypeCstToAstSingle {
 
     /**
-     * [TypeScript] 转换 TSConditionalType CST 为 AST
+     * [TypeScript] 转换 TSConditionalType CST �?AST
      */
     createTSConditionalTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -46,7 +46,7 @@ export class SlimeJavascriptTSCompositeTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSUnionOrIntersectionType CST 为 AST
+     * [TypeScript] 转换 TSUnionOrIntersectionType CST �?AST
      */
     createTSUnionOrIntersectionTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -71,7 +71,7 @@ export class SlimeJavascriptTSCompositeTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSIntersectionType CST 为 AST
+     * [TypeScript] 转换 TSIntersectionType CST �?AST
      */
     createTSIntersectionTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -96,7 +96,7 @@ export class SlimeJavascriptTSCompositeTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTypeOperand CST 为 AST
+     * [TypeScript] 转换 TSTypeOperand CST �?AST
      */
     createTSTypeOperandAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -145,7 +145,7 @@ export class SlimeJavascriptTSCompositeTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSPrefixTypeOrPrimary CST 为 AST
+     * [TypeScript] 转换 TSPrefixTypeOrPrimary CST �?AST
      */
     createTSPrefixTypeOrPrimaryAst(cst: SubhutiCst): any {
         const child = cst.children?.[0]

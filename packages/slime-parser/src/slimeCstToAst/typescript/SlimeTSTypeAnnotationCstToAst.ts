@@ -13,7 +13,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTypeAnnotation CST 为 AST
+     * [TypeScript] 转换 TSTypeAnnotation CST �?AST
      */
     createTSTypeAnnotationAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -36,8 +36,8 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSType CST 为 AST
-     * 支持所有已实现的 TypeScript 类型
+     * [TypeScript] 转换 TSType CST �?AST
+     * 支持所有已实现�?TypeScript 类型
      */
     createTSTypeAst(cst: SubhutiCst): any {
         const child = cst.children?.[0]
@@ -55,12 +55,12 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
             return this.createTSConstructorTypeAst(child)
         }
 
-        // 条件类型（包含联合/交叉类型）
+        // 条件类型（包含联�?交叉类型�?
         if (name === 'TSConditionalType') {
             return this.createTSConditionalTypeAst(child)
         }
 
-        // 联合/交叉类型（兼容旧代码）
+        // 联合/交叉类型（兼容旧代码�?
         if (name === 'TSUnionOrIntersectionType') {
             return this.createTSUnionOrIntersectionTypeAst(child)
         }
@@ -69,7 +69,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSTypeQuery CST 为 AST (typeof x)
+     * [TypeScript] 转换 TSTypeQuery CST �?AST (typeof x)
      */
     createTSTypeQueryAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -95,12 +95,12 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSTypeOperator CST 为 AST (keyof, readonly, unique)
+     * [TypeScript] 转换 TSTypeOperator CST �?AST (keyof, readonly, unique)
      */
     createTSTypeOperatorAst(cst: SubhutiCst): any {
         const children = cst.children || []
 
-        // 确定操作符类型
+        // 确定操作符类�?
         let operator: 'keyof' | 'readonly' | 'unique'
         let typeAnnotation: any
 
@@ -145,12 +145,12 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSInferType CST 为 AST (infer R)
+     * [TypeScript] 转换 TSInferType CST �?AST (infer R)
      */
     createTSInferTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
 
-        // 找到标识符
+        // 找到标识�?
         const identifierCst = children.find(c => c.name === 'Identifier')
         if (!identifierCst) {
             throw new Error('TSInferType: Identifier not found')
@@ -180,7 +180,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSPrimaryType CST 为 AST
+     * [TypeScript] 转换 TSPrimaryType CST �?AST
      */
     createTSPrimaryTypeAst(cst: SubhutiCst): any {
         const child = cst.children?.[0]
@@ -198,7 +198,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
             return this.createTSKeywordTypeWrapperAst(child)
         }
 
-        // 字面量类型
+        // 字面量类�?
         if (name === 'TSLiteralType') return this.createTSLiteralTypeAst(child)
 
         // 类型引用
@@ -207,7 +207,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
         // 元组类型
         if (name === 'TSTupleType') return this.createTSTupleTypeAst(child)
 
-        // 对象类型字面量
+        // 对象类型字面�?
         if (name === 'TSTypeLiteral') return this.createTSTypeLiteralAst(child)
 
         // 括号类型
@@ -217,7 +217,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSKeywordType 包装规则 CST 为 AST
+     * [TypeScript] 转换 TSKeywordType 包装规则 CST �?AST
      */
     createTSKeywordTypeWrapperAst(cst: SubhutiCst): any {
         const child = cst.children?.[0]
@@ -227,7 +227,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
 
         const name = child.name
 
-        // 基础类型关键字
+        // 基础类型关键�?
         if (name === 'TSNumberKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNumberKeyword)
         if (name === 'TSStringKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSStringKeyword)
         if (name === 'TSBooleanKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSBooleanKeyword)
@@ -245,7 +245,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 创建关键字类型 AST
+     * [TypeScript] 创建关键字类�?AST
      */
     createTSKeywordTypeAst(cst: SubhutiCst, typeName: string): any {
         return {
@@ -255,7 +255,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSLiteralType CST 为 AST
+     * [TypeScript] 转换 TSLiteralType CST �?AST
      */
     createTSLiteralTypeAst(cst: SubhutiCst): any {
         const child = cst.children?.[0]
@@ -263,7 +263,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
             throw new Error('TSLiteralType has no children')
         }
 
-        // 获取字面量值
+        // 获取字面量�?
         let literal: any
         if (child.name === 'StringLiteral' || child.name === 'Literal') {
             const tokenCst = child.children?.[0] || child
@@ -296,7 +296,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
                 loc: child.loc,
             }
         } else {
-            // 尝试从 token 获取值
+            // 尝试�?token 获取�?
             const tokenCst = child.children?.[0] || child
             literal = {
                 type: 'Literal',
@@ -315,7 +315,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTypeReference CST 为 AST
+     * [TypeScript] 转换 TSTypeReference CST �?AST
      */
     createTSTypeReferenceAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -331,7 +331,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
             }
         }
 
-        // 如果没有找到 TSTypeName，尝试直接从 children 中提取
+        // 如果没有找到 TSTypeName，尝试直接从 children 中提�?
         if (!typeName) {
             const nameParts: string[] = []
             for (const child of children) {
@@ -365,7 +365,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSTypeName CST 为 AST
+     * [TypeScript] 转换 TSTypeName CST �?AST
      */
     createTSTypeNameAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -426,7 +426,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSTypeParameterInstantiation CST 为 AST
+     * [TypeScript] 转换 TSTypeParameterInstantiation CST �?AST
      */
     createTSTypeParameterInstantiationAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -447,7 +447,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSParameterList CST 为 AST
+     * [TypeScript] 转换 TSParameterList CST �?AST
      */
     createTSParameterListAst(cst: SubhutiCst): any[] {
         const children = cst.children || []
@@ -463,7 +463,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSParameter CST 为 AST
+     * [TypeScript] 转换 TSParameter CST �?AST
      */
     createTSParameterAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -510,7 +510,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSParenthesizedType CST 为 AST
+     * [TypeScript] 转换 TSParenthesizedType CST �?AST
      */
     createTSParenthesizedTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -534,7 +534,7 @@ export class SlimeJavascriptTSTypeAnnotationCstToAstSingle {
 
 
     // ============================================
-    // TypeScript: Phase 7 - 模块和命名空间
+    // TypeScript: Phase 7 - 模块和命名空�?
     // ============================================
 
 

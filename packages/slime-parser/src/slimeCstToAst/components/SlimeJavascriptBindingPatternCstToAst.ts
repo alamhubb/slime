@@ -12,10 +12,13 @@ import {
     type SlimeJavascriptStatement, SlimeJavascriptTokenCreateUtils, SlimeJavascriptAstTypeName,
     type SlimeJavascriptArrayPatternElement, type SlimeJavascriptLBracketToken, type SlimeJavascriptRBracketToken,
     type SlimeJavascriptCommaToken, type SlimeJavascriptLBraceToken, type SlimeJavascriptRBraceToken,
-    type SlimeJavascriptObjectPatternProperty, type SlimeJavascriptAssignmentProperty
+    type SlimeJavascriptObjectPatternProperty, type SlimeJavascriptAssignmentProperty, SlimePattern, SlimeAstTypeName,
+    SlimeRestElement, SlimeArrayPattern, SlimeArrayPatternElement, SlimeLBracketToken, SlimeRBracketToken,
+    SlimeCommaToken, SlimeTokenCreateUtils, SlimeObjectPattern, SlimeObjectPatternProperty, SlimeLBraceToken,
+    SlimeRBraceToken
 } from "slime-ast";
 
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeJavascriptParser from "../../deprecated/SlimeJavascriptParser.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
 
@@ -30,10 +33,10 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
         } else if (first.name === SlimeJavascriptParser.prototype.BindingPattern?.name ||
             first.name === SlimeJavascriptParser.prototype.ArrayBindingPattern?.name ||
             first.name === SlimeJavascriptParser.prototype.ObjectBindingPattern?.name) {
-            // 解构参数：function({name, age}) �?function([a, b])
+            // 解构参数：function({name, age}) �?function([a, b])
             // 检查是否有 Initializer（默认值）
             const initializer = cst.children.find(ch => ch.name === SlimeJavascriptParser.prototype.Initializer?.name || ch.name === 'Initializer')
-            let pattern: SlimeJavascriptPattern
+            let pattern: SlimePattern
             if (first.name === SlimeJavascriptParser.prototype.BindingPattern?.name) {
                 pattern = SlimeCstToAstUtil.createBindingPatternAst(first)
             } else if (first.name === SlimeJavascriptParser.prototype.ArrayBindingPattern?.name) {
@@ -63,7 +66,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
         const first = cst.children[0]
         const id = SlimeCstToAstUtil.createBindingIdentifierAst(first)
 
-        // 检查是否有默认值（Initializer�?
+        // 检查是否有默认值（Initializer�?
         const initializer = cst.children.find(ch => ch.name === SlimeJavascriptParser.prototype.Initializer?.name)
         if (initializer) {
             // 有默认值，创建AssignmentPattern
@@ -81,9 +84,9 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
 
 
     /**
-     * BindingRestProperty CST �?AST
+     * BindingRestProperty CST �?AST
      */
-    createBindingRestPropertyAst(cst: SubhutiCst): SlimeJavascriptRestElement {
+    createBindingRestPropertyAst(cst: SubhutiCst): SlimeRestElement {
         const argument = cst.children?.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.BindingIdentifier?.name ||
             ch.name === 'BindingIdentifier'
@@ -94,7 +97,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
     }
 
     /**
-     * BindingProperty CST �?AST
+     * BindingProperty CST �?AST
      * BindingProperty -> SingleNameBinding | PropertyName : BindingElement
      */
     createBindingPropertyAst(cst: SubhutiCst): any {
@@ -109,7 +112,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
             return SlimeCstToAstUtil.createSingleNameBindingAst(singleNameBinding)
         }
 
-        // 否则�?PropertyName : BindingElement
+        // 否则�?PropertyName : BindingElement
         const propertyName = children.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.PropertyName?.name ||
             ch.name === 'PropertyName'
@@ -135,7 +138,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
     }
 
     /**
-     * BindingPropertyList CST 转 AST
+     * BindingPropertyList CST �?AST
      */
     createBindingPropertyListAst(cst: SubhutiCst): any[] {
         const properties: any[] = []
@@ -149,7 +152,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
     }
 
     /**
-     * BindingElementList CST �?AST
+     * BindingElementList CST �?AST
      */
     createBindingElementListAst(cst: SubhutiCst): any[] {
         const elements: any[] = []
@@ -177,7 +180,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
     }
 
     /**
-     * BindingElisionElement CST �?AST
+     * BindingElisionElement CST �?AST
      */
     createBindingElisionElementAst(cst: SubhutiCst): any {
         const bindingElement = cst.children?.find(ch =>
@@ -193,7 +196,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
 
 
 
-    createBindingPatternAst(cst: SubhutiCst): SlimeJavascriptPattern {
+    createBindingPatternAst(cst: SubhutiCst): SlimePattern {
         SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.BindingPattern?.name)
 
         const child = cst.children[0]
@@ -207,15 +210,15 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
         }
     }
 
-    createArrayBindingPatternAst(cst: SubhutiCst): SlimeJavascriptArrayPattern {
+    createArrayBindingPatternAst(cst: SubhutiCst): SlimeArrayPattern {
         SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ArrayBindingPattern?.name)
 
         // CST结构：[LBracket, BindingElementList?, Comma?, Elision?, BindingRestElement?, RBracket]
-        const elements: SlimeJavascriptArrayPatternElement[] = []
+        const elements: SlimeArrayPatternElement[] = []
 
-        // 提取 LBracket �?RBracket tokens
-        let lBracketToken: SlimeJavascriptLBracketToken | undefined
-        let rBracketToken: SlimeJavascriptRBracketToken | undefined
+        // 提取 LBracket �?RBracket tokens
+        let lBracketToken: SlimeLBracketToken | undefined
+        let rBracketToken: SlimeRBracketToken | undefined
         for (const child of cst.children) {
             if (child.value === '[') {
                 lBracketToken = SlimeJavascriptTokenCreateUtils.createLBracketToken(child.loc)
@@ -228,7 +231,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
         const bindingList = cst.children.find(ch => ch.name === SlimeJavascriptParser.prototype.BindingElementList?.name)
         if (bindingList) {
             // BindingElementList包含BindingElisionElement和Comma
-            let pendingCommaToken: SlimeJavascriptCommaToken | undefined
+            let pendingCommaToken: SlimeCommaToken | undefined
             for (let i = 0; i < bindingList.children.length; i++) {
                 const child = bindingList.children[i]
                 if (child.value === ',') {
@@ -240,7 +243,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
                     }
                 } else if (child.name === SlimeJavascriptParser.prototype.BindingElisionElement?.name) {
                     // BindingElisionElement可能包含：Elision + BindingElement
-                    // 先检查是否有Elision（跳过的元素�?
+                    // 先检查是否有Elision（跳过的元素�?
                     const elision = child.children.find((ch: any) =>
                         ch.name === SlimeJavascriptParser.prototype.Elision?.name)
                     if (elision) {
@@ -249,7 +252,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
                             if (elisionChild.value === ',') {
                                 elements.push({
                                     element: null,
-                                    commaToken: SlimeJavascriptTokenCreateUtils.createCommaToken(elisionChild.loc)
+                                    commaToken: SlimeTokenCreateUtils.createCommaToken(elisionChild.loc)
                                 })
                             }
                         }
@@ -260,7 +263,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
                         ch.name === SlimeJavascriptParser.prototype.BindingElement?.name)
 
                     if (bindingElement) {
-                        // 使用 createBindingElementAst 正确处理 BindingElement（包�?Initializer�?
+                        // 使用 createBindingElementAst 正确处理 BindingElement（包�?Initializer�?
                         const element = SlimeCstToAstUtil.createBindingElementAst(bindingElement)
                         if (element) {
                             elements.push({ element })
@@ -270,39 +273,39 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
             }
         }
 
-        // 处理 ArrayBindingPattern 直接子节点中�?Comma �?Elision（尾部空位）
+        // 处理 ArrayBindingPattern 直接子节点中�?Comma �?Elision（尾部空位）
         // CST: [LBracket, BindingElementList, Comma, Elision, RBracket]
         for (let i = 0; i < cst.children.length; i++) {
             const child = cst.children[i]
-            // 跳过 LBracket, RBracket, BindingElementList（已处理�?
+            // 跳过 LBracket, RBracket, BindingElementList（已处理�?
             if (child.value === '[' || child.value === ']' ||
                 child.name === SlimeJavascriptParser.prototype.BindingElementList?.name ||
                 child.name === SlimeJavascriptParser.prototype.BindingRestElement?.name) {
                 continue
             }
 
-            // 处理 BindingElementList 之后�?Comma
+            // 处理 BindingElementList 之后�?Comma
             if (child.value === ',') {
-                // 将逗号关联到最后一个元�?
+                // 将逗号关联到最后一个元�?
                 if (elements.length > 0 && !elements[elements.length - 1].commaToken) {
                     elements[elements.length - 1].commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
                 }
             }
 
-            // 处理尾部�?Elision
+            // 处理尾部�?Elision
             if (child.name === SlimeJavascriptParser.prototype.Elision?.name || child.name === 'Elision') {
                 for (const elisionChild of child.children || []) {
                     if (elisionChild.value === ',') {
                         elements.push({
                             element: null,
-                            commaToken: SlimeJavascriptTokenCreateUtils.createCommaToken(elisionChild.loc)
+                            commaToken: SlimeTokenCreateUtils.createCommaToken(elisionChild.loc)
                         })
                     }
                 }
             }
         }
 
-        // 检查是否有BindingRestElement�?..rest �?...[a, b]�?
+        // 检查是否有BindingRestElement�?..rest �?...[a, b]�?
         const restElement = cst.children.find(ch => ch.name === SlimeJavascriptParser.prototype.BindingRestElement?.name)
         if (restElement) {
             const restNode = SlimeCstToAstUtil.createBindingRestElementAst(restElement)
@@ -318,15 +321,15 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
         } as SlimeJavascriptArrayPattern
     }
 
-    createObjectBindingPatternAst(cst: SubhutiCst): SlimeJavascriptObjectPattern {
+    createObjectBindingPatternAst(cst: SubhutiCst): SlimeObjectPattern {
         SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ObjectBindingPattern?.name)
 
         // CST结构：[LBrace, BindingPropertyList?, RBrace]
-        const properties: SlimeJavascriptObjectPatternProperty[] = []
+        const properties: SlimeObjectPatternProperty[] = []
 
-        // 提取 LBrace �?RBrace tokens
-        let lBraceToken: SlimeJavascriptLBraceToken | undefined
-        let rBraceToken: SlimeJavascriptRBraceToken | undefined
+        // 提取 LBrace �?RBrace tokens
+        let lBraceToken: SlimeLBraceToken | undefined
+        let rBraceToken: SlimeRBraceToken | undefined
         for (const child of cst.children) {
             if (child.value === '{') {
                 lBraceToken = SlimeJavascriptTokenCreateUtils.createLBraceToken(child.loc)
@@ -342,17 +345,17 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
             for (let i = 0; i < propList.children.length; i++) {
                 const child = propList.children[i]
                 if (child.value === ',') {
-                    // 将逗号关联到前一个属�?
+                    // 将逗号关联到前一个属�?
                     if (properties.length > 0 && !properties[properties.length - 1].commaToken) {
                         properties[properties.length - 1].commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
                     }
                 } else if (child.name === SlimeJavascriptParser.prototype.BindingProperty?.name) {
-                    // BindingProperty -> SingleNameBinding (简�? �?PropertyName + BindingElement (完整)
+                    // BindingProperty -> SingleNameBinding (简�? �?PropertyName + BindingElement (完整)
                     const singleName = child.children.find((ch: any) =>
                         ch.name === SlimeJavascriptParser.prototype.SingleNameBinding?.name)
 
                     if (singleName) {
-                        // 简写形式：{name} �?{name = "Guest"}
+                        // 简写形式：{name} �?{name = "Guest"}
                         const value = SlimeCstToAstUtil.createSingleNameBindingAst(singleName)
                         const identifier = singleName.children.find((ch: any) =>
                             ch.name === SlimeJavascriptParser.prototype.BindingIdentifier?.name)
@@ -398,19 +401,19 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
             }
         }
 
-        // 检查外层是否有逗号（在 BindingPropertyList 之后、BindingRestProperty 之前�?
+        // 检查外层是否有逗号（在 BindingPropertyList 之后、BindingRestProperty 之前�?
         // CST 结构: { BindingPropertyList , BindingRestProperty }
-        // 逗号�?ObjectBindingPattern 的直接子节点
+        // 逗号�?ObjectBindingPattern 的直接子节点
         for (const child of cst.children) {
             if (child.value === ',') {
-                // 将逗号关联到最后一个属�?
+                // 将逗号关联到最后一个属�?
                 if (properties.length > 0 && !properties[properties.length - 1].commaToken) {
                     properties[properties.length - 1].commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
                 }
             }
         }
 
-        // ES2018: 检查是否有BindingRestElement �?BindingRestProperty�?..rest�?
+        // ES2018: 检查是否有BindingRestElement �?BindingRestProperty�?..rest�?
         const restElement = cst.children.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.BindingRestElement?.name ||
             ch.name === 'BindingRestElement' ||
@@ -427,7 +430,7 @@ export class SlimeJavascriptBindingPatternCstToAstSingle {
                 // 提取 ellipsis token
                 const ellipsisCst = restElement.children.find((ch: any) => ch.value === '...')
                 const ellipsisToken = ellipsisCst ? SlimeJavascriptTokenCreateUtils.createEllipsisToken(ellipsisCst.loc) : undefined
-                const restNode: SlimeJavascriptRestElement = {
+                const restNode: SlimeRestElement = {
                     type: SlimeAstTypeName.RestElement,
                     argument: restId,
                     ellipsisToken,

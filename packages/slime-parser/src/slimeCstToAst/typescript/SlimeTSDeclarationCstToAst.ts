@@ -9,7 +9,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
     // ============================================
 
     /**
-     * [TypeScript] 转换 TSInterfaceDeclaration CST 为 AST
+     * [TypeScript] 转换 TSInterfaceDeclaration CST �?AST
      */
     createTSInterfaceDeclarationAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -48,7 +48,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSInterfaceExtends CST 为 AST
+     * [TypeScript] 转换 TSInterfaceExtends CST �?AST
      */
     createTSInterfaceExtendsAst(cst: SubhutiCst): any[] {
         const children = cst.children || []
@@ -66,7 +66,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSExpressionWithTypeArguments CST 为 AST
+     * [TypeScript] 转换 TSExpressionWithTypeArguments CST �?AST
      */
     createTSExpressionWithTypeArgumentsAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -99,7 +99,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSInterfaceBody CST 为 AST
+     * [TypeScript] 转换 TSInterfaceBody CST �?AST
      */
     createTSInterfaceBodyAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -120,7 +120,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSEnumDeclaration CST 为 AST
+     * [TypeScript] 转换 TSEnumDeclaration CST �?AST
      */
     createTSEnumDeclarationAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -154,11 +154,11 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSEnumMember CST 为 AST
+     * [TypeScript] 转换 TSEnumMember CST �?AST
      *
      * CST 结构:
      * TSEnumMember
-     *   - Identifier (成员名)
+     *   - Identifier (成员�?
      *   - Assign (可选的 = 符号)
      *   - AssignmentExpression (可选的初始化表达式)
      */
@@ -170,7 +170,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
 
         for (const child of children) {
             if (child.name === 'Identifier') {
-                // 枚举成员名
+                // 枚举成员�?
                 const tokenCst = child.children?.[0] || child
                 id = {
                     type: 'Identifier',
@@ -178,7 +178,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
                     loc: tokenCst.loc,
                 }
             } else if (child.name === 'StringLiteral') {
-                // 字符串字面量作为成员名
+                // 字符串字面量作为成员�?
                 id = {
                     type: 'Literal',
                     value: child.value?.slice(1, -1),
@@ -186,8 +186,8 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
                     loc: child.loc,
                 }
             } else if (child.name === 'AssignmentExpression') {
-                // 初始化表达式 - 使用 SlimeJavascriptCstToAstUtil 的方法
-                // 注意：这里调用的是单例的方法，会被 SlimeJavascriptCstToAstUtil 的拦截机制处理
+                // 初始化表达式 - 使用 SlimeJavascriptCstToAstUtil 的方�?
+                // 注意：这里调用的是单例的方法，会�?SlimeJavascriptCstToAstUtil 的拦截机制处�?
                 initializer = SlimeJavascriptCstToAstUtil.createAssignmentExpressionAst(child)
             }
         }
@@ -202,7 +202,7 @@ export class SlimeJavascriptTSDeclarationCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTypeAliasDeclaration CST 为 AST
+     * [TypeScript] 转换 TSTypeAliasDeclaration CST �?AST
      */
     createTSTypeAliasDeclarationAst(cst: SubhutiCst): any {
         const children = cst.children || []

@@ -5,7 +5,7 @@ import {SlimeJavascriptTSObjectTypeCstToAstSingle} from "./SlimeTSObjectTypeCstT
 export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
 
     /**
-     * [TypeScript] 转换 TSPrimaryType CST 为 AST
+     * [TypeScript] 转换 TSPrimaryType CST �?AST
      */
     createTSPrimaryTypeAst(cst: SubhutiCst): any {
         const child = cst.children?.[0]
@@ -23,7 +23,7 @@ export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
             return this.createTSKeywordTypeWrapperAst(child)
         }
 
-        // 字面量类型
+        // 字面量类�?
         if (name === 'TSLiteralType') return this.createTSLiteralTypeAst(child)
 
         // 类型引用
@@ -32,7 +32,7 @@ export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
         // 元组类型
         if (name === 'TSTupleType') return this.createTSTupleTypeAst(child)
 
-        // 对象类型字面量
+        // 对象类型字面�?
         if (name === 'TSTypeLiteral') return this.createTSTypeLiteralAst(child)
 
         // 括号类型
@@ -45,7 +45,7 @@ export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSKeywordType 包装规则 CST 为 AST
+     * [TypeScript] 转换 TSKeywordType 包装规则 CST �?AST
      */
     createTSKeywordTypeWrapperAst(cst: SubhutiCst): any {
         const child = cst.children?.[0]
@@ -55,7 +55,7 @@ export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
 
         const name = child.name
 
-        // 基础类型关键字
+        // 基础类型关键�?
         if (name === 'TSNumberKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSNumberKeyword)
         if (name === 'TSStringKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSStringKeyword)
         if (name === 'TSBooleanKeyword') return this.createTSKeywordTypeAst(child, SlimeAstTypeName.TSBooleanKeyword)
@@ -74,7 +74,7 @@ export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 创建关键字类型 AST
+     * [TypeScript] 创建关键字类�?AST
      */
     createTSKeywordTypeAst(cst: SubhutiCst, typeName: string): any {
         return {
@@ -87,7 +87,7 @@ export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSLiteralType CST 为 AST
+     * [TypeScript] 转换 TSLiteralType CST �?AST
      */
     createTSLiteralTypeAst(cst: SubhutiCst): any {
         const child = cst.children?.[0]
@@ -95,7 +95,7 @@ export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
             throw new Error('TSLiteralType has no children')
         }
 
-        // 获取字面量值
+        // 获取字面量�?
         let literal: any
         if (child.name === 'StringLiteral' || child.name === 'Literal') {
             const tokenCst = child.children?.[0] || child
@@ -128,7 +128,7 @@ export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
                 loc: child.loc,
             }
         } else {
-            // 尝试从 token 获取值
+            // 尝试�?token 获取�?
             const tokenCst = child.children?.[0] || child
             literal = {
                 type: 'Literal',
@@ -148,7 +148,7 @@ export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTypeReference CST 为 AST
+     * [TypeScript] 转换 TSTypeReference CST �?AST
      */
     createTSTypeReferenceAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -200,7 +200,7 @@ export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSParenthesizedType CST 为 AST
+     * [TypeScript] 转换 TSParenthesizedType CST �?AST
      */
     createTSParenthesizedTypeAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -218,7 +218,7 @@ export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
     }
 
     /**
-     * [TypeScript] 转换 TSTypeQuery CST 为 AST (typeof x)
+     * [TypeScript] 转换 TSTypeQuery CST �?AST (typeof x)
      */
     createTSTypeQueryAst(cst: SubhutiCst): any {
         const children = cst.children || []
@@ -244,7 +244,7 @@ export class SlimeJavascriptTSPrimaryTypeCstToAstSingle {
 
 
     /**
-     * [TypeScript] 转换 TSTypeOperator CST 为 AST (keyof, readonly, unique)
+     * [TypeScript] 转换 TSTypeOperator CST �?AST (keyof, readonly, unique)
      */
     createTSTypeOperatorAst(cst: SubhutiCst): any {
         const children = cst.children || []

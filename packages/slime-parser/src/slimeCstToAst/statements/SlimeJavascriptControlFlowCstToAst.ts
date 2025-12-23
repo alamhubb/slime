@@ -3,7 +3,7 @@
  */
 import { SubhutiCst } from "subhuti";
 
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeJavascriptParser from "../../deprecated/SlimeJavascriptParser.ts";
 import {
     SlimeJavascriptCreateUtils,
     SlimeJavascriptAstTypeName,
@@ -20,7 +20,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
     // ==================== 语句相关转换方法 ====================
 
     /**
-     * BreakableStatement CST �?AST（透传�?
+     * BreakableStatement CST �?AST（透传�?
      * BreakableStatement -> IterationStatement | SwitchStatement
      */
     createBreakableStatementAst(cst: SubhutiCst): any {
@@ -32,7 +32,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
     }
 
     /**
-     * IterationStatement CST �?AST（透传�?
+     * IterationStatement CST �?AST（透传�?
      * IterationStatement -> DoWhileStatement | WhileStatement | ForStatement | ForInOfStatement
      */
     createIterationStatementAst(cst: SubhutiCst): any {
@@ -107,7 +107,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
                 continue
             }
 
-            // Legacy: 直接�?Statement
+            // Legacy: 直接�?Statement
             if (name === SlimeJavascriptParser.prototype.Statement?.name || name === 'Statement') {
                 const stmts = SlimeCstToAstUtil.createStatementAst(child)
                 const body = Array.isArray(stmts) ? stmts[0] : stmts
@@ -156,7 +156,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
      *   for ( LexicalDeclaration Expression_opt ; Expression_opt ) Statement
      *   for ( Expression_opt ; Expression_opt ; Expression_opt ) Statement
      *
-     * 注意：LexicalDeclaration 内部已经包含分号（SemicolonASI�?
+     * 注意：LexicalDeclaration 内部已经包含分号（SemicolonASI�?
      */
     createForStatementAst(cst: SubhutiCst): any {
         SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ForStatement?.name);
@@ -172,7 +172,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
 
         const children = cst.children || []
 
-        // 收集所有表达式（可能是 test �?update�?
+        // 收集所有表达式（可能是 test �?update�?
         const expressions: any[] = []
         let hasLexicalDeclaration = false
 
@@ -210,7 +210,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
             }
 
             // LexicalDeclaration (for let/const) - init
-            // 注意：LexicalDeclaration 内部包含了分�?
+            // 注意：LexicalDeclaration 内部包含了分�?
             if (name === SlimeJavascriptParser.prototype.LexicalDeclaration?.name || name === 'LexicalDeclaration') {
                 init = SlimeCstToAstUtil.createLexicalDeclarationAst(child)
                 hasLexicalDeclaration = true
@@ -237,19 +237,19 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
             }
         }
 
-        // 根据收集的表达式和是否有 LexicalDeclaration 来分�?
+        // 根据收集的表达式和是否有 LexicalDeclaration 来分�?
         if (hasLexicalDeclaration) {
-            // for (let i = 0; test; update) - LexicalDeclaration 已经�?init
-            // 后面两个表达式分别是 test �?update
+            // for (let i = 0; test; update) - LexicalDeclaration 已经�?init
+            // 后面两个表达式分别是 test �?update
             if (expressions.length >= 1) test = expressions[0]
             if (expressions.length >= 2) update = expressions[1]
         } else if (init) {
-            // for (var i = 0; test; update) - init 已设�?
-            // 后面两个表达式分别是 test �?update
+            // for (var i = 0; test; update) - init 已设�?
+            // 后面两个表达式分别是 test �?update
             if (expressions.length >= 1) test = expressions[0]
             if (expressions.length >= 2) update = expressions[1]
         } else {
-            // for (init; test; update) - 三个表达�?
+            // for (init; test; update) - 三个表达�?
             if (expressions.length >= 1) init = expressions[0]
             if (expressions.length >= 2) test = expressions[1]
             if (expressions.length >= 3) update = expressions[2]
@@ -268,20 +268,20 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
     createForInOfStatementAst(cst: SubhutiCst): any {
         SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ForInOfStatement?.name);
 
-        // ForInOfStatement 结构（多种形式）�?
+        // ForInOfStatement 结构（多种形式）�?
         // 普�?for-in/of: [ForTok, LParen, ForDeclaration, InTok/OfTok, Expression, RParen, Statement]
         // for await: [ForTok, AwaitTok, LParen, ForDeclaration, OfTok, AssignmentExpression, RParen, Statement]
 
         // 检查是否是 for await
         const hasAwait = cst.children.some(ch => ch.name === 'Await')
 
-        // 动态查找各个部�?
+        // 动态查找各个部�?
         let left: any = null
         let right: any = null
         let body: any = null
         let isForOf = false
 
-        // 查找 ForDeclaration �?LeftHandSideExpression
+        // 查找 ForDeclaration �?LeftHandSideExpression
         const forDeclarationCst = cst.children.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.ForDeclaration?.name ||
             ch.name === 'ForDeclaration'
@@ -306,7 +306,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
         )
 
         if (forDeclarationCst) {
-            // ForDeclaration 内部�?LetOrConst + ForBinding
+            // ForDeclaration 内部�?LetOrConst + ForBinding
             const letOrConstCst = forDeclarationCst.children[0]
             const forBindingCst = forDeclarationCst.children[1]
 
@@ -399,7 +399,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
         )
         isForOf = inOrOfCst?.value === 'of' || inOrOfCst?.name === 'OfTok'
 
-        // 查找 right expression (�?in/of 之后)
+        // 查找 right expression (�?in/of 之后)
         const inOrOfIndex = cst.children.indexOf(inOrOfCst)
         if (inOrOfIndex !== -1 && inOrOfIndex + 1 < cst.children.length) {
             const rightCst = cst.children[inOrOfIndex + 1]
@@ -428,7 +428,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
             loc: cst.loc
         }
 
-        // for await 需要设�?await 属�?
+        // for await 需要设�?await 属�?
         if (hasAwait) {
             result.await = true
         }
@@ -462,7 +462,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
         const statement = cst.children.find(ch => ch.name === SlimeJavascriptParser.prototype.Statement?.name)
 
         const test = expression ? SlimeCstToAstUtil.createExpressionAst(expression) : null
-        // createStatementAst返回数组，取第一个元�?
+        // createStatementAst返回数组，取第一个元�?
         const bodyArray = statement ? SlimeCstToAstUtil.createStatementAst(statement) : []
         const body = bodyArray.length > 0 ? bodyArray[0] : null
 
@@ -534,7 +534,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
             }
         }
 
-        // 提取 discriminant（判断表达式�?
+        // 提取 discriminant（判断表达式�?
         const discriminantCst = cst.children?.find(ch => ch.name === SlimeJavascriptParser.prototype.Expression?.name)
         const discriminant = discriminantCst ? SlimeCstToAstUtil.createExpressionAst(discriminantCst) : null
 
@@ -542,7 +542,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
         const caseBlockCst = cst.children?.find(ch => ch.name === SlimeJavascriptParser.prototype.CaseBlock?.name)
         const cases = caseBlockCst ? SlimeCstToAstUtil.extractCasesFromCaseBlock(caseBlockCst) : []
 
-        // �?CaseBlock 提取 brace tokens
+        // �?CaseBlock 提取 brace tokens
         if (caseBlockCst && caseBlockCst.children) {
             const lBraceCst = caseBlockCst.children.find(ch => ch.name === 'LBrace' || ch.value === '{')
             const rBraceCst = caseBlockCst.children.find(ch => ch.name === 'RBrace' || ch.value === '}')
@@ -558,7 +558,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
 
 
     /**
-     * CaseClause CST �?AST
+     * CaseClause CST �?AST
      * CaseClause -> case Expression : StatementList?
      */
     createCaseClauseAst(cst: SubhutiCst): any {
@@ -566,7 +566,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
     }
 
     /**
-     * DefaultClause CST �?AST
+     * DefaultClause CST �?AST
      * DefaultClause -> default : StatementList?
      */
     createDefaultClauseAst(cst: SubhutiCst): any {
@@ -574,7 +574,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
     }
 
     /**
-     * CaseClauses CST �?AST
+     * CaseClauses CST �?AST
      * CaseClauses -> CaseClause+
      */
     createCaseClausesAst(cst: SubhutiCst): any[] {
@@ -588,7 +588,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
     }
 
     /**
-     * CaseBlock CST �?AST
+     * CaseBlock CST �?AST
      * CaseBlock -> { CaseClauses? DefaultClause? CaseClauses? }
      */
     createCaseBlockAst(cst: SubhutiCst): any[] {
@@ -597,10 +597,10 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
 
 
     /**
-     * [AST 类型映射] CaseClause/DefaultClause CST �?SwitchCase AST
+     * [AST 类型映射] CaseClause/DefaultClause CST �?SwitchCase AST
      *
-     * 存在必要性：CST �?case �?default 是分开的规则（CaseClause/DefaultClause），
-     * �?ESTree AST 统一使用 SwitchCase 类型，通过 test 是否�?null 区分�?
+     * 存在必要性：CST �?case �?default 是分开的规则（CaseClause/DefaultClause），
+     * �?ESTree AST 统一使用 SwitchCase 类型，通过 test 是否�?null 区分�?
      *
      * CaseClause: case Expression : StatementList?
      * DefaultClause: default : StatementList?
@@ -614,7 +614,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
         let colonToken: any = undefined
 
         if (cst.name === SlimeJavascriptParser.prototype.CaseClause?.name) {
-            // CaseClause 结构�?
+            // CaseClause 结构�?
             // children[0]: CaseTok
             // children[1]: Expression - test
             // children[2]: Colon
@@ -634,7 +634,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
             const stmtListCst = cst.children?.find(ch => ch.name === SlimeJavascriptParser.prototype.StatementList?.name)
             consequent = stmtListCst ? SlimeCstToAstUtil.createStatementListAst(stmtListCst) : []
         } else if (cst.name === SlimeJavascriptParser.prototype.DefaultClause?.name) {
-            // DefaultClause 结构�?
+            // DefaultClause 结构�?
             // children[0]: DefaultTok
             // children[1]: Colon
             // children[2]: StatementList（可选）
@@ -658,7 +658,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
 
 
     /**
-     * �?CaseBlock 提取所�?case/default 子句
+     * �?CaseBlock 提取所�?case/default 子句
      * CaseBlock: { CaseClauses? DefaultClause? CaseClauses? }
      */
     extractCasesFromCaseBlock(caseBlockCst: SubhutiCst): any[] {
@@ -666,7 +666,7 @@ export class SlimeJavascriptControlFlowCstToAstSingle {
 
         if (!caseBlockCst.children) return cases
 
-        // CaseBlock �?children:
+        // CaseBlock �?children:
         // [0]: LBrace
         // [1-n]: CaseClauses / DefaultClause（可能有多个，可能没有）
         // [last]: RBrace

@@ -1,5 +1,5 @@
 /**
- * CompoundLiteralCstToAst - 数组/对象字面量转换
+ * CompoundLiteralCstToAst - 数组/对象字面量转�?
  */
 import {SubhutiCst} from "subhuti";
 import {
@@ -19,7 +19,7 @@ import {
     type SlimeJavascriptStatement,
     SlimeJavascriptTokenCreateUtils
 } from "slime-ast";
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeJavascriptParser from "../../deprecated/SlimeJavascriptParser.ts";
 
 import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
@@ -27,14 +27,14 @@ import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascri
 
 export class SlimeJavascriptCompoundLiteralCstToAstSingle {
     /**
-     * 对象字面�?CST �?AST（透传�?ObjectExpression�?
+     * 对象字面�?CST �?AST（透传�?ObjectExpression�?
      * ObjectLiteral -> { } | { PropertyDefinitionList } | { PropertyDefinitionList , }
      */
-    createObjectLiteralAst(cst: SubhutiCst): SlimeJavascriptObjectExpression {
+    createObjectLiteralAst(cst: SubhutiCst): SlimeObjectExpression {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ObjectLiteral?.name);
         const properties: Array<SlimeJavascriptObjectPropertyItem> = []
 
-        // 提取 LBrace �?RBrace tokens
+        // 提取 LBrace �?RBrace tokens
         let lBraceToken: any = undefined
         let rBraceToken: any = undefined
 
@@ -54,11 +54,11 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
 
         if (cst.children.length > 2) {
             const PropertyDefinitionListCst = cst.children[1]
-            let currentProperty: SlimeJavascriptProperty | SlimeJavascriptSpreadElement | null = null
+            let currentProperty: SlimeProperty | SlimeJavascriptSpreadElement | null = null
             let hasProperty = false
 
             for (const child of PropertyDefinitionListCst.children) {
-                // 跳过没有children的PropertyDefinition节点（SubhutiParser优化导致�?
+                // 跳过没有children的PropertyDefinition节点（SubhutiParser优化导致�?
                 if (child.name === SlimeJavascriptParser.prototype.PropertyDefinition?.name && child.children && child.children.length > 0) {
                     // 如果之前有属性但没有逗号，先推入
                     if (hasProperty) {
@@ -67,7 +67,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
                     currentProperty = SlimeCstToAstUtil.createPropertyDefinitionAst(child)
                     hasProperty = true
                 } else if (child.name === 'Comma' || child.value === ',') {
-                    // 逗号与前面的属性配�?
+                    // 逗号与前面的属性配�?
                     const commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
                     if (hasProperty) {
                         properties.push(SlimeJavascriptCreateUtils.createObjectPropertyItem(currentProperty!, commaToken))
@@ -77,7 +77,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
                 }
             }
 
-            // 处理最后一个属性（如果没有尾随逗号�?
+            // 处理最后一个属性（如果没有尾随逗号�?
             if (hasProperty) {
                 properties.push(SlimeJavascriptCreateUtils.createObjectPropertyItem(currentProperty!, undefined))
             }
@@ -87,14 +87,14 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
 
 
     /**
-     * ArrayLiteral CST �?ArrayExpression AST
+     * ArrayLiteral CST �?ArrayExpression AST
      * ArrayLiteral -> [ Elision? ] | [ ElementList ] | [ ElementList , Elision? ]
      */
-    createArrayLiteralAst(cst: SubhutiCst): SlimeJavascriptArrayExpression {
+    createArrayLiteralAst(cst: SubhutiCst): SlimeArrayExpression {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ArrayLiteral?.name);
         // ArrayLiteral: [LBracket, ElementList?, Comma?, Elision?, RBracket]
 
-        // 提取 LBracket �?RBracket tokens
+        // 提取 LBracket �?RBracket tokens
         let lBracketToken: any = undefined
         let rBracketToken: any = undefined
 
@@ -113,8 +113,8 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
         const elementList = cst.children.find(ch => ch.name === SlimeJavascriptParser.prototype.ElementList?.name)
         const elements = elementList ? SlimeCstToAstUtil.createElementListAst(elementList) : []
 
-        // 处理 ArrayLiteral 顶层�?Comma �?Elision（尾随逗号和省略）
-        // 例如 [x,,] -> ElementList 后面�?Comma �?Elision
+        // 处理 ArrayLiteral 顶层�?Comma �?Elision（尾随逗号和省略）
+        // 例如 [x,,] -> ElementList 后面�?Comma �?Elision
         let hasTrailingComma = false
         for (const child of cst.children) {
             if (child.name === 'Comma' || child.value === ',') {
@@ -134,7 +134,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
     }
 
 
-    createSpreadElementAst(cst: SubhutiCst): SlimeJavascriptSpreadElement {
+    createSpreadElementAst(cst: SubhutiCst): SlimeSpreadElement {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.SpreadElement?.name);
         // SpreadElement: [Ellipsis, AssignmentExpression]
 
@@ -162,10 +162,10 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
     }
 
 
-    createPropertyDefinitionAst(cst: SubhutiCst): SlimeJavascriptProperty {
+    createPropertyDefinitionAst(cst: SubhutiCst): SlimeProperty {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.PropertyDefinition?.name);
 
-        // 防御性检查：如果 children 为空，说明是空对象的情况，不应该被调�?
+        // 防御性检查：如果 children 为空，说明是空对象的情况，不应该被调�?
         // 这种情况通常不会发生，因为空对象{}不会有PropertyDefinition节点
         if (!cst.children || cst.children.length === 0) {
             throw new Error('PropertyDefinition CST has no children - this should not happen for valid syntax');
@@ -174,7 +174,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
         const first = cst.children[0]
 
         // ES2018: 对象spread {...obj}
-        // 检查first是否是Ellipsis token（name�?Ellipsis'�?
+        // 检查first是否是Ellipsis token（name�?Ellipsis'�?
         if (first.name === 'Ellipsis' || first.value === '...') {
             // PropertyDefinition -> Ellipsis + AssignmentExpression
             const AssignmentExpressionCst = cst.children[1]
@@ -203,7 +203,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
 
             return keyAst
         } else if (first.name === SlimeJavascriptParser.prototype.MethodDefinition?.name) {
-            // 方法定义（对象中的方法没有static�?
+            // 方法定义（对象中的方法没有static�?
             const SlimeJavascriptMethodDefinition = SlimeCstToAstUtil.createMethodDefinitionAst(null, first)
 
             const keyAst = SlimeJavascriptCreateUtils.createPropertyAst(SlimeJavascriptMethodDefinition.key, SlimeJavascriptMethodDefinition.value)
@@ -213,24 +213,24 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
                 keyAst.computed = true
             }
 
-            // 继承MethodDefinition的kind标志（getter/setter/method�?
+            // 继承MethodDefinition的kind标志（getter/setter/method�?
             if (SlimeJavascriptMethodDefinition.kind === 'get' || SlimeJavascriptMethodDefinition.kind === 'set') {
                 keyAst.kind = SlimeJavascriptMethodDefinition.kind
             } else {
-                // 普通方法使�?method: true
+                // 普通方法使�?method: true
                 keyAst.method = true
             }
 
             return keyAst
         } else if (first.name === SlimeJavascriptParser.prototype.IdentifierReference?.name) {
-            // 属性简�?{name} -> {name: name}
+            // 属性简�?{name} -> {name: name}
             const identifierCst = first.children[0] // IdentifierReference -> Identifier
             const identifier = SlimeCstToAstUtil.createIdentifierAst(identifierCst)
             const keyAst = SlimeJavascriptCreateUtils.createPropertyAst(identifier, identifier)
             keyAst.shorthand = true
             return keyAst
         } else if (first.name === 'CoverInitializedName') {
-            // CoverInitializedName: 带默认值的属性简�?{name = 'default'}
+            // CoverInitializedName: 带默认值的属性简�?{name = 'default'}
             // CoverInitializedName -> IdentifierReference + Initializer
             const identifierRefCst = first.children[0]
             const initializerCst = first.children[1]
@@ -258,7 +258,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
     }
 
 
-    createPropertyNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral | SlimeJavascriptExpression {
+    createPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeJavascriptLiteral | SlimeJavascriptExpression {
         if (!cst || !cst.children || cst.children.length === 0) {
             throw new Error('createPropertyNameAst: invalid cst or no children')
         }
@@ -272,17 +272,17 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
             // ComputedPropertyName -> LBracket + AssignmentExpression + RBracket
             return SlimeCstToAstUtil.createAssignmentExpressionAst(first.children[1])
         }
-        // 回退：可能first直接就是 LiteralPropertyName 的内�?
+        // 回退：可能first直接就是 LiteralPropertyName 的内�?
         return SlimeCstToAstUtil.createLiteralPropertyNameAst(first)
     }
 
 
-    createLiteralPropertyNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral {
+    createLiteralPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeJavascriptLiteral {
         if (!cst) {
             throw new Error('createLiteralPropertyNameAst: cst is null')
         }
 
-        // 可能�?LiteralPropertyName 节点，也可能直接是内部节�?
+        // 可能�?LiteralPropertyName 节点，也可能直接是内部节�?
         let first = cst
         if (cst.name === SlimeJavascriptParser.prototype.LiteralPropertyName?.name || cst.name === 'LiteralPropertyName') {
             if (!cst.children || cst.children.length === 0) {
@@ -293,7 +293,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
 
         // IdentifierName (Es2025Parser) - 可能是规则节点或 token
         if (first.name === 'IdentifierName' || first.name === SlimeJavascriptParser.prototype.IdentifierName?.name) {
-            // 如果�?value，直接使�?
+            // 如果�?value，直接使�?
             if (first.value !== undefined) {
                 return SlimeJavascriptCreateUtils.createIdentifier(first.value, first.loc)
             }
@@ -307,7 +307,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
             }
             throw new Error(`createLiteralPropertyNameAst: Cannot extract value from IdentifierName`)
         }
-        // Identifier (旧版�?Es2025)
+        // Identifier (旧版�?Es2025)
         else if (first.name === 'Identifier' || first.name === SlimeJavascriptParser.prototype.Identifier?.name) {
             return SlimeCstToAstUtil.createIdentifierAst(first)
         }
@@ -319,7 +319,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
         else if (first.name === SlimeJavascriptTokenConsumer.prototype.StringLiteral?.name || first.name === 'StringLiteral' || first.name === 'String') {
             return SlimeCstToAstUtil.createStringLiteralAst(first)
         }
-        // 如果是直接的 token（有 value 属性），创�?Identifier
+        // 如果是直接的 token（有 value 属性），创�?Identifier
         else if (first.value !== undefined) {
             return SlimeJavascriptCreateUtils.createIdentifier(first.value, first.loc)
         }
@@ -329,10 +329,10 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
 
 
     /**
-     * ComputedPropertyName CST �?AST
+     * ComputedPropertyName CST �?AST
      * ComputedPropertyName -> [ AssignmentExpression ]
      */
-    createComputedPropertyNameAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createComputedPropertyNameAst(cst: SubhutiCst): SlimeExpression {
         const expr = cst.children?.find(ch =>
             ch.name === SlimeJavascriptParser.prototype.AssignmentExpression?.name ||
             ch.name === 'AssignmentExpression'
@@ -348,9 +348,9 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
         const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ElementList?.name);
         const elements: Array<SlimeJavascriptArrayElement> = []
 
-        // 遍历所有子节点，处�?AssignmentExpression、SpreadElement、Elision �?Comma
+        // 遍历所有子节点，处�?AssignmentExpression、SpreadElement、Elision �?Comma
         // 每个元素与其后面的逗号配对
-        let currentElement: SlimeJavascriptExpression | SlimeJavascriptSpreadElement | null = null
+        let currentElement: SlimeExpression | SlimeJavascriptSpreadElement | null = null
         let hasElement = false
 
         for (let i = 0; i < cst.children.length; i++) {
@@ -371,7 +371,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
                 hasElement = true
             } else if (child.name === SlimeJavascriptParser.prototype.Elision?.name) {
                 // Elision 代表空元素：[1, , 3] - 可能包含多个逗号
-                // 每个 Elision 内部的逗号数量决定空元素数�?
+                // 每个 Elision 内部的逗号数量决定空元素数�?
                 const elisionCommas = child.children?.filter((c: any) => c.name === 'Comma' || c.value === ',') || []
                 for (let j = 0; j < elisionCommas.length; j++) {
                     if (hasElement) {
@@ -394,7 +394,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
             }
         }
 
-        // 处理最后一个元素（如果没有尾随逗号�?
+        // 处理最后一个元素（如果没有尾随逗号�?
         if (hasElement) {
             elements.push(SlimeJavascriptCreateUtils.createArrayElement(currentElement, undefined))
         }
@@ -406,7 +406,7 @@ export class SlimeJavascriptCompoundLiteralCstToAstSingle {
 
 
     /**
-     * CoverInitializedName CST �?AST
+     * CoverInitializedName CST �?AST
      * CoverInitializedName -> IdentifierReference Initializer
      */
     createCoverInitializedNameAst(cst: SubhutiCst): any {
