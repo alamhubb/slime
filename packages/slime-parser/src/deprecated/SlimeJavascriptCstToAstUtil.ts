@@ -11,102 +11,102 @@
  * 参考：packages/slime-parser/src/SlimeCstToAstUtil.ts
  */
 import {
-    type SlimeJavascriptAssignmentExpression,
-    SlimeJavascriptBlockStatement,
-    SlimeJavascriptCallExpression,
-    SlimeJavascriptClassBody,
-    SlimeJavascriptClassDeclaration,
-    SlimeJavascriptConditionalExpression,
-    SlimeJavascriptDeclaration,
-    SlimeJavascriptExportDefaultDeclaration,
-    SlimeJavascriptExportNamedDeclaration,
-    SlimeJavascriptExpression,
-    SlimeJavascriptExpressionStatement,
-    SlimeJavascriptFunctionExpression,
-    SlimeJavascriptIdentifier,
-    SlimeJavascriptLiteral,
-    SlimeJavascriptModuleDeclaration,
-    SlimeJavascriptPattern,
-    SlimeJavascriptProgram,
-    SlimeJavascriptStatement,
-    SlimeJavascriptStringLiteral,
-    SlimeJavascriptVariableDeclaration,
-    SlimeJavascriptVariableDeclarator,
-    SlimeJavascriptReturnStatement,
-    SlimeJavascriptSpreadElement,
-    SlimeJavascriptMethodDefinition,
-    SlimeJavascriptRestElement,
-    SlimeJavascriptMemberExpression,
-    SlimeJavascriptImportDeclaration,
-    SlimeJavascriptImportSpecifier,
-    SlimeJavascriptClassExpression,
-    SlimeJavascriptArrayPattern,
-    SlimeJavascriptObjectPattern,
-    SlimeJavascriptAssignmentProperty,
+    type SlimeAssignmentExpression,
+    SlimeBlockStatement,
+    SlimeCallExpression,
+    SlimeClassBody,
+    SlimeClassDeclaration,
+    SlimeConditionalExpression,
+    SlimeDeclaration,
+    SlimeExportDefaultDeclaration,
+    SlimeExportNamedDeclaration,
+    SlimeExpression,
+    SlimeExpressionStatement,
+    SlimeFunctionExpression,
+    SlimeIdentifier,
+    SlimeLiteral,
+    SlimeModuleDeclaration,
+    SlimePattern,
+    SlimeProgram,
+    SlimeStatement,
+    SlimeStringLiteral,
+    SlimeVariableDeclaration,
+    SlimeVariableDeclarator,
+    SlimeReturnStatement,
+    SlimeSpreadElement,
+    SlimeMethodDefinition,
+    SlimeRestElement,
+    SlimeMemberExpression,
+    SlimeImportDeclaration,
+    SlimeImportSpecifier,
+    SlimeClassExpression,
+    SlimeArrayPattern,
+    SlimeObjectPattern,
+    SlimeAssignmentProperty,
     // Wrapper types for comma token association
-    type SlimeJavascriptArrayElement,
-    SlimeJavascriptObjectPropertyItem,
-    SlimeJavascriptFunctionParam,
-    SlimeJavascriptCallArgument,
-    SlimeJavascriptArrayPatternElement,
-    SlimeJavascriptObjectPatternProperty,
-    SlimeJavascriptImportSpecifierItem,
-    SlimeJavascriptExportSpecifierItem,
-    SlimeJavascriptFunctionDeclaration,
-    SlimeJavascriptImportDefaultSpecifier,
-    SlimeJavascriptImportNamespaceSpecifier,
+    type SlimeArrayElement,
+    SlimeObjectPropertyItem,
+    SlimeFunctionParam,
+    SlimeCallArgument,
+    SlimeArrayPatternElement,
+    SlimeObjectPatternProperty,
+    SlimeImportSpecifierItem,
+    SlimeExportSpecifierItem,
+    SlimeFunctionDeclaration,
+    SlimeImportDefaultSpecifier,
+    SlimeImportNamespaceSpecifier,
     // Additional needed types
-    type SlimeJavascriptObjectExpression,
-    SlimeJavascriptProperty,
-    SlimeJavascriptNumericLiteral,
-    SlimeJavascriptArrayExpression,
-    SlimeJavascriptArrowFunctionExpression,
-    SlimeJavascriptDotToken,
-    SlimeJavascriptAssignToken,
-    SlimeJavascriptLBracketToken,
-    SlimeJavascriptRBracketToken,
-    SlimeJavascriptCommaToken,
-    SlimeJavascriptLBraceToken,
-    SlimeJavascriptRBraceToken,
-    SlimeJavascriptSuper,
-    SlimeJavascriptThisExpression,
-    SlimeJavascriptPropertyDefinition,
-    SlimeJavascriptMaybeNamedFunctionDeclaration,
-    SlimeJavascriptMaybeNamedClassDeclaration,
-    SlimeJavascriptExportAllDeclaration,
-    SlimeJavascriptExportSpecifier,
+    type SlimeObjectExpression,
+    SlimeProperty,
+    SlimeNumericLiteral,
+    SlimeArrayExpression,
+    SlimeArrowFunctionExpression,
+    SlimeDotToken,
+    SlimeAssignToken,
+    SlimeLBracketToken,
+    SlimeRBracketToken,
+    SlimeCommaToken,
+    SlimeLBraceToken,
+    SlimeRBraceToken,
+    SlimeSuper,
+    SlimeThisExpression,
+    SlimePropertyDefinition,
+    SlimeMaybeNamedFunctionDeclaration,
+    SlimeMaybeNamedClassDeclaration,
+    SlimeExportAllDeclaration,
+    SlimeExportSpecifier,
 } from "slime-ast";
 import { SubhutiCst, type SubhutiSourceLocation } from "subhuti";
-import SlimeJavascriptParser from "./SlimeJavascriptParser.ts";
-import { SlimeJavascriptCreateUtils, SlimeJavascriptTokenCreateUtils, SlimeJavascriptAstTypeName } from "slime-ast";
+import SlimeParser from "./SlimeParser.ts";
+import {  SlimeTokenCreateUtils, SlimeAstTypeName } from "slime-ast";
 import {
-    SlimeJavascriptArrowFunctionCstToAst,
-    SlimeJavascriptAssignmentPatternCstToAst,
-    SlimeJavascriptBinaryExpressionCstToAst,
-    SlimeJavascriptBindingPatternCstToAst,
-    SlimeJavascriptBlockCstToAst,
-    SlimeJavascriptCompoundLiteralCstToAst,
-    SlimeJavascriptControlFlowCstToAst,
-    SlimeJavascriptExpressionCstToAst,
-    SlimeJavascriptExportCstToAst,
-    SlimeJavascriptFunctionBodyCstToAst,
-    SlimeJavascriptFunctionDeclarationCstToAst,
-    SlimeJavascriptFunctionExpressionCstToAst,
-    SlimeJavascriptFunctionParameterCstToAst,
-    SlimeJavascriptIdentifierCstToAst,
-    SlimeJavascriptImportCstToAst,
-    SlimeJavascriptLiteralCstToAst,
-    SlimeJavascriptMemberCallCstToAst,
-    SlimeJavascriptMethodDefinitionCstToAst,
-    SlimeJavascriptModuleCstToAst,
-    SlimeJavascriptOptionalExpressionCstToAst,
-    SlimeJavascriptOtherStatementCstToAst,
-    SlimeJavascriptPatternConvertCstToAst,
-    SlimeJavascriptPrimaryExpressionCstToAst,
-    SlimeJavascriptUnaryExpressionCstToAst,
-    SlimeJavascriptVariableCstToAst,
-    SlimeJavascriptClassDeclarationCstToAst,
-} from "./slimeJavascriptCstToAst";
+    SlimeArrowFunctionCstToAst,
+    SlimeAssignmentPatternCstToAst,
+    SlimeBinaryExpressionCstToAst,
+    SlimeBindingPatternCstToAst,
+    SlimeBlockCstToAst,
+    SlimeCompoundLiteralCstToAst,
+    SlimeControlFlowCstToAst,
+    SlimeExpressionCstToAst,
+    SlimeExportCstToAst,
+    SlimeFunctionBodyCstToAst,
+    SlimeFunctionDeclarationCstToAst,
+    SlimeFunctionExpressionCstToAst,
+    SlimeFunctionParameterCstToAst,
+    SlimeIdentifierCstToAst,
+    SlimeImportCstToAst,
+    SlimeLiteralCstToAst,
+    SlimeMemberCallCstToAst,
+    SlimeMethodDefinitionCstToAst,
+    SlimeModuleCstToAst,
+    SlimeOptionalExpressionCstToAst,
+    SlimeOtherStatementCstToAst,
+    SlimePatternConvertCstToAst,
+    SlimePrimaryExpressionCstToAst,
+    SlimeUnaryExpressionCstToAst,
+    SlimeVariableCstToAst,
+    SlimeClassDeclarationCstToAst,
+} from "./SlimeCstToAst";
 
 
 
@@ -121,10 +121,10 @@ import {
  *
  * ## 两层架构设计
  *
- * ### 第一层：AST 工厂类 (SlimeJavascriptAstCreateUtils.ts / SlimeJavascriptCreateUtils)
+ * ### 第一层：AST 工厂类 (SlimeAstCreateUtils.ts / SlimeCreateUtils)
  * - 与 ESTree AST 节点类型一一对应的纯粹创建方法
  * - 不依赖 CST 结构，只接收参数创建节点
- * - 示例：createIdentifier(name, loc) -> SlimeJavascriptIdentifier
+ * - 示例：createIdentifier(name, loc) -> SlimeIdentifier
  *
  * ### 第二层：CST 转换器 (本类)
  * - 与 CST 规则一一对应的转换方法 (createXxxAst)
@@ -143,7 +143,7 @@ import {
  * ## 方法命名规范
  *
  * 所有 CST 转换方法命名为 createXxxAst，其中 Xxx 与 CST 规则名一致。
- * 内部调用 SlimeJavascriptNodeCreate / SlimeJavascriptCreateUtils 中与 AST 类型名一致的工厂方法。
+ * 内部调用 SlimeNodeCreate / SlimeCreateUtils 中与 AST 类型名一致的工厂方法。
  *
  * 例如：
  * - createArrayLiteralAst (CST 规则名) -> 内部调用 createArrayExpression (AST 类型名)
@@ -157,7 +157,7 @@ import {
  * ## 辅助处理方法
  * - toProgram: Program 入口处理
  */
-export class SlimeJavascriptCstToAst {
+export class SlimeCstToAst {
 
     /**
      * 将 Unicode 转义序列解码为实际字符
@@ -190,287 +190,287 @@ export class SlimeJavascriptCstToAst {
         return cstName
     }
 
-    readonly expressionAstCache = new WeakMap<SubhutiCst, SlimeJavascriptExpression>()
+    readonly expressionAstCache = new WeakMap<SubhutiCst, SlimeExpression>()
 
     // === identifier / IdentifierCstToAst ===
 
-    createIdentifierNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
-        return SlimeJavascriptIdentifierCstToAst.createIdentifierNameAst(cst)
+    createIdentifierNameAst(cst: SubhutiCst): SlimeIdentifier {
+        return SlimeIdentifierCstToAst.createIdentifierNameAst(cst)
     }
 
-    createBindingIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
-        return SlimeJavascriptIdentifierCstToAst.createBindingIdentifierAst(cst)
+    createBindingIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
+        return SlimeIdentifierCstToAst.createBindingIdentifierAst(cst)
     }
 
-    createPrivateIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
-        return SlimeJavascriptIdentifierCstToAst.createPrivateIdentifierAst(cst)
+    createPrivateIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
+        return SlimeIdentifierCstToAst.createPrivateIdentifierAst(cst)
     }
 
-    createLabelIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
-        return SlimeJavascriptIdentifierCstToAst.createLabelIdentifierAst(cst)
+    createLabelIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
+        return SlimeIdentifierCstToAst.createLabelIdentifierAst(cst)
     }
 
-    createIdentifierReferenceAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
-        return SlimeJavascriptIdentifierCstToAst.createIdentifierReferenceAst(cst)
+    createIdentifierReferenceAst(cst: SubhutiCst): SlimeIdentifier {
+        return SlimeIdentifierCstToAst.createIdentifierReferenceAst(cst)
     }
 
-    createIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
-        return SlimeJavascriptIdentifierCstToAst.createIdentifierAst(cst)
+    createIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
+        return SlimeIdentifierCstToAst.createIdentifierAst(cst)
     }
 
     // === literal / LiteralCstToAst ===
 
-    createBooleanLiteralAst(cst: SubhutiCst): SlimeJavascriptLiteral {
-        return SlimeJavascriptLiteralCstToAst.createBooleanLiteralAst(cst)
+    createBooleanLiteralAst(cst: SubhutiCst): SlimeLiteral {
+        return SlimeLiteralCstToAst.createBooleanLiteralAst(cst)
     }
 
-    createNumericLiteralAst(cst: SubhutiCst): SlimeJavascriptNumericLiteral {
-        return SlimeJavascriptLiteralCstToAst.createNumericLiteralAst(cst)
+    createNumericLiteralAst(cst: SubhutiCst): SlimeNumericLiteral {
+        return SlimeLiteralCstToAst.createNumericLiteralAst(cst)
     }
 
-    createStringLiteralAst(cst: SubhutiCst): SlimeJavascriptStringLiteral {
-        return SlimeJavascriptLiteralCstToAst.createStringLiteralAst(cst)
+    createStringLiteralAst(cst: SubhutiCst): SlimeStringLiteral {
+        return SlimeLiteralCstToAst.createStringLiteralAst(cst)
     }
 
     createRegExpLiteralAst(cst: SubhutiCst): any {
-        return SlimeJavascriptLiteralCstToAst.createRegExpLiteralAst(cst)
+        return SlimeLiteralCstToAst.createRegExpLiteralAst(cst)
     }
 
-    createLiteralFromToken(token: any): SlimeJavascriptExpression {
-        return SlimeJavascriptLiteralCstToAst.createLiteralFromToken(token)
+    createLiteralFromToken(token: any): SlimeExpression {
+        return SlimeLiteralCstToAst.createLiteralFromToken(token)
     }
 
-    createLiteralAst(cst: SubhutiCst): SlimeJavascriptLiteral {
-        return SlimeJavascriptLiteralCstToAst.createLiteralAst(cst)
+    createLiteralAst(cst: SubhutiCst): SlimeLiteral {
+        return SlimeLiteralCstToAst.createLiteralAst(cst)
     }
 
     createElisionAst(cst: SubhutiCst): number {
-        return SlimeJavascriptLiteralCstToAst.createElisionAst(cst)
+        return SlimeLiteralCstToAst.createElisionAst(cst)
     }
 
-    processTemplateMiddleList(cst: SubhutiCst, quasis: any[], expressions: SlimeJavascriptExpression[]): void {
-        return SlimeJavascriptLiteralCstToAst.processTemplateMiddleList(cst, quasis, expressions)
+    processTemplateMiddleList(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[]): void {
+        return SlimeLiteralCstToAst.processTemplateMiddleList(cst, quasis, expressions)
     }
 
-    processTemplateSpans(cst: SubhutiCst, quasis: any[], expressions: SlimeJavascriptExpression[]): void {
-        return SlimeJavascriptLiteralCstToAst.processTemplateSpans(cst, quasis, expressions)
+    processTemplateSpans(cst: SubhutiCst, quasis: any[], expressions: SlimeExpression[]): void {
+        return SlimeLiteralCstToAst.processTemplateSpans(cst, quasis, expressions)
     }
 
-    createTemplateLiteralAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptLiteralCstToAst.createTemplateLiteralAst(cst)
+    createTemplateLiteralAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeLiteralCstToAst.createTemplateLiteralAst(cst)
     }
 
     // === literal / CompoundLiteralCstToAst ===
 
-    createPropertyNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral | SlimeJavascriptExpression {
-        return SlimeJavascriptCompoundLiteralCstToAst.createPropertyNameAst(cst)
+    createPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral | SlimeExpression {
+        return SlimeCompoundLiteralCstToAst.createPropertyNameAst(cst)
     }
 
-    createLiteralPropertyNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral {
-        return SlimeJavascriptCompoundLiteralCstToAst.createLiteralPropertyNameAst(cst)
+    createLiteralPropertyNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
+        return SlimeCompoundLiteralCstToAst.createLiteralPropertyNameAst(cst)
     }
 
-    createSpreadElementAst(cst: SubhutiCst): SlimeJavascriptSpreadElement {
-        return SlimeJavascriptCompoundLiteralCstToAst.createSpreadElementAst(cst)
+    createSpreadElementAst(cst: SubhutiCst): SlimeSpreadElement {
+        return SlimeCompoundLiteralCstToAst.createSpreadElementAst(cst)
     }
 
-    createElementListAst(cst: SubhutiCst): Array<SlimeJavascriptArrayElement> {
-        return SlimeJavascriptCompoundLiteralCstToAst.createElementListAst(cst)
+    createElementListAst(cst: SubhutiCst): Array<SlimeArrayElement> {
+        return SlimeCompoundLiteralCstToAst.createElementListAst(cst)
     }
 
-    createArrayLiteralAst(cst: SubhutiCst): SlimeJavascriptArrayExpression {
-        return SlimeJavascriptCompoundLiteralCstToAst.createArrayLiteralAst(cst)
+    createArrayLiteralAst(cst: SubhutiCst): SlimeArrayExpression {
+        return SlimeCompoundLiteralCstToAst.createArrayLiteralAst(cst)
     }
 
-    createObjectLiteralAst(cst: SubhutiCst): SlimeJavascriptObjectExpression {
-        return SlimeJavascriptCompoundLiteralCstToAst.createObjectLiteralAst(cst)
+    createObjectLiteralAst(cst: SubhutiCst): SlimeObjectExpression {
+        return SlimeCompoundLiteralCstToAst.createObjectLiteralAst(cst)
     }
 
-    createPropertyDefinitionAst(cst: SubhutiCst): SlimeJavascriptProperty {
-        return SlimeJavascriptCompoundLiteralCstToAst.createPropertyDefinitionAst(cst)
+    createPropertyDefinitionAst(cst: SubhutiCst): SlimeProperty {
+        return SlimeCompoundLiteralCstToAst.createPropertyDefinitionAst(cst)
     }
 
     // === pattern / BindingPatternCstToAst ===
 
     createBindingElementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptBindingPatternCstToAst.createBindingElementAst(cst)
+        return SlimeBindingPatternCstToAst.createBindingElementAst(cst)
     }
 
     createSingleNameBindingAst(cst: SubhutiCst): any {
-        return SlimeJavascriptBindingPatternCstToAst.createSingleNameBindingAst(cst)
+        return SlimeBindingPatternCstToAst.createSingleNameBindingAst(cst)
     }
 
-    createBindingRestPropertyAst(cst: SubhutiCst): SlimeJavascriptRestElement {
-        return SlimeJavascriptBindingPatternCstToAst.createBindingRestPropertyAst(cst)
+    createBindingRestPropertyAst(cst: SubhutiCst): SlimeRestElement {
+        return SlimeBindingPatternCstToAst.createBindingRestPropertyAst(cst)
     }
 
     createBindingPropertyAst(cst: SubhutiCst): any {
-        return SlimeJavascriptBindingPatternCstToAst.createBindingPropertyAst(cst)
+        return SlimeBindingPatternCstToAst.createBindingPropertyAst(cst)
     }
 
     createBindingPropertyListAst(cst: SubhutiCst): any[] {
-        return SlimeJavascriptBindingPatternCstToAst.createBindingPropertyListAst(cst)
+        return SlimeBindingPatternCstToAst.createBindingPropertyListAst(cst)
     }
 
     createBindingElementListAst(cst: SubhutiCst): any[] {
-        return SlimeJavascriptBindingPatternCstToAst.createBindingElementListAst(cst)
+        return SlimeBindingPatternCstToAst.createBindingElementListAst(cst)
     }
 
     createBindingElisionElementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptBindingPatternCstToAst.createBindingElisionElementAst(cst)
+        return SlimeBindingPatternCstToAst.createBindingElisionElementAst(cst)
     }
 
-    createBindingPatternAst(cst: SubhutiCst): SlimeJavascriptPattern {
-        return SlimeJavascriptBindingPatternCstToAst.createBindingPatternAst(cst)
+    createBindingPatternAst(cst: SubhutiCst): SlimePattern {
+        return SlimeBindingPatternCstToAst.createBindingPatternAst(cst)
     }
 
-    createArrayBindingPatternAst(cst: SubhutiCst): SlimeJavascriptArrayPattern {
-        return SlimeJavascriptBindingPatternCstToAst.createArrayBindingPatternAst(cst)
+    createArrayBindingPatternAst(cst: SubhutiCst): SlimeArrayPattern {
+        return SlimeBindingPatternCstToAst.createArrayBindingPatternAst(cst)
     }
 
-    createObjectBindingPatternAst(cst: SubhutiCst): SlimeJavascriptObjectPattern {
-        return SlimeJavascriptBindingPatternCstToAst.createObjectBindingPatternAst(cst)
+    createObjectBindingPatternAst(cst: SubhutiCst): SlimeObjectPattern {
+        return SlimeBindingPatternCstToAst.createObjectBindingPatternAst(cst)
     }
 
     // === pattern / AssignmentPatternCstToAst ===
 
     createAssignmentPatternAst(cst: SubhutiCst): any {
-        return SlimeJavascriptAssignmentPatternCstToAst.createAssignmentPatternAst(cst)
+        return SlimeAssignmentPatternCstToAst.createAssignmentPatternAst(cst)
     }
 
-    createObjectAssignmentPatternAst(cst: SubhutiCst): SlimeJavascriptObjectPattern {
-        return SlimeJavascriptAssignmentPatternCstToAst.createObjectAssignmentPatternAst(cst)
+    createObjectAssignmentPatternAst(cst: SubhutiCst): SlimeObjectPattern {
+        return SlimeAssignmentPatternCstToAst.createObjectAssignmentPatternAst(cst)
     }
 
-    createArrayAssignmentPatternAst(cst: SubhutiCst): SlimeJavascriptArrayPattern {
-        return SlimeJavascriptAssignmentPatternCstToAst.createArrayAssignmentPatternAst(cst)
+    createArrayAssignmentPatternAst(cst: SubhutiCst): SlimeArrayPattern {
+        return SlimeAssignmentPatternCstToAst.createArrayAssignmentPatternAst(cst)
     }
 
     createAssignmentPropertyListAst(cst: SubhutiCst): any[] {
-        return SlimeJavascriptAssignmentPatternCstToAst.createAssignmentPropertyListAst(cst)
+        return SlimeAssignmentPatternCstToAst.createAssignmentPropertyListAst(cst)
     }
 
     createAssignmentPropertyAst(cst: SubhutiCst): any {
-        return SlimeJavascriptAssignmentPatternCstToAst.createAssignmentPropertyAst(cst)
+        return SlimeAssignmentPatternCstToAst.createAssignmentPropertyAst(cst)
     }
 
     createAssignmentElementListAst(cst: SubhutiCst): any[] {
-        return SlimeJavascriptAssignmentPatternCstToAst.createAssignmentElementListAst(cst)
+        return SlimeAssignmentPatternCstToAst.createAssignmentElementListAst(cst)
     }
 
     createAssignmentElementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptAssignmentPatternCstToAst.createAssignmentElementAst(cst)
+        return SlimeAssignmentPatternCstToAst.createAssignmentElementAst(cst)
     }
 
     createAssignmentElisionElementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptAssignmentPatternCstToAst.createAssignmentElisionElementAst(cst)
+        return SlimeAssignmentPatternCstToAst.createAssignmentElisionElementAst(cst)
     }
 
     createAssignmentRestElementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptAssignmentPatternCstToAst.createAssignmentRestElementAst(cst)
+        return SlimeAssignmentPatternCstToAst.createAssignmentRestElementAst(cst)
     }
 
     createAssignmentRestPropertyAst(cst: SubhutiCst): any {
-        return SlimeJavascriptAssignmentPatternCstToAst.createAssignmentRestPropertyAst(cst)
+        return SlimeAssignmentPatternCstToAst.createAssignmentRestPropertyAst(cst)
     }
 
     // === pattern / PatternConvertCstToAst ===
 
-    convertArrayExpressionToPattern(expr: any): SlimeJavascriptArrayPattern {
-        return SlimeJavascriptPatternConvertCstToAst.convertArrayExpressionToPattern(expr)
+    convertArrayExpressionToPattern(expr: any): SlimeArrayPattern {
+        return SlimePatternConvertCstToAst.convertArrayExpressionToPattern(expr)
     }
 
-    convertCstToPattern(cst: SubhutiCst): SlimeJavascriptPattern | null {
-        return SlimeJavascriptPatternConvertCstToAst.convertCstToPattern(cst)
+    convertCstToPattern(cst: SubhutiCst): SlimePattern | null {
+        return SlimePatternConvertCstToAst.convertCstToPattern(cst)
     }
 
-    convertCoverParameterCstToPattern(cst: SubhutiCst, hasEllipsis: boolean): SlimeJavascriptPattern | null {
-        return SlimeJavascriptPatternConvertCstToAst.convertCoverParameterCstToPattern(cst, hasEllipsis)
+    convertCoverParameterCstToPattern(cst: SubhutiCst, hasEllipsis: boolean): SlimePattern | null {
+        return SlimePatternConvertCstToAst.convertCoverParameterCstToPattern(cst, hasEllipsis)
     }
 
-    convertObjectLiteralToPattern(cst: SubhutiCst): SlimeJavascriptObjectPattern {
-        return SlimeJavascriptPatternConvertCstToAst.convertObjectLiteralToPattern(cst)
+    convertObjectLiteralToPattern(cst: SubhutiCst): SlimeObjectPattern {
+        return SlimePatternConvertCstToAst.convertObjectLiteralToPattern(cst)
     }
 
-    convertPropertyDefinitionToPatternProperty(cst: SubhutiCst): SlimeJavascriptAssignmentProperty | null {
-        return SlimeJavascriptPatternConvertCstToAst.convertPropertyDefinitionToPatternProperty(cst)
+    convertPropertyDefinitionToPatternProperty(cst: SubhutiCst): SlimeAssignmentProperty | null {
+        return SlimePatternConvertCstToAst.convertPropertyDefinitionToPatternProperty(cst)
     }
 
-    convertObjectExpressionToPattern(expr: any): SlimeJavascriptObjectPattern {
-        return SlimeJavascriptPatternConvertCstToAst.convertObjectExpressionToPattern(expr)
+    convertObjectExpressionToPattern(expr: any): SlimeObjectPattern {
+        return SlimePatternConvertCstToAst.convertObjectExpressionToPattern(expr)
     }
 
     convertAssignmentExpressionToPattern(expr: any): any {
-        return SlimeJavascriptPatternConvertCstToAst.convertAssignmentExpressionToPattern(expr)
+        return SlimePatternConvertCstToAst.convertAssignmentExpressionToPattern(expr)
     }
 
-    convertExpressionToPatternFromAST(expr: any): SlimeJavascriptPattern | null {
-        return SlimeJavascriptPatternConvertCstToAst.convertExpressionToPatternFromAST(expr)
+    convertExpressionToPatternFromAST(expr: any): SlimePattern | null {
+        return SlimePatternConvertCstToAst.convertExpressionToPatternFromAST(expr)
     }
 
-    convertArrayLiteralToPattern(cst: SubhutiCst): SlimeJavascriptArrayPattern {
-        return SlimeJavascriptPatternConvertCstToAst.convertArrayLiteralToPattern(cst)
+    convertArrayLiteralToPattern(cst: SubhutiCst): SlimeArrayPattern {
+        return SlimePatternConvertCstToAst.convertArrayLiteralToPattern(cst)
     }
 
-    convertExpressionToPattern(expr: any): SlimeJavascriptPattern {
-        return SlimeJavascriptPatternConvertCstToAst.convertExpressionToPattern(expr)
+    convertExpressionToPattern(expr: any): SlimePattern {
+        return SlimePatternConvertCstToAst.convertExpressionToPattern(expr)
     }
 
     // === expression / ExpressionCstToAst ===
 
     createYieldExpressionAst(cst: SubhutiCst): any {
-        return SlimeJavascriptUnaryExpressionCstToAst.createYieldExpressionAst(cst)
+        return SlimeUnaryExpressionCstToAst.createYieldExpressionAst(cst)
     }
 
     createAwaitExpressionAst(cst: SubhutiCst): any {
-        return SlimeJavascriptUnaryExpressionCstToAst.createAwaitExpressionAst(cst)
+        return SlimeUnaryExpressionCstToAst.createAwaitExpressionAst(cst)
     }
 
-    createConditionalExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptExpressionCstToAst.createConditionalExpressionAst(cst)
+    createConditionalExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeExpressionCstToAst.createConditionalExpressionAst(cst)
     }
 
     // === expression / PrimaryExpressionCstToAst ===
 
-    createComputedPropertyNameAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptCompoundLiteralCstToAst.createComputedPropertyNameAst(cst)
+    createComputedPropertyNameAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeCompoundLiteralCstToAst.createComputedPropertyNameAst(cst)
     }
 
-    createPrimaryExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptPrimaryExpressionCstToAst.createPrimaryExpressionAst(cst)
+    createPrimaryExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimePrimaryExpressionCstToAst.createPrimaryExpressionAst(cst)
     }
 
-    createParenthesizedExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptPrimaryExpressionCstToAst.createParenthesizedExpressionAst(cst)
+    createParenthesizedExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimePrimaryExpressionCstToAst.createParenthesizedExpressionAst(cst)
     }
 
-    createCoverParenthesizedExpressionAndArrowParameterListAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptPrimaryExpressionCstToAst.createCoverParenthesizedExpressionAndArrowParameterListAst(cst)
+    createCoverParenthesizedExpressionAndArrowParameterListAst(cst: SubhutiCst): SlimeExpression {
+        return SlimePrimaryExpressionCstToAst.createCoverParenthesizedExpressionAndArrowParameterListAst(cst)
     }
 
     createCoverInitializedNameAst(cst: SubhutiCst): any {
-        return SlimeJavascriptCompoundLiteralCstToAst.createCoverInitializedNameAst(cst)
+        return SlimeCompoundLiteralCstToAst.createCoverInitializedNameAst(cst)
     }
 
-    createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptMemberCallCstToAst.createCoverCallExpressionAndAsyncArrowHeadAst(cst)
+    createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeMemberCallCstToAst.createCoverCallExpressionAndAsyncArrowHeadAst(cst)
     }
 
-    createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptMemberCallCstToAst.createLeftHandSideExpressionAst(cst)
+    createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeMemberCallCstToAst.createLeftHandSideExpressionAst(cst)
     }
 
     // === expression / AssignmentExpressionCstToAst ===
 
-    createExpressionBodyAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptMemberCallCstToAst.createExpressionBodyAst(cst)
+    createExpressionBodyAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeMemberCallCstToAst.createExpressionBodyAst(cst)
     }
 
-    createAssignmentExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptExpressionCstToAst.createAssignmentExpressionAst(cst)
+    createAssignmentExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeExpressionCstToAst.createAssignmentExpressionAst(cst)
     }
 
-    createExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createExpressionAst(cst: SubhutiCst): SlimeExpression {
         const cached = this.expressionAstCache.get(cst)
         if (cached) {
             return cached
@@ -480,785 +480,785 @@ export class SlimeJavascriptCstToAst {
         return result
     }
 
-    createExpressionAstUncached(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptExpressionCstToAst.createExpressionAstUncached(cst)
+    createExpressionAstUncached(cst: SubhutiCst): SlimeExpression {
+        return SlimeExpressionCstToAst.createExpressionAstUncached(cst)
     }
 
     // === expression / BinaryExpressionCstToAst ===
 
     createMultiplicativeOperatorAst(cst: SubhutiCst): string {
-        return SlimeJavascriptBinaryExpressionCstToAst.createMultiplicativeOperatorAst(cst)
+        return SlimeBinaryExpressionCstToAst.createMultiplicativeOperatorAst(cst)
     }
 
     createAssignmentOperatorAst(cst: SubhutiCst): string {
-        return SlimeJavascriptExpressionCstToAst.createAssignmentOperatorAst(cst)
+        return SlimeExpressionCstToAst.createAssignmentOperatorAst(cst)
     }
 
-    createExponentiationExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptBinaryExpressionCstToAst.createExponentiationExpressionAst(cst)
+    createExponentiationExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeBinaryExpressionCstToAst.createExponentiationExpressionAst(cst)
     }
 
-    createLogicalORExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptBinaryExpressionCstToAst.createLogicalORExpressionAst(cst)
+    createLogicalORExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeBinaryExpressionCstToAst.createLogicalORExpressionAst(cst)
     }
 
-    createLogicalANDExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptBinaryExpressionCstToAst.createLogicalANDExpressionAst(cst)
+    createLogicalANDExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeBinaryExpressionCstToAst.createLogicalANDExpressionAst(cst)
     }
 
-    createBitwiseORExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptBinaryExpressionCstToAst.createBitwiseORExpressionAst(cst)
+    createBitwiseORExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeBinaryExpressionCstToAst.createBitwiseORExpressionAst(cst)
     }
 
-    createBitwiseXORExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptBinaryExpressionCstToAst.createBitwiseXORExpressionAst(cst)
+    createBitwiseXORExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeBinaryExpressionCstToAst.createBitwiseXORExpressionAst(cst)
     }
 
-    createBitwiseANDExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptBinaryExpressionCstToAst.createBitwiseANDExpressionAst(cst)
+    createBitwiseANDExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeBinaryExpressionCstToAst.createBitwiseANDExpressionAst(cst)
     }
 
-    createEqualityExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptBinaryExpressionCstToAst.createEqualityExpressionAst(cst)
+    createEqualityExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeBinaryExpressionCstToAst.createEqualityExpressionAst(cst)
     }
 
-    createRelationalExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptBinaryExpressionCstToAst.createRelationalExpressionAst(cst)
+    createRelationalExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeBinaryExpressionCstToAst.createRelationalExpressionAst(cst)
     }
 
-    createShiftExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptBinaryExpressionCstToAst.createShiftExpressionAst(cst)
+    createShiftExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeBinaryExpressionCstToAst.createShiftExpressionAst(cst)
     }
 
-    createCoalesceExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptExpressionCstToAst.createCoalesceExpressionAst(cst)
+    createCoalesceExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeExpressionCstToAst.createCoalesceExpressionAst(cst)
     }
 
-    createCoalesceExpressionHeadAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptExpressionCstToAst.createCoalesceExpressionHeadAst(cst)
+    createCoalesceExpressionHeadAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeExpressionCstToAst.createCoalesceExpressionHeadAst(cst)
     }
 
-    createShortCircuitExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptExpressionCstToAst.createShortCircuitExpressionAst(cst)
+    createShortCircuitExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeExpressionCstToAst.createShortCircuitExpressionAst(cst)
     }
 
-    createShortCircuitExpressionTailAst(left: SlimeJavascriptExpression, tailCst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptExpressionCstToAst.createShortCircuitExpressionTailAst(left, tailCst)
+    createShortCircuitExpressionTailAst(left: SlimeExpression, tailCst: SubhutiCst): SlimeExpression {
+        return SlimeExpressionCstToAst.createShortCircuitExpressionTailAst(left, tailCst)
     }
 
     // === expression / UnaryExpressionCstToAst ===
 
-    createUnaryExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptUnaryExpressionCstToAst.createUnaryExpressionAst(cst)
+    createUnaryExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeUnaryExpressionCstToAst.createUnaryExpressionAst(cst)
     }
 
-    createUpdateExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptUnaryExpressionCstToAst.createUpdateExpressionAst(cst)
+    createUpdateExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeUnaryExpressionCstToAst.createUpdateExpressionAst(cst)
     }
 
-    createAdditiveExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptBinaryExpressionCstToAst.createAdditiveExpressionAst(cst)
+    createAdditiveExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeBinaryExpressionCstToAst.createAdditiveExpressionAst(cst)
     }
 
-    createMultiplicativeExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptBinaryExpressionCstToAst.createMultiplicativeExpressionAst(cst)
+    createMultiplicativeExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeBinaryExpressionCstToAst.createMultiplicativeExpressionAst(cst)
     }
 
     // === expression / MemberCallCstToAst ===
 
-    createMemberExpressionFirstOr(cst: SubhutiCst): SlimeJavascriptExpression | SlimeJavascriptSuper {
-        return SlimeJavascriptMemberCallCstToAst.createMemberExpressionFirstOr(cst)
+    createMemberExpressionFirstOr(cst: SubhutiCst): SlimeExpression | SlimeSuper {
+        return SlimeMemberCallCstToAst.createMemberExpressionFirstOr(cst)
     }
 
-    createMemberExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptMemberCallCstToAst.createMemberExpressionAst(cst)
+    createMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeMemberCallCstToAst.createMemberExpressionAst(cst)
     }
 
-    createArgumentsAst(cst: SubhutiCst): Array<SlimeJavascriptCallArgument> {
-        return SlimeJavascriptMemberCallCstToAst.createArgumentsAst(cst)
+    createArgumentsAst(cst: SubhutiCst): Array<SlimeCallArgument> {
+        return SlimeMemberCallCstToAst.createArgumentsAst(cst)
     }
 
-    createArgumentListAst(cst: SubhutiCst): Array<SlimeJavascriptCallArgument> {
-        return SlimeJavascriptMemberCallCstToAst.createArgumentListAst(cst)
+    createArgumentListAst(cst: SubhutiCst): Array<SlimeCallArgument> {
+        return SlimeMemberCallCstToAst.createArgumentListAst(cst)
     }
 
-    createCallExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptMemberCallCstToAst.createCallExpressionAst(cst)
+    createCallExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeMemberCallCstToAst.createCallExpressionAst(cst)
     }
 
-    createCallMemberExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptMemberCallCstToAst.createCallMemberExpressionAst(cst)
+    createCallMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeMemberCallCstToAst.createCallMemberExpressionAst(cst)
     }
 
     createNewExpressionAst(cst: SubhutiCst): any {
-        return SlimeJavascriptMemberCallCstToAst.createNewExpressionAst(cst)
+        return SlimeMemberCallCstToAst.createNewExpressionAst(cst)
     }
 
-    createSuperCallAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptMemberCallCstToAst.createSuperCallAst(cst)
+    createSuperCallAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeMemberCallCstToAst.createSuperCallAst(cst)
     }
 
-    createSuperPropertyAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptMemberCallCstToAst.createSuperPropertyAst(cst)
+    createSuperPropertyAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeMemberCallCstToAst.createSuperPropertyAst(cst)
     }
 
-    createMetaPropertyAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptMemberCallCstToAst.createMetaPropertyAst(cst)
+    createMetaPropertyAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeMemberCallCstToAst.createMetaPropertyAst(cst)
     }
 
     // === expression / OptionalExpressionCstToAst ===
 
-    createOptionalChainAst(object: SlimeJavascriptExpression, chainCst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptOptionalExpressionCstToAst.createOptionalChainAst(object, chainCst)
+    createOptionalChainAst(object: SlimeExpression, chainCst: SubhutiCst): SlimeExpression {
+        return SlimeOptionalExpressionCstToAst.createOptionalChainAst(object, chainCst)
     }
 
-    createOptionalExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptOptionalExpressionCstToAst.createOptionalExpressionAst(cst)
+    createOptionalExpressionAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeOptionalExpressionCstToAst.createOptionalExpressionAst(cst)
     }
 
     // === function / ArrowFunctionCstToAst ===
 
-    createAsyncConciseBodyAst(cst: SubhutiCst): SlimeJavascriptBlockStatement | SlimeJavascriptExpression {
-        return SlimeJavascriptFunctionBodyCstToAst.createAsyncConciseBodyAst(cst)
+    createAsyncConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
+        return SlimeFunctionBodyCstToAst.createAsyncConciseBodyAst(cst)
     }
 
     createAsyncArrowHeadAst(cst: SubhutiCst): any {
-        return SlimeJavascriptArrowFunctionCstToAst.createAsyncArrowHeadAst(cst)
+        return SlimeArrowFunctionCstToAst.createAsyncArrowHeadAst(cst)
     }
 
-    createAsyncArrowBindingIdentifierAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
-        return SlimeJavascriptArrowFunctionCstToAst.createAsyncArrowBindingIdentifierAst(cst)
+    createAsyncArrowBindingIdentifierAst(cst: SubhutiCst): SlimeIdentifier {
+        return SlimeArrowFunctionCstToAst.createAsyncArrowBindingIdentifierAst(cst)
     }
 
     findFirstIdentifierInExpression(cst: SubhutiCst): SubhutiCst | null {
-        return SlimeJavascriptPrimaryExpressionCstToAst.findFirstIdentifierInExpression(cst)
+        return SlimePrimaryExpressionCstToAst.findFirstIdentifierInExpression(cst)
     }
 
-    extractParametersFromExpression(expressionCst: SubhutiCst): SlimeJavascriptPattern[] {
-        return SlimeJavascriptFunctionParameterCstToAst.extractParametersFromExpression(expressionCst)
+    extractParametersFromExpression(expressionCst: SubhutiCst): SlimePattern[] {
+        return SlimeFunctionParameterCstToAst.extractParametersFromExpression(expressionCst)
     }
 
-    createArrowParametersFromCoverGrammar(cst: SubhutiCst): SlimeJavascriptPattern[] {
-        return SlimeJavascriptArrowFunctionCstToAst.createArrowParametersFromCoverGrammar(cst)
+    createArrowParametersFromCoverGrammar(cst: SubhutiCst): SlimePattern[] {
+        return SlimeArrowFunctionCstToAst.createArrowParametersFromCoverGrammar(cst)
     }
 
-    createArrowFormalParametersAst(cst: SubhutiCst): SlimeJavascriptPattern[] {
-        return SlimeJavascriptArrowFunctionCstToAst.createArrowFormalParametersAst(cst)
+    createArrowFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
+        return SlimeArrowFunctionCstToAst.createArrowFormalParametersAst(cst)
     }
 
-    createArrowFormalParametersAstWrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
-        return SlimeJavascriptArrowFunctionCstToAst.createArrowFormalParametersAstWrapped(cst)
+    createArrowFormalParametersAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+        return SlimeArrowFunctionCstToAst.createArrowFormalParametersAstWrapped(cst)
     }
 
-    createArrowParametersAst(cst: SubhutiCst): SlimeJavascriptPattern[] {
-        return SlimeJavascriptArrowFunctionCstToAst.createArrowParametersAst(cst)
+    createArrowParametersAst(cst: SubhutiCst): SlimePattern[] {
+        return SlimeArrowFunctionCstToAst.createArrowParametersAst(cst)
     }
 
-    createArrowFunctionAst(cst: SubhutiCst): SlimeJavascriptArrowFunctionExpression {
-        return SlimeJavascriptArrowFunctionCstToAst.createArrowFunctionAst(cst)
+    createArrowFunctionAst(cst: SubhutiCst): SlimeArrowFunctionExpression {
+        return SlimeArrowFunctionCstToAst.createArrowFunctionAst(cst)
     }
 
-    createAsyncArrowFunctionAst(cst: SubhutiCst): SlimeJavascriptArrowFunctionExpression {
-        return SlimeJavascriptArrowFunctionCstToAst.createAsyncArrowFunctionAst(cst)
+    createAsyncArrowFunctionAst(cst: SubhutiCst): SlimeArrowFunctionExpression {
+        return SlimeArrowFunctionCstToAst.createAsyncArrowFunctionAst(cst)
     }
 
-    createAsyncArrowParamsFromCover(cst: SubhutiCst): SlimeJavascriptPattern[] {
-        return SlimeJavascriptArrowFunctionCstToAst.createAsyncArrowParamsFromCover(cst)
+    createAsyncArrowParamsFromCover(cst: SubhutiCst): SlimePattern[] {
+        return SlimeArrowFunctionCstToAst.createAsyncArrowParamsFromCover(cst)
     }
 
-    createConciseBodyAst(cst: SubhutiCst): SlimeJavascriptBlockStatement | SlimeJavascriptExpression {
-        return SlimeJavascriptFunctionBodyCstToAst.createConciseBodyAst(cst)
+    createConciseBodyAst(cst: SubhutiCst): SlimeBlockStatement | SlimeExpression {
+        return SlimeFunctionBodyCstToAst.createConciseBodyAst(cst)
     }
 
     // === function / FunctionExpressionCstToAst ===
 
-    createFunctionExpressionAst(cst: SubhutiCst): SlimeJavascriptFunctionExpression {
-        return SlimeJavascriptFunctionExpressionCstToAst.createFunctionExpressionAst(cst)
+    createFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
+        return SlimeFunctionExpressionCstToAst.createFunctionExpressionAst(cst)
     }
 
-    createGeneratorExpressionAst(cst: SubhutiCst): SlimeJavascriptFunctionExpression {
-        return SlimeJavascriptFunctionExpressionCstToAst.createGeneratorExpressionAst(cst)
+    createGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
+        return SlimeFunctionExpressionCstToAst.createGeneratorExpressionAst(cst)
     }
 
-    createAsyncFunctionExpressionAst(cst: SubhutiCst): SlimeJavascriptFunctionExpression {
-        return SlimeJavascriptFunctionExpressionCstToAst.createAsyncFunctionExpressionAst(cst)
+    createAsyncFunctionExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
+        return SlimeFunctionExpressionCstToAst.createAsyncFunctionExpressionAst(cst)
     }
 
-    createAsyncGeneratorExpressionAst(cst: SubhutiCst): SlimeJavascriptFunctionExpression {
-        return SlimeJavascriptFunctionExpressionCstToAst.createAsyncGeneratorExpressionAst(cst)
+    createAsyncGeneratorExpressionAst(cst: SubhutiCst): SlimeFunctionExpression {
+        return SlimeFunctionExpressionCstToAst.createAsyncGeneratorExpressionAst(cst)
     }
 
     // === function / FunctionParameterCstToAst ===
 
-    createBindingRestElementAst(cst: SubhutiCst): SlimeJavascriptRestElement {
-        return SlimeJavascriptPatternConvertCstToAst.createBindingRestElementAst(cst)
+    createBindingRestElementAst(cst: SubhutiCst): SlimeRestElement {
+        return SlimePatternConvertCstToAst.createBindingRestElementAst(cst)
     }
 
-    createFunctionRestParameterAst(cst: SubhutiCst): SlimeJavascriptRestElement {
-        return SlimeJavascriptFunctionParameterCstToAst.createFunctionRestParameterAst(cst)
+    createFunctionRestParameterAst(cst: SubhutiCst): SlimeRestElement {
+        return SlimeFunctionParameterCstToAst.createFunctionRestParameterAst(cst)
     }
 
-    createFunctionRestParameterAstAlt(cst: SubhutiCst): SlimeJavascriptRestElement {
-        return SlimeJavascriptFunctionParameterCstToAst.createFunctionRestParameterAstAlt(cst)
+    createFunctionRestParameterAstAlt(cst: SubhutiCst): SlimeRestElement {
+        return SlimeFunctionParameterCstToAst.createFunctionRestParameterAstAlt(cst)
     }
 
-    createFormalParameterAst(cst: SubhutiCst): SlimeJavascriptPattern {
-        return SlimeJavascriptFunctionParameterCstToAst.createFormalParameterAst(cst)
+    createFormalParameterAst(cst: SubhutiCst): SlimePattern {
+        return SlimeFunctionParameterCstToAst.createFormalParameterAst(cst)
     }
 
-    createFormalParameterListAst(cst: SubhutiCst): SlimeJavascriptPattern[] {
-        return SlimeJavascriptFunctionParameterCstToAst.createFormalParameterListAst(cst)
+    createFormalParameterListAst(cst: SubhutiCst): SlimePattern[] {
+        return SlimeFunctionParameterCstToAst.createFormalParameterListAst(cst)
     }
 
-    createFormalParameterListAstWrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
-        return SlimeJavascriptFunctionParameterCstToAst.createFormalParameterListAstWrapped(cst)
+    createFormalParameterListAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+        return SlimeFunctionParameterCstToAst.createFormalParameterListAstWrapped(cst)
     }
 
-    createFormalParametersAst(cst: SubhutiCst): SlimeJavascriptPattern[] {
-        return SlimeJavascriptFunctionParameterCstToAst.createFormalParametersAst(cst)
+    createFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
+        return SlimeFunctionParameterCstToAst.createFormalParametersAst(cst)
     }
 
-    createFormalParametersAstWrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
-        return SlimeJavascriptFunctionParameterCstToAst.createFormalParametersAstWrapped(cst)
+    createFormalParametersAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+        return SlimeFunctionParameterCstToAst.createFormalParametersAstWrapped(cst)
     }
 
-    createFormalParameterListFromEs2025Wrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
-        return SlimeJavascriptFunctionParameterCstToAst.createFormalParameterListFromEs2025Wrapped(cst)
+    createFormalParameterListFromEs2025Wrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+        return SlimeFunctionParameterCstToAst.createFormalParameterListFromEs2025Wrapped(cst)
     }
 
-    createUniqueFormalParametersAst(cst: SubhutiCst): SlimeJavascriptPattern[] {
-        return SlimeJavascriptFunctionParameterCstToAst.createUniqueFormalParametersAst(cst)
+    createUniqueFormalParametersAst(cst: SubhutiCst): SlimePattern[] {
+        return SlimeFunctionParameterCstToAst.createUniqueFormalParametersAst(cst)
     }
 
-    createUniqueFormalParametersAstWrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
-        return SlimeJavascriptFunctionParameterCstToAst.createUniqueFormalParametersAstWrapped(cst)
+    createUniqueFormalParametersAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+        return SlimeFunctionParameterCstToAst.createUniqueFormalParametersAstWrapped(cst)
     }
 
     // === declaration / FunctionDeclarationCstToAst ===
 
-    createFunctionDeclarationAst(cst: SubhutiCst): SlimeJavascriptFunctionDeclaration {
-        return SlimeJavascriptFunctionDeclarationCstToAst.createFunctionDeclarationAst(cst)
+    createFunctionDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
+        return SlimeFunctionDeclarationCstToAst.createFunctionDeclarationAst(cst)
     }
 
-    createGeneratorDeclarationAst(cst: SubhutiCst): SlimeJavascriptFunctionDeclaration {
-        return SlimeJavascriptFunctionDeclarationCstToAst.createGeneratorDeclarationAst(cst)
+    createGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
+        return SlimeFunctionDeclarationCstToAst.createGeneratorDeclarationAst(cst)
     }
 
-    createAsyncFunctionDeclarationAst(cst: SubhutiCst): SlimeJavascriptFunctionDeclaration {
-        return SlimeJavascriptFunctionDeclarationCstToAst.createAsyncFunctionDeclarationAst(cst)
+    createAsyncFunctionDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
+        return SlimeFunctionDeclarationCstToAst.createAsyncFunctionDeclarationAst(cst)
     }
 
-    createAsyncGeneratorDeclarationAst(cst: SubhutiCst): SlimeJavascriptFunctionDeclaration {
-        return SlimeJavascriptFunctionDeclarationCstToAst.createAsyncGeneratorDeclarationAst(cst)
+    createAsyncGeneratorDeclarationAst(cst: SubhutiCst): SlimeFunctionDeclaration {
+        return SlimeFunctionDeclarationCstToAst.createAsyncGeneratorDeclarationAst(cst)
     }
 
     // === declaration / VariableCstToAst ===
 
     createLetOrConstAst(cst: SubhutiCst): string {
-        return SlimeJavascriptVariableCstToAst.createLetOrConstAst(cst)
+        return SlimeVariableCstToAst.createLetOrConstAst(cst)
     }
 
-    createVariableDeclarationFromList(cst: SubhutiCst, kind: string): SlimeJavascriptVariableDeclaration {
-        return SlimeJavascriptVariableCstToAst.createVariableDeclarationFromList(cst, kind)
+    createVariableDeclarationFromList(cst: SubhutiCst, kind: string): SlimeVariableDeclaration {
+        return SlimeVariableCstToAst.createVariableDeclarationFromList(cst, kind)
     }
 
     createForBindingAst(cst: SubhutiCst): any {
-        return SlimeJavascriptVariableCstToAst.createForBindingAst(cst)
+        return SlimeVariableCstToAst.createForBindingAst(cst)
     }
 
     createForDeclarationAst(cst: SubhutiCst): any {
-        return SlimeJavascriptVariableCstToAst.createForDeclarationAst(cst)
+        return SlimeVariableCstToAst.createForDeclarationAst(cst)
     }
 
-    createInitializerAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptVariableCstToAst.createInitializerAst(cst)
+    createInitializerAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeVariableCstToAst.createInitializerAst(cst)
     }
 
-    createVariableDeclaratorAst(cst: SubhutiCst): SlimeJavascriptVariableDeclarator {
-        return SlimeJavascriptVariableCstToAst.createVariableDeclaratorAst(cst)
+    createVariableDeclaratorAst(cst: SubhutiCst): SlimeVariableDeclarator {
+        return SlimeVariableCstToAst.createVariableDeclaratorAst(cst)
     }
 
-    createVariableDeclaratorFromVarDeclaration(cst: SubhutiCst): SlimeJavascriptVariableDeclarator {
-        return SlimeJavascriptVariableCstToAst.createVariableDeclaratorFromVarDeclaration(cst)
+    createVariableDeclaratorFromVarDeclaration(cst: SubhutiCst): SlimeVariableDeclarator {
+        return SlimeVariableCstToAst.createVariableDeclaratorFromVarDeclaration(cst)
     }
 
-    createVariableDeclarationListAst(cst: SubhutiCst): SlimeJavascriptVariableDeclarator[] {
-        return SlimeJavascriptVariableCstToAst.createVariableDeclarationListAst(cst)
+    createVariableDeclarationListAst(cst: SubhutiCst): SlimeVariableDeclarator[] {
+        return SlimeVariableCstToAst.createVariableDeclarationListAst(cst)
     }
 
-    createLexicalBindingAst(cst: SubhutiCst): SlimeJavascriptVariableDeclarator {
-        return SlimeJavascriptVariableCstToAst.createLexicalBindingAst(cst)
+    createLexicalBindingAst(cst: SubhutiCst): SlimeVariableDeclarator {
+        return SlimeVariableCstToAst.createLexicalBindingAst(cst)
     }
 
-    createLexicalDeclarationAst(cst: SubhutiCst): SlimeJavascriptVariableDeclaration {
-        return SlimeJavascriptVariableCstToAst.createLexicalDeclarationAst(cst)
+    createLexicalDeclarationAst(cst: SubhutiCst): SlimeVariableDeclaration {
+        return SlimeVariableCstToAst.createLexicalDeclarationAst(cst)
     }
 
-    createVariableDeclarationAst(cst: SubhutiCst): SlimeJavascriptVariableDeclaration {
-        return SlimeJavascriptVariableCstToAst.createVariableDeclarationAst(cst)
+    createVariableDeclarationAst(cst: SubhutiCst): SlimeVariableDeclaration {
+        return SlimeVariableCstToAst.createVariableDeclarationAst(cst)
     }
 
-    createVariableStatementAst(cst: SubhutiCst): SlimeJavascriptVariableDeclaration {
-        return SlimeJavascriptVariableCstToAst.createVariableStatementAst(cst)
+    createVariableStatementAst(cst: SubhutiCst): SlimeVariableDeclaration {
+        return SlimeVariableCstToAst.createVariableStatementAst(cst)
     }
 
-    createDeclarationAst(cst: SubhutiCst): SlimeJavascriptDeclaration {
-        return SlimeJavascriptVariableCstToAst.createDeclarationAst(cst)
+    createDeclarationAst(cst: SubhutiCst): SlimeDeclaration {
+        return SlimeVariableCstToAst.createDeclarationAst(cst)
     }
 
-    createHoistableDeclarationAst(cst: SubhutiCst): SlimeJavascriptDeclaration {
-        return SlimeJavascriptVariableCstToAst.createHoistableDeclarationAst(cst)
+    createHoistableDeclarationAst(cst: SubhutiCst): SlimeDeclaration {
+        return SlimeVariableCstToAst.createHoistableDeclarationAst(cst)
     }
 
     // === class / ClassDeclarationCstToAst ===
 
-    createClassElementNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral | SlimeJavascriptExpression {
-        return SlimeJavascriptClassDeclarationCstToAst.createClassElementNameAst(cst)
+    createClassElementNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral | SlimeExpression {
+        return SlimeClassDeclarationCstToAst.createClassElementNameAst(cst)
     }
 
     isComputedPropertyName(cst: SubhutiCst): boolean {
-        return SlimeJavascriptClassDeclarationCstToAst.isComputedPropertyName(cst)
+        return SlimeClassDeclarationCstToAst.isComputedPropertyName(cst)
     }
 
     isStaticModifier(cst: SubhutiCst | null): boolean {
-        return SlimeJavascriptClassDeclarationCstToAst.isStaticModifier(cst)
+        return SlimeClassDeclarationCstToAst.isStaticModifier(cst)
     }
 
-    createClassDeclarationAst(cst: SubhutiCst): SlimeJavascriptClassDeclaration {
-        return SlimeJavascriptClassDeclarationCstToAst.createClassDeclarationAst(cst)
+    createClassDeclarationAst(cst: SubhutiCst): SlimeClassDeclaration {
+        return SlimeClassDeclarationCstToAst.createClassDeclarationAst(cst)
     }
 
     createClassTailAst(cst: SubhutiCst): {
-        superClass: SlimeJavascriptExpression | null;
-        body: SlimeJavascriptClassBody;
+        superClass: SlimeExpression | null;
+        body: SlimeClassBody;
         extendsToken?: any;
         lBraceToken?: any;
         rBraceToken?: any;
     } {
-        return SlimeJavascriptClassDeclarationCstToAst.createClassTailAst(cst)
+        return SlimeClassDeclarationCstToAst.createClassTailAst(cst)
     }
 
-    createClassHeritageAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptClassDeclarationCstToAst.createClassHeritageAst(cst)
+    createClassHeritageAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeClassDeclarationCstToAst.createClassHeritageAst(cst)
     }
 
-    createClassHeritageAstWithToken(cst: SubhutiCst): { superClass: SlimeJavascriptExpression; extendsToken?: any } {
-        return SlimeJavascriptClassDeclarationCstToAst.createClassHeritageAstWithToken(cst)
+    createClassHeritageAstWithToken(cst: SubhutiCst): { superClass: SlimeExpression; extendsToken?: any } {
+        return SlimeClassDeclarationCstToAst.createClassHeritageAstWithToken(cst)
     }
 
-    createFieldDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptPropertyDefinition {
-        return SlimeJavascriptClassDeclarationCstToAst.createFieldDefinitionAst(staticCst, cst)
+    createFieldDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimePropertyDefinition {
+        return SlimeClassDeclarationCstToAst.createFieldDefinitionAst(staticCst, cst)
     }
 
-    createClassBodyAst(cst: SubhutiCst): SlimeJavascriptClassBody {
-        return SlimeJavascriptClassDeclarationCstToAst.createClassBodyAst(cst)
+    createClassBodyAst(cst: SubhutiCst): SlimeClassBody {
+        return SlimeClassDeclarationCstToAst.createClassBodyAst(cst)
     }
 
     createClassStaticBlockAst(cst: SubhutiCst): any {
-        return SlimeJavascriptClassDeclarationCstToAst.createClassStaticBlockAst(cst)
+        return SlimeClassDeclarationCstToAst.createClassStaticBlockAst(cst)
     }
 
     createClassElementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptClassDeclarationCstToAst.createClassElementAst(cst)
+        return SlimeClassDeclarationCstToAst.createClassElementAst(cst)
     }
 
     createClassElementListAst(cst: SubhutiCst): any[] {
-        return SlimeJavascriptClassDeclarationCstToAst.createClassElementListAst(cst)
+        return SlimeClassDeclarationCstToAst.createClassElementListAst(cst)
     }
 
-    createClassStaticBlockBodyAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        return SlimeJavascriptClassDeclarationCstToAst.createClassStaticBlockBodyAst(cst)
+    createClassStaticBlockBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
+        return SlimeClassDeclarationCstToAst.createClassStaticBlockBodyAst(cst)
     }
 
-    createClassStaticBlockStatementListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        return SlimeJavascriptClassDeclarationCstToAst.createClassStaticBlockStatementListAst(cst)
+    createClassStaticBlockStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
+        return SlimeClassDeclarationCstToAst.createClassStaticBlockStatementListAst(cst)
     }
 
-    createClassExpressionAst(cst: SubhutiCst): SlimeJavascriptClassExpression {
-        return SlimeJavascriptClassDeclarationCstToAst.createClassExpressionAst(cst)
+    createClassExpressionAst(cst: SubhutiCst): SlimeClassExpression {
+        return SlimeClassDeclarationCstToAst.createClassExpressionAst(cst)
     }
 
     // === class / MethodDefinitionCstToAst ===
 
-    createPropertySetParameterListAst(cst: SubhutiCst): SlimeJavascriptPattern[] {
-        return SlimeJavascriptMethodDefinitionCstToAst.createPropertySetParameterListAst(cst)
+    createPropertySetParameterListAst(cst: SubhutiCst): SlimePattern[] {
+        return SlimeMethodDefinitionCstToAst.createPropertySetParameterListAst(cst)
     }
 
-    createPropertySetParameterListAstWrapped(cst: SubhutiCst): SlimeJavascriptFunctionParam[] {
-        return SlimeJavascriptMethodDefinitionCstToAst.createPropertySetParameterListAstWrapped(cst)
+    createPropertySetParameterListAstWrapped(cst: SubhutiCst): SlimeFunctionParam[] {
+        return SlimeMethodDefinitionCstToAst.createPropertySetParameterListAstWrapped(cst)
     }
 
-    createMethodDefinitionAstInternal(cst: SubhutiCst, kind: 'method' | 'get' | 'set', generator: boolean, async: boolean): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionAstInternal(cst, kind, generator, async)
+    createMethodDefinitionAstInternal(cst: SubhutiCst, kind: 'method' | 'get' | 'set', generator: boolean, async: boolean): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionAstInternal(cst, kind, generator, async)
     }
 
-    createGeneratorMethodAst(cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createGeneratorMethodAst(cst)
+    createGeneratorMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createGeneratorMethodAst(cst)
     }
 
-    createAsyncMethodAst(cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createAsyncMethodAst(cst)
+    createAsyncMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createAsyncMethodAst(cst)
     }
 
-    createAsyncGeneratorMethodAst(cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createAsyncGeneratorMethodAst(cst)
+    createAsyncGeneratorMethodAst(cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createAsyncGeneratorMethodAst(cst)
     }
 
-    createMethodDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionAst(staticCst, cst)
+    createMethodDefinitionAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionAst(staticCst, cst)
     }
 
-    createMethodDefinitionMethodDefinitionFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionMethodDefinitionFromIdentifier(staticCst, cst)
+    createMethodDefinitionMethodDefinitionFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionMethodDefinitionFromIdentifier(staticCst, cst)
     }
 
-    createMethodDefinitionClassElementNameAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionClassElementNameAst(staticCst, cst)
+    createMethodDefinitionClassElementNameAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionClassElementNameAst(staticCst, cst)
     }
 
-    createMethodDefinitionGetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionGetterMethodAst(staticCst, cst)
+    createMethodDefinitionGetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionGetterMethodAst(staticCst, cst)
     }
 
-    createMethodDefinitionSetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionSetterMethodAst(staticCst, cst)
+    createMethodDefinitionSetterMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionSetterMethodAst(staticCst, cst)
     }
 
-    createMethodDefinitionGetterMethodFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionGetterMethodFromIdentifier(staticCst, cst)
+    createMethodDefinitionGetterMethodFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionGetterMethodFromIdentifier(staticCst, cst)
     }
 
-    createMethodDefinitionSetterMethodFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionSetterMethodFromIdentifier(staticCst, cst)
+    createMethodDefinitionSetterMethodFromIdentifier(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionSetterMethodFromIdentifier(staticCst, cst)
     }
 
-    createMethodDefinitionGeneratorMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionGeneratorMethodAst(staticCst, cst)
+    createMethodDefinitionGeneratorMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionGeneratorMethodAst(staticCst, cst)
     }
 
-    createMethodDefinitionGeneratorMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionGeneratorMethodFromChildren(staticCst, cst)
+    createMethodDefinitionGeneratorMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionGeneratorMethodFromChildren(staticCst, cst)
     }
 
-    createMethodDefinitionAsyncMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionAsyncMethodAst(staticCst, cst)
+    createMethodDefinitionAsyncMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionAsyncMethodAst(staticCst, cst)
     }
 
-    createMethodDefinitionAsyncMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionAsyncMethodFromChildren(staticCst, cst)
+    createMethodDefinitionAsyncMethodFromChildren(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionAsyncMethodFromChildren(staticCst, cst)
     }
 
-    createMethodDefinitionAsyncGeneratorMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeJavascriptMethodDefinition {
-        return SlimeJavascriptMethodDefinitionCstToAst.createMethodDefinitionAsyncGeneratorMethodAst(staticCst, cst)
+    createMethodDefinitionAsyncGeneratorMethodAst(staticCst: SubhutiCst | null, cst: SubhutiCst): SlimeMethodDefinition {
+        return SlimeMethodDefinitionCstToAst.createMethodDefinitionAsyncGeneratorMethodAst(staticCst, cst)
     }
 
     // === statement / BlockCstToAst ===
 
-    createBlockAst(cst: SubhutiCst): SlimeJavascriptBlockStatement {
-        return SlimeJavascriptBlockCstToAst.createBlockAst(cst)
+    createBlockAst(cst: SubhutiCst): SlimeBlockStatement {
+        return SlimeBlockCstToAst.createBlockAst(cst)
     }
 
-    createBlockStatementAst(cst: SubhutiCst): SlimeJavascriptBlockStatement {
-        return SlimeJavascriptBlockCstToAst.createBlockStatementAst(cst)
+    createBlockStatementAst(cst: SubhutiCst): SlimeBlockStatement {
+        return SlimeBlockCstToAst.createBlockStatementAst(cst)
     }
 
     createStatementDeclarationAst(cst: SubhutiCst): any {
-        return SlimeJavascriptBlockCstToAst.createStatementDeclarationAst(cst)
+        return SlimeBlockCstToAst.createStatementDeclarationAst(cst)
     }
 
-    createStatementAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        return SlimeJavascriptBlockCstToAst.createStatementAst(cst)
+    createStatementAst(cst: SubhutiCst): Array<SlimeStatement> {
+        return SlimeBlockCstToAst.createStatementAst(cst)
     }
 
-    createStatementListItemAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        return SlimeJavascriptBlockCstToAst.createStatementListItemAst(cst)
+    createStatementListItemAst(cst: SubhutiCst): Array<SlimeStatement> {
+        return SlimeBlockCstToAst.createStatementListItemAst(cst)
     }
 
-    createStatementListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        return SlimeJavascriptBlockCstToAst.createStatementListAst(cst)
+    createStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
+        return SlimeBlockCstToAst.createStatementListAst(cst)
     }
 
     // === statement / ControlFlowCstToAst ===
 
     createBreakableStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptControlFlowCstToAst.createBreakableStatementAst(cst)
+        return SlimeControlFlowCstToAst.createBreakableStatementAst(cst)
     }
 
     createIterationStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptControlFlowCstToAst.createIterationStatementAst(cst)
+        return SlimeControlFlowCstToAst.createIterationStatementAst(cst)
     }
 
     createIfStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptControlFlowCstToAst.createIfStatementAst(cst)
+        return SlimeControlFlowCstToAst.createIfStatementAst(cst)
     }
 
     createIfStatementBodyAst(cst: SubhutiCst): any {
-        return SlimeJavascriptControlFlowCstToAst.createIfStatementBodyAst(cst)
+        return SlimeControlFlowCstToAst.createIfStatementBodyAst(cst)
     }
 
     createForStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptControlFlowCstToAst.createForStatementAst(cst)
+        return SlimeControlFlowCstToAst.createForStatementAst(cst)
     }
 
     createForInOfStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptControlFlowCstToAst.createForInOfStatementAst(cst)
+        return SlimeControlFlowCstToAst.createForInOfStatementAst(cst)
     }
 
     createWhileStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptControlFlowCstToAst.createWhileStatementAst(cst)
+        return SlimeControlFlowCstToAst.createWhileStatementAst(cst)
     }
 
     createDoWhileStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptControlFlowCstToAst.createDoWhileStatementAst(cst)
+        return SlimeControlFlowCstToAst.createDoWhileStatementAst(cst)
     }
 
     createSwitchStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptControlFlowCstToAst.createSwitchStatementAst(cst)
+        return SlimeControlFlowCstToAst.createSwitchStatementAst(cst)
     }
 
     // === statement / FunctionBodyCstToAst ===
 
-    createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        return SlimeJavascriptFunctionBodyCstToAst.createFunctionStatementListAst(cst)
+    createFunctionStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
+        return SlimeFunctionBodyCstToAst.createFunctionStatementListAst(cst)
     }
 
-    createFunctionBodyAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        return SlimeJavascriptFunctionBodyCstToAst.createFunctionBodyAst(cst)
+    createFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
+        return SlimeFunctionBodyCstToAst.createFunctionBodyAst(cst)
     }
 
-    createGeneratorBodyAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        return SlimeJavascriptFunctionBodyCstToAst.createGeneratorBodyAst(cst)
+    createGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
+        return SlimeFunctionBodyCstToAst.createGeneratorBodyAst(cst)
     }
 
-    createAsyncFunctionBodyAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        return SlimeJavascriptFunctionBodyCstToAst.createAsyncFunctionBodyAst(cst)
+    createAsyncFunctionBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
+        return SlimeFunctionBodyCstToAst.createAsyncFunctionBodyAst(cst)
     }
 
-    createAsyncGeneratorBodyAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        return SlimeJavascriptFunctionBodyCstToAst.createAsyncGeneratorBodyAst(cst)
+    createAsyncGeneratorBodyAst(cst: SubhutiCst): Array<SlimeStatement> {
+        return SlimeFunctionBodyCstToAst.createAsyncGeneratorBodyAst(cst)
     }
 
     // === statement / OtherStatementCstToAst ===
 
     createSemicolonASIAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createSemicolonASIAst(cst)
+        return SlimeOtherStatementCstToAst.createSemicolonASIAst(cst)
     }
 
     createEmptyStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createEmptyStatementAst(cst)
+        return SlimeOtherStatementCstToAst.createEmptyStatementAst(cst)
     }
 
     createThrowStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createThrowStatementAst(cst)
+        return SlimeOtherStatementCstToAst.createThrowStatementAst(cst)
     }
 
     createBreakStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createBreakStatementAst(cst)
+        return SlimeOtherStatementCstToAst.createBreakStatementAst(cst)
     }
 
     createContinueStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createContinueStatementAst(cst)
+        return SlimeOtherStatementCstToAst.createContinueStatementAst(cst)
     }
 
     createTryStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createTryStatementAst(cst)
+        return SlimeOtherStatementCstToAst.createTryStatementAst(cst)
     }
 
     createFinallyAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createFinallyAst(cst)
+        return SlimeOtherStatementCstToAst.createFinallyAst(cst)
     }
 
     createCatchAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createCatchAst(cst)
+        return SlimeOtherStatementCstToAst.createCatchAst(cst)
     }
 
     createCatchParameterAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createCatchParameterAst(cst)
+        return SlimeOtherStatementCstToAst.createCatchParameterAst(cst)
     }
 
-    createReturnStatementAst(cst: SubhutiCst): SlimeJavascriptReturnStatement {
-        return SlimeJavascriptOtherStatementCstToAst.createReturnStatementAst(cst)
+    createReturnStatementAst(cst: SubhutiCst): SlimeReturnStatement {
+        return SlimeOtherStatementCstToAst.createReturnStatementAst(cst)
     }
 
-    createExpressionStatementAst(cst: SubhutiCst): SlimeJavascriptExpressionStatement {
-        return SlimeJavascriptOtherStatementCstToAst.createExpressionStatementAst(cst)
+    createExpressionStatementAst(cst: SubhutiCst): SlimeExpressionStatement {
+        return SlimeOtherStatementCstToAst.createExpressionStatementAst(cst)
     }
 
     createLabelledStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createLabelledStatementAst(cst)
+        return SlimeOtherStatementCstToAst.createLabelledStatementAst(cst)
     }
 
     createWithStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createWithStatementAst(cst)
+        return SlimeOtherStatementCstToAst.createWithStatementAst(cst)
     }
 
     createDebuggerStatementAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createDebuggerStatementAst(cst)
+        return SlimeOtherStatementCstToAst.createDebuggerStatementAst(cst)
     }
 
     createLabelledItemAst(cst: SubhutiCst): any {
-        return SlimeJavascriptOtherStatementCstToAst.createLabelledItemAst(cst)
+        return SlimeOtherStatementCstToAst.createLabelledItemAst(cst)
     }
 
     // === statement / SwitchCstToAst ===
 
     createCaseClauseAst(cst: SubhutiCst): any {
-        return SlimeJavascriptControlFlowCstToAst.createCaseClauseAst(cst)
+        return SlimeControlFlowCstToAst.createCaseClauseAst(cst)
     }
 
     createDefaultClauseAst(cst: SubhutiCst): any {
-        return SlimeJavascriptControlFlowCstToAst.createDefaultClauseAst(cst)
+        return SlimeControlFlowCstToAst.createDefaultClauseAst(cst)
     }
 
     createCaseClausesAst(cst: SubhutiCst): any[] {
-        return SlimeJavascriptControlFlowCstToAst.createCaseClausesAst(cst)
+        return SlimeControlFlowCstToAst.createCaseClausesAst(cst)
     }
 
     createCaseBlockAst(cst: SubhutiCst): any[] {
-        return SlimeJavascriptControlFlowCstToAst.createCaseBlockAst(cst)
+        return SlimeControlFlowCstToAst.createCaseBlockAst(cst)
     }
 
     createSwitchCaseAst(cst: SubhutiCst): any {
-        return SlimeJavascriptControlFlowCstToAst.createSwitchCaseAst(cst)
+        return SlimeControlFlowCstToAst.createSwitchCaseAst(cst)
     }
 
     extractCasesFromCaseBlock(caseBlockCst: SubhutiCst): any[] {
-        return SlimeJavascriptControlFlowCstToAst.extractCasesFromCaseBlock(caseBlockCst)
+        return SlimeControlFlowCstToAst.extractCasesFromCaseBlock(caseBlockCst)
     }
 
     // === module / ExportCstToAst ===
 
     createExportFromClauseAst(cst: SubhutiCst): any {
-        return SlimeJavascriptExportCstToAst.createExportFromClauseAst(cst)
+        return SlimeExportCstToAst.createExportFromClauseAst(cst)
     }
 
-    createExportDeclarationAst(cst: SubhutiCst): SlimeJavascriptExportDefaultDeclaration | SlimeJavascriptExportNamedDeclaration | SlimeJavascriptExportAllDeclaration {
-        return SlimeJavascriptExportCstToAst.createExportDeclarationAst(cst)
+    createExportDeclarationAst(cst: SubhutiCst): SlimeExportDefaultDeclaration | SlimeExportNamedDeclaration | SlimeExportAllDeclaration {
+        return SlimeExportCstToAst.createExportDeclarationAst(cst)
     }
 
-    createNamedExportsAst(cst: SubhutiCst): SlimeJavascriptExportSpecifierItem[] {
-        return SlimeJavascriptExportCstToAst.createNamedExportsAst(cst)
+    createNamedExportsAst(cst: SubhutiCst): SlimeExportSpecifierItem[] {
+        return SlimeExportCstToAst.createNamedExportsAst(cst)
     }
 
-    createExportsListAst(cst: SubhutiCst): SlimeJavascriptExportSpecifierItem[] {
-        return SlimeJavascriptExportCstToAst.createExportsListAst(cst)
+    createExportsListAst(cst: SubhutiCst): SlimeExportSpecifierItem[] {
+        return SlimeExportCstToAst.createExportsListAst(cst)
     }
 
-    createExportSpecifierAst(cst: SubhutiCst): SlimeJavascriptExportSpecifier {
-        return SlimeJavascriptExportCstToAst.createExportSpecifierAst(cst)
+    createExportSpecifierAst(cst: SubhutiCst): SlimeExportSpecifier {
+        return SlimeExportCstToAst.createExportSpecifierAst(cst)
     }
 
-    createModuleExportNameAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral {
-        return SlimeJavascriptExportCstToAst.createModuleExportNameAst(cst)
+    createModuleExportNameAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
+        return SlimeExportCstToAst.createModuleExportNameAst(cst)
     }
 
     // === module / ImportCstToAst ===
 
-    createImportCallAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        return SlimeJavascriptImportCstToAst.createImportCallAst(cst)
+    createImportCallAst(cst: SubhutiCst): SlimeExpression {
+        return SlimeImportCstToAst.createImportCallAst(cst)
     }
 
-    createNameSpaceImportAst(cst: SubhutiCst): SlimeJavascriptImportNamespaceSpecifier {
-        return SlimeJavascriptImportCstToAst.createNameSpaceImportAst(cst)
+    createNameSpaceImportAst(cst: SubhutiCst): SlimeImportNamespaceSpecifier {
+        return SlimeImportCstToAst.createNameSpaceImportAst(cst)
     }
 
-    createNamedImportsAst(cst: SubhutiCst): Array<SlimeJavascriptImportSpecifier> {
-        return SlimeJavascriptImportCstToAst.createNamedImportsAst(cst)
+    createNamedImportsAst(cst: SubhutiCst): Array<SlimeImportSpecifier> {
+        return SlimeImportCstToAst.createNamedImportsAst(cst)
     }
 
-    createImportsListAst(cst: SubhutiCst): Array<SlimeJavascriptImportSpecifier> {
-        return SlimeJavascriptImportCstToAst.createImportsListAst(cst)
+    createImportsListAst(cst: SubhutiCst): Array<SlimeImportSpecifier> {
+        return SlimeImportCstToAst.createImportsListAst(cst)
     }
 
-    createImportSpecifierAst(cst: SubhutiCst): SlimeJavascriptImportSpecifier {
-        return SlimeJavascriptImportCstToAst.createImportSpecifierAst(cst)
+    createImportSpecifierAst(cst: SubhutiCst): SlimeImportSpecifier {
+        return SlimeImportCstToAst.createImportSpecifierAst(cst)
     }
 
-    createAttributeKeyAst(cst: SubhutiCst): SlimeJavascriptIdentifier | SlimeJavascriptLiteral {
-        return SlimeJavascriptImportCstToAst.createAttributeKeyAst(cst)
+    createAttributeKeyAst(cst: SubhutiCst): SlimeIdentifier | SlimeLiteral {
+        return SlimeImportCstToAst.createAttributeKeyAst(cst)
     }
 
     createWithEntriesAst(cst: SubhutiCst): any[] {
-        return SlimeJavascriptImportCstToAst.createWithEntriesAst(cst)
+        return SlimeImportCstToAst.createWithEntriesAst(cst)
     }
 
-    createImportDeclarationAst(cst: SubhutiCst): SlimeJavascriptImportDeclaration {
-        return SlimeJavascriptImportCstToAst.createImportDeclarationAst(cst)
+    createImportDeclarationAst(cst: SubhutiCst): SlimeImportDeclaration {
+        return SlimeImportCstToAst.createImportDeclarationAst(cst)
     }
 
     createWithClauseAst(cst: SubhutiCst): { attributes: any[], withToken: any } {
-        return SlimeJavascriptImportCstToAst.createWithClauseAst(cst)
+        return SlimeImportCstToAst.createWithClauseAst(cst)
     }
 
-    createFromClauseAst(cst: SubhutiCst): { source: SlimeJavascriptStringLiteral, fromToken?: any } {
-        return SlimeJavascriptImportCstToAst.createFromClauseAst(cst)
+    createFromClauseAst(cst: SubhutiCst): { source: SlimeStringLiteral, fromToken?: any } {
+        return SlimeImportCstToAst.createFromClauseAst(cst)
     }
 
-    createModuleSpecifierAst(cst: SubhutiCst): SlimeJavascriptStringLiteral {
-        return SlimeJavascriptImportCstToAst.createModuleSpecifierAst(cst)
+    createModuleSpecifierAst(cst: SubhutiCst): SlimeStringLiteral {
+        return SlimeImportCstToAst.createModuleSpecifierAst(cst)
     }
 
     createImportClauseAst(cst: SubhutiCst): {
-        specifiers: Array<SlimeJavascriptImportSpecifierItem>,
+        specifiers: Array<SlimeImportSpecifierItem>,
         lBraceToken?: any,
         rBraceToken?: any
     } {
-        return SlimeJavascriptImportCstToAst.createImportClauseAst(cst)
+        return SlimeImportCstToAst.createImportClauseAst(cst)
     }
 
-    createImportedDefaultBindingAst(cst: SubhutiCst): SlimeJavascriptImportDefaultSpecifier {
-        return SlimeJavascriptImportCstToAst.createImportedDefaultBindingAst(cst)
+    createImportedDefaultBindingAst(cst: SubhutiCst): SlimeImportDefaultSpecifier {
+        return SlimeImportCstToAst.createImportedDefaultBindingAst(cst)
     }
 
-    createImportedBindingAst(cst: SubhutiCst): SlimeJavascriptIdentifier {
-        return SlimeJavascriptImportCstToAst.createImportedBindingAst(cst)
+    createImportedBindingAst(cst: SubhutiCst): SlimeIdentifier {
+        return SlimeImportCstToAst.createImportedBindingAst(cst)
     }
 
     createNamedImportsListAstWrapped(cst: SubhutiCst): {
-        specifiers: Array<SlimeJavascriptImportSpecifierItem>,
+        specifiers: Array<SlimeImportSpecifierItem>,
         lBraceToken?: any,
         rBraceToken?: any
     } {
-        return SlimeJavascriptImportCstToAst.createNamedImportsListAstWrapped(cst)
+        return SlimeImportCstToAst.createNamedImportsListAstWrapped(cst)
     }
 
     // === module / ModuleCstToAst ===
 
-    createProgramAst(cst: SubhutiCst): SlimeJavascriptProgram {
-        return SlimeJavascriptModuleCstToAst.createProgramAst(cst)
+    createProgramAst(cst: SubhutiCst): SlimeProgram {
+        return SlimeModuleCstToAst.createProgramAst(cst)
     }
 
-    createScriptAst(cst: SubhutiCst): SlimeJavascriptProgram {
-        return SlimeJavascriptModuleCstToAst.createScriptAst(cst)
+    createScriptAst(cst: SubhutiCst): SlimeProgram {
+        return SlimeModuleCstToAst.createScriptAst(cst)
     }
 
-    createScriptBodyAst(cst: SubhutiCst): SlimeJavascriptProgram {
-        return SlimeJavascriptModuleCstToAst.createScriptBodyAst(cst)
+    createScriptBodyAst(cst: SubhutiCst): SlimeProgram {
+        return SlimeModuleCstToAst.createScriptBodyAst(cst)
     }
 
-    createModuleAst(cst: SubhutiCst): SlimeJavascriptProgram {
-        return SlimeJavascriptModuleCstToAst.createModuleAst(cst)
+    createModuleAst(cst: SubhutiCst): SlimeProgram {
+        return SlimeModuleCstToAst.createModuleAst(cst)
     }
 
-    createModuleBodyAst(cst: SubhutiCst): SlimeJavascriptProgram {
-        return SlimeJavascriptModuleCstToAst.createModuleBodyAst(cst)
+    createModuleBodyAst(cst: SubhutiCst): SlimeProgram {
+        return SlimeModuleCstToAst.createModuleBodyAst(cst)
     }
 
-    createModuleItemAst(item: SubhutiCst): SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration | SlimeJavascriptStatement[] | undefined {
-        return SlimeJavascriptModuleCstToAst.createModuleItemAst(item)
+    createModuleItemAst(item: SubhutiCst): SlimeStatement | SlimeModuleDeclaration | SlimeStatement[] | undefined {
+        return SlimeModuleCstToAst.createModuleItemAst(item)
     }
 
-    toProgram(cst: SubhutiCst): SlimeJavascriptProgram {
-        return SlimeJavascriptModuleCstToAst.toProgram(cst)
+    toProgram(cst: SubhutiCst): SlimeProgram {
+        return SlimeModuleCstToAst.toProgram(cst)
     }
 
-    createModuleItemListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement | SlimeJavascriptModuleDeclaration> {
-        return SlimeJavascriptModuleCstToAst.createModuleItemListAst(cst)
+    createModuleItemListAst(cst: SubhutiCst): Array<SlimeStatement | SlimeModuleDeclaration> {
+        return SlimeModuleCstToAst.createModuleItemListAst(cst)
     }
 
     // === class / ClassDeclarationCstToAst ===
 }
 
-const SlimeJavascriptCstToAstUtil = new SlimeJavascriptCstToAst()
+const SlimeCstToAstUtil = new SlimeCstToAst()
 
-export default SlimeJavascriptCstToAstUtil
+export default SlimeCstToAstUtil

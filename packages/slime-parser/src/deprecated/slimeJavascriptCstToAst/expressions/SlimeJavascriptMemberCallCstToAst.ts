@@ -3,24 +3,24 @@
  */
 import { SubhutiCst } from "subhuti";
 import {
-    SlimeJavascriptCreateUtils, type SlimeJavascriptCallArgument,
-    SlimeJavascriptExpression,
-    type SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, type SlimeJavascriptPattern, SlimeJavascriptSpreadElement, type SlimeJavascriptSuper,
-    SlimeJavascriptTokenCreateUtils,
-    type SlimeJavascriptVariableDeclarator
+     type SlimeCallArgument,
+    SlimeExpression,
+    type SlimeIdentifier, SlimeAstTypeName, type SlimePattern, SlimeSpreadElement, type SlimeSuper,
+    SlimeTokenCreateUtils,
+    type SlimeVariableDeclarator
 } from "slime-ast";
 
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeParser from "../../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
-import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
+import {SlimeVariableCstToAstSingle} from "../statements/SlimeVariableCstToAst.ts";
 
-export class SlimeJavascriptMemberCallCstToAstSingle {
+export class SlimeMemberCallCstToAstSingle {
 
     /**
      * ExpressionBody CST �?AST
      * ExpressionBody -> AssignmentExpression
      */
-    createExpressionBodyAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createExpressionBodyAst(cst: SubhutiCst): SlimeExpression {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             return SlimeCstToAstUtil.createAssignmentExpressionAst(firstChild)
@@ -29,12 +29,12 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
     }
 
 
-    createMemberExpressionFirstOr(cst: SubhutiCst): SlimeJavascriptExpression | SlimeJavascriptSuper {
-        if (cst.name === SlimeJavascriptParser.prototype.PrimaryExpression?.name || cst.name === 'PrimaryExpression') {
+    createMemberExpressionFirstOr(cst: SubhutiCst): SlimeExpression | SlimeSuper {
+        if (cst.name === SlimeParser.prototype.PrimaryExpression?.name || cst.name === 'PrimaryExpression') {
             return SlimeCstToAstUtil.createPrimaryExpressionAst(cst)
-        } else if (cst.name === SlimeJavascriptParser.prototype.SuperProperty?.name || cst.name === 'SuperProperty') {
+        } else if (cst.name === SlimeParser.prototype.SuperProperty?.name || cst.name === 'SuperProperty') {
             return SlimeCstToAstUtil.createSuperPropertyAst(cst)
-        } else if (cst.name === SlimeJavascriptParser.prototype.MetaProperty?.name || cst.name === 'MetaProperty') {
+        } else if (cst.name === SlimeParser.prototype.MetaProperty?.name || cst.name === 'MetaProperty') {
             return SlimeCstToAstUtil.createMetaPropertyAst(cst)
         } else if (cst.name === 'NewMemberExpressionArguments') {
             return SlimeCstToAstUtil.createNewExpressionAst(cst)
@@ -48,15 +48,15 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
     }
 
 
-    createMemberExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.MemberExpression?.name);
+    createMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.MemberExpression?.name);
 
         if (cst.children.length === 0) {
             throw new Error('MemberExpression has no children')
         }
 
         // 从第一个child创建base对象
-        let current: SlimeJavascriptExpression
+        let current: SlimeExpression
         let startIdx = 1
 
         // Es2025Parser: 检查是否是 new MemberExpression Arguments 模式
@@ -72,16 +72,16 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             const args = argsCst ? SlimeCstToAstUtil.createArgumentsAst(argsCst) : []
 
             // 提取 tokens
-            const newToken = SlimeJavascriptTokenCreateUtils.createNewToken(newCst.loc)
+            const newToken = SlimeTokenCreateUtils.createNewToken(newCst.loc)
             let lParenToken: any = undefined
             let rParenToken: any = undefined
 
             if (argsCst && argsCst.children) {
                 for (const child of argsCst.children) {
                     if (child.name === 'LParen' || child.value === '(') {
-                        lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(child.loc)
+                        lParenToken = SlimeTokenCreateUtils.createLParenToken(child.loc)
                     } else if (child.name === 'RParen' || child.value === ')') {
-                        rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(child.loc)
+                        rParenToken = SlimeTokenCreateUtils.createRParenToken(child.loc)
                     }
                 }
             }
@@ -99,7 +99,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             // �?Arguments 之后继续处理（如 .bar�?
             startIdx = 3
         } else {
-            current = SlimeCstToAstUtil.createMemberExpressionFirstOr(cst.children[0]) as SlimeJavascriptExpression
+            current = SlimeCstToAstUtil.createMemberExpressionFirstOr(cst.children[0]) as SlimeExpression
         }
 
         // 循环处理剩余的children（Dot+IdentifierName、LBracket+Expression+RBracket、Arguments、TemplateLiteral�?
@@ -108,16 +108,16 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
 
             if (child.name === 'DotIdentifier') {
                 // .property - 成员访问 (旧版兼容)
-                const dotToken = SlimeJavascriptTokenCreateUtils.createDotToken(child.children[0].loc)
+                const dotToken = SlimeTokenCreateUtils.createDotToken(child.children[0].loc)
 
                 // children[1]是IdentifierName，可能是Identifier或关键字token
-                let property: SlimeJavascriptIdentifier | null = null
+                let property: SlimeIdentifier | null = null
                 if (child.children[1]) {
                     const identifierNameCst = child.children[1]
-                    if (identifierNameCst.name === SlimeJavascriptParser.prototype.IdentifierName?.name) {
+                    if (identifierNameCst.name === SlimeParser.prototype.IdentifierName?.name) {
                         // IdentifierName -> Identifier or Keyword token
                         const tokenCst = identifierNameCst.children[0]
-                        property = SlimeJavascriptCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
+                        property = SlimeAstCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
                     } else {
                         // 直接是token（向后兼容）
                         property = SlimeCstToAstUtil.createIdentifierAst(identifierNameCst)
@@ -125,37 +125,37 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
                 }
 
                 // 创建新的MemberExpression，current作为object
-                current = SlimeJavascriptCreateUtils.createMemberExpression(current, dotToken, property)
+                current = SlimeAstCreateUtils.createMemberExpression(current, dotToken, property)
 
             } else if (child.name === 'Dot') {
                 // Es2025Parser产生的是直接�?Dot token + IdentifierName
                 // .property - 成员访问
-                const dotToken = SlimeJavascriptTokenCreateUtils.createDotToken(child.loc)
+                const dotToken = SlimeTokenCreateUtils.createDotToken(child.loc)
 
                 // 下一个child应该是IdentifierName或PrivateIdentifier
                 const nextChild = cst.children[i + 1]
-                let property: SlimeJavascriptIdentifier | null = null
+                let property: SlimeIdentifier | null = null
                 if (nextChild) {
-                    if (nextChild.name === SlimeJavascriptParser.prototype.IdentifierName?.name || nextChild.name === 'IdentifierName') {
+                    if (nextChild.name === SlimeParser.prototype.IdentifierName?.name || nextChild.name === 'IdentifierName') {
                         // IdentifierName -> Identifier or Keyword token
                         const tokenCst = nextChild.children[0]
-                        property = SlimeJavascriptCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
+                        property = SlimeAstCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
                         i++ // 跳过已处理的IdentifierName
                     } else if (nextChild.name === 'PrivateIdentifier') {
                         // 私有标识�?#prop
-                        property = SlimeJavascriptCreateUtils.createIdentifier(nextChild.value, nextChild.loc)
+                        property = SlimeAstCreateUtils.createIdentifier(nextChild.value, nextChild.loc)
                         i++ // 跳过已处理的PrivateIdentifier
                     }
                 }
 
                 // 创建新的MemberExpression，current作为object
-                current = SlimeJavascriptCreateUtils.createMemberExpression(current, dotToken, property)
+                current = SlimeAstCreateUtils.createMemberExpression(current, dotToken, property)
 
             } else if (child.name === 'BracketExpression') {
                 // [expression] - computed property access (旧版兼容)
                 const propertyExpression = SlimeCstToAstUtil.createExpressionAst(child.children[1])
                 current = {
-                    type: SlimeJavascriptAstTypeName.MemberExpression,
+                    type: SlimeAstTypeName.MemberExpression,
                     object: current,
                     property: propertyExpression,
                     computed: true,
@@ -170,7 +170,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
                 if (expressionChild) {
                     const propertyExpression = SlimeCstToAstUtil.createExpressionAst(expressionChild)
                     current = {
-                        type: SlimeJavascriptAstTypeName.MemberExpression,
+                        type: SlimeAstTypeName.MemberExpression,
                         object: current,
                         property: propertyExpression,
                         computed: true,
@@ -180,12 +180,12 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
                     i += 2 // 跳过Expression和RBracket
                 }
 
-            } else if (child.name === SlimeJavascriptParser.prototype.Arguments?.name || child.name === 'Arguments') {
+            } else if (child.name === SlimeParser.prototype.Arguments?.name || child.name === 'Arguments') {
                 // () - function call
                 const args = SlimeCstToAstUtil.createArgumentsAst(child)
-                current = SlimeJavascriptCreateUtils.createCallExpression(current, args) as SlimeJavascriptExpression
+                current = SlimeAstCreateUtils.createCallExpression(current, args) as SlimeExpression
 
-            } else if (child.name === SlimeJavascriptParser.prototype.TemplateLiteral?.name || child.name === 'TemplateLiteral') {
+            } else if (child.name === SlimeParser.prototype.TemplateLiteral?.name || child.name === 'TemplateLiteral') {
                 // `template` - Tagged Template
                 const quasi = SlimeCstToAstUtil.createTemplateLiteralAst(child)
                 current = {
@@ -207,11 +207,11 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
         return current
     }
 
-    createArgumentsAst(cst: SubhutiCst): Array<SlimeJavascriptCallArgument> {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.Arguments?.name);
+    createArgumentsAst(cst: SubhutiCst): Array<SlimeCallArgument> {
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.Arguments?.name);
         const first1 = cst.children[1]
         if (first1) {
-            if (first1.name === SlimeJavascriptParser.prototype.ArgumentList?.name) {
+            if (first1.name === SlimeParser.prototype.ArgumentList?.name) {
                 const res = SlimeCstToAstUtil.createArgumentListAst(first1)
                 return res
             }
@@ -219,13 +219,13 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
         return []
     }
 
-    createArgumentListAst(cst: SubhutiCst): Array<SlimeJavascriptCallArgument> {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ArgumentList?.name);
-        const arguments_: Array<SlimeJavascriptCallArgument> = []
+    createArgumentListAst(cst: SubhutiCst): Array<SlimeCallArgument> {
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ArgumentList?.name);
+        const arguments_: Array<SlimeCallArgument> = []
 
         // 遍历children，处�?Ellipsis + AssignmentExpression + Comma 组合
         // 每个参数与其后面的逗号配对
-        let currentArg: SlimeJavascriptExpression | SlimeJavascriptSpreadElement | null = null
+        let currentArg: SlimeExpression | SlimeSpreadElement | null = null
         let hasArg = false
         let pendingEllipsis: SubhutiCst | null = null
 
@@ -235,34 +235,34 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             if (child.name === 'Ellipsis' || child.name === 'Ellipsis') {
                 // 记录 ellipsis，下一个表达式�?spread
                 pendingEllipsis = child
-            } else if (child.name === SlimeJavascriptParser.prototype.AssignmentExpression?.name) {
+            } else if (child.name === SlimeParser.prototype.AssignmentExpression?.name) {
                 // 如果之前有参数但没有逗号，先推入
                 if (hasArg) {
-                    arguments_.push(SlimeJavascriptCreateUtils.createCallArgument(currentArg!, undefined))
+                    arguments_.push(SlimeAstCreateUtils.createCallArgument(currentArg!, undefined))
                 }
 
                 const expr = SlimeCstToAstUtil.createAssignmentExpressionAst(child)
                 if (pendingEllipsis) {
                     // 创建 SpreadElement
-                    const ellipsisToken = SlimeJavascriptTokenCreateUtils.createEllipsisToken(pendingEllipsis.loc)
-                    currentArg = SlimeJavascriptCreateUtils.createSpreadElement(expr, child.loc, ellipsisToken)
+                    const ellipsisToken = SlimeTokenCreateUtils.createEllipsisToken(pendingEllipsis.loc)
+                    currentArg = SlimeAstCreateUtils.createSpreadElement(expr, child.loc, ellipsisToken)
                     pendingEllipsis = null
                 } else {
                     currentArg = expr
                 }
                 hasArg = true
-            } else if (child.name === SlimeJavascriptParser.prototype.SpreadElement?.name) {
+            } else if (child.name === SlimeParser.prototype.SpreadElement?.name) {
                 // 处理 spread 参数�?..args（旧结构兼容�?
                 if (hasArg) {
-                    arguments_.push(SlimeJavascriptCreateUtils.createCallArgument(currentArg!, undefined))
+                    arguments_.push(SlimeAstCreateUtils.createCallArgument(currentArg!, undefined))
                 }
                 currentArg = SlimeCstToAstUtil.createSpreadElementAst(child)
                 hasArg = true
             } else if (child.name === 'Comma' || child.value === ',') {
                 // 逗号与前面的参数配对
-                const commaToken = SlimeJavascriptTokenCreateUtils.createCommaToken(child.loc)
+                const commaToken = SlimeTokenCreateUtils.createCommaToken(child.loc)
                 if (hasArg) {
-                    arguments_.push(SlimeJavascriptCreateUtils.createCallArgument(currentArg!, commaToken))
+                    arguments_.push(SlimeAstCreateUtils.createCallArgument(currentArg!, commaToken))
                     hasArg = false
                     currentArg = null
                 }
@@ -271,16 +271,16 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
 
         // 处理最后一个参数（如果没有尾随逗号�?
         if (hasArg) {
-            arguments_.push(SlimeJavascriptCreateUtils.createCallArgument(currentArg!, undefined))
+            arguments_.push(SlimeAstCreateUtils.createCallArgument(currentArg!, undefined))
         }
 
         return arguments_
     }
 
 
-    createCallExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createCallExpressionAst(cst: SubhutiCst): SlimeExpression {
         // Support both CallExpression and CoverCallExpressionAndAsyncArrowHead
-        const isCallExpr = cst.name === SlimeJavascriptParser.prototype.CallExpression?.name || cst.name === 'CallExpression'
+        const isCallExpr = cst.name === SlimeParser.prototype.CallExpression?.name || cst.name === 'CallExpression'
         const isCoverExpr = cst.name === 'CoverCallExpressionAndAsyncArrowHead'
 
         if (!isCallExpr && !isCoverExpr) {
@@ -290,7 +290,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
         if (cst.children.length === 1) {
             // 单个子节点，可能是SuperCall
             const first = cst.children[0]
-            if (first.name === SlimeJavascriptParser.prototype.SuperCall?.name) {
+            if (first.name === SlimeParser.prototype.SuperCall?.name) {
                 return SlimeCstToAstUtil.createSuperCallAst(first)
             }
             return SlimeCstToAstUtil.createExpressionAst(first)
@@ -301,7 +301,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
         // children[1]: Arguments (第一次调�?
         // children[2+]: Dot/Identifier/Arguments（链式调用）
 
-        let current: SlimeJavascriptExpression
+        let current: SlimeExpression
         const firstChild = cst.children[0]
 
         // 处理第一个子节点
@@ -309,11 +309,11 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             // CoverCallExpressionAndAsyncArrowHead 结构: [MemberExpression, Arguments]
             // 递归处理�?
             current = SlimeCstToAstUtil.createCallExpressionAst(firstChild)
-        } else if (firstChild.name === SlimeJavascriptParser.prototype.MemberExpression?.name || firstChild.name === 'MemberExpression') {
+        } else if (firstChild.name === SlimeParser.prototype.MemberExpression?.name || firstChild.name === 'MemberExpression') {
             current = SlimeCstToAstUtil.createMemberExpressionAst(firstChild)
-        } else if (firstChild.name === SlimeJavascriptParser.prototype.SuperCall?.name || firstChild.name === 'SuperCall') {
+        } else if (firstChild.name === SlimeParser.prototype.SuperCall?.name || firstChild.name === 'SuperCall') {
             current = SlimeCstToAstUtil.createSuperCallAst(firstChild)
-        } else if (firstChild.name === SlimeJavascriptParser.prototype.ImportCall?.name || firstChild.name === 'ImportCall') {
+        } else if (firstChild.name === SlimeParser.prototype.ImportCall?.name || firstChild.name === 'ImportCall') {
             current = SlimeCstToAstUtil.createImportCallAst(firstChild)
         } else {
             // 尝试作为表达式处�?
@@ -324,44 +324,44 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
         for (let i = 1; i < cst.children.length; i++) {
             const child = cst.children[i]
 
-            if (child.name === SlimeJavascriptParser.prototype.Arguments?.name || child.name === 'Arguments') {
+            if (child.name === SlimeParser.prototype.Arguments?.name || child.name === 'Arguments') {
                 // () - 函数调用
                 const args = SlimeCstToAstUtil.createArgumentsAst(child)
-                current = SlimeJavascriptCreateUtils.createCallExpression(current, args) as SlimeJavascriptExpression
+                current = SlimeAstCreateUtils.createCallExpression(current, args) as SlimeExpression
 
             } else if (child.name === 'DotMemberExpression') {
                 // DotMemberExpression包含Dot和IdentifierName (旧版兼容)
                 const dotChild = child.children[0]  // Dot token
                 const identifierNameCst = child.children[1]  // IdentifierName
                 const tokenCst = identifierNameCst.children[0]  // 实际的token（Identifier或关键字�?
-                const property = SlimeJavascriptCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
-                const dotOp = SlimeJavascriptTokenCreateUtils.createDotToken(dotChild.loc)
-                current = SlimeJavascriptCreateUtils.createMemberExpression(current, dotOp, property)
+                const property = SlimeAstCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
+                const dotOp = SlimeTokenCreateUtils.createDotToken(dotChild.loc)
+                current = SlimeAstCreateUtils.createMemberExpression(current, dotOp, property)
 
             } else if (child.name === 'Dot') {
                 // Es2025Parser产生的是直接�?Dot token + IdentifierName
-                const dotOp = SlimeJavascriptTokenCreateUtils.createDotToken(child.loc)
+                const dotOp = SlimeTokenCreateUtils.createDotToken(child.loc)
 
                 // 下一个child应该是IdentifierName或PrivateIdentifier
                 const nextChild = cst.children[i + 1]
-                let property: SlimeJavascriptIdentifier | null = null
+                let property: SlimeIdentifier | null = null
                 if (nextChild) {
-                    if (nextChild.name === SlimeJavascriptParser.prototype.IdentifierName?.name || nextChild.name === 'IdentifierName') {
+                    if (nextChild.name === SlimeParser.prototype.IdentifierName?.name || nextChild.name === 'IdentifierName') {
                         const tokenCst = nextChild.children[0]
-                        property = SlimeJavascriptCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
+                        property = SlimeAstCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
                         i++ // 跳过已处理的IdentifierName
                     } else if (nextChild.name === 'PrivateIdentifier') {
-                        property = SlimeJavascriptCreateUtils.createIdentifier(nextChild.value, nextChild.loc)
+                        property = SlimeAstCreateUtils.createIdentifier(nextChild.value, nextChild.loc)
                         i++ // 跳过已处理的PrivateIdentifier
                     }
                 }
-                current = SlimeJavascriptCreateUtils.createMemberExpression(current, dotOp, property)
+                current = SlimeAstCreateUtils.createMemberExpression(current, dotOp, property)
 
             } else if (child.name === 'BracketExpression') {
                 // [expr] - computed property (旧版兼容)
                 const propertyExpression = SlimeCstToAstUtil.createExpressionAst(child.children[1])
                 current = {
-                    type: SlimeJavascriptAstTypeName.MemberExpression,
+                    type: SlimeAstTypeName.MemberExpression,
                     object: current,
                     property: propertyExpression,
                     computed: true,
@@ -375,7 +375,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
                 if (expressionChild && expressionChild.name !== 'RBracket') {
                     const propertyExpression = SlimeCstToAstUtil.createExpressionAst(expressionChild)
                     current = {
-                        type: SlimeJavascriptAstTypeName.MemberExpression,
+                        type: SlimeAstTypeName.MemberExpression,
                         object: current,
                         property: propertyExpression,
                         computed: true,
@@ -385,7 +385,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
                     i += 2 // 跳过Expression和RBracket
                 }
 
-            } else if (child.name === SlimeJavascriptParser.prototype.TemplateLiteral?.name || child.name === 'TemplateLiteral') {
+            } else if (child.name === SlimeParser.prototype.TemplateLiteral?.name || child.name === 'TemplateLiteral') {
                 // `template` - Tagged Template
                 const quasi = SlimeCstToAstUtil.createTemplateLiteralAst(child)
                 current = {
@@ -410,7 +410,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
      * CallMemberExpression CST �?AST
      * CallMemberExpression -> MemberExpression Arguments
      */
-    createCallMemberExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createCallMemberExpressionAst(cst: SubhutiCst): SlimeExpression {
         return SlimeCstToAstUtil.createCallExpressionAst(cst)
     }
 
@@ -419,7 +419,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
     createNewExpressionAst(cst: SubhutiCst): any {
         // 支持两种类型：NewExpression �?NewMemberExpressionArguments
         const isNewMemberExpr = cst.name === 'NewMemberExpressionArguments'
-        const isNewExpr = cst.name === SlimeJavascriptParser.prototype.NewExpression?.name
+        const isNewExpr = cst.name === SlimeParser.prototype.NewExpression?.name
 
         if (!isNewMemberExpr && !isNewExpr) {
             throw new Error('createNewExpressionAst: 不支持的类型 ' + cst.name)
@@ -435,7 +435,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             // 提取 new token
             const newCst = cst.children[0]
             if (newCst && (newCst.name === 'New' || newCst.value === 'new')) {
-                newToken = SlimeJavascriptTokenCreateUtils.createNewToken(newCst.loc)
+                newToken = SlimeTokenCreateUtils.createNewToken(newCst.loc)
             }
 
             // 提取 Arguments 中的 LParen/RParen tokens
@@ -443,9 +443,9 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             if (argsCst && argsCst.children) {
                 for (const child of argsCst.children) {
                     if (child.name === 'LParen' || child.value === '(') {
-                        lParenToken = SlimeJavascriptTokenCreateUtils.createLParenToken(child.loc)
+                        lParenToken = SlimeTokenCreateUtils.createLParenToken(child.loc)
                     } else if (child.name === 'RParen' || child.value === ')') {
-                        rParenToken = SlimeJavascriptTokenCreateUtils.createRParenToken(child.loc)
+                        rParenToken = SlimeTokenCreateUtils.createRParenToken(child.loc)
                     }
                 }
             }
@@ -453,7 +453,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             const calleeExpression = SlimeCstToAstUtil.createMemberExpressionAst(cst.children[1])
             const args = SlimeCstToAstUtil.createArgumentsAst(cst.children[2])
 
-            return SlimeJavascriptCreateUtils.createNewExpression(
+            return SlimeAstCreateUtils.createNewExpression(
                 calleeExpression, args, cst.loc,
                 newToken, lParenToken, rParenToken
             )
@@ -465,11 +465,11 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             const firstChild = cst.children[0]
             if (firstChild.name === 'New' || firstChild.value === 'new') {
                 // 这是 `new NewExpression` 形式，创建无参数�?NewExpression
-                const newToken = SlimeJavascriptTokenCreateUtils.createNewToken(firstChild.loc)
+                const newToken = SlimeTokenCreateUtils.createNewToken(firstChild.loc)
                 const innerNewExpr = cst.children[1]
                 const calleeExpression = SlimeCstToAstUtil.createNewExpressionAst(innerNewExpr)
 
-                return SlimeJavascriptCreateUtils.createNewExpression(
+                return SlimeAstCreateUtils.createNewExpression(
                     calleeExpression, [], cst.loc,
                     newToken, undefined, undefined
                 )
@@ -481,28 +481,28 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
     }
 
 
-    createSuperCallAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.SuperCall?.name);
+    createSuperCallAst(cst: SubhutiCst): SlimeExpression {
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.SuperCall?.name);
         // SuperCall -> SuperTok + Arguments
         // children[0]: SuperTok token
         // children[1]: Arguments CST
         const argumentsCst = cst.children[1]
-        const argumentsAst: SlimeJavascriptCallArgument[] = SlimeCstToAstUtil.createArgumentsAst(argumentsCst)
+        const argumentsAst: SlimeCallArgument[] = SlimeCstToAstUtil.createArgumentsAst(argumentsCst)
 
         // 创建Super节点作为callee
-        const superNode: SlimeJavascriptSuper = {
+        const superNode: SlimeSuper = {
             type: "Super",
             loc: cst.children[0].loc
         }
 
-        return SlimeJavascriptCreateUtils.createCallExpression(superNode, argumentsAst) as SlimeJavascriptExpression
+        return SlimeAstCreateUtils.createCallExpression(superNode, argumentsAst) as SlimeExpression
     }
 
-    createSuperPropertyAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createSuperPropertyAst(cst: SubhutiCst): SlimeExpression {
         // SuperProperty:
         // 形式1: SuperTok + Dot + IdentifierName
         // 形式2: SuperTok + LBracket + Expression + RBracket
-        const superNode: SlimeJavascriptSuper = {
+        const superNode: SlimeSuper = {
             type: "Super",
             loc: cst.children[0].loc
         }
@@ -512,7 +512,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             // super[expression] - 旧版兼容
             const propertyExpression = SlimeCstToAstUtil.createExpressionAst(second.children[1])
             return {
-                type: SlimeJavascriptAstTypeName.MemberExpression,
+                type: SlimeAstTypeName.MemberExpression,
                 object: superNode,
                 property: propertyExpression,
                 computed: true,
@@ -525,7 +525,7 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             const expressionCst = cst.children[2]
             const propertyExpression = SlimeCstToAstUtil.createExpressionAst(expressionCst)
             return {
-                type: SlimeJavascriptAstTypeName.MemberExpression,
+                type: SlimeAstTypeName.MemberExpression,
                 object: superNode,
                 property: propertyExpression,
                 computed: true,
@@ -536,17 +536,17 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             // Es2025Parser: super.property
             // children: [SuperTok, Dot, IdentifierName]
             const identifierNameCst = cst.children[2]
-            let property: SlimeJavascriptIdentifier
-            if (identifierNameCst.name === 'IdentifierName' || identifierNameCst.name === SlimeJavascriptParser.prototype.IdentifierName?.name) {
+            let property: SlimeIdentifier
+            if (identifierNameCst.name === 'IdentifierName' || identifierNameCst.name === SlimeParser.prototype.IdentifierName?.name) {
                 const tokenCst = identifierNameCst.children[0]
-                property = SlimeJavascriptCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
+                property = SlimeAstCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
             } else {
                 // 直接是token
-                property = SlimeJavascriptCreateUtils.createIdentifier(identifierNameCst.value, identifierNameCst.loc)
+                property = SlimeAstCreateUtils.createIdentifier(identifierNameCst.value, identifierNameCst.loc)
             }
 
             return {
-                type: SlimeJavascriptAstTypeName.MemberExpression,
+                type: SlimeAstTypeName.MemberExpression,
                 object: superNode,
                 property: property,
                 computed: false,
@@ -557,10 +557,10 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
             // 旧版兼容: super.property
             // children: [SuperTok, Dot, Identifier]
             const propToken = cst.children[2]
-            const property = SlimeJavascriptCreateUtils.createIdentifier(propToken.value, propToken.loc)
+            const property = SlimeAstCreateUtils.createIdentifier(propToken.value, propToken.loc)
 
             return {
-                type: SlimeJavascriptAstTypeName.MemberExpression,
+                type: SlimeAstTypeName.MemberExpression,
                 object: superNode,
                 property: property,
                 computed: false,
@@ -570,23 +570,23 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
         }
     }
 
-    createMetaPropertyAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createMetaPropertyAst(cst: SubhutiCst): SlimeExpression {
         // MetaProperty: children[0]是NewTarget或ImportMeta
         const first = cst.children[0]
-        if (first.name === SlimeJavascriptParser.prototype.NewTarget?.name) {
+        if (first.name === SlimeParser.prototype.NewTarget?.name) {
             // new.target
             return {
                 type: 'MetaProperty',
-                meta: SlimeJavascriptCreateUtils.createIdentifier('new', first.loc),
-                property: SlimeJavascriptCreateUtils.createIdentifier('target', first.loc),
+                meta: SlimeAstCreateUtils.createIdentifier('new', first.loc),
+                property: SlimeAstCreateUtils.createIdentifier('target', first.loc),
                 loc: cst.loc
             } as any
         } else {
             // import.meta
             return {
                 type: 'MetaProperty',
-                meta: SlimeJavascriptCreateUtils.createIdentifier('import', first.loc),
-                property: SlimeJavascriptCreateUtils.createIdentifier('meta', first.loc),
+                meta: SlimeAstCreateUtils.createIdentifier('import', first.loc),
+                property: SlimeAstCreateUtils.createIdentifier('meta', first.loc),
                 loc: cst.loc
             } as any
         }
@@ -598,17 +598,17 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
      * CoverCallExpressionAndAsyncArrowHead CST �?AST
      * 这是一�?cover grammar，通常作为 CallExpression 处理
      */
-    createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createCoverCallExpressionAndAsyncArrowHeadAst(cst: SubhutiCst): SlimeExpression {
         return SlimeCstToAstUtil.createCallExpressionAst(cst)
     }
 
 
 
-    createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.LeftHandSideExpression?.name);
+    createLeftHandSideExpressionAst(cst: SubhutiCst): SlimeExpression {
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.LeftHandSideExpression?.name);
         // 容错：Parser在ASI场景下可能生成不完整的CST，返回空标识�?
         if (!cst.children || cst.children.length === 0) {
-            return SlimeJavascriptCreateUtils.createIdentifier('', cst.loc)
+            return SlimeAstCreateUtils.createIdentifier('', cst.loc)
         }
         if (cst.children.length > 1) {
 
@@ -619,4 +619,4 @@ export class SlimeJavascriptMemberCallCstToAstSingle {
 }
 
 
-export const SlimeJavascriptMemberCallCstToAst = new SlimeJavascriptMemberCallCstToAstSingle()
+export const SlimeMemberCallCstToAst = new SlimeMemberCallCstToAstSingle()

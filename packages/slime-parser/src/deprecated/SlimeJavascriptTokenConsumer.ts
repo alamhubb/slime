@@ -15,13 +15,13 @@
  */
 
 import {
-    SlimeJavascriptBinaryOperatorTokenTypes,
-    SlimeJavascriptContextualKeywordTokenTypes,
-    SlimeJavascriptTokenType, SlimeJavascriptReservedWordTokenTypes, SlimeJavascriptUnaryOperatorTokenTypes
+    SlimeBinaryOperatorTokenTypes,
+    SlimeContextualKeywordTokenTypes,
+    SlimeTokenType, SlimeReservedWordTokenTypes, SlimeUnaryOperatorTokenTypes
 } from "slime-token"
 import { SubhutiTokenConsumer, LexicalGoal } from "subhuti"
 
-export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
+export default class SlimeTokenConsumer extends SubhutiTokenConsumer {
 
     // ============================================
     // 软关键字消费辅助方法
@@ -39,8 +39,8 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      */
     protected consumeIdentifierValue(value: string) {
         const token = this.parser.curToken
-        if (token?.tokenName === SlimeJavascriptTokenType.IdentifierName && token.tokenValue === value) {
-            return this.consume(SlimeJavascriptTokenType.IdentifierName)
+        if (token?.tokenName === SlimeTokenType.IdentifierName && token.tokenValue === value) {
+            return this.consume(SlimeTokenType.IdentifierName)
         }
         // 标记解析失败
         this.parser._markParseFail()
@@ -52,87 +52,87 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
     // ============================================
 
     Await() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Await)
+        return this.consume(SlimeReservedWordTokenTypes.Await)
     }
 
     Break() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Break)
+        return this.consume(SlimeReservedWordTokenTypes.Break)
     }
 
     Case() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Case)
+        return this.consume(SlimeReservedWordTokenTypes.Case)
     }
 
     Catch() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Catch)
+        return this.consume(SlimeReservedWordTokenTypes.Catch)
     }
 
     Class() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Class)
+        return this.consume(SlimeReservedWordTokenTypes.Class)
     }
 
     Const() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Const)
+        return this.consume(SlimeReservedWordTokenTypes.Const)
     }
 
     Continue() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Continue)
+        return this.consume(SlimeReservedWordTokenTypes.Continue)
     }
 
     Debugger() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Debugger)
+        return this.consume(SlimeReservedWordTokenTypes.Debugger)
     }
 
     Default() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Default)
+        return this.consume(SlimeReservedWordTokenTypes.Default)
     }
 
     Do() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Do)
+        return this.consume(SlimeReservedWordTokenTypes.Do)
     }
 
     Else() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Else)
+        return this.consume(SlimeReservedWordTokenTypes.Else)
     }
 
     Enum() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Enum)
+        return this.consume(SlimeReservedWordTokenTypes.Enum)
     }
 
     Export() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Export)
+        return this.consume(SlimeReservedWordTokenTypes.Export)
     }
 
     Extends() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Extends)
+        return this.consume(SlimeReservedWordTokenTypes.Extends)
     }
 
     False() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.False)
+        return this.consume(SlimeReservedWordTokenTypes.False)
     }
 
     Finally() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Finally)
+        return this.consume(SlimeReservedWordTokenTypes.Finally)
     }
 
     For() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.For)
+        return this.consume(SlimeReservedWordTokenTypes.For)
     }
 
     Function() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Function)
+        return this.consume(SlimeReservedWordTokenTypes.Function)
     }
 
     If() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.If)
+        return this.consume(SlimeReservedWordTokenTypes.If)
     }
 
     Import() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Import)
+        return this.consume(SlimeReservedWordTokenTypes.Import)
     }
 
     New() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.New)
+        return this.consume(SlimeReservedWordTokenTypes.New)
     }
 
     /**
@@ -140,51 +140,51 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 规范 A.1: NullLiteral :: null
      */
     NullLiteral() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.NullLiteral)
+        return this.consume(SlimeReservedWordTokenTypes.NullLiteral)
     }
 
     Return() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Return)
+        return this.consume(SlimeReservedWordTokenTypes.Return)
     }
 
     Super() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Super)
+        return this.consume(SlimeReservedWordTokenTypes.Super)
     }
 
     Switch() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Switch)
+        return this.consume(SlimeReservedWordTokenTypes.Switch)
     }
 
     This() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.This)
+        return this.consume(SlimeReservedWordTokenTypes.This)
     }
 
     Throw() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Throw)
+        return this.consume(SlimeReservedWordTokenTypes.Throw)
     }
 
     True() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.True)
+        return this.consume(SlimeReservedWordTokenTypes.True)
     }
 
     Try() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Try)
+        return this.consume(SlimeReservedWordTokenTypes.Try)
     }
 
 
     Var() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Var)
+        return this.consume(SlimeReservedWordTokenTypes.Var)
     }
     While() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.While)
+        return this.consume(SlimeReservedWordTokenTypes.While)
     }
 
     With() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.With)
+        return this.consume(SlimeReservedWordTokenTypes.With)
     }
 
     Yield() {
-        return this.consume(SlimeJavascriptReservedWordTokenTypes.Yield)
+        return this.consume(SlimeReservedWordTokenTypes.Yield)
     }
 
     /**
@@ -193,26 +193,26 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 注意：let 在非严格模式下可作为标识符，因此作为软关键字处理
      */
     Let() {
-        return this.consumeIdentifierValue(SlimeJavascriptContextualKeywordTokenTypes.Let)
+        return this.consumeIdentifierValue(SlimeContextualKeywordTokenTypes.Let)
     }
 
     Void() {
-        return this.consume(SlimeJavascriptUnaryOperatorTokenTypes.Void)
+        return this.consume(SlimeUnaryOperatorTokenTypes.Void)
     }
 
     Typeof() {
-        return this.consume(SlimeJavascriptUnaryOperatorTokenTypes.Typeof)
+        return this.consume(SlimeUnaryOperatorTokenTypes.Typeof)
     }
 
     In() {
-        return this.consume(SlimeJavascriptBinaryOperatorTokenTypes.In)
+        return this.consume(SlimeBinaryOperatorTokenTypes.In)
     }
 
     Instanceof() {
-        return this.consume(SlimeJavascriptBinaryOperatorTokenTypes.Instanceof)
+        return this.consume(SlimeBinaryOperatorTokenTypes.Instanceof)
     }
     Delete() {
-        return this.consume(SlimeJavascriptUnaryOperatorTokenTypes.Delete)
+        return this.consume(SlimeUnaryOperatorTokenTypes.Delete)
     }
 
     // ============================================
@@ -227,7 +227,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 注意：async 可作为标识符使用，如 `let async = 1`
      */
     Async() {
-        return this.consumeIdentifierValue(SlimeJavascriptContextualKeywordTokenTypes.Async)
+        return this.consumeIdentifierValue(SlimeContextualKeywordTokenTypes.Async)
     }
 
     /**
@@ -236,7 +236,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 注意：非严格模式下可作为标识符
      */
     Static() {
-        return this.consumeIdentifierValue(SlimeJavascriptContextualKeywordTokenTypes.Static)
+        return this.consumeIdentifierValue(SlimeContextualKeywordTokenTypes.Static)
     }
 
     /**
@@ -244,7 +244,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 用于 import/export 的重命名
      */
     As() {
-        return this.consumeIdentifierValue(SlimeJavascriptContextualKeywordTokenTypes.As)
+        return this.consumeIdentifierValue(SlimeContextualKeywordTokenTypes.As)
     }
 
     /**
@@ -252,7 +252,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 用于 getter 方法定义
      */
     Get() {
-        return this.consumeIdentifierValue(SlimeJavascriptContextualKeywordTokenTypes.Get)
+        return this.consumeIdentifierValue(SlimeContextualKeywordTokenTypes.Get)
     }
 
     /**
@@ -260,7 +260,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 用于 setter 方法定义
      */
     Set() {
-        return this.consumeIdentifierValue(SlimeJavascriptContextualKeywordTokenTypes.Set)
+        return this.consumeIdentifierValue(SlimeContextualKeywordTokenTypes.Set)
     }
 
     /**
@@ -268,7 +268,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 用于 for-of 语句
      */
     Of() {
-        return this.consumeIdentifierValue(SlimeJavascriptContextualKeywordTokenTypes.Of)
+        return this.consumeIdentifierValue(SlimeContextualKeywordTokenTypes.Of)
     }
 
     /**
@@ -276,7 +276,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 用于 new.target
      */
     Target() {
-        return this.consumeIdentifierValue(SlimeJavascriptContextualKeywordTokenTypes.Target)
+        return this.consumeIdentifierValue(SlimeContextualKeywordTokenTypes.Target)
     }
 
     /**
@@ -284,7 +284,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 用于 import.meta
      */
     Meta() {
-        return this.consumeIdentifierValue(SlimeJavascriptContextualKeywordTokenTypes.Meta)
+        return this.consumeIdentifierValue(SlimeContextualKeywordTokenTypes.Meta)
     }
 
     /**
@@ -292,7 +292,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 用于 import/export 语句
      */
     From() {
-        return this.consumeIdentifierValue(SlimeJavascriptContextualKeywordTokenTypes.From)
+        return this.consumeIdentifierValue(SlimeContextualKeywordTokenTypes.From)
     }
 
     // ============================================
@@ -309,19 +309,19 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * - LegacyOctalIntegerLiteral (如 077, Annex B)
      */
     NumericLiteral() {
-        return this.consume(SlimeJavascriptTokenType.NumericLiteral)
+        return this.consume(SlimeTokenType.NumericLiteral)
     }
 
     StringLiteral() {
-        return this.consume(SlimeJavascriptTokenType.StringLiteral)
+        return this.consume(SlimeTokenType.StringLiteral)
     }
 
     NoSubstitutionTemplate() {
-        return this.consume(SlimeJavascriptTokenType.NoSubstitutionTemplate)
+        return this.consume(SlimeTokenType.NoSubstitutionTemplate)
     }
 
     TemplateHead() {
-        return this.consume(SlimeJavascriptTokenType.TemplateHead)
+        return this.consume(SlimeTokenType.TemplateHead)
     }
 
     /**
@@ -329,7 +329,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 使用 InputElementTemplateTail 词法目标，确保 } 被识别为模板部分而非 RBrace
      */
     TemplateMiddle() {
-        return this.consume(SlimeJavascriptTokenType.TemplateMiddle, LexicalGoal.InputElementTemplateTail)
+        return this.consume(SlimeTokenType.TemplateMiddle, LexicalGoal.InputElementTemplateTail)
     }
 
     /**
@@ -337,11 +337,11 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 使用 InputElementTemplateTail 词法目标，确保 } 被识别为模板部分而非 RBrace
      */
     TemplateTail() {
-        return this.consume(SlimeJavascriptTokenType.TemplateTail, LexicalGoal.InputElementTemplateTail)
+        return this.consume(SlimeTokenType.TemplateTail, LexicalGoal.InputElementTemplateTail)
     }
 
     RegularExpressionLiteral() {
-        return this.consume(SlimeJavascriptTokenType.RegularExpressionLiteral)
+        return this.consume(SlimeTokenType.RegularExpressionLiteral)
     }
 
     // ============================================
@@ -353,7 +353,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 只能出现在文件开头，由 Parser 的 Program 规则显式调用
      */
     HashbangComment() {
-        return this.consume(SlimeJavascriptTokenType.HashbangComment)
+        return this.consume(SlimeTokenType.HashbangComment)
     }
 
     // ============================================
@@ -365,7 +365,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 规范: IdentifierName :: IdentifierStart | IdentifierName IdentifierPart
      */
     IdentifierName() {
-        return this.consume(SlimeJavascriptTokenType.IdentifierName)
+        return this.consume(SlimeTokenType.IdentifierName)
     }
 
     /**
@@ -373,7 +373,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
      * 规范: PrivateIdentifier :: # IdentifierName
      */
     PrivateIdentifier() {
-        return this.consume(SlimeJavascriptTokenType.PrivateIdentifier)
+        return this.consume(SlimeTokenType.PrivateIdentifier)
     }
     
     // ============================================
@@ -381,7 +381,7 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
     // ============================================
 
     UnsignedRightShiftAssign() {
-        return this.consume(SlimeJavascriptTokenType.UnsignedRightShiftAssign)
+        return this.consume(SlimeTokenType.UnsignedRightShiftAssign)
     }
 
     // ============================================
@@ -389,43 +389,43 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
     // ============================================
 
     Ellipsis() {
-        return this.consume(SlimeJavascriptTokenType.Ellipsis)
+        return this.consume(SlimeTokenType.Ellipsis)
     }
 
     UnsignedRightShift() {
-        return this.consume(SlimeJavascriptTokenType.UnsignedRightShift)
+        return this.consume(SlimeTokenType.UnsignedRightShift)
     }
 
     StrictEqual() {
-        return this.consume(SlimeJavascriptTokenType.StrictEqual)
+        return this.consume(SlimeTokenType.StrictEqual)
     }
 
     StrictNotEqual() {
-        return this.consume(SlimeJavascriptTokenType.StrictNotEqual)
+        return this.consume(SlimeTokenType.StrictNotEqual)
     }
 
     LeftShiftAssign() {
-        return this.consume(SlimeJavascriptTokenType.LeftShiftAssign)
+        return this.consume(SlimeTokenType.LeftShiftAssign)
     }
 
     RightShiftAssign() {
-        return this.consume(SlimeJavascriptTokenType.RightShiftAssign)
+        return this.consume(SlimeTokenType.RightShiftAssign)
     }
 
     ExponentiationAssign() {
-        return this.consume(SlimeJavascriptTokenType.ExponentiationAssign)
+        return this.consume(SlimeTokenType.ExponentiationAssign)
     }
 
     LogicalAndAssign() {
-        return this.consume(SlimeJavascriptTokenType.LogicalAndAssign)
+        return this.consume(SlimeTokenType.LogicalAndAssign)
     }
 
     LogicalOrAssign() {
-        return this.consume(SlimeJavascriptTokenType.LogicalOrAssign)
+        return this.consume(SlimeTokenType.LogicalOrAssign)
     }
 
     NullishCoalescingAssign() {
-        return this.consume(SlimeJavascriptTokenType.NullishCoalescingAssign)
+        return this.consume(SlimeTokenType.NullishCoalescingAssign)
     }
 
     // ============================================
@@ -433,91 +433,91 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
     // ============================================
 
     Arrow() {
-        return this.consume(SlimeJavascriptTokenType.Arrow)
+        return this.consume(SlimeTokenType.Arrow)
     }
 
     PlusAssign() {
-        return this.consume(SlimeJavascriptTokenType.PlusAssign)
+        return this.consume(SlimeTokenType.PlusAssign)
     }
 
     MinusAssign() {
-        return this.consume(SlimeJavascriptTokenType.MinusAssign)
+        return this.consume(SlimeTokenType.MinusAssign)
     }
 
     MultiplyAssign() {
-        return this.consume(SlimeJavascriptTokenType.MultiplyAssign)
+        return this.consume(SlimeTokenType.MultiplyAssign)
     }
 
     DivideAssign() {
-        return this.consume(SlimeJavascriptTokenType.DivideAssign)
+        return this.consume(SlimeTokenType.DivideAssign)
     }
 
     ModuloAssign() {
-        return this.consume(SlimeJavascriptTokenType.ModuloAssign)
+        return this.consume(SlimeTokenType.ModuloAssign)
     }
 
     LeftShift() {
-        return this.consume(SlimeJavascriptTokenType.LeftShift)
+        return this.consume(SlimeTokenType.LeftShift)
     }
 
     RightShift() {
-        return this.consume(SlimeJavascriptTokenType.RightShift)
+        return this.consume(SlimeTokenType.RightShift)
     }
 
     LessEqual() {
-        return this.consume(SlimeJavascriptTokenType.LessEqual)
+        return this.consume(SlimeTokenType.LessEqual)
     }
 
     GreaterEqual() {
-        return this.consume(SlimeJavascriptTokenType.GreaterEqual)
+        return this.consume(SlimeTokenType.GreaterEqual)
     }
 
     Equal() {
-        return this.consume(SlimeJavascriptTokenType.Equal)
+        return this.consume(SlimeTokenType.Equal)
     }
 
     NotEqual() {
-        return this.consume(SlimeJavascriptTokenType.NotEqual)
+        return this.consume(SlimeTokenType.NotEqual)
     }
 
     LogicalAnd() {
-        return this.consume(SlimeJavascriptTokenType.LogicalAnd)
+        return this.consume(SlimeTokenType.LogicalAnd)
     }
 
     LogicalOr() {
-        return this.consume(SlimeJavascriptTokenType.LogicalOr)
+        return this.consume(SlimeTokenType.LogicalOr)
     }
 
     NullishCoalescing() {
-        return this.consume(SlimeJavascriptTokenType.NullishCoalescing)
+        return this.consume(SlimeTokenType.NullishCoalescing)
     }
 
     Increment() {
-        return this.consume(SlimeJavascriptTokenType.Increment)
+        return this.consume(SlimeTokenType.Increment)
     }
 
     Decrement() {
-        return this.consume(SlimeJavascriptTokenType.Decrement)
+        return this.consume(SlimeTokenType.Decrement)
     }
 
     Exponentiation() {
-        return this.consume(SlimeJavascriptTokenType.Exponentiation)
+        return this.consume(SlimeTokenType.Exponentiation)
     }
 
     BitwiseAndAssign() {
-        return this.consume(SlimeJavascriptTokenType.BitwiseAndAssign)
+        return this.consume(SlimeTokenType.BitwiseAndAssign)
     }
 
     BitwiseOrAssign() {
-        return this.consume(SlimeJavascriptTokenType.BitwiseOrAssign)
+        return this.consume(SlimeTokenType.BitwiseOrAssign)
     }
 
     BitwiseXorAssign() {
-        return this.consume(SlimeJavascriptTokenType.BitwiseXorAssign)
+        return this.consume(SlimeTokenType.BitwiseXorAssign)
     }
 
     OptionalChaining() {
-        return this.consume(SlimeJavascriptTokenType.OptionalChaining)
+        return this.consume(SlimeTokenType.OptionalChaining)
     }
     
     // ============================================
@@ -525,99 +525,99 @@ export default class SlimeJavascriptTokenConsumer extends SubhutiTokenConsumer {
     // ============================================
 
     LBrace() {
-        return this.consume(SlimeJavascriptTokenType.LBrace)
+        return this.consume(SlimeTokenType.LBrace)
     }
 
     RBrace() {
-        return this.consume(SlimeJavascriptTokenType.RBrace)
+        return this.consume(SlimeTokenType.RBrace)
     }
 
     LParen() {
-        return this.consume(SlimeJavascriptTokenType.LParen)
+        return this.consume(SlimeTokenType.LParen)
     }
 
     RParen() {
-        return this.consume(SlimeJavascriptTokenType.RParen)
+        return this.consume(SlimeTokenType.RParen)
     }
 
     LBracket() {
-        return this.consume(SlimeJavascriptTokenType.LBracket)
+        return this.consume(SlimeTokenType.LBracket)
     }
 
     RBracket() {
-        return this.consume(SlimeJavascriptTokenType.RBracket)
+        return this.consume(SlimeTokenType.RBracket)
     }
 
     Dot() {
-        return this.consume(SlimeJavascriptTokenType.Dot)
+        return this.consume(SlimeTokenType.Dot)
     }
 
     Semicolon() {
-        return this.consume(SlimeJavascriptTokenType.Semicolon)
+        return this.consume(SlimeTokenType.Semicolon)
     }
 
     Comma() {
-        return this.consume(SlimeJavascriptTokenType.Comma)
+        return this.consume(SlimeTokenType.Comma)
     }
 
     Less() {
-        return this.consume(SlimeJavascriptTokenType.Less)
+        return this.consume(SlimeTokenType.Less)
     }
 
     Greater() {
-        return this.consume(SlimeJavascriptTokenType.Greater)
+        return this.consume(SlimeTokenType.Greater)
     }
 
     Plus() {
-        return this.consume(SlimeJavascriptTokenType.Plus)
+        return this.consume(SlimeTokenType.Plus)
     }
 
     Minus() {
-        return this.consume(SlimeJavascriptTokenType.Minus)
+        return this.consume(SlimeTokenType.Minus)
     }
 
     Asterisk() {
-        return this.consume(SlimeJavascriptTokenType.Asterisk)
+        return this.consume(SlimeTokenType.Asterisk)
     }
 
     Slash() {
-        return this.consume(SlimeJavascriptTokenType.Slash)
+        return this.consume(SlimeTokenType.Slash)
     }
 
     Modulo() {
-        return this.consume(SlimeJavascriptTokenType.Modulo)
+        return this.consume(SlimeTokenType.Modulo)
     }
 
     BitwiseAnd() {
-        return this.consume(SlimeJavascriptTokenType.BitwiseAnd)
+        return this.consume(SlimeTokenType.BitwiseAnd)
     }
 
     BitwiseOr() {
-        return this.consume(SlimeJavascriptTokenType.BitwiseOr)
+        return this.consume(SlimeTokenType.BitwiseOr)
     }
 
     BitwiseXor() {
-        return this.consume(SlimeJavascriptTokenType.BitwiseXor)
+        return this.consume(SlimeTokenType.BitwiseXor)
     }
 
     BitwiseNot() {
-        return this.consume(SlimeJavascriptTokenType.BitwiseNot)
+        return this.consume(SlimeTokenType.BitwiseNot)
     }
 
     LogicalNot() {
-        return this.consume(SlimeJavascriptTokenType.LogicalNot)
+        return this.consume(SlimeTokenType.LogicalNot)
     }
 
     Question() {
-        return this.consume(SlimeJavascriptTokenType.Question)
+        return this.consume(SlimeTokenType.Question)
     }
 
     Colon() {
-        return this.consume(SlimeJavascriptTokenType.Colon)
+        return this.consume(SlimeTokenType.Colon)
     }
 
     Assign() {
-        return this.consume(SlimeJavascriptTokenType.Assign)
+        return this.consume(SlimeTokenType.Assign)
     }
 }
 

@@ -3,14 +3,14 @@
  */
 import {SubhutiCst} from "subhuti";
 
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
-import {SlimeJavascriptCreateUtils, SlimeJavascriptExpression, SlimeJavascriptAstTypeName, SlimeJavascriptTokenCreateUtils} from "slime-ast";
+import SlimeParser from "../../../SlimeParser.ts";
+import { SlimeExpression, SlimeAstTypeName, SlimeTokenCreateUtils} from "slime-ast";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
-import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
+import {SlimeVariableCstToAstSingle} from "../statements/SlimeVariableCstToAst.ts";
 
-export class SlimeJavascriptExpressionCstToAstSingle {
-    createExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+export class SlimeExpressionCstToAstSingle {
+    createExpressionAst(cst: SubhutiCst): SlimeExpression {
         const cached = SlimeCstToAstUtil.expressionAstCache.get(cst)
         if (cached) {
             return cached
@@ -21,14 +21,14 @@ export class SlimeJavascriptExpressionCstToAstSingle {
     }
 
 
-    createExpressionAstUncached(cst: SubhutiCst): SlimeJavascriptExpression {
+    createExpressionAstUncached(cst: SubhutiCst): SlimeExpression {
         const astName = cst.name
         let left
-        if (astName === SlimeJavascriptParser.prototype.Expression?.name) {
+        if (astName === SlimeParser.prototype.Expression?.name) {
             // Expression 可能是逗号表达�?(SequenceExpression)
             // 结构: Expression -> AssignmentExpression | Expression, AssignmentExpression
             // 收集所有表达式
-            const expressions: SlimeJavascriptExpression[] = []
+            const expressions: SlimeExpression[] = []
             for (const child of cst.children || []) {
                 if (child.name === 'Comma' || child.value === ',') {
                     // 跳过逗号 token
@@ -50,57 +50,57 @@ export class SlimeJavascriptExpressionCstToAstSingle {
             } else {
                 throw new Error('Expression has no children')
             }
-        } else if (astName === SlimeJavascriptParser.prototype.Statement?.name) {
+        } else if (astName === SlimeParser.prototype.Statement?.name) {
             left = SlimeCstToAstUtil.createStatementAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.AssignmentExpression?.name) {
+        } else if (astName === SlimeParser.prototype.AssignmentExpression?.name) {
             left = SlimeCstToAstUtil.createAssignmentExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.ConditionalExpression?.name) {
+        } else if (astName === SlimeParser.prototype.ConditionalExpression?.name) {
             left = SlimeCstToAstUtil.createConditionalExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.LogicalORExpression?.name) {
+        } else if (astName === SlimeParser.prototype.LogicalORExpression?.name) {
             left = SlimeCstToAstUtil.createLogicalORExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.LogicalANDExpression?.name) {
+        } else if (astName === SlimeParser.prototype.LogicalANDExpression?.name) {
             left = SlimeCstToAstUtil.createLogicalANDExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.BitwiseORExpression?.name) {
+        } else if (astName === SlimeParser.prototype.BitwiseORExpression?.name) {
             left = SlimeCstToAstUtil.createBitwiseORExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.BitwiseXORExpression?.name) {
+        } else if (astName === SlimeParser.prototype.BitwiseXORExpression?.name) {
             left = SlimeCstToAstUtil.createBitwiseXORExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.BitwiseANDExpression?.name) {
+        } else if (astName === SlimeParser.prototype.BitwiseANDExpression?.name) {
             left = SlimeCstToAstUtil.createBitwiseANDExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.EqualityExpression?.name) {
+        } else if (astName === SlimeParser.prototype.EqualityExpression?.name) {
             left = SlimeCstToAstUtil.createEqualityExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.RelationalExpression?.name) {
+        } else if (astName === SlimeParser.prototype.RelationalExpression?.name) {
             left = SlimeCstToAstUtil.createRelationalExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.ShiftExpression?.name) {
+        } else if (astName === SlimeParser.prototype.ShiftExpression?.name) {
             left = SlimeCstToAstUtil.createShiftExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.AdditiveExpression?.name) {
+        } else if (astName === SlimeParser.prototype.AdditiveExpression?.name) {
             left = SlimeCstToAstUtil.createAdditiveExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.MultiplicativeExpression?.name) {
+        } else if (astName === SlimeParser.prototype.MultiplicativeExpression?.name) {
             left = SlimeCstToAstUtil.createMultiplicativeExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.UnaryExpression?.name) {
+        } else if (astName === SlimeParser.prototype.UnaryExpression?.name) {
             left = SlimeCstToAstUtil.createUnaryExpressionAst(cst)
         } else if (astName === 'PostfixExpression') {
             left = SlimeCstToAstUtil.createUpdateExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.UpdateExpression?.name || astName === 'UpdateExpression') {
+        } else if (astName === SlimeParser.prototype.UpdateExpression?.name || astName === 'UpdateExpression') {
             left = SlimeCstToAstUtil.createUpdateExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.LeftHandSideExpression?.name) {
+        } else if (astName === SlimeParser.prototype.LeftHandSideExpression?.name) {
             left = SlimeCstToAstUtil.createLeftHandSideExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.CallExpression?.name) {
+        } else if (astName === SlimeParser.prototype.CallExpression?.name) {
             left = SlimeCstToAstUtil.createCallExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.NewExpression?.name) {
+        } else if (astName === SlimeParser.prototype.NewExpression?.name) {
             left = SlimeCstToAstUtil.createNewExpressionAst(cst)
         } else if (astName === 'NewMemberExpressionArguments') {
             left = SlimeCstToAstUtil.createNewExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.MemberExpression?.name) {
+        } else if (astName === SlimeParser.prototype.MemberExpression?.name) {
             left = SlimeCstToAstUtil.createMemberExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.PrimaryExpression?.name) {
+        } else if (astName === SlimeParser.prototype.PrimaryExpression?.name) {
             left = SlimeCstToAstUtil.createPrimaryExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.YieldExpression?.name) {
+        } else if (astName === SlimeParser.prototype.YieldExpression?.name) {
             left = SlimeCstToAstUtil.createYieldExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.AwaitExpression?.name) {
+        } else if (astName === SlimeParser.prototype.AwaitExpression?.name) {
             left = SlimeCstToAstUtil.createAwaitExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.SuperProperty?.name) {
+        } else if (astName === SlimeParser.prototype.SuperProperty?.name) {
             left = SlimeCstToAstUtil.createSuperPropertyAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.MetaProperty?.name) {
+        } else if (astName === SlimeParser.prototype.MetaProperty?.name) {
             left = SlimeCstToAstUtil.createMetaPropertyAst(cst)
         } else if (astName === 'ShortCircuitExpression') {
             // ES2020: ShortCircuitExpression = LogicalORExpression | CoalesceExpression
@@ -129,13 +129,13 @@ export class SlimeJavascriptExpressionCstToAstSingle {
         } else if (astName === 'OptionalExpression') {
             // ES2020: Optional chaining (?.)
             left = SlimeCstToAstUtil.createOptionalExpressionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.ArrowFunction?.name || astName === 'ArrowFunction') {
+        } else if (astName === SlimeParser.prototype.ArrowFunction?.name || astName === 'ArrowFunction') {
             // 箭头函数
             left = SlimeCstToAstUtil.createArrowFunctionAst(cst)
         } else if (astName === 'AsyncArrowFunction') {
             // Async 箭头函数
             left = SlimeCstToAstUtil.createAsyncArrowFunctionAst(cst)
-        } else if (astName === SlimeJavascriptParser.prototype.ImportCall?.name || astName === 'ImportCall') {
+        } else if (astName === SlimeParser.prototype.ImportCall?.name || astName === 'ImportCall') {
             // ES2020: 动�?import()
             left = SlimeCstToAstUtil.createImportCallAst(cst)
         } else if (astName === 'PrivateIdentifier') {
@@ -148,13 +148,13 @@ export class SlimeJavascriptExpressionCstToAstSingle {
     }
 
 
-    createAssignmentExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.AssignmentExpression?.name);
+    createAssignmentExpressionAst(cst: SubhutiCst): SlimeExpression {
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.AssignmentExpression?.name);
 
         if (cst.children.length === 1) {
             const child = cst.children[0]
             // 检查是否是箭头函数
-            if (child.name === SlimeJavascriptParser.prototype.ArrowFunction?.name) {
+            if (child.name === SlimeParser.prototype.ArrowFunction?.name) {
                 return SlimeCstToAstUtil.createArrowFunctionAst(child)
             }
             // 否则作为表达式处�?
@@ -172,7 +172,7 @@ export class SlimeJavascriptExpressionCstToAstSingle {
         // AssignmentOperator节点下有子节�?PlusEq/MinusEq�?，需要从children[0].value获取
         const operator = (operatorCst.children && operatorCst.children[0]?.value) || operatorCst.value || '='
 
-        const ast: SlimeJavascriptAssignmentExpression = {
+        const ast: SlimeAssignmentExpression = {
             type: 'AssignmentExpression',
             operator: operator as any,
             left: left as any,
@@ -191,8 +191,8 @@ export class SlimeJavascriptExpressionCstToAstSingle {
         return token?.value || '='
     }
 
-    createConditionalExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.ConditionalExpression?.name);
+    createConditionalExpressionAst(cst: SubhutiCst): SlimeExpression {
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.ConditionalExpression?.name);
         const firstChild = cst.children[0]
         let test = SlimeCstToAstUtil.createExpressionAst(firstChild)
         let alternate
@@ -210,17 +210,17 @@ export class SlimeJavascriptExpressionCstToAstSingle {
             const colonCst = cst.children[3]
 
             if (questionCst && (questionCst.name === 'Question' || questionCst.value === '?')) {
-                questionToken = SlimeJavascriptTokenCreateUtils.createQuestionToken(questionCst.loc)
+                questionToken = SlimeTokenCreateUtils.createQuestionToken(questionCst.loc)
             }
             if (colonCst && (colonCst.name === 'Colon' || colonCst.value === ':')) {
-                colonToken = SlimeJavascriptTokenCreateUtils.createColonToken(colonCst.loc)
+                colonToken = SlimeTokenCreateUtils.createColonToken(colonCst.loc)
             }
 
             consequent = SlimeCstToAstUtil.createAssignmentExpressionAst(cst.children[2])
             alternate = SlimeCstToAstUtil.createAssignmentExpressionAst(cst.children[4])
         }
 
-        return SlimeJavascriptCreateUtils.createConditionalExpression(test, consequent, alternate, cst.loc, questionToken, colonToken)
+        return SlimeAstCreateUtils.createConditionalExpression(test, consequent, alternate, cst.loc, questionToken, colonToken)
     }
 
 
@@ -228,7 +228,7 @@ export class SlimeJavascriptExpressionCstToAstSingle {
      * 创建 CoalesceExpression AST（ES2020�?
      * 处理 ?? 空值合并运算符
      */
-    createCoalesceExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createCoalesceExpressionAst(cst: SubhutiCst): SlimeExpression {
         // CoalesceExpression -> BitwiseORExpression ( ?? BitwiseORExpression )*
         if (cst.children.length === 1) {
             return SlimeCstToAstUtil.createExpressionAst(cst.children[0])
@@ -240,7 +240,7 @@ export class SlimeJavascriptExpressionCstToAstSingle {
             const operator = cst.children[i]  // ?? token
             const right = SlimeCstToAstUtil.createExpressionAst(cst.children[i + 1])
             left = {
-                type: SlimeJavascriptAstTypeName.LogicalExpression,
+                type: SlimeAstTypeName.LogicalExpression,
                 operator: '??',
                 left: left,
                 right: right
@@ -254,7 +254,7 @@ export class SlimeJavascriptExpressionCstToAstSingle {
      * CoalesceExpressionHead CST 转 AST
      * CoalesceExpressionHead -> CoalesceExpression | BitwiseORExpression
      */
-    createCoalesceExpressionHeadAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createCoalesceExpressionHeadAst(cst: SubhutiCst): SlimeExpression {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             return SlimeCstToAstUtil.createExpressionAst(firstChild)
@@ -267,7 +267,7 @@ export class SlimeJavascriptExpressionCstToAstSingle {
      * ShortCircuitExpression CST �?AST（透传�?
      * ShortCircuitExpression -> LogicalORExpression | CoalesceExpression
      */
-    createShortCircuitExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createShortCircuitExpressionAst(cst: SubhutiCst): SlimeExpression {
         const firstChild = cst.children?.[0]
         if (firstChild) {
             return SlimeCstToAstUtil.createExpressionAst(firstChild)
@@ -280,7 +280,7 @@ export class SlimeJavascriptExpressionCstToAstSingle {
      * CST 结构：ShortCircuitExpressionTail -> LogicalORExpressionTail | CoalesceExpressionTail
      * LogicalORExpressionTail -> LogicalOr LogicalANDExpression LogicalORExpressionTail?
      */
-    createShortCircuitExpressionTailAst(left: SlimeJavascriptExpression, tailCst: SubhutiCst): SlimeJavascriptExpression {
+    createShortCircuitExpressionTailAst(left: SlimeExpression, tailCst: SubhutiCst): SlimeExpression {
         const tailChildren = tailCst.children || []
 
         // 如果�?ShortCircuitExpressionTail，获取内部的 tail
@@ -305,7 +305,7 @@ export class SlimeJavascriptExpressionCstToAstSingle {
                 const right = SlimeCstToAstUtil.createExpressionAst(rightCst)
 
                 result = {
-                    type: SlimeJavascriptAstTypeName.LogicalExpression,
+                    type: SlimeAstTypeName.LogicalExpression,
                     operator: operator,
                     left: result,
                     right: right,
@@ -331,7 +331,7 @@ export class SlimeJavascriptExpressionCstToAstSingle {
                 const right = SlimeCstToAstUtil.createExpressionAst(rightCst)
 
                 result = {
-                    type: SlimeJavascriptAstTypeName.LogicalExpression,
+                    type: SlimeAstTypeName.LogicalExpression,
                     operator: operator,
                     left: result,
                     right: right,
@@ -351,4 +351,4 @@ export class SlimeJavascriptExpressionCstToAstSingle {
 
 }
 
-export const SlimeJavascriptExpressionCstToAst = new SlimeJavascriptExpressionCstToAstSingle()
+export const SlimeExpressionCstToAst = new SlimeExpressionCstToAstSingle()

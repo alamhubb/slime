@@ -22,12 +22,12 @@ import type {
     SubhutiParserOptions, SubhutiTokenConsumerConstructor
 } from "subhuti"
 import {
-    SlimeJavascriptContextualKeywordTokenTypes,
-    SlimeJavascriptReservedWordTokenTypes,
-    SlimeJavascriptTokenType
+    SlimeContextualKeywordTokenTypes,
+    SlimeReservedWordTokenTypes,
+    SlimeTokenType
 } from "slime-token";
-import SlimeJavascriptTokenConsumer from "./SlimeJavascriptTokenConsumer.ts";
-import {slimeJavascriptTokens} from "./SlimeJavascriptTokens.ts";
+import SlimeTokenConsumer from "./SlimeTokenConsumer.ts";
+import {SlimeTokens} from "./SlimeTokens.ts";
 
 // ============================================
 // 保留字集合（用于 Identifier 验证）
@@ -58,7 +58,7 @@ import {slimeJavascriptTokens} from "./SlimeJavascriptTokens.ts";
 
 
 export const ReservedWords = new Set(
-    slimeJavascriptTokens
+    SlimeTokens
         .filter(token => token.isKeyword)  // 过滤出所有硬关键字 token
         .map(token => token.value!)        // 提取 value（'await', 'break' 等）
 )
@@ -207,7 +207,7 @@ function isValidIdentifierWithEscapes(name: string): boolean {
 // ============================================
 
 @Subhuti
-export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsumer = SlimeJavascriptTokenConsumer> extends SubhutiParser<T> {
+export default class SlimeParser<T extends SlimeTokenConsumer = SlimeTokenConsumer> extends SubhutiParser<T> {
     /**
      * 构造函数
      * @param sourceCode 原始源码，使用按需词法分析模式
@@ -216,10 +216,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     constructor(sourceCode: string = '', options?: SubhutiParserOptions<T>) {
         // 使用按需词法分析模式（On-Demand Lexing）
         // Parser 在需要 token 时告诉 Lexer 期望什么（InputElementDiv 或 InputElementRegExp）
-        const defaultTokenConsumer = SlimeJavascriptTokenConsumer as unknown as SubhutiTokenConsumerConstructor<T>
+        const defaultTokenConsumer = SlimeTokenConsumer as unknown as SubhutiTokenConsumerConstructor<T>
         super(sourceCode, {
             tokenConsumer: options?.tokenConsumer ?? defaultTokenConsumer,
-            tokenDefinitions: options?.tokenDefinitions ?? slimeJavascriptTokens
+            tokenDefinitions: options?.tokenDefinitions ?? SlimeTokens
         })
     }
 
@@ -229,10 +229,10 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     // ============================================
     /**
      * 检查当前 token 是否是指定的上下文关键字（软关键字）
-     * @param value 软关键字的值（如 SlimeJavascriptContextualKeywordTokenTypes.LET）
+     * @param value 软关键字的值（如 SlimeContextualKeywordTokenTypes.LET）
      */
     protected isContextual(value: string): boolean {
-        return this.match(SlimeJavascriptTokenType.IdentifierName) && this.curToken?.tokenValue === value
+        return this.match(SlimeTokenType.IdentifierName) && this.curToken?.tokenValue === value
     }
 
     /**
@@ -314,7 +314,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     protected isContextualPair(first: string, second: string): boolean {
         if (!this.isContextual(first)) return false
         const nextToken = this.peek(1)
-        return nextToken?.tokenName === SlimeJavascriptTokenType.IdentifierName && nextToken.tokenValue === second
+        return nextToken?.tokenName === SlimeTokenType.IdentifierName && nextToken.tokenValue === second
     }
 
     /**
@@ -420,7 +420,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     @SubhutiRule
     Identifier(): SubhutiCst | undefined {
         // 前瞻检查是否是 IdentifierName
-        if (!this.match(SlimeJavascriptTokenType.IdentifierName)) {
+        if (!this.match(SlimeTokenType.IdentifierName)) {
             return this.setParseFail()
         }
         const value = this.curToken!.tokenValue!
@@ -468,7 +468,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             {
                 alt: () => {
                     // 前瞻检查是否是 IdentifierName token
-                    if (!this.match(SlimeJavascriptTokenType.IdentifierName)) {
+                    if (!this.match(SlimeTokenType.IdentifierName)) {
                         this.setParseFail()
                     }
                     const value = this.curToken!.tokenValue!
@@ -598,7 +598,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
      * 使用 protected 以便子类重写 PrimaryExpression 时可以调用
      */
     protected consumeRegularExpressionLiteral() {
-        this.consume(SlimeJavascriptTokenType.RegularExpressionLiteral, LexicalGoal.InputElementRegExp)
+        this.consume(SlimeTokenType.RegularExpressionLiteral, LexicalGoal.InputElementRegExp)
     }
 
     /**
@@ -1800,7 +1800,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
 
         // 处理 [+In] PrivateIdentifier in ShiftExpression
         // PrivateIdentifier 是词法规则（A.1 Lexical Grammar），直接消费 token
-        if (In && this.lookahead(SlimeJavascriptTokenType.PrivateIdentifier, 1)) {
+        if (In && this.lookahead(SlimeTokenType.PrivateIdentifier, 1)) {
             this.tokenConsumer.PrivateIdentifier()
             this.tokenConsumer.In()
             this.ShiftExpression(params)
@@ -2676,7 +2676,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     @SubhutiRule
     SemicolonASI() {
         // 检查当前 token 是否是分号
-        if (this.match(SlimeJavascriptTokenType.Semicolon)) {
+        if (this.match(SlimeTokenType.Semicolon)) {
             this.tokenConsumer.Semicolon()
             return
         }
@@ -2717,7 +2717,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
         }
 
         // 条件 2：当前 token 是 }
-        if (this.match(SlimeJavascriptTokenType.RBrace)) {
+        if (this.match(SlimeTokenType.RBrace)) {
             return true
         }
 
@@ -2741,9 +2741,9 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
     @SubhutiRule
     ExpressionStatement(params: StatementParams = {}) {
         // [lookahead ∉ {{, function, async [no LineTerminator here] function, class, let [}]
-        this.assertLookaheadNotIn([SlimeJavascriptTokenType.LBrace, SlimeJavascriptTokenType.Function, SlimeJavascriptTokenType.Class])
-        this.assertNotContextualSequenceNoLT(SlimeJavascriptContextualKeywordTokenTypes.Async, SlimeJavascriptTokenType.Function)
-        this.assertNotContextualSequence(SlimeJavascriptContextualKeywordTokenTypes.Let, SlimeJavascriptTokenType.LBracket)
+        this.assertLookaheadNotIn([SlimeTokenType.LBrace, SlimeTokenType.Function, SlimeTokenType.Class])
+        this.assertNotContextualSequenceNoLT(SlimeContextualKeywordTokenTypes.Async, SlimeTokenType.Function)
+        this.assertNotContextualSequence(SlimeContextualKeywordTokenTypes.Let, SlimeTokenType.LBracket)
 
         this.Expression({...params, In: true})
         this.SemicolonASI()
@@ -2785,7 +2785,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
                     this.Expression({...params, In: true})
                     this.tokenConsumer.RParen()
                     this.IfStatementBody(params)
-                    this.assertLookaheadNot(SlimeJavascriptTokenType.Else)  // [lookahead ≠ else]
+                    this.assertLookaheadNot(SlimeTokenType.Else)  // [lookahead ≠ else]
                 }
             }
         ])
@@ -2918,7 +2918,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
                     this.tokenConsumer.For()
                     this.tokenConsumer.LParen()
                     // [lookahead ≠ let []
-                    this.assertNotContextualSequence(SlimeJavascriptContextualKeywordTokenTypes.Let, SlimeJavascriptTokenType.LBracket)
+                    this.assertNotContextualSequence(SlimeContextualKeywordTokenTypes.Let, SlimeTokenType.LBracket)
                     this.Option(() => this.Expression({...params, In: false}))
                     this.tokenConsumer.Semicolon()
                     this.Option(() => this.Expression({...params, In: true}))
@@ -2986,7 +2986,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
                 alt: () => {
                     this.tokenConsumer.For()
                     this.tokenConsumer.LParen()
-                    this.assertNotContextualSequence(SlimeJavascriptContextualKeywordTokenTypes.Let, SlimeJavascriptTokenType.LBracket)
+                    this.assertNotContextualSequence(SlimeContextualKeywordTokenTypes.Let, SlimeTokenType.LBracket)
                     this.LeftHandSideExpression(params)
                     this.tokenConsumer.In()
                     this.Expression({...params, In: true})
@@ -3037,8 +3037,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
                     this.tokenConsumer.For()
                     this.tokenConsumer.LParen()
                     // [lookahead ∉ {let, async of}]
-                    this.assertNotContextual(SlimeJavascriptContextualKeywordTokenTypes.Let)
-                    this.assertNotContextualPair(SlimeJavascriptContextualKeywordTokenTypes.Async, SlimeJavascriptContextualKeywordTokenTypes.Of)
+                    this.assertNotContextual(SlimeContextualKeywordTokenTypes.Let)
+                    this.assertNotContextualPair(SlimeContextualKeywordTokenTypes.Async, SlimeContextualKeywordTokenTypes.Of)
                     this.LeftHandSideExpression(params)
                     this.tokenConsumer.Of()
                     this.AssignmentExpression({...params, In: true})
@@ -3080,7 +3080,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
                     this.tokenConsumer.Await()
                     this.tokenConsumer.LParen()
                     // [lookahead ≠ let]
-                    this.assertNotContextual(SlimeJavascriptContextualKeywordTokenTypes.Let)
+                    this.assertNotContextual(SlimeContextualKeywordTokenTypes.Let)
                     this.LeftHandSideExpression(params)
                     this.tokenConsumer.Of()
                     this.AssignmentExpression({...params, In: true})
@@ -3531,7 +3531,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             {
                 alt: () => {
                     // [lookahead ≠ {]
-                    this.assertLookaheadNot(SlimeJavascriptTokenType.LBrace)
+                    this.assertLookaheadNot(SlimeTokenType.LBrace)
                     this.ExpressionBody({...params, Await: false})
                 }
             }
@@ -3605,7 +3605,7 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
             {
                 alt: () => {
                     // [lookahead ≠ {]
-                    this.assertLookaheadNot(SlimeJavascriptTokenType.LBrace)
+                    this.assertLookaheadNot(SlimeTokenType.LBrace)
                     this.ExpressionBody({...params, Await: true})
                 }
             }
@@ -4788,8 +4788,8 @@ export default class SlimeJavascriptParser<T extends SlimeJavascriptTokenConsume
                     this.tokenConsumer.Export()
                     this.tokenConsumer.Default()
                     // [lookahead ∉ {function, async [no LineTerminator here] function, class}]
-                    this.assertLookaheadNotIn([SlimeJavascriptTokenType.Function, SlimeJavascriptTokenType.Class])
-                    this.assertNotContextualSequenceNoLT(SlimeJavascriptContextualKeywordTokenTypes.Async, SlimeJavascriptTokenType.Function)
+                    this.assertLookaheadNotIn([SlimeTokenType.Function, SlimeTokenType.Class])
+                    this.assertNotContextualSequenceNoLT(SlimeContextualKeywordTokenTypes.Async, SlimeTokenType.Function)
                     this.AssignmentExpression({In: true, Yield: false, Await: true})
                     this.SemicolonASI()
                 }

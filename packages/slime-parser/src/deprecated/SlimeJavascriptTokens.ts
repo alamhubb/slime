@@ -5,7 +5,7 @@ import {
     createEmptyValueRegToken, createKeywordToken,
     createValueRegToken, type SubhutiCreateToken,
 } from "subhuti";
-import { SlimeJavascriptTokenType } from "slime-token";
+import { SlimeTokenType } from "slime-token";
 
 // ============================================
 // 词法歧义处理说明
@@ -51,7 +51,7 @@ const PRIVATE_IDENTIFIER_PATTERN = new RegExp(
     'u'
 )
 
-export const SlimeJavascriptTokensObj = {
+export const SlimeTokensObj = {
 
     // ============================================
     // A.1.2 注释 (Comments)
@@ -62,7 +62,7 @@ export const SlimeJavascriptTokensObj = {
     // LineTerminator 包括: LF(\n), CR(\r), LS(\u2028), PS(\u2029)
     // 使用 onlyAtStart 约束确保只在文件开头匹配
     HashbangComment: createValueRegToken(
-        SlimeJavascriptTokenType.HashbangComment,
+        SlimeTokenType.HashbangComment,
         /#![^\n\r\u2028\u2029]*/,
         '',
         false,
@@ -70,14 +70,14 @@ export const SlimeJavascriptTokensObj = {
         {onlyAtStart: true}  // 只在文件开头匹配
     ),
     // SingleLineComment 和 MultiLineComment 也需要正确处理 LineTerminator
-    MultiLineComment: createValueRegToken(SlimeJavascriptTokenType.MultiLineComment, /\/\*[\s\S]*?\*\//, '', true),
-    SingleLineComment: createValueRegToken(SlimeJavascriptTokenType.SingleLineComment, /\/\/[^\n\r\u2028\u2029]*/, '', true),
+    MultiLineComment: createValueRegToken(SlimeTokenType.MultiLineComment, /\/\*[\s\S]*?\*\//, '', true),
+    SingleLineComment: createValueRegToken(SlimeTokenType.SingleLineComment, /\/\/[^\n\r\u2028\u2029]*/, '', true),
 
     // B.1.1 HTML-like Comments (Web 兼容性扩展)
     // SingleLineHTMLOpenComment: <!-- 作为单行注释（无位置约束）
     // 规范: SingleLineHTMLOpenComment :: <!-- SingleLineCommentChars_opt
     SingleLineHTMLOpenComment: createValueRegToken(
-        SlimeJavascriptTokenType.SingleLineHTMLOpenComment,
+        SlimeTokenType.SingleLineHTMLOpenComment,
         /<!--[^\n\r\u2028\u2029]*/,  // <!-- 后跟到行尾的所有字符
         '',
         true  // skip = true，作为注释跳过
@@ -88,7 +88,7 @@ export const SlimeJavascriptTokensObj = {
     // 使用 onlyAtLineStart 约束：只有当前行号 > 上一个非 skip token 的行号时才匹配
     // 这确保 `x = y-->10;` 中的 --> 被解析为 -- 和 >，而 ` --> nothing` 被解析为注释
     SingleLineHTMLCloseComment: createValueRegToken(
-        SlimeJavascriptTokenType.SingleLineHTMLCloseComment,
+        SlimeTokenType.SingleLineHTMLCloseComment,
         /-->[^\n\r\u2028\u2029]*/,  // --> 后跟到行尾的所有字符
         '',
         true,  // skip = true，作为注释跳过
@@ -103,54 +103,54 @@ export const SlimeJavascriptTokensObj = {
     // ECMAScript 12.2 White Space
     // 包含: TAB, VT, FF, SP, NBSP, BOM, 以及所有 Unicode Zs 类别字符
     // Zs 类别包括: U+0020 (SP), U+00A0 (NBSP), U+1680, U+2000-U+200A, U+202F, U+205F, U+3000
-    WhiteSpace: createValueRegToken(SlimeJavascriptTokenType.WhiteSpace, /[\t\v\f \u00A0\u1680\u2000-\u200A\u202F\u205F\u3000\uFEFF]+/, '', true),
-    LineTerminatorCRLF: createValueRegToken(SlimeJavascriptTokenType.LineTerminator, /\r\n/, '', true),
-    LineTerminator: createValueRegToken(SlimeJavascriptTokenType.LineTerminator, /[\n\r\u2028\u2029]/, '', true),
+    WhiteSpace: createValueRegToken(SlimeTokenType.WhiteSpace, /[\t\v\f \u00A0\u1680\u2000-\u200A\u202F\u205F\u3000\uFEFF]+/, '', true),
+    LineTerminatorCRLF: createValueRegToken(SlimeTokenType.LineTerminator, /\r\n/, '', true),
+    LineTerminator: createValueRegToken(SlimeTokenType.LineTerminator, /[\n\r\u2028\u2029]/, '', true),
 
     // ============================================
     // A.1.5 关键字和保留字
     // ============================================
 
-    AwaitTok: createKeywordToken(SlimeJavascriptTokenType.Await, 'await'),
-    BreakTok: createKeywordToken(SlimeJavascriptTokenType.Break, 'break'),
-    CaseTok: createKeywordToken(SlimeJavascriptTokenType.Case, 'case'),
-    CatchTok: createKeywordToken(SlimeJavascriptTokenType.Catch, 'catch'),
-    ClassTok: createKeywordToken(SlimeJavascriptTokenType.Class, 'class'),
-    ConstTok: createKeywordToken(SlimeJavascriptTokenType.Const, 'const'),
-    ContinueTok: createKeywordToken(SlimeJavascriptTokenType.Continue, 'continue'),
-    DebuggerTok: createKeywordToken(SlimeJavascriptTokenType.Debugger, 'debugger'),
-    DefaultTok: createKeywordToken(SlimeJavascriptTokenType.Default, 'default'),
-    DeleteTok: createKeywordToken(SlimeJavascriptTokenType.Delete, 'delete'),
-    DoTok: createKeywordToken(SlimeJavascriptTokenType.Do, 'do'),
-    ElseTok: createKeywordToken(SlimeJavascriptTokenType.Else, 'else'),
-    EnumTok: createKeywordToken(SlimeJavascriptTokenType.Enum, 'enum'),
-    ExportTok: createKeywordToken(SlimeJavascriptTokenType.Export, 'export'),
-    ExtendsTok: createKeywordToken(SlimeJavascriptTokenType.Extends, 'extends'),
-    FalseTok: createKeywordToken(SlimeJavascriptTokenType.False, 'false'),
-    FinallyTok: createKeywordToken(SlimeJavascriptTokenType.Finally, 'finally'),
-    ForTok: createKeywordToken(SlimeJavascriptTokenType.For, 'for'),
-    FunctionTok: createKeywordToken(SlimeJavascriptTokenType.Function, 'function'),
-    IfTok: createKeywordToken(SlimeJavascriptTokenType.If, 'if'),
-    ImportTok: createKeywordToken(SlimeJavascriptTokenType.Import, 'import'),
-    InTok: createKeywordToken(SlimeJavascriptTokenType.In, 'in'),
-    InstanceofTok: createKeywordToken(SlimeJavascriptTokenType.Instanceof, 'instanceof'),
+    AwaitTok: createKeywordToken(SlimeTokenType.Await, 'await'),
+    BreakTok: createKeywordToken(SlimeTokenType.Break, 'break'),
+    CaseTok: createKeywordToken(SlimeTokenType.Case, 'case'),
+    CatchTok: createKeywordToken(SlimeTokenType.Catch, 'catch'),
+    ClassTok: createKeywordToken(SlimeTokenType.Class, 'class'),
+    ConstTok: createKeywordToken(SlimeTokenType.Const, 'const'),
+    ContinueTok: createKeywordToken(SlimeTokenType.Continue, 'continue'),
+    DebuggerTok: createKeywordToken(SlimeTokenType.Debugger, 'debugger'),
+    DefaultTok: createKeywordToken(SlimeTokenType.Default, 'default'),
+    DeleteTok: createKeywordToken(SlimeTokenType.Delete, 'delete'),
+    DoTok: createKeywordToken(SlimeTokenType.Do, 'do'),
+    ElseTok: createKeywordToken(SlimeTokenType.Else, 'else'),
+    EnumTok: createKeywordToken(SlimeTokenType.Enum, 'enum'),
+    ExportTok: createKeywordToken(SlimeTokenType.Export, 'export'),
+    ExtendsTok: createKeywordToken(SlimeTokenType.Extends, 'extends'),
+    FalseTok: createKeywordToken(SlimeTokenType.False, 'false'),
+    FinallyTok: createKeywordToken(SlimeTokenType.Finally, 'finally'),
+    ForTok: createKeywordToken(SlimeTokenType.For, 'for'),
+    FunctionTok: createKeywordToken(SlimeTokenType.Function, 'function'),
+    IfTok: createKeywordToken(SlimeTokenType.If, 'if'),
+    ImportTok: createKeywordToken(SlimeTokenType.Import, 'import'),
+    InTok: createKeywordToken(SlimeTokenType.In, 'in'),
+    InstanceofTok: createKeywordToken(SlimeTokenType.Instanceof, 'instanceof'),
     // let 作为软关键字处理，不再定义为硬关键字 token
-    // LetTok: createKeywordToken(SlimeJavascriptTokenType.Let, 'let'),
-    NewTok: createKeywordToken(SlimeJavascriptTokenType.New, 'new'),
-    NullTok: createKeywordToken(SlimeJavascriptTokenType.NullLiteral, 'null'),
-    ReturnTok: createKeywordToken(SlimeJavascriptTokenType.Return, 'return'),
-    SuperTok: createKeywordToken(SlimeJavascriptTokenType.Super, 'super'),
-    SwitchTok: createKeywordToken(SlimeJavascriptTokenType.Switch, 'switch'),
-    ThisTok: createKeywordToken(SlimeJavascriptTokenType.This, 'this'),
-    ThrowTok: createKeywordToken(SlimeJavascriptTokenType.Throw, 'throw'),
-    TrueTok: createKeywordToken(SlimeJavascriptTokenType.True, 'true'),
-    TryTok: createKeywordToken(SlimeJavascriptTokenType.Try, 'try'),
-    TypeofTok: createKeywordToken(SlimeJavascriptTokenType.Typeof, 'typeof'),
-    VarTok: createKeywordToken(SlimeJavascriptTokenType.Var, 'var'),
-    VoidTok: createKeywordToken(SlimeJavascriptTokenType.Void, 'void'),
-    WhileTok: createKeywordToken(SlimeJavascriptTokenType.While, 'while'),
-    WithTok: createKeywordToken(SlimeJavascriptTokenType.With, 'with'),
-    YieldTok: createKeywordToken(SlimeJavascriptTokenType.Yield, 'yield'),
+    // LetTok: createKeywordToken(SlimeTokenType.Let, 'let'),
+    NewTok: createKeywordToken(SlimeTokenType.New, 'new'),
+    NullTok: createKeywordToken(SlimeTokenType.NullLiteral, 'null'),
+    ReturnTok: createKeywordToken(SlimeTokenType.Return, 'return'),
+    SuperTok: createKeywordToken(SlimeTokenType.Super, 'super'),
+    SwitchTok: createKeywordToken(SlimeTokenType.Switch, 'switch'),
+    ThisTok: createKeywordToken(SlimeTokenType.This, 'this'),
+    ThrowTok: createKeywordToken(SlimeTokenType.Throw, 'throw'),
+    TrueTok: createKeywordToken(SlimeTokenType.True, 'true'),
+    TryTok: createKeywordToken(SlimeTokenType.Try, 'try'),
+    TypeofTok: createKeywordToken(SlimeTokenType.Typeof, 'typeof'),
+    VarTok: createKeywordToken(SlimeTokenType.Var, 'var'),
+    VoidTok: createKeywordToken(SlimeTokenType.Void, 'void'),
+    WhileTok: createKeywordToken(SlimeTokenType.While, 'while'),
+    WithTok: createKeywordToken(SlimeTokenType.With, 'with'),
+    YieldTok: createKeywordToken(SlimeTokenType.Yield, 'yield'),
     // 软关键字（async, static, as, get, set, of, target, meta, from）
     // 在词法层作为 IdentifierName 处理，在 Parser 中通过值检查识别
 
@@ -168,18 +168,18 @@ export const SlimeJavascriptTokensObj = {
     // BigInt 变体 - 必须在普通数字之前匹配（因为后缀 n）
     // DecimalBigIntegerLiteral :: 0n | NonZeroDigit DecimalDigits_opt n
     // NonDecimalIntegerLiteral BigIntLiteralSuffix
-    NumericLiteralBigIntHex: createEmptyValueRegToken(SlimeJavascriptTokenType.NumericLiteral, /0[xX][0-9a-fA-F](_?[0-9a-fA-F])*n/),
-    NumericLiteralBigIntBinary: createEmptyValueRegToken(SlimeJavascriptTokenType.NumericLiteral, /0[bB][01](_?[01])*n/),
-    NumericLiteralBigIntOctal: createEmptyValueRegToken(SlimeJavascriptTokenType.NumericLiteral, /0[oO][0-7](_?[0-7])*n/),
-    NumericLiteralBigIntDecimal: createEmptyValueRegToken(SlimeJavascriptTokenType.NumericLiteral, /(?:0|[1-9](_?[0-9])*)n/),
+    NumericLiteralBigIntHex: createEmptyValueRegToken(SlimeTokenType.NumericLiteral, /0[xX][0-9a-fA-F](_?[0-9a-fA-F])*n/),
+    NumericLiteralBigIntBinary: createEmptyValueRegToken(SlimeTokenType.NumericLiteral, /0[bB][01](_?[01])*n/),
+    NumericLiteralBigIntOctal: createEmptyValueRegToken(SlimeTokenType.NumericLiteral, /0[oO][0-7](_?[0-7])*n/),
+    NumericLiteralBigIntDecimal: createEmptyValueRegToken(SlimeTokenType.NumericLiteral, /(?:0|[1-9](_?[0-9])*)n/),
 
     // 非十进制整数 (NonDecimalIntegerLiteral) - 必须在十进制之前匹配
     // HexIntegerLiteral :: 0x HexDigits | 0X HexDigits
     // BinaryIntegerLiteral :: 0b BinaryDigits | 0B BinaryDigits
     // OctalIntegerLiteral :: 0o OctalDigits | 0O OctalDigits
-    NumericLiteralHex: createEmptyValueRegToken(SlimeJavascriptTokenType.NumericLiteral, /0[xX][0-9a-fA-F](_?[0-9a-fA-F])*/),
-    NumericLiteralBinary: createEmptyValueRegToken(SlimeJavascriptTokenType.NumericLiteral, /0[bB][01](_?[01])*/),
-    NumericLiteralOctal: createEmptyValueRegToken(SlimeJavascriptTokenType.NumericLiteral, /0[oO][0-7](_?[0-7])*/),
+    NumericLiteralHex: createEmptyValueRegToken(SlimeTokenType.NumericLiteral, /0[xX][0-9a-fA-F](_?[0-9a-fA-F])*/),
+    NumericLiteralBinary: createEmptyValueRegToken(SlimeTokenType.NumericLiteral, /0[bB][01](_?[01])*/),
+    NumericLiteralOctal: createEmptyValueRegToken(SlimeTokenType.NumericLiteral, /0[oO][0-7](_?[0-7])*/),
 
     // 十进制数字（统一匹配，包括 LegacyOctal 和 NonOctalDecimal）
     // 参考 Babel 的 readNumber 实现：先匹配所有数字，语义层再区分类型
@@ -195,7 +195,7 @@ export const SlimeJavascriptTokensObj = {
     // - LegacyOctalIntegerLiteral (07, 077): 严格模式报错
     // - NonOctalDecimalIntegerLiteral (08, 09): 严格模式报错，非严格模式当十进制
     // - 以 0 开头的数字不能有小数点或指数（如 07.5 是语法错误）
-    NumericLiteralDecimal: createEmptyValueRegToken(SlimeJavascriptTokenType.NumericLiteral, /(?:0[0-9]*|[1-9](_?[0-9])*)(?:\.([0-9](_?[0-9])*)?)?([eE][+-]?[0-9](_?[0-9])*)?|\.[0-9](_?[0-9])*([eE][+-]?[0-9](_?[0-9])*)?/),
+    NumericLiteralDecimal: createEmptyValueRegToken(SlimeTokenType.NumericLiteral, /(?:0[0-9]*|[1-9](_?[0-9])*)(?:\.([0-9](_?[0-9])*)?)?([eE][+-]?[0-9](_?[0-9])*)?|\.[0-9](_?[0-9])*([eE][+-]?[0-9](_?[0-9])*)?/),
 
     // ============================================
     // A.1.10 字符串字面量
@@ -211,98 +211,98 @@ export const SlimeJavascriptTokensObj = {
     // 支持行续符 (LineContinuation): \ 后跟 \r\n | \r | \n
     // 参考 ES2025 规范 12.9.4 String Literals 和 Annex B
     // Annex B: 支持八进制转义序列 \0-\7, \00-\77, \000-\377
-    DoubleStringCharacters: createEmptyValueRegToken(SlimeJavascriptTokenType.StringLiteral, /"(?:[^\n\r"\\]|\\(?:\r\n|\r|\n|['"\\bfnrtv]|[^'"\\bfnrtv\n\r]|x[0-9a-fA-F]{2}|u(?:[0-9a-fA-F]{4}|\{[0-9a-fA-F]+\})))*"/),
-    SingleStringCharacters: createEmptyValueRegToken(SlimeJavascriptTokenType.StringLiteral, /'(?:[^\n\r'\\]|\\(?:\r\n|\r|\n|['"\\bfnrtv]|[^'"\\bfnrtv\n\r]|x[0-9a-fA-F]{2}|u(?:[0-9a-fA-F]{4}|\{[0-9a-fA-F]+\})))*'/),
+    DoubleStringCharacters: createEmptyValueRegToken(SlimeTokenType.StringLiteral, /"(?:[^\n\r"\\]|\\(?:\r\n|\r|\n|['"\\bfnrtv]|[^'"\\bfnrtv\n\r]|x[0-9a-fA-F]{2}|u(?:[0-9a-fA-F]{4}|\{[0-9a-fA-F]+\})))*"/),
+    SingleStringCharacters: createEmptyValueRegToken(SlimeTokenType.StringLiteral, /'(?:[^\n\r'\\]|\\(?:\r\n|\r|\n|['"\\bfnrtv]|[^'"\\bfnrtv\n\r]|x[0-9a-fA-F]{2}|u(?:[0-9a-fA-F]{4}|\{[0-9a-fA-F]+\})))*'/),
 
     // ============================================
     // A.1.12 模板字面量
     // ============================================
 
-    TemplateHead: createEmptyValueRegToken(SlimeJavascriptTokenType.TemplateHead, /`(?:[^`\\$]|\\[\s\S]|\$(?!\{))*\$\{/),
-    TemplateMiddle: createEmptyValueRegToken(SlimeJavascriptTokenType.TemplateMiddle, /\}(?:[^`\\$]|\\[\s\S]|\$(?!\{))*\$\{/),
-    TemplateTail: createEmptyValueRegToken(SlimeJavascriptTokenType.TemplateTail, /\}(?:[^`\\$]|\\[\s\S]|\$(?!\{))*`/),
-    NoSubstitutionTemplate: createEmptyValueRegToken(SlimeJavascriptTokenType.NoSubstitutionTemplate, /`(?:[^`\\$]|\\[\s\S]|\$(?!\{))*`/),
+    TemplateHead: createEmptyValueRegToken(SlimeTokenType.TemplateHead, /`(?:[^`\\$]|\\[\s\S]|\$(?!\{))*\$\{/),
+    TemplateMiddle: createEmptyValueRegToken(SlimeTokenType.TemplateMiddle, /\}(?:[^`\\$]|\\[\s\S]|\$(?!\{))*\$\{/),
+    TemplateTail: createEmptyValueRegToken(SlimeTokenType.TemplateTail, /\}(?:[^`\\$]|\\[\s\S]|\$(?!\{))*`/),
+    NoSubstitutionTemplate: createEmptyValueRegToken(SlimeTokenType.NoSubstitutionTemplate, /`(?:[^`\\$]|\\[\s\S]|\$(?!\{))*`/),
 
     // ============================================
     // A.1.8 运算符和标点符号
     // ============================================
 
     // 4 字符
-    UnsignedRightShiftAssign: createValueRegToken(SlimeJavascriptTokenType.UnsignedRightShiftAssign, />>>=/, '>>>='),
+    UnsignedRightShiftAssign: createValueRegToken(SlimeTokenType.UnsignedRightShiftAssign, />>>=/, '>>>='),
 
     // 3 字符
-    Ellipsis: createValueRegToken(SlimeJavascriptTokenType.Ellipsis, /\.\.\./, '...'),
-    UnsignedRightShift: createValueRegToken(SlimeJavascriptTokenType.UnsignedRightShift, />>>/, '>>>'),
-    StrictEqual: createValueRegToken(SlimeJavascriptTokenType.StrictEqual, /===/, '==='),
-    StrictNotEqual: createValueRegToken(SlimeJavascriptTokenType.StrictNotEqual, /!==/, '!=='),
-    LeftShiftAssign: createValueRegToken(SlimeJavascriptTokenType.LeftShiftAssign, /<<=/, '<<='),
-    RightShiftAssign: createValueRegToken(SlimeJavascriptTokenType.RightShiftAssign, />>=/, '>>='),
-    ExponentiationAssign: createValueRegToken(SlimeJavascriptTokenType.ExponentiationAssign, /\*\*=/, '**='),
-    LogicalAndAssign: createValueRegToken(SlimeJavascriptTokenType.LogicalAndAssign, /&&=/, '&&='),
-    LogicalOrAssign: createValueRegToken(SlimeJavascriptTokenType.LogicalOrAssign, /\|\|=/, '||='),
-    NullishCoalescingAssign: createValueRegToken(SlimeJavascriptTokenType.NullishCoalescingAssign, /\?\?=/, '??='),
+    Ellipsis: createValueRegToken(SlimeTokenType.Ellipsis, /\.\.\./, '...'),
+    UnsignedRightShift: createValueRegToken(SlimeTokenType.UnsignedRightShift, />>>/, '>>>'),
+    StrictEqual: createValueRegToken(SlimeTokenType.StrictEqual, /===/, '==='),
+    StrictNotEqual: createValueRegToken(SlimeTokenType.StrictNotEqual, /!==/, '!=='),
+    LeftShiftAssign: createValueRegToken(SlimeTokenType.LeftShiftAssign, /<<=/, '<<='),
+    RightShiftAssign: createValueRegToken(SlimeTokenType.RightShiftAssign, />>=/, '>>='),
+    ExponentiationAssign: createValueRegToken(SlimeTokenType.ExponentiationAssign, /\*\*=/, '**='),
+    LogicalAndAssign: createValueRegToken(SlimeTokenType.LogicalAndAssign, /&&=/, '&&='),
+    LogicalOrAssign: createValueRegToken(SlimeTokenType.LogicalOrAssign, /\|\|=/, '||='),
+    NullishCoalescingAssign: createValueRegToken(SlimeTokenType.NullishCoalescingAssign, /\?\?=/, '??='),
 
     // 2 字符
-    Arrow: createValueRegToken(SlimeJavascriptTokenType.Arrow, /=>/, '=>'),
-    PlusAssign: createValueRegToken(SlimeJavascriptTokenType.PlusAssign, /\+=/, '+='),
-    MinusAssign: createValueRegToken(SlimeJavascriptTokenType.MinusAssign, /-=/, '-='),
-    MultiplyAssign: createValueRegToken(SlimeJavascriptTokenType.MultiplyAssign, /\*=/, '*='),
+    Arrow: createValueRegToken(SlimeTokenType.Arrow, /=>/, '=>'),
+    PlusAssign: createValueRegToken(SlimeTokenType.PlusAssign, /\+=/, '+='),
+    MinusAssign: createValueRegToken(SlimeTokenType.MinusAssign, /-=/, '-='),
+    MultiplyAssign: createValueRegToken(SlimeTokenType.MultiplyAssign, /\*=/, '*='),
     // DivideAssign 词法层始终匹配（无上下文约束）
     // /=xxx/g 的情况由语法层 rescanSlashAsRegExp() 处理
-    DivideAssign: createValueRegToken(SlimeJavascriptTokenType.DivideAssign, /\/=/, '/='),
-    ModuloAssign: createValueRegToken(SlimeJavascriptTokenType.ModuloAssign, /%=/, '%='),
-    LeftShift: createValueRegToken(SlimeJavascriptTokenType.LeftShift, /<</, '<<'),
-    RightShift: createValueRegToken(SlimeJavascriptTokenType.RightShift, />>/, '>>'),
-    LessEqual: createValueRegToken(SlimeJavascriptTokenType.LessEqual, /<=/, '<='),
-    GreaterEqual: createValueRegToken(SlimeJavascriptTokenType.GreaterEqual, />=/, '>='),
-    Equal: createValueRegToken(SlimeJavascriptTokenType.Equal, /==/, '=='),
-    NotEqual: createValueRegToken(SlimeJavascriptTokenType.NotEqual, /!=/, '!='),
-    LogicalAnd: createValueRegToken(SlimeJavascriptTokenType.LogicalAnd, /&&/, '&&'),
-    LogicalOr: createValueRegToken(SlimeJavascriptTokenType.LogicalOr, /\|\|/, '||'),
-    NullishCoalescing: createValueRegToken(SlimeJavascriptTokenType.NullishCoalescing, /\?\?/, '??'),
-    Increment: createValueRegToken(SlimeJavascriptTokenType.Increment, /\+\+/, '++'),
-    Decrement: createValueRegToken(SlimeJavascriptTokenType.Decrement, /--/, '--'),
-    Exponentiation: createValueRegToken(SlimeJavascriptTokenType.Exponentiation, /\*\*/, '**'),
-    BitwiseAndAssign: createValueRegToken(SlimeJavascriptTokenType.BitwiseAndAssign, /&=/, '&='),
-    BitwiseOrAssign: createValueRegToken(SlimeJavascriptTokenType.BitwiseOrAssign, /\|=/, '|='),
-    BitwiseXorAssign: createValueRegToken(SlimeJavascriptTokenType.BitwiseXorAssign, /\^=/, '^='),
-    OptionalChaining: createValueRegToken(SlimeJavascriptTokenType.OptionalChaining, /\?\./, '?.', false, {not: /^\d/}),
+    DivideAssign: createValueRegToken(SlimeTokenType.DivideAssign, /\/=/, '/='),
+    ModuloAssign: createValueRegToken(SlimeTokenType.ModuloAssign, /%=/, '%='),
+    LeftShift: createValueRegToken(SlimeTokenType.LeftShift, /<</, '<<'),
+    RightShift: createValueRegToken(SlimeTokenType.RightShift, />>/, '>>'),
+    LessEqual: createValueRegToken(SlimeTokenType.LessEqual, /<=/, '<='),
+    GreaterEqual: createValueRegToken(SlimeTokenType.GreaterEqual, />=/, '>='),
+    Equal: createValueRegToken(SlimeTokenType.Equal, /==/, '=='),
+    NotEqual: createValueRegToken(SlimeTokenType.NotEqual, /!=/, '!='),
+    LogicalAnd: createValueRegToken(SlimeTokenType.LogicalAnd, /&&/, '&&'),
+    LogicalOr: createValueRegToken(SlimeTokenType.LogicalOr, /\|\|/, '||'),
+    NullishCoalescing: createValueRegToken(SlimeTokenType.NullishCoalescing, /\?\?/, '??'),
+    Increment: createValueRegToken(SlimeTokenType.Increment, /\+\+/, '++'),
+    Decrement: createValueRegToken(SlimeTokenType.Decrement, /--/, '--'),
+    Exponentiation: createValueRegToken(SlimeTokenType.Exponentiation, /\*\*/, '**'),
+    BitwiseAndAssign: createValueRegToken(SlimeTokenType.BitwiseAndAssign, /&=/, '&='),
+    BitwiseOrAssign: createValueRegToken(SlimeTokenType.BitwiseOrAssign, /\|=/, '|='),
+    BitwiseXorAssign: createValueRegToken(SlimeTokenType.BitwiseXorAssign, /\^=/, '^='),
+    OptionalChaining: createValueRegToken(SlimeTokenType.OptionalChaining, /\?\./, '?.', false, {not: /^\d/}),
 
     // 1 字符
-    LBrace: createValueRegToken(SlimeJavascriptTokenType.LBrace, /\{/, '{'),
-    RBrace: createValueRegToken(SlimeJavascriptTokenType.RBrace, /\}/, '}'),
-    LParen: createValueRegToken(SlimeJavascriptTokenType.LParen, /\(/, '('),
-    RParen: createValueRegToken(SlimeJavascriptTokenType.RParen, /\)/, ')'),
-    LBracket: createValueRegToken(SlimeJavascriptTokenType.LBracket, /\[/, '['),
-    RBracket: createValueRegToken(SlimeJavascriptTokenType.RBracket, /\]/, ']'),
-    Dot: createValueRegToken(SlimeJavascriptTokenType.Dot, /\./, '.'),
-    Semicolon: createValueRegToken(SlimeJavascriptTokenType.Semicolon, /;/, ';'),
-    Comma: createValueRegToken(SlimeJavascriptTokenType.Comma, /,/, ','),
-    Less: createValueRegToken(SlimeJavascriptTokenType.Less, /</, '<'),
-    Greater: createValueRegToken(SlimeJavascriptTokenType.Greater, />/, '>'),
-    Plus: createValueRegToken(SlimeJavascriptTokenType.Plus, /\+/, '+'),
-    Minus: createValueRegToken(SlimeJavascriptTokenType.Minus, /-/, '-'),
-    Asterisk: createValueRegToken(SlimeJavascriptTokenType.Asterisk, /\*/, '*'),
+    LBrace: createValueRegToken(SlimeTokenType.LBrace, /\{/, '{'),
+    RBrace: createValueRegToken(SlimeTokenType.RBrace, /\}/, '}'),
+    LParen: createValueRegToken(SlimeTokenType.LParen, /\(/, '('),
+    RParen: createValueRegToken(SlimeTokenType.RParen, /\)/, ')'),
+    LBracket: createValueRegToken(SlimeTokenType.LBracket, /\[/, '['),
+    RBracket: createValueRegToken(SlimeTokenType.RBracket, /\]/, ']'),
+    Dot: createValueRegToken(SlimeTokenType.Dot, /\./, '.'),
+    Semicolon: createValueRegToken(SlimeTokenType.Semicolon, /;/, ';'),
+    Comma: createValueRegToken(SlimeTokenType.Comma, /,/, ','),
+    Less: createValueRegToken(SlimeTokenType.Less, /</, '<'),
+    Greater: createValueRegToken(SlimeTokenType.Greater, />/, '>'),
+    Plus: createValueRegToken(SlimeTokenType.Plus, /\+/, '+'),
+    Minus: createValueRegToken(SlimeTokenType.Minus, /-/, '-'),
+    Asterisk: createValueRegToken(SlimeTokenType.Asterisk, /\*/, '*'),
 
     // ============================================
     // 除法运算符（词法层始终匹配为 Slash）
     // 正则表达式由语法层 rescanSlashAsRegExp() 处理
     // ============================================
-    Slash: createValueRegToken(SlimeJavascriptTokenType.Slash, /\//, '/'),
+    Slash: createValueRegToken(SlimeTokenType.Slash, /\//, '/'),
 
     // 注意：RegularExpressionLiteral 不在词法层定义
     // 正则表达式完全由语法层的 rescanSlashAsRegExp() 方法处理
     // 这确保了 100% 正确性，因为只有语法分析器知道当前上下文
 
-    Modulo: createValueRegToken(SlimeJavascriptTokenType.Modulo, /%/, '%'),
-    BitwiseAnd: createValueRegToken(SlimeJavascriptTokenType.BitwiseAnd, /&/, '&'),
-    BitwiseOr: createValueRegToken(SlimeJavascriptTokenType.BitwiseOr, /\|/, '|'),
-    BitwiseXor: createValueRegToken(SlimeJavascriptTokenType.BitwiseXor, /\^/, '^'),
-    BitwiseNot: createValueRegToken(SlimeJavascriptTokenType.BitwiseNot, /~/, '~'),
-    LogicalNot: createValueRegToken(SlimeJavascriptTokenType.LogicalNot, /!/, '!'),
-    Question: createValueRegToken(SlimeJavascriptTokenType.Question, /\?/, '?'),
-    Colon: createValueRegToken(SlimeJavascriptTokenType.Colon, /:/, ':'),
-    Assign: createValueRegToken(SlimeJavascriptTokenType.Assign, /=/, '='),
+    Modulo: createValueRegToken(SlimeTokenType.Modulo, /%/, '%'),
+    BitwiseAnd: createValueRegToken(SlimeTokenType.BitwiseAnd, /&/, '&'),
+    BitwiseOr: createValueRegToken(SlimeTokenType.BitwiseOr, /\|/, '|'),
+    BitwiseXor: createValueRegToken(SlimeTokenType.BitwiseXor, /\^/, '^'),
+    BitwiseNot: createValueRegToken(SlimeTokenType.BitwiseNot, /~/, '~'),
+    LogicalNot: createValueRegToken(SlimeTokenType.LogicalNot, /!/, '!'),
+    Question: createValueRegToken(SlimeTokenType.Question, /\?/, '?'),
+    Colon: createValueRegToken(SlimeTokenType.Colon, /:/, ':'),
+    Assign: createValueRegToken(SlimeTokenType.Assign, /=/, '='),
 
     // ============================================
     // A.1.5 标识符
@@ -332,8 +332,8 @@ export const SlimeJavascriptTokensObj = {
     // 参考实现：Babel、Acorn、TypeScript
     // ============================================
 
-    PrivateIdentifier: createEmptyValueRegToken(SlimeJavascriptTokenType.PrivateIdentifier, PRIVATE_IDENTIFIER_PATTERN),
-    IdentifierName: createEmptyValueRegToken(SlimeJavascriptTokenType.IdentifierName, IDENTIFIER_NAME_PATTERN),
+    PrivateIdentifier: createEmptyValueRegToken(SlimeTokenType.PrivateIdentifier, PRIVATE_IDENTIFIER_PATTERN),
+    IdentifierName: createEmptyValueRegToken(SlimeTokenType.IdentifierName, IDENTIFIER_NAME_PATTERN),
 }
 
-export const slimeJavascriptTokens: SubhutiCreateToken[] = Object.values(SlimeJavascriptTokensObj)
+export const SlimeTokens: SubhutiCreateToken[] = Object.values(SlimeTokensObj)

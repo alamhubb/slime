@@ -3,117 +3,117 @@
  */
 import {SubhutiCst} from "subhuti";
 import {
-    SlimeJavascriptCreateUtils,
-    SlimeJavascriptBlockStatement,
-    SlimeJavascriptExpression,
-    SlimeJavascriptFunctionExpression,
-    SlimeJavascriptFunctionParam,
-    SlimeJavascriptIdentifier, SlimeJavascriptAstTypeName, SlimeJavascriptPattern, SlimeJavascriptRestElement
+    
+    SlimeBlockStatement,
+    SlimeExpression,
+    SlimeFunctionExpression,
+    SlimeFunctionParam,
+    SlimeIdentifier, SlimeAstTypeName, SlimePattern, SlimeRestElement
 } from "slime-ast";
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeParser from "../../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
 
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
-import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
+import {SlimeVariableCstToAstSingle} from "../statements/SlimeVariableCstToAst.ts";
 
-export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
+export class SlimePrimaryExpressionCstToAstSingle {
 
-    createPrimaryExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.PrimaryExpression?.name);
+    createPrimaryExpressionAst(cst: SubhutiCst): SlimeExpression {
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.PrimaryExpression?.name);
         const first = cst.children[0]
-        if (first.name === SlimeJavascriptParser.prototype.IdentifierReference?.name) {
+        if (first.name === SlimeParser.prototype.IdentifierReference?.name) {
             return SlimeCstToAstUtil.createIdentifierAst(first.children[0])
-        } else if (first.name === SlimeJavascriptParser.prototype.Literal?.name) {
+        } else if (first.name === SlimeParser.prototype.Literal?.name) {
             return SlimeCstToAstUtil.createLiteralAst(first)
-        } else if (first.name === SlimeJavascriptParser.prototype.ArrayLiteral?.name) {
-            return SlimeCstToAstUtil.createArrayLiteralAst(first) as SlimeJavascriptExpression
-        } else if (first.name === SlimeJavascriptParser.prototype.FunctionExpression?.name) {
-            return SlimeCstToAstUtil.createFunctionExpressionAst(first) as SlimeJavascriptExpression
-        } else if (first.name === SlimeJavascriptParser.prototype.ObjectLiteral?.name) {
-            return SlimeCstToAstUtil.createObjectLiteralAst(first) as SlimeJavascriptExpression
-        } else if (first.name === SlimeJavascriptParser.prototype.ClassExpression?.name) {
-            return SlimeCstToAstUtil.createClassExpressionAst(first) as SlimeJavascriptExpression
-        } else if (first.name === SlimeJavascriptTokenConsumer.prototype.This?.name) {
+        } else if (first.name === SlimeParser.prototype.ArrayLiteral?.name) {
+            return SlimeCstToAstUtil.createArrayLiteralAst(first) as SlimeExpression
+        } else if (first.name === SlimeParser.prototype.FunctionExpression?.name) {
+            return SlimeCstToAstUtil.createFunctionExpressionAst(first) as SlimeExpression
+        } else if (first.name === SlimeParser.prototype.ObjectLiteral?.name) {
+            return SlimeCstToAstUtil.createObjectLiteralAst(first) as SlimeExpression
+        } else if (first.name === SlimeParser.prototype.ClassExpression?.name) {
+            return SlimeCstToAstUtil.createClassExpressionAst(first) as SlimeExpression
+        } else if (first.name === SlimeTokenConsumer.prototype.This?.name) {
             // 处理 this 关键�?
-            return SlimeJavascriptCreateUtils.createThisExpression(first.loc)
-        } else if (first.name === SlimeJavascriptTokenConsumer.prototype.RegularExpressionLiteral?.name) {
+            return SlimeAstCreateUtils.createThisExpression(first.loc)
+        } else if (first.name === SlimeTokenConsumer.prototype.RegularExpressionLiteral?.name) {
             // 处理正则表达式字面量
             return SlimeCstToAstUtil.createRegExpLiteralAst(first)
-        } else if (first.name === SlimeJavascriptParser.prototype.GeneratorExpression?.name || first.name === 'GeneratorExpression') {
+        } else if (first.name === SlimeParser.prototype.GeneratorExpression?.name || first.name === 'GeneratorExpression') {
             // 处理 function* 表达�?
-            return SlimeCstToAstUtil.createGeneratorExpressionAst(first) as SlimeJavascriptExpression
-        } else if (first.name === SlimeJavascriptParser.prototype.AsyncFunctionExpression?.name || first.name === 'AsyncFunctionExpression') {
+            return SlimeCstToAstUtil.createGeneratorExpressionAst(first) as SlimeExpression
+        } else if (first.name === SlimeParser.prototype.AsyncFunctionExpression?.name || first.name === 'AsyncFunctionExpression') {
             // 处理 async function 表达�?
-            return SlimeCstToAstUtil.createAsyncFunctionExpressionAst(first) as SlimeJavascriptExpression
-        } else if (first.name === SlimeJavascriptParser.prototype.AsyncGeneratorExpression?.name || first.name === 'AsyncGeneratorExpression') {
+            return SlimeCstToAstUtil.createAsyncFunctionExpressionAst(first) as SlimeExpression
+        } else if (first.name === SlimeParser.prototype.AsyncGeneratorExpression?.name || first.name === 'AsyncGeneratorExpression') {
             // 处理 async function* 表达�?
-            return SlimeCstToAstUtil.createAsyncGeneratorExpressionAst(first) as SlimeJavascriptExpression
-        } else if (first.name === SlimeJavascriptParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name ||
+            return SlimeCstToAstUtil.createAsyncGeneratorExpressionAst(first) as SlimeExpression
+        } else if (first.name === SlimeParser.prototype.CoverParenthesizedExpressionAndArrowParameterList?.name ||
             first.name === 'CoverParenthesizedExpressionAndArrowParameterList') {
             // Cover Grammar - try to interpret as parenthesized expression
             // Structure varies: [LParen, content?, RParen] or [LParen, Expression, RParen]
 
             // Empty parentheses: ()
             if (!first.children || first.children.length === 0) {
-                return SlimeJavascriptCreateUtils.createIdentifier('undefined', first.loc)
+                return SlimeAstCreateUtils.createIdentifier('undefined', first.loc)
             }
 
             // Only 2 children (empty parens): LParen, RParen
             if (first.children.length === 2) {
-                return SlimeJavascriptCreateUtils.createIdentifier('undefined', first.loc)
+                return SlimeAstCreateUtils.createIdentifier('undefined', first.loc)
             }
 
             // Find the content (skip LParen at start, RParen at end)
             const middleCst = first.children[1]
             if (!middleCst) {
-                return SlimeJavascriptCreateUtils.createIdentifier('undefined', first.loc)
+                return SlimeAstCreateUtils.createIdentifier('undefined', first.loc)
             }
 
             // If it's an Expression, process it directly
-            if (middleCst.name === SlimeJavascriptParser.prototype.Expression?.name || middleCst.name === 'Expression') {
+            if (middleCst.name === SlimeParser.prototype.Expression?.name || middleCst.name === 'Expression') {
                 const innerExpr = SlimeCstToAstUtil.createExpressionAst(middleCst)
-                return SlimeJavascriptCreateUtils.createParenthesizedExpression(innerExpr, first.loc)
+                return SlimeAstCreateUtils.createParenthesizedExpression(innerExpr, first.loc)
             }
 
             // If it's AssignmentExpression, process it
-            if (middleCst.name === SlimeJavascriptParser.prototype.AssignmentExpression?.name || middleCst.name === 'AssignmentExpression') {
+            if (middleCst.name === SlimeParser.prototype.AssignmentExpression?.name || middleCst.name === 'AssignmentExpression') {
                 const innerExpr = SlimeCstToAstUtil.createExpressionAst(middleCst)
-                return SlimeJavascriptCreateUtils.createParenthesizedExpression(innerExpr, first.loc)
+                return SlimeAstCreateUtils.createParenthesizedExpression(innerExpr, first.loc)
             }
 
             // If it's FormalParameterList, convert to expression
-            if (middleCst.name === SlimeJavascriptParser.prototype.FormalParameterList?.name || middleCst.name === 'FormalParameterList') {
+            if (middleCst.name === SlimeParser.prototype.FormalParameterList?.name || middleCst.name === 'FormalParameterList') {
                 const params = SlimeCstToAstUtil.createFormalParameterListAst(middleCst)
-                if (params.length === 1 && params[0].type === SlimeJavascriptAstTypeName.Identifier) {
-                    return SlimeJavascriptCreateUtils.createParenthesizedExpression(params[0] as any, first.loc)
+                if (params.length === 1 && params[0].type === SlimeAstTypeName.Identifier) {
+                    return SlimeAstCreateUtils.createParenthesizedExpression(params[0] as any, first.loc)
                 }
                 if (params.length > 1) {
                     const expressions = params.map(p => p as any)
-                    return SlimeJavascriptCreateUtils.createParenthesizedExpression({
+                    return SlimeAstCreateUtils.createParenthesizedExpression({
                         type: 'SequenceExpression',
                         expressions: expressions
                     } as any, first.loc)
                 }
-                return SlimeJavascriptCreateUtils.createIdentifier('undefined', first.loc)
+                return SlimeAstCreateUtils.createIdentifier('undefined', first.loc)
             }
 
             // Try to process the middle content as an expression
             try {
                 const innerExpr = SlimeCstToAstUtil.createExpressionAst(middleCst)
-                return SlimeJavascriptCreateUtils.createParenthesizedExpression(innerExpr, first.loc)
+                return SlimeAstCreateUtils.createParenthesizedExpression(innerExpr, first.loc)
             } catch (e) {
                 // Fallback: return the first child as identifier
-                return SlimeJavascriptCreateUtils.createIdentifier('undefined', first.loc)
+                return SlimeAstCreateUtils.createIdentifier('undefined', first.loc)
             }
-        } else if (first.name === SlimeJavascriptParser.prototype.TemplateLiteral?.name) {
+        } else if (first.name === SlimeParser.prototype.TemplateLiteral?.name) {
             // 处理模板字符�?
             return SlimeCstToAstUtil.createTemplateLiteralAst(first)
-        } else if (first.name === SlimeJavascriptParser.prototype.ParenthesizedExpression?.name) {
+        } else if (first.name === SlimeParser.prototype.ParenthesizedExpression?.name) {
             // 处理普通括号表达式�? Expression )
             // children[0]=LParen, children[1]=Expression, children[2]=RParen
             const expressionCst = first.children[1]
             const innerExpression = SlimeCstToAstUtil.createExpressionAst(expressionCst)
-            return SlimeJavascriptCreateUtils.createParenthesizedExpression(innerExpression, first.loc)
+            return SlimeAstCreateUtils.createParenthesizedExpression(innerExpression, first.loc)
         } else if (first.name === 'RegularExpressionLiteral' || first.name === 'RegularExpressionLiteral') {
             // 处理正则表达式字面量
             return SlimeCstToAstUtil.createRegExpLiteralAst(first)
@@ -126,12 +126,12 @@ export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
      * ParenthesizedExpression CST �?AST
      * ParenthesizedExpression -> ( Expression )
      */
-    createParenthesizedExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createParenthesizedExpressionAst(cst: SubhutiCst): SlimeExpression {
         // 查找内部�?Expression
         for (const child of cst.children || []) {
-            if (child.name === SlimeJavascriptParser.prototype.Expression?.name ||
+            if (child.name === SlimeParser.prototype.Expression?.name ||
                 child.name === 'Expression' ||
-                child.name === SlimeJavascriptParser.prototype.AssignmentExpression?.name) {
+                child.name === SlimeParser.prototype.AssignmentExpression?.name) {
                 return SlimeCstToAstUtil.createExpressionAst(child)
             }
         }
@@ -150,7 +150,7 @@ export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
      * CoverParenthesizedExpressionAndArrowParameterList CST �?AST
      * 这是一�?cover grammar，根据上下文可能是括号表达式或箭头函数参�?
      */
-    createCoverParenthesizedExpressionAndArrowParameterListAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createCoverParenthesizedExpressionAndArrowParameterListAst(cst: SubhutiCst): SlimeExpression {
         // 通常作为括号表达式处理，箭头函数参数有专门的处理路径
         return SlimeCstToAstUtil.createParenthesizedExpressionAst(cst)
     }
@@ -160,7 +160,7 @@ export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
      * 在Expression中查找第一个Identifier（辅助方法）
      */
     findFirstIdentifierInExpression(cst: SubhutiCst): SubhutiCst | null {
-        if (cst.name === SlimeJavascriptTokenConsumer.prototype.IdentifierName?.name) {
+        if (cst.name === SlimeTokenConsumer.prototype.IdentifierName?.name) {
             return cst
         }
         if (cst.children) {
@@ -174,4 +174,4 @@ export class SlimeJavascriptPrimaryExpressionCstToAstSingle {
 
 }
 
-export const SlimeJavascriptPrimaryExpressionCstToAst = new SlimeJavascriptPrimaryExpressionCstToAstSingle()
+export const SlimePrimaryExpressionCstToAst = new SlimePrimaryExpressionCstToAstSingle()

@@ -1,17 +1,17 @@
 import {
-    SlimeJavascriptCreateUtils,
-    SlimeJavascriptExpression,
-    type SlimeJavascriptFunctionExpression,
-    type SlimeJavascriptIdentifier,
-    SlimeJavascriptAstTypeName
+    
+    SlimeExpression,
+    type SlimeFunctionExpression,
+    type SlimeIdentifier,
+    SlimeAstTypeName
 } from "slime-ast";
 import { SubhutiCst } from "subhuti";
 
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeParser from "../../../SlimeParser.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
-import {SlimeJavascriptVariableCstToAstSingle} from "../statements/SlimeJavascriptVariableCstToAst.ts";
+import {SlimeVariableCstToAstSingle} from "../statements/SlimeVariableCstToAst.ts";
 
-export class SlimeJavascriptOptionalExpressionCstToAstSingle {
+export class SlimeOptionalExpressionCstToAstSingle {
 
     /**
      * 创建 OptionalChain AST
@@ -20,7 +20,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
      * 注意：只有紧跟在 ?. 后面的操作是 optional: true
      * 链式的后续操作（�?foo?.().bar() 中的 .bar()）是 optional: false
      */
-    createOptionalChainAst(object: SlimeJavascriptExpression, chainCst: SubhutiCst): SlimeJavascriptExpression {
+    createOptionalChainAst(object: SlimeExpression, chainCst: SubhutiCst): SlimeExpression {
         let result = object
         // 追踪是否刚遇�??. token，下一个操作是 optional
         let nextIsOptional = false
@@ -36,7 +36,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
                 // ()调用 - 可能是可选调用或普通调�?
                 const args = SlimeCstToAstUtil.createArgumentsAst(child)
                 result = {
-                    type: SlimeJavascriptAstTypeName.OptionalCallExpression,
+                    type: SlimeAstTypeName.OptionalCallExpression,
                     callee: result,
                     arguments: args,
                     optional: nextIsOptional,
@@ -50,7 +50,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
                 if (exprIndex < chainCst.children.length) {
                     const property = SlimeCstToAstUtil.createExpressionAst(chainCst.children[exprIndex])
                     result = {
-                        type: SlimeJavascriptAstTypeName.OptionalMemberExpression,
+                        type: SlimeAstTypeName.OptionalMemberExpression,
                         object: result,
                         property: property,
                         computed: true,
@@ -61,12 +61,12 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
                 }
             } else if (name === 'IdentifierName') {
                 // .prop 属性访�?- 可能是可选或普�?
-                let property: SlimeJavascriptIdentifier
+                let property: SlimeIdentifier
                 // IdentifierName 内部包含一�?Identifier 或关键字 token
                 const tokenCst = child.children[0]
-                property = SlimeJavascriptCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
+                property = SlimeAstCreateUtils.createIdentifier(tokenCst.value, tokenCst.loc)
                 result = {
-                    type: SlimeJavascriptAstTypeName.OptionalMemberExpression,
+                    type: SlimeAstTypeName.OptionalMemberExpression,
                     object: result,
                     property: property,
                     computed: false,
@@ -84,7 +84,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
                 // #prop - 私有属性访�?
                 const property = SlimeCstToAstUtil.createPrivateIdentifierAst(child)
                 result = {
-                    type: SlimeJavascriptAstTypeName.OptionalMemberExpression,
+                    type: SlimeAstTypeName.OptionalMemberExpression,
                     object: result,
                     property: property,
                     computed: false,
@@ -111,7 +111,7 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
      *   CallExpression OptionalChain
      *   OptionalExpression OptionalChain
      */
-    createOptionalExpressionAst(cst: SubhutiCst): SlimeJavascriptExpression {
+    createOptionalExpressionAst(cst: SubhutiCst): SlimeExpression {
         // OptionalExpression 结构�?
         // children[0] = MemberExpression | CallExpression
         // children[1...n] = OptionalChain
@@ -136,4 +136,4 @@ export class SlimeJavascriptOptionalExpressionCstToAstSingle {
 
 }
 
-export const SlimeJavascriptOptionalExpressionCstToAst = new SlimeJavascriptOptionalExpressionCstToAstSingle()
+export const SlimeOptionalExpressionCstToAst = new SlimeOptionalExpressionCstToAstSingle()

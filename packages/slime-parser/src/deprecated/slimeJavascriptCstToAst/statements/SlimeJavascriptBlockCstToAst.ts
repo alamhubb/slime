@@ -1,24 +1,24 @@
 import {SubhutiCst} from "subhuti";
 
-import SlimeJavascriptParser from "../../SlimeJavascriptParser.ts";
+import SlimeParser from "../../../SlimeParser.ts";
 import {
-    SlimeJavascriptCreateUtils, SlimeJavascriptBlockStatement, type SlimeJavascriptExportAllDeclaration,
-    type SlimeJavascriptExportDefaultDeclaration,
-    type SlimeJavascriptExportNamedDeclaration, SlimeJavascriptExpressionStatement,
-    SlimeJavascriptFunctionDeclaration, SlimeJavascriptFunctionExpression, SlimeJavascriptAstTypeName, SlimeJavascriptStatement,
-    SlimeJavascriptTokenCreateUtils
+     SlimeBlockStatement, type SlimeExportAllDeclaration,
+    type SlimeExportDefaultDeclaration,
+    type SlimeExportNamedDeclaration, SlimeExpressionStatement,
+    SlimeFunctionDeclaration, SlimeFunctionExpression, SlimeAstTypeName, SlimeStatement,
+    SlimeTokenCreateUtils
 } from "slime-ast";
-import SlimeJavascriptTokenConsumer from "../../SlimeJavascriptTokenConsumer.ts";
+import SlimeTokenConsumer from "../../SlimeTokenConsumer.ts";
 import SlimeCstToAstUtil from "../../../SlimeCstToAstUtil.ts";
-import {SlimeJavascriptVariableCstToAstSingle} from "./SlimeJavascriptVariableCstToAst.ts";
+import {SlimeVariableCstToAstSingle} from "./SlimeVariableCstToAst.ts";
 
-export class SlimeJavascriptBlockCstToAstSingle {
+export class SlimeBlockCstToAstSingle {
     /**
      * 从Block CST创建BlockStatement AST
      * Block: LBrace StatementList? RBrace
      */
-    createBlockAst(cst: SubhutiCst): SlimeJavascriptBlockStatement {
-        SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.Block?.name)
+    createBlockAst(cst: SubhutiCst): SlimeBlockStatement {
+        SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.Block?.name)
 
         // Block 的结构：LBrace StatementList? RBrace
         let lBraceToken: any = undefined
@@ -27,20 +27,20 @@ export class SlimeJavascriptBlockCstToAstSingle {
         if (cst.children) {
             for (const child of cst.children) {
                 if (child.name === 'LBrace' || child.value === '{') {
-                    lBraceToken = SlimeJavascriptTokenCreateUtils.createLBraceToken(child.loc)
+                    lBraceToken = SlimeTokenCreateUtils.createLBraceToken(child.loc)
                 } else if (child.name === 'RBrace' || child.value === '}') {
-                    rBraceToken = SlimeJavascriptTokenCreateUtils.createRBraceToken(child.loc)
+                    rBraceToken = SlimeTokenCreateUtils.createRBraceToken(child.loc)
                 }
             }
         }
 
         const statementListCst = cst.children?.find(
-            child => child.name === SlimeJavascriptParser.prototype.StatementList?.name
+            child => child.name === SlimeParser.prototype.StatementList?.name
         )
 
         const statements = statementListCst ? SlimeCstToAstUtil.createStatementListAst(statementListCst) : []
 
-        return SlimeJavascriptCreateUtils.createBlockStatement(statements, cst.loc, lBraceToken, rBraceToken)
+        return SlimeAstCreateUtils.createBlockStatement(statements, cst.loc, lBraceToken, rBraceToken)
     }
 
 
@@ -50,21 +50,21 @@ export class SlimeJavascriptBlockCstToAstSingle {
      * 1. 直接�?StatementList（旧的实现）
      * 2. �?BlockStatement，需要提取内部的 Block -> StatementList
      */
-    createBlockStatementAst(cst: SubhutiCst): SlimeJavascriptBlockStatement {
-        let statements: Array<SlimeJavascriptStatement>
+    createBlockStatementAst(cst: SubhutiCst): SlimeBlockStatement {
+        let statements: Array<SlimeStatement>
 
         // 如果�?StatementList，直接转�?
-        if (cst.name === SlimeJavascriptParser.prototype.StatementList?.name) {
+        if (cst.name === SlimeParser.prototype.StatementList?.name) {
             statements = SlimeCstToAstUtil.createStatementListAst(cst)
         }
         // 如果�?BlockStatement，需要提�?Block -> StatementList
-        else if (cst.name === SlimeJavascriptParser.prototype.BlockStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.BlockStatement?.name) {
             // BlockStatement -> Block -> StatementList
             const blockCst = cst.children?.[0]
-            if (blockCst && blockCst.name === SlimeJavascriptParser.prototype.Block?.name) {
+            if (blockCst && blockCst.name === SlimeParser.prototype.Block?.name) {
                 // Block 的结构：LBrace StatementList RBrace
                 const statementListCst = blockCst.children?.find(
-                    child => child.name === SlimeJavascriptParser.prototype.StatementList?.name
+                    child => child.name === SlimeParser.prototype.StatementList?.name
                 )
                 if (statementListCst) {
                     statements = SlimeCstToAstUtil.createStatementListAst(statementListCst)
@@ -78,8 +78,8 @@ export class SlimeJavascriptBlockCstToAstSingle {
             throw new Error(`Expected StatementList or BlockStatement, got ${cst.name}`)
         }
 
-        const ast: SlimeJavascriptBlockStatement = {
-            type: SlimeJavascriptParser.prototype.BlockStatement?.name as any,
+        const ast: SlimeBlockStatement = {
+            type: SlimeParser.prototype.BlockStatement?.name as any,
             body: statements,
             loc: cst.loc
         }
@@ -87,8 +87,8 @@ export class SlimeJavascriptBlockCstToAstSingle {
     }
 
 
-    createStatementListAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.StatementList?.name);
+    createStatementListAst(cst: SubhutiCst): Array<SlimeStatement> {
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.StatementList?.name);
         if (cst.children) {
             const statements = cst.children.map(item => SlimeCstToAstUtil.createStatementListItemAst(item)).flat()
             return statements
@@ -97,20 +97,20 @@ export class SlimeJavascriptBlockCstToAstSingle {
     }
 
 
-    createStatementAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.Statement?.name);
-        const statements: SlimeJavascriptStatement[] = cst.children
+    createStatementAst(cst: SubhutiCst): Array<SlimeStatement> {
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.Statement?.name);
+        const statements: SlimeStatement[] = cst.children
             .map(item => SlimeCstToAstUtil.createStatementDeclarationAst(item))
             .filter(stmt => stmt !== undefined)  // 过滤�?undefined
         return statements
     }
 
 
-    createStatementListItemAst(cst: SubhutiCst): Array<SlimeJavascriptStatement> {
-        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeJavascriptParser.prototype.StatementListItem?.name);
+    createStatementListItemAst(cst: SubhutiCst): Array<SlimeStatement> {
+        const astName = SlimeCstToAstUtil.checkCstName(cst, SlimeParser.prototype.StatementListItem?.name);
         const statements = cst.children.map(item => {
             // 如果�?Declaration，直接处�?
-            if (item.name === SlimeJavascriptParser.prototype.Declaration?.name) {
+            if (item.name === SlimeParser.prototype.Declaration?.name) {
                 return [SlimeCstToAstUtil.createDeclarationAst(item) as any]
             }
 
@@ -120,31 +120,31 @@ export class SlimeJavascriptBlockCstToAstSingle {
 
             // 检查是否是命名�?FunctionExpression �?ClassExpression（应该转�?Declaration�?
             return result.map(stmt => {
-                if (stmt.type === SlimeJavascriptAstTypeName.ExpressionStatement) {
-                    const expr = (stmt as SlimeJavascriptExpressionStatement).expression
+                if (stmt.type === SlimeAstTypeName.ExpressionStatement) {
+                    const expr = (stmt as SlimeExpressionStatement).expression
 
                     // 命名�?FunctionExpression �?FunctionDeclaration
-                    if (expr.type === SlimeJavascriptAstTypeName.FunctionExpression) {
-                        const funcExpr = expr as SlimeJavascriptFunctionExpression
+                    if (expr.type === SlimeAstTypeName.FunctionExpression) {
+                        const funcExpr = expr as SlimeFunctionExpression
                         if (funcExpr.id) {
                             return {
-                                type: SlimeJavascriptAstTypeName.FunctionDeclaration,
+                                type: SlimeAstTypeName.FunctionDeclaration,
                                 id: funcExpr.id,
                                 params: funcExpr.params,
                                 body: funcExpr.body,
                                 generator: funcExpr.generator,
                                 async: funcExpr.async,
                                 loc: funcExpr.loc
-                            } as SlimeJavascriptFunctionDeclaration
+                            } as SlimeFunctionDeclaration
                         }
                     }
 
                     // ClassExpression �?ClassDeclaration
-                    if (expr.type === SlimeJavascriptAstTypeName.ClassExpression) {
+                    if (expr.type === SlimeAstTypeName.ClassExpression) {
                         const classExpr = expr as any
                         if (classExpr.id) {
                             return {
-                                type: SlimeJavascriptAstTypeName.ClassDeclaration,
+                                type: SlimeAstTypeName.ClassDeclaration,
                                 id: classExpr.id,
                                 superClass: classExpr.superClass,
                                 body: classExpr.body,
@@ -176,21 +176,21 @@ export class SlimeJavascriptBlockCstToAstSingle {
      */
     createStatementDeclarationAst(cst: SubhutiCst) {
         // Statement - 包装节点，递归处理子节�?
-        if (cst.name === SlimeJavascriptParser.prototype.Statement?.name || cst.name === 'Statement') {
+        if (cst.name === SlimeParser.prototype.Statement?.name || cst.name === 'Statement') {
             if (cst.children && cst.children.length > 0) {
                 return SlimeCstToAstUtil.createStatementDeclarationAst(cst.children[0])
             }
             return undefined
         }
         // BreakableStatement - 包装节点，递归处理子节�?
-        else if (cst.name === SlimeJavascriptParser.prototype.BreakableStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.BreakableStatement?.name) {
             if (cst.children && cst.children.length > 0) {
                 return SlimeCstToAstUtil.createStatementDeclarationAst(cst.children[0])
             }
             return undefined
         }
         // IterationStatement - 循环语句包装节点
-        else if (cst.name === SlimeJavascriptParser.prototype.IterationStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.IterationStatement?.name) {
             if (cst.children && cst.children.length > 0) {
                 return SlimeCstToAstUtil.createStatementDeclarationAst(cst.children[0])
             }
@@ -204,91 +204,91 @@ export class SlimeJavascriptBlockCstToAstSingle {
             return undefined
         }
         // var 变量声明语句 (ES2025: VariableStatement)
-        else if (cst.name === SlimeJavascriptParser.prototype.VariableStatement?.name || cst.name === 'VariableStatement') {
+        else if (cst.name === SlimeParser.prototype.VariableStatement?.name || cst.name === 'VariableStatement') {
             return SlimeCstToAstUtil.createVariableStatementAst(cst)
         }
         // 变量声明 (用于 for 循环�?
-        else if (cst.name === SlimeJavascriptParser.prototype.VariableDeclaration?.name) {
+        else if (cst.name === SlimeParser.prototype.VariableDeclaration?.name) {
             return SlimeCstToAstUtil.createVariableDeclarationAst(cst)
         }
         // 表达式语�?
-        else if (cst.name === SlimeJavascriptParser.prototype.ExpressionStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.ExpressionStatement?.name) {
             return SlimeCstToAstUtil.createExpressionStatementAst(cst)
         }
         // return 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.ReturnStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.ReturnStatement?.name) {
             return SlimeCstToAstUtil.createReturnStatementAst(cst)
         }
         // if 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.IfStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.IfStatement?.name) {
             return SlimeCstToAstUtil.createIfStatementAst(cst)
         }
         // for 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.ForStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.ForStatement?.name) {
             return SlimeCstToAstUtil.createForStatementAst(cst)
         }
         // for...in / for...of 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.ForInOfStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.ForInOfStatement?.name) {
             return SlimeCstToAstUtil.createForInOfStatementAst(cst)
         }
         // while 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.WhileStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.WhileStatement?.name) {
             return SlimeCstToAstUtil.createWhileStatementAst(cst)
         }
         // do...while 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.DoWhileStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.DoWhileStatement?.name) {
             return SlimeCstToAstUtil.createDoWhileStatementAst(cst)
         }
         // 块语�?
-        else if (cst.name === SlimeJavascriptParser.prototype.BlockStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.BlockStatement?.name) {
             return SlimeCstToAstUtil.createBlockStatementAst(cst)
         }
         // switch 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.SwitchStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.SwitchStatement?.name) {
             return SlimeCstToAstUtil.createSwitchStatementAst(cst)
         }
         // try 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.TryStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.TryStatement?.name) {
             return SlimeCstToAstUtil.createTryStatementAst(cst)
         }
         // throw 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.ThrowStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.ThrowStatement?.name) {
             return SlimeCstToAstUtil.createThrowStatementAst(cst)
         }
         // break 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.BreakStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.BreakStatement?.name) {
             return SlimeCstToAstUtil.createBreakStatementAst(cst)
         }
         // continue 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.ContinueStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.ContinueStatement?.name) {
             return SlimeCstToAstUtil.createContinueStatementAst(cst)
         }
         // 标签语句
-        else if (cst.name === SlimeJavascriptParser.prototype.LabelledStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.LabelledStatement?.name) {
             return SlimeCstToAstUtil.createLabelledStatementAst(cst)
         }
         // with 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.WithStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.WithStatement?.name) {
             return SlimeCstToAstUtil.createWithStatementAst(cst)
         }
         // debugger 语句
-        else if (cst.name === SlimeJavascriptParser.prototype.DebuggerStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.DebuggerStatement?.name) {
             return SlimeCstToAstUtil.createDebuggerStatementAst(cst)
         }
         // 空语�?
-        else if (cst.name === SlimeJavascriptParser.prototype.EmptyStatement?.name) {
+        else if (cst.name === SlimeParser.prototype.EmptyStatement?.name) {
             return SlimeCstToAstUtil.createEmptyStatementAst(cst)
         }
         // 函数声明
-        else if (cst.name === SlimeJavascriptParser.prototype.FunctionDeclaration?.name) {
+        else if (cst.name === SlimeParser.prototype.FunctionDeclaration?.name) {
             return SlimeCstToAstUtil.createFunctionDeclarationAst(cst)
         }
         // 类声�?
-        else if (cst.name === SlimeJavascriptParser.prototype.ClassDeclaration?.name) {
+        else if (cst.name === SlimeParser.prototype.ClassDeclaration?.name) {
             return SlimeCstToAstUtil.createClassDeclarationAst(cst)
         }
     }
 
 }
 
-export const SlimeJavascriptBlockCstToAst = new SlimeJavascriptBlockCstToAstSingle()
+export const SlimeBlockCstToAst = new SlimeBlockCstToAstSingle()
